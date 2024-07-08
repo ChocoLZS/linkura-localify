@@ -12,20 +12,21 @@ jobs:
       with:
         submodules: recursive
 
-    - name: set up android development environment
-      uses: android-actions/setup-android@v2
-
-    - name: install dependencies
-      run: |
-        sdkmanager --install "cmake;3.22.1"
-        echo "cmake.dir=/usr/local/lib/android/sdk/cmake/3.22.1" > local.properties
-        npm install -g pnpm
-
     - name: Setup Java JDK
       uses: actions/setup-java@v4.2.1
       with:
         distribution: 'temurin'
         java-version: '21'
+
+    - name: Setup Android Development Environment
+      uses: android-actions/setup-android@v3
+
+    - name: install dependencies
+      run: |
+        sdkmanager --install "cmake;3.22.1"
+        echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" > local.properties
+        echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+        npm install -g pnpm
 
     - name: Update Submodules
       run: |
@@ -58,24 +59,44 @@ jobs:
       run: ./gradlew build
 
     - uses: actions/upload-artifact@v4
+      id: upload_unsigned_v4
       with:
         name: GakumasLocalify-Unsigned-apk
         path: app/build/outputs/apk/debug/app-debug.apk
+      continue-on-error: true
 
-    - uses: ilharp/sign-android-release@v1
+    - name: Upload Unsigned APK with v3 if v4 failed
+      if: steps.upload_unsigned_v4.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: GakumasLocalify-Unsigned-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+      continue-on-error: true
+
+    - uses: r0adkll/sign-android-release@v1
       name: Sign app APK
       id: sign_app
       with:
-        releaseDir: app/build/outputs/apk/debug
-        signingKey: ${{ secrets.KEYSTOREB64 }}
-        keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+        releaseDirectory: app/build/outputs/apk/debug
+        signingKeyBase64: ${{ secrets.KEYSTOREB64 }}
+        alias: ${{ secrets.ANDROID_KEY_ALIAS }}
         keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        buildToolsVersion: 33.0.0
+      env:
+        BUILD_TOOLS_VERSION: "34.0.0"
       continue-on-error: true
 
     - uses: actions/upload-artifact@v4
+      id: upload_signed_v4
       with:
         name: GakumasLocalify-Signed-apk
-        path: ${{steps.sign_app.outputs.signedFile}}
+        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+      continue-on-error: true
+
+    - name: Upload Signed APK with v3 if v4 failed
+      if: steps.upload_signed_v4.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: GakumasLocalify-Signed-apk
+        path: ${{steps.sign_app.outputs.signedReleaseFile}}
       continue-on-error: true
