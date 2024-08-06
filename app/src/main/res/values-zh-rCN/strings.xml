@@ -73,8 +73,33 @@
     <string name="invalid_zip_file">文件解析失败</string>
     <string name="invalid_zip_file_warn">此文件不是一个有效的 ZIP 翻译资源包</string>
     <string name="cancel">取消</string>
+    <string name="ok">确定</string>
     <string name="downloaded_resource_version">已下载资源版本</string>
     <string name="del_remote_after_update">替换文件后删除下载缓存</string>
+    <string name="warning">注意</string>
+    <string name="install">安装</string>
+    <string name="installing">安装中</string>
+    <string name="check_resource_from_api">从服务器检查热更新资源</string>
+    <string name="api_addr">API 地址（Github Latest Release API）</string>
+    <string name="check_update">检查更新</string>
+    <string name="translation_resource_update">翻译资源更新</string>
+
+    <string name="game_patch">游戏修补</string>
+    <string name="patch_mode">修补模式</string>
+    <string name="patch_local">本地模式</string>
+    <string name="patch_local_desc">为未嵌入模块的应用程序打补丁。\nXposed 范围可动态更改，无需重新打补丁。\n打了本地补丁的应用程序只能在本地设备上运行。</string>
+    <string name="patch_integrated">集成模式</string>
+    <string name="patch_integrated_desc">修补 App 并内置模块。\n经修补的应用可以在没有管理器的情况下运行，但不能动态管理配置。\n以集成模式修补的应用可在未安装 LSPatch 管理器的设备上运行。</string>
+    <string name="shizuku_available">Shizuku 服务可用</string>
+    <string name="shizuku_unavailable">Shizuku 服务未连接</string>
+    <string name="home_shizuku_warning">部分功能不可用</string>
+    <string name="patch_debuggable">可调试</string>
+    <string name="reserve_patched">安装时保留修补包</string>
+    <string name="support_file_types">支持文件类型：\n单/多选 apk\n单选 apks, xapk, zip</string>
+    <string name="patch_uninstall_text">由于签名不同，安装修补的应用前需要先卸载原应用。\n确保您已备份好个人数据。</string>
+    <string name="patch_uninstall_confirm">您确定要卸载吗</string>
+    <string name="patch_finished">修补完成，是否开始安装？</string>
 
     <string name="about_contributors_asset_file">about_contributors_zh_cn.json</string>
+    <string name="default_assets_check_api">https://uma.chinosk6.cn/api/gkms_trans_data</string>
 </resources>

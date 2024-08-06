@@ -73,8 +73,33 @@
     <string name="invalid_zip_file">Invalid file</string>
     <string name="invalid_zip_file_warn">This file is not a valid ZIP translation resource pack.</string>
     <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
     <string name="downloaded_resource_version">Downloaded Version</string>
     <string name="del_remote_after_update">Delete Cache File After Update</string>
+    <string name="warning">Warning</string>
+    <string name="install">Install</string>
+    <string name="installing">Installing</string>
+    <string name="check_resource_from_api">Check Resource Update From API</string>
+    <string name="api_addr">API Address（Github Latest Release API）</string>
+    <string name="check_update">Check</string>
+    <string name="translation_resource_update">Translation Resource Update</string>
+
+    <string name="game_patch">Game Patch</string>
+    <string name="patch_mode">Patch Mode</string>
+    <string name="patch_local">Local</string>
+    <string name="patch_local_desc">Patch an app without modules embedded.\nXposed scope can be changed dynamically without re-patch.\nLocal patched apps can only run on the local device.</string>
+    <string name="patch_integrated">Integrated</string>
+    <string name="patch_integrated_desc">Patch an app with modules embedded.\nThe patched app can run without the manager, but cannot be managed dynamically.\nIntegrated patched apps can be used on devices that do not have LSPatch Manager installed.</string>
+    <string name="shizuku_available">Shizuku service available</string>
+    <string name="shizuku_unavailable">Shizuku service not connected</string>
+    <string name="home_shizuku_warning">Some functions unavailable</string>
+    <string name="patch_debuggable">Debuggable</string>
+    <string name="reserve_patched">Reserve Patched APK</string>
+    <string name="support_file_types">Supported files:\nSingle/Multiple Choice: apk\nSingle Choice: apks, xapk, zip</string>
+    <string name="patch_uninstall_text">Due to different signatures, you need to uninstall the original app before installing the patched one.\nMake sure you have backed up personal data.</string>
+    <string name="patch_uninstall_confirm">Are you sure you want to uninstall?</string>
+    <string name="patch_finished">Patch finished. Start installing?</string>
 
     <string name="about_contributors_asset_file">about_contributors_en.json</string>
+    <string name="default_assets_check_api">https://api.github.com/repos/NatsumeLS/Gakumas-Translation-Data-EN/releases/latest</string>
 </resources>

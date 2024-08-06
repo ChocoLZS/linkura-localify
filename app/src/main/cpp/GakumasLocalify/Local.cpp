@@ -15,6 +15,7 @@
 #include <cctype>
 #include <algorithm>
 #include "BaseDefine.h"
+#include "string_parser/StringParser.hpp"
 
 
 namespace GakumasLocal::Local {
@@ -22,9 +23,12 @@ namespace GakumasLocal::Local {
     std::unordered_map<std::string, std::string> i18nDumpData{};
     std::unordered_map<std::string, std::string> genericText{};
     std::unordered_map<std::string, std::string> genericSplitText{};
+    std::unordered_map<std::string, std::string> genericFmtText{};
     std::vector<std::string> genericTextDumpData{};
     std::vector<std::string> genericSplittedDumpData{};
     std::vector<std::string> genericOrigTextDumpData{};
+    std::vector<std::string> genericFmtTextDumpData{};
+
     std::unordered_set<std::string> translatedText{};
     int genericDumpFileIndex = 0;
     const std::string splitTextPrefix = "[__split__]";
@@ -64,7 +68,8 @@ namespace GakumasLocal::Local {
     enum class DumpStrStat {
         DEFAULT = 0,
         SPLITTABLE_ORIG = 1,
-        SPLITTED = 2
+        SPLITTED = 2,
+        FMT = 3
     };
 
     enum class SplitTagsTranslationStat {
@@ -262,6 +267,15 @@ namespace GakumasLocal::Local {
         return ret;
     }
 
+    void ReplaceNumberComma(std::string* orig) {
+        if (!orig->contains("，")) return;
+        std::string newStr = *orig;
+        ReplaceString(&newStr, "，", ",");
+        if (IsPureStringValue(newStr)) {
+            *orig = newStr;
+        }
+    }
+
     SplitTagsTranslationStat GetSplitTagsTranslationFull(const std::string& origTextIn, std::string* newText, std::vector<std::string>& unTransResultRet) {
         // static const std::u16string splitFlags = u"0123456789+＋-－%％【】.";
         static const std::unordered_set<char16_t> splitFlags = {u'0', u'1', u'2', u'3', u'4', u'5',
@@ -306,7 +320,9 @@ namespace GakumasLocal::Local {
                 return SplitTagsTranslationStat::NO_SPLIT_AND_EMPTY;
             }
             else {
-                return SplitTagsTranslationStat::NO_SPLIT;
+                if (!(!origText.empty() && splitFlags.contains(origText[0]))) {  // 开头为特殊符号或数字
+                    return SplitTagsTranslationStat::NO_SPLIT;
+                }
             }
         }
         checkCurrentWaitingReplaceTextAndClear()
@@ -317,8 +333,9 @@ namespace GakumasLocal::Local {
         bool hasNotTrans = false;
         if (!waitingReplaceTexts.empty()) {
             for (const auto& i : waitingReplaceTexts) {
-                const auto searchResult = findInMapIgnoreSpace(i, genericSplitText);
+                std::string searchResult = findInMapIgnoreSpace(i, genericSplitText);
                 if (!searchResult.empty()) {
+                    ReplaceNumberComma(&searchResult);
                     ReplaceString(newText, i, searchResult);
                     hasTrans = true;
                 }
@@ -358,6 +375,7 @@ namespace GakumasLocal::Local {
 
         LoadJsonDataToMap(genericFile, genericText, true, true, true);
         genericSplitText.clear();
+        genericFmtText.clear();
         LoadJsonDataToMap(genericSplitFile, genericSplitText, true, true, true);
         if (std::filesystem::exists(genericDir) || std::filesystem::is_directory(genericDir)) {
             for (const auto& entry : std::filesystem::recursive_directory_iterator(genericDir)) {
@@ -366,6 +384,9 @@ namespace GakumasLocal::Local {
                     if (to_lower(currFile.extension().string()) == ".json") {
                         if (currFile.filename().string().ends_with(".split.json")) {  // split text file
                             LoadJsonDataToMap(currFile, genericSplitText, true, false, true);
+                        }
+                        if (currFile.filename().string().ends_with(".fmt.json")) {  // fmt text file
+                            LoadJsonDataToMap(currFile, genericFmtText, true, false, false);
                         }
                         else {
                             LoadJsonDataToMap(currFile, genericText, true, false, true);
@@ -442,6 +463,10 @@ namespace GakumasLocal::Local {
             if (genericDumpFileIndex == 0) return "generic_orig.json";
             return Log::StringFormat("generic_orig_%d.json", genericDumpFileIndex);
         }
+        else if (stat == DumpStrStat::FMT) {
+            if (genericDumpFileIndex == 0) return "generic.fmt.json";
+            return Log::StringFormat("generic_%d.fmt.json", genericDumpFileIndex);
+        }
         else {
             if (genericDumpFileIndex == 0) return "generic.json";
             return Log::StringFormat("generic_%d.json", genericDumpFileIndex);
@@ -452,10 +477,11 @@ namespace GakumasLocal::Local {
     void DumpGenericText(const std::string& origText, DumpStrStat stat = DumpStrStat::DEFAULT) {
         if (translatedText.contains(origText)) return;
 
-        std::array<std::reference_wrapper<std::vector<std::string>>, 3> targets = {
+        std::array<std::reference_wrapper<std::vector<std::string>>, 4> targets = {
                 genericTextDumpData,
                 genericOrigTextDumpData,
-                genericSplittedDumpData
+                genericSplittedDumpData,
+                genericFmtTextDumpData
         };
 
         auto& appendTarget = targets[static_cast<int>(stat)].get();
@@ -475,25 +501,50 @@ namespace GakumasLocal::Local {
             DumpVectorDataToJson(dumpBasePath, GetDumpGenericFileName(DumpStrStat::DEFAULT), genericTextDumpData);
             DumpVectorDataToJson(dumpBasePath, GetDumpGenericFileName(DumpStrStat::SPLITTABLE_ORIG), genericOrigTextDumpData);
             DumpVectorDataToJson(dumpBasePath, GetDumpGenericFileName(DumpStrStat::SPLITTED), genericSplittedDumpData, splitTextPrefix);
+            DumpVectorDataToJson(dumpBasePath, GetDumpGenericFileName(DumpStrStat::FMT), genericFmtTextDumpData);
             genericTextDumpData.clear();
             genericSplittedDumpData.clear();
             genericOrigTextDumpData.clear();
+            genericFmtTextDumpData.clear();
             inDumpGeneric = false;
         }).detach();
     }
 
     bool GetGenericText(const std::string& origText, std::string* newStr) {
+        // 完全匹配
         if (const auto iter = genericText.find(origText); iter != genericText.end()) {
             *newStr = iter->second;
             return true;
         }
+        // 不翻译翻译过的文本
+        if (translatedText.contains(origText)) {
+            return false;
+        }
+
+        // fmt 文本
+        auto fmtText = StringParser::ParseItems::parse(origText, false);
+        if (fmtText.isValid) {
+            const auto fmtStr = fmtText.ToFmtString();
+            if (auto it = genericFmtText.find(fmtStr); it != genericFmtText.end()) {
+                auto newRet = fmtText.MergeText(it->second);
+                if (!newRet.empty()) {
+                    *newStr = newRet;
+                    return true;
+                }
+            }
+            if (Config::dumpText) {
+                DumpGenericText(fmtStr, DumpStrStat::FMT);
+            }
+        }
 
         auto ret = false;
 
+        // 分割匹配
         std::vector<std::string> unTransResultRet;
         const auto splitTransStat = GetSplitTagsTranslationFull(origText, newStr, unTransResultRet);
         switch (splitTransStat) {
             case SplitTagsTranslationStat::FULL_TRANS: {
+                DumpGenericText(origText, DumpStrStat::SPLITTABLE_ORIG);
                 return true;
             } break;
 

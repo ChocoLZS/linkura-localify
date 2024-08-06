@@ -1,0 +1,6 @@
+jar xf lspatch.jar
+cp -r assets/lspatch/so ../../src/main/assets/lspatch/so
+rm -rf com/google/common/util/concurrent
+rm -rf com/google/errorprone/annotations
+python rm_duplicate.py
+jar cf lspatch_cleaned.jar .

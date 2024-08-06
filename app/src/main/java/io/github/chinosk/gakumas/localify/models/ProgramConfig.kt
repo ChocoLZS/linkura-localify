@@ -16,8 +16,12 @@ data class ProgramConfig(
     var checkBuiltInAssets: Boolean = true,
     var transRemoteZipUrl: String = "",
     var useRemoteAssets: Boolean = false,
+    var useAPIAssets: Boolean = false,
+    var useAPIAssetsURL: String = "",
     var delRemoteAfterUpdate: Boolean = true,
     var cleanLocalAssets: Boolean = false,
+
+    // var localAPIAssetsVersion: String = "",
     var p: Boolean = false
 )
 

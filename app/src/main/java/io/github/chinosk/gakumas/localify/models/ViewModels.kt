@@ -53,6 +53,15 @@ class ProgramConfigViewModelFactory(private val initialValue: ProgramConfig,
     }
 }
 
+data class ConfirmStateModel(
+    var isShow: Boolean = false,
+    var title: String = "GakuConfirm Title",
+    var content: String = "GakuConfirm Content",
+    var onConfirm: () -> Unit = {},
+    var onCancel: () -> Unit = {},
+    var p: Boolean = false
+)
+
 class ProgramConfigViewModel(initValue: ProgramConfig, initLocalResourceVersion: String) : ViewModel() {
     val configState = MutableStateFlow(initValue)
     val config: StateFlow<ProgramConfig> = configState.asStateFlow()
@@ -66,6 +75,12 @@ class ProgramConfigViewModel(initValue: ProgramConfig, initLocalResourceVersion:
     val localResourceVersionState = MutableStateFlow(initLocalResourceVersion)
     val localResourceVersion: StateFlow<String> = localResourceVersionState.asStateFlow()
 
+    val localAPIResourceVersionState = MutableStateFlow(initLocalResourceVersion)
+    val localAPIResourceVersion: StateFlow<String> = localAPIResourceVersionState.asStateFlow()
+
     val errorStringState = MutableStateFlow("")
     val errorString: StateFlow<String> = errorStringState.asStateFlow()
+
+    val mainUIConfirmState = MutableStateFlow(ConfirmStateModel())
+    val mainUIConfirm: StateFlow<ConfirmStateModel> = mainUIConfirmState.asStateFlow()
 }

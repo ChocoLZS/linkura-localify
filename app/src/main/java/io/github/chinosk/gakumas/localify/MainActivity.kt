@@ -16,7 +16,10 @@ import androidx.lifecycle.ViewModelProvider
 import io.github.chinosk.gakumas.localify.hookUtils.FileHotUpdater
 import io.github.chinosk.gakumas.localify.hookUtils.FilesChecker
 import io.github.chinosk.gakumas.localify.hookUtils.MainKeyEventDispatcher
+import io.github.chinosk.gakumas.localify.mainUtils.RemoteAPIFilesChecker
+import io.github.chinosk.gakumas.localify.mainUtils.ShizukuApi
 import io.github.chinosk.gakumas.localify.mainUtils.json
+import io.github.chinosk.gakumas.localify.models.ConfirmStateModel
 import io.github.chinosk.gakumas.localify.models.GakumasConfig
 import io.github.chinosk.gakumas.localify.models.ProgramConfig
 import io.github.chinosk.gakumas.localify.models.ProgramConfigViewModel
@@ -42,6 +45,11 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    fun gotoPatchActivity() {
+        val intent = Intent(this, PatchActivity::class.java)
+        startActivity(intent)
     }
 
     override fun saveConfig() {
@@ -75,6 +83,10 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         try {
             val stream = assets.open("${FilesChecker.localizationFilesDir}/version.txt")
             resVersionText = FilesChecker.convertToString(stream)
+
+            if (programConfig.useAPIAssets) {
+                RemoteAPIFilesChecker.getLocalVersion(this)?.let { resVersionText = it }
+            }
 
             val packInfo = packageManager.getPackageInfo(packageName, 0)
             val version = packInfo.versionName
@@ -121,6 +133,8 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
             FileHotUpdater.getZipResourceVersion(File(filesDir, "update_trans.zip").absolutePath).toString()
         )
         programConfigViewModel = ViewModelProvider(this, programConfigFactory)[ProgramConfigViewModel::class.java]
+
+        ShizukuApi.init()
 
         setContent {
             GakumasLocalifyTheme(dynamicColor = false, darkTheme = false) {
@@ -187,12 +201,34 @@ fun getProgramLocalResourceVersionState(context: MainActivity?): State<String> {
 }
 
 @Composable
+fun getProgramLocalAPIResourceVersionState(context: MainActivity?): State<String> {
+    return if (context != null) {
+        context.programConfigViewModel.localAPIResourceVersion.collectAsState()
+    }
+    else {
+        val configMSF = MutableStateFlow("null")
+        configMSF.asStateFlow().collectAsState()
+    }
+}
+
+@Composable
 fun getProgramDownloadErrorStringState(context: MainActivity?): State<String> {
     return if (context != null) {
         context.programConfigViewModel.errorString.collectAsState()
     }
     else {
         val configMSF = MutableStateFlow("")
+        configMSF.asStateFlow().collectAsState()
+    }
+}
+
+@Composable
+fun getMainUIConfirmState(context: MainActivity?, previewData: ConfirmStateModel? = null): State<ConfirmStateModel> {
+    return if (context != null) {
+        context.programConfigViewModel.mainUIConfirm.collectAsState()
+    }
+    else {
+        val configMSF = MutableStateFlow(previewData ?: ConfirmStateModel())
         configMSF.asStateFlow().collectAsState()
     }
 }

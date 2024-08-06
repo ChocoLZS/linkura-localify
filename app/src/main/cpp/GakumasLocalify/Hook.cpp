@@ -333,6 +333,13 @@ namespace GakumasLocal::HookMain {
                                                       "TMPro", "TMP_Text", "get_font");
         static auto set_font = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",
                                                       "TMPro", "TMP_Text", "set_font");
+//        static auto set_fontMaterial = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",
+//                                                      "TMPro", "TMP_Text", "set_fontMaterial");
+//        static auto ForceMeshUpdate = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",
+//                                                      "TMPro", "TMP_Text", "ForceMeshUpdate");
+//
+//        static auto get_material = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",
+//                                                      "TMPro", "TMP_Asset", "get_material");
 
         static auto set_sourceFontFile = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll", "TMPro",
                                                                 "TMP_FontAsset", "set_sourceFontFile");
@@ -351,6 +358,10 @@ namespace GakumasLocal::HookMain {
             if (updatedFontPtrs.size() > 200) updatedFontPtrs.clear();
         }
         set_font->Invoke<void>(TMP_Textself, fontAsset);
+
+//        auto fontMaterial = get_material->Invoke<void*>(fontAsset);
+//        set_fontMaterial->Invoke<void>(TMP_Textself, fontMaterial);
+//        ForceMeshUpdate->Invoke<void>(TMP_Textself, false, false);
     }
 
     DEFINE_HOOK(void, TMP_Text_PopulateTextBackingArray, (void* self, UnityResolve::UnityType::String* text, int start, int length)) {
@@ -365,6 +376,7 @@ namespace GakumasLocal::HookMain {
         std::string transText;
         if (Local::GetGenericText(origText, &transText)) {
             const auto newText = UnityResolve::UnityType::String::New(transText);
+            UpdateFont(self);
             return TMP_Text_PopulateTextBackingArray_Orig(self, newText, 0, newText->length);
         }
 

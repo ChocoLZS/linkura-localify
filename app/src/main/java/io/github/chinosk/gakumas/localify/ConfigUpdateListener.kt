@@ -1,5 +1,6 @@
 package io.github.chinosk.gakumas.localify
 
+import android.util.Log
 import android.view.KeyEvent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,6 +11,7 @@ import io.github.chinosk.gakumas.localify.models.ProgramConfigViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
 
 
 interface ConfigListener {
@@ -62,7 +64,14 @@ interface ConfigListener {
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
                                      downloadProgressState: Float? = null,
                                      localResourceVersionState: String? = null,
-                                     errorString: String? = null)
+                                     errorString: String? = null,
+                                     localAPIResourceVersion: String? = null)
+    fun onPUseAPIAssetsChanged(value: Boolean)
+    fun onPUseAPIAssetsURLChanged(s: CharSequence, start: Int, before: Int, count: Int)
+    fun mainUIConfirmStatUpdate(isShow: Boolean? = null, title: String? = null,
+                                content: String? = null,
+                                onConfirm: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) },
+                                onCancel: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) })
 }
 
 class UserConfigViewModelFactory(private val initialValue: GakumasConfig) : ViewModelProvider.Factory {
@@ -503,16 +512,29 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onPCheckBuiltInAssetsChanged(value: Boolean) {
         programConfig.checkBuiltInAssets = value
+        if (value) {
+            programConfig.cleanLocalAssets = false
+        }
         saveProgramConfig()
     }
 
     override fun onPUseRemoteAssetsChanged(value: Boolean) {
         programConfig.useRemoteAssets = value
+        if (value) {
+            programConfig.checkBuiltInAssets = false
+            programConfig.cleanLocalAssets = false
+            programConfig.useAPIAssets = false
+        }
         saveProgramConfig()
     }
 
     override fun onPCleanLocalAssetsChanged(value: Boolean) {
         programConfig.cleanLocalAssets = value
+        if (value) {
+            programConfig.useRemoteAssets = false
+            programConfig.useAPIAssets = false
+            programConfig.checkBuiltInAssets = false
+        }
         saveProgramConfig()
     }
 
@@ -527,10 +549,59 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     }
 
     override fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean?, downloadProgressState: Float?,
-                                              localResourceVersionState: String?, errorString: String?) {
-        downloadAbleState?.let { programConfigViewModel.downloadAbleState.value = downloadAbleState }
-        downloadProgressState?.let{ programConfigViewModel.downloadProgressState.value = downloadProgressState }
-        localResourceVersionState?.let{ programConfigViewModel.localResourceVersionState.value = localResourceVersionState }
-        errorString?.let{ programConfigViewModel.errorStringState.value = errorString }
+                                              localResourceVersionState: String?, errorString: String?,
+                                              localAPIResourceVersion: String?) {
+        downloadAbleState?.let { programConfigViewModel.downloadAbleState.value = it }
+        downloadProgressState?.let{ programConfigViewModel.downloadProgressState.value = it }
+        localResourceVersionState?.let{ programConfigViewModel.localResourceVersionState.value = it }
+        errorString?.let{ programConfigViewModel.errorStringState.value = it }
+        localAPIResourceVersion?.let{ programConfigViewModel.localAPIResourceVersionState.value = it }
+    }
+
+    override fun onPUseAPIAssetsChanged(value: Boolean) {
+        programConfig.useAPIAssets = value
+        if (value) {
+            programConfig.checkBuiltInAssets = false
+            programConfig.useRemoteAssets = false
+            programConfig.cleanLocalAssets = false
+        }
+        saveProgramConfig()
+    }
+
+    override fun onPUseAPIAssetsURLChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+        programConfig.useAPIAssetsURL = s.toString()
+        saveProgramConfig()
+    }
+
+    override fun mainUIConfirmStatUpdate(isShow: Boolean?, title: String?, content: String?,
+        onConfirm: (() -> Unit)?, onCancel: (() -> Unit)?
+    ) {
+        val orig = programConfigViewModel.mainUIConfirmState.value
+        isShow?.let {
+            if (orig.isShow && it) {
+                Log.e(TAG, "Duplicate mainUIConfirmStat")
+            }
+            orig.isShow = it
+        }
+        title?.let { orig.title = it }
+        content?.let { orig.content = it }
+        onConfirm?.let { orig.onConfirm = {
+            try {
+                it()
+            }
+            finally {
+                mainUIConfirmStatUpdate(isShow = false)
+            }
+        } }
+        onCancel?.let { orig.onCancel = {
+            try {
+                it()
+            }
+            finally {
+                mainUIConfirmStatUpdate(isShow = false)
+            }
+        } }
+        orig.p = false
+        programConfigViewModel.mainUIConfirmState.value = orig.copy(p = true)
     }
 }

@@ -3,6 +3,7 @@
 #include <codecvt>
 #include <locale>
 #include <jni.h>
+#include "fmt/core.h"
 
 
 extern JavaVM* g_javaVM;
@@ -88,11 +89,85 @@ namespace GakumasLocal::Misc {
 
     int CSEnum::GetValueByName(const std::string &name) {
         for (int i = 0; i < names.size(); i++) {
-            if (names[i].compare(name) == 0) {
+            if (names[i] == name) {
                 return values[i];
             }
         }
         return values[0];
+    }
+
+
+    namespace StringFormat {
+        template<typename... Args>
+        std::string string_format(const std::string& fmt, Args&&... args) {
+            // return std::vformat(fmt, std::make_format_args(std::forward<Args>(args)...));
+            return fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...);
+        }
+
+
+        template <std::size_t N, std::size_t... Indices, typename T>
+        auto vectorToTupleImpl(const std::vector<T>& vec, std::index_sequence<Indices...>) {
+            if (vec.size() != N) {
+                // printf("vec.size: %zu, N: %zu\n", vec.size(), N);
+                throw std::out_of_range("Vector size does not match tuple size.");
+            }
+            return std::make_tuple(vec[Indices]...);
+        }
+
+        template <std::size_t N, typename T>
+        auto vectorToTuple(const std::vector<T>& vec) {
+            return vectorToTupleImpl<N>(vec, std::make_index_sequence<N>{});
+        }
+
+
+        template <typename T>
+        std::string stringFormat(const std::string& fmt, const std::vector<T>& vec) {
+            std::string ret = fmt;
+
+#define CASE_ARG_COUNT(N) \
+    case N: {\
+        auto tp = vectorToTuple<N>(vec); \
+        std::apply([&](auto&&... args) { \
+            ret = string_format(fmt, args...); \
+        }, tp); } break;
+
+            switch (vec.size()) {
+                CASE_ARG_COUNT(1)
+                CASE_ARG_COUNT(2)
+                CASE_ARG_COUNT(3)
+                CASE_ARG_COUNT(4)
+                CASE_ARG_COUNT(5)
+                CASE_ARG_COUNT(6)
+                CASE_ARG_COUNT(7)
+                CASE_ARG_COUNT(8)
+                CASE_ARG_COUNT(9)
+                CASE_ARG_COUNT(10)
+                CASE_ARG_COUNT(11)
+                CASE_ARG_COUNT(12)
+                CASE_ARG_COUNT(13)
+                CASE_ARG_COUNT(14)
+                CASE_ARG_COUNT(15)
+                CASE_ARG_COUNT(16)
+                CASE_ARG_COUNT(17)
+                CASE_ARG_COUNT(18)
+                CASE_ARG_COUNT(19)
+                CASE_ARG_COUNT(20)
+                CASE_ARG_COUNT(21)
+                CASE_ARG_COUNT(22)
+                CASE_ARG_COUNT(23)
+                CASE_ARG_COUNT(24)
+            }
+            return ret;
+        }
+
+        std::string stringFormatString(const std::string& fmt, const std::vector<std::string>& vec) {
+            try {
+                return stringFormat(fmt, vec);
+            }
+            catch (std::exception& e) {
+                return fmt;
+            }
+        }
     }
 
 }

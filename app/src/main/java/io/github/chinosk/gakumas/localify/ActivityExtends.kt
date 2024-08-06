@@ -74,9 +74,28 @@ fun <T> T.loadConfig() where T : Activity, T : IHasConfigItems {
     } catch (e: SerializationException) {
         ProgramConfig()
     }
+    if (programConfig.useAPIAssetsURL.isEmpty()) {
+        programConfig.useAPIAssetsURL = getString(R.string.default_assets_check_api)
+    }
 }
 
 fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
+    val lastStartPluginVersionFile = File(filesDir, "lastStartPluginVersion.txt")
+    val lastStartPluginVersion = if (lastStartPluginVersionFile.exists()) {
+        lastStartPluginVersionFile.readText()
+    }
+    else {
+        "null"
+    }
+    val packInfo = packageManager.getPackageInfo(packageName, 0)
+    val version = packInfo.versionName
+    val versionCode = packInfo.longVersionCode
+    val currentPluginVersion = "$version ($versionCode)"
+    if (lastStartPluginVersion != currentPluginVersion) {  // 插件版本更新，强制启用资源更新检查
+        lastStartPluginVersionFile.writeText(currentPluginVersion)
+        programConfig.checkBuiltInAssets = true
+    }
+
     val intent = Intent().apply {
         setClassName(
             "com.bandainamcoent.idolmaster_gakuen",
@@ -85,17 +104,29 @@ fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
         putExtra("gkmsData", getConfigContent())
         putExtra(
             "localData",
-            getProgramConfigContent(listOf("transRemoteZipUrl", "p"), programConfig)
+            getProgramConfigContent(listOf("transRemoteZipUrl", "useAPIAssetsURL",
+                "localAPIAssetsVersion", "p"), programConfig)
         )
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
 
     val updateFile = File(filesDir, "update_trans.zip")
-    if (updateFile.exists()) {
+    val updateAPIFile = File(filesDir, "remote_files/remote.zip")
+    val targetFile = if (programConfig.useAPIAssets && updateAPIFile.exists()) {
+        updateAPIFile
+    }
+    else if (programConfig.useRemoteAssets && updateFile.exists()) {
+        updateFile
+    }
+    else {
+        null
+    }
+
+    if (targetFile != null) {
         val dirUri = FileProvider.getUriForFile(
             this,
             "io.github.chinosk.gakumas.localify.fileprovider",
-            File(updateFile.absolutePath)
+            File(targetFile.absolutePath)
         )
         intent.setDataAndType(dirUri, "resource/file")
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)

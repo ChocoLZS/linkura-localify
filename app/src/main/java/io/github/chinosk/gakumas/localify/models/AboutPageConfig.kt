@@ -21,7 +21,8 @@ data class MainContributors(
 @Serializable
 data class ContribImg(
     val plugin: String,
-    val translation: String
+    val translation: String,
+    val translations: List<String> = listOf()
 )
 
 @Serializable

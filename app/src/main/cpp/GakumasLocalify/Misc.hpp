@@ -73,5 +73,9 @@ namespace GakumasLocal {
             size_t maxSize;
             T sum;
         };
+
+        namespace StringFormat {
+            std::string stringFormatString(const std::string& fmt, const std::vector<std::string>& vec);
+        }
     }
 }

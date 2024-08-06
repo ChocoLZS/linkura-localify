@@ -144,6 +144,13 @@ fun AboutPage(modifier: Modifier = Modifier,
                 url = contributorInfo.contrib_img.translation,
                 contentDescription = "translation-contrib"
             )
+            contributorInfo.contrib_img.translations.forEach { url ->
+                Spacer(modifier = Modifier.height(2.dp))
+                NetworkSvgImage(
+                    url = url,
+                    contentDescription = "translation-contrib"
+                )
+            }
         }
 
         item {

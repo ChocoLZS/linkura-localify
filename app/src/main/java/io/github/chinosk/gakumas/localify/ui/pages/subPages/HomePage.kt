@@ -2,6 +2,7 @@ package io.github.chinosk.gakumas.localify.ui.pages.subPages
 
 import io.github.chinosk.gakumas.localify.ui.components.GakuGroupBox
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,14 +37,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.chinosk.gakumas.localify.MainActivity
 import io.github.chinosk.gakumas.localify.R
+import io.github.chinosk.gakumas.localify.TAG
 import io.github.chinosk.gakumas.localify.getConfigState
 import io.github.chinosk.gakumas.localify.getProgramConfigState
 import io.github.chinosk.gakumas.localify.getProgramDownloadAbleState
 import io.github.chinosk.gakumas.localify.getProgramDownloadErrorStringState
 import io.github.chinosk.gakumas.localify.getProgramDownloadState
 import io.github.chinosk.gakumas.localify.getProgramLocalResourceVersionState
+import io.github.chinosk.gakumas.localify.getProgramLocalAPIResourceVersionState
 import io.github.chinosk.gakumas.localify.hookUtils.FileHotUpdater
 import io.github.chinosk.gakumas.localify.mainUtils.FileDownloader
+import io.github.chinosk.gakumas.localify.mainUtils.RemoteAPIFilesChecker
+import io.github.chinosk.gakumas.localify.mainUtils.TimeUtils
 import io.github.chinosk.gakumas.localify.models.GakumasConfig
 import io.github.chinosk.gakumas.localify.models.ResourceCollapsibleBoxViewModel
 import io.github.chinosk.gakumas.localify.models.ResourceCollapsibleBoxViewModelFactory
@@ -64,7 +73,9 @@ fun HomePage(modifier: Modifier = Modifier,
     val downloadProgress by getProgramDownloadState(context)
     val downloadAble by getProgramDownloadAbleState(context)
     val localResourceVersion by getProgramLocalResourceVersionState(context)
+    val localAPIResourceVersion by getProgramLocalAPIResourceVersionState(context)
     val downloadErrorString by getProgramDownloadErrorStringState(context)
+    var isFirstTimeInThisPage by rememberSaveable { mutableStateOf(true) }
 
     // val scrollState = rememberScrollState()
     val keyboardOptionsNumber = remember {
@@ -77,12 +88,8 @@ fun HomePage(modifier: Modifier = Modifier,
     val resourceSettingsViewModel: ResourceCollapsibleBoxViewModel =
         viewModel(factory = ResourceCollapsibleBoxViewModelFactory(initiallyExpanded = false))
 
-    fun onClickDownload() {
-        context?.mainPageAssetsViewDataUpdate(
-            downloadAbleState = false,
-            errorString = "",
-            downloadProgressState = -1f
-        )
+
+    fun zipResourceDownload() {
         val (_, newUrl) = FileDownloader.checkAndChangeDownloadURL(programConfig.value.transRemoteZipUrl)
         context?.onPTransRemoteZipUrlChanged(newUrl, 0, 0, 0)
         FileDownloader.downloadFile(
@@ -122,9 +129,93 @@ fun HomePage(modifier: Modifier = Modifier,
                     errorString = reason,
                 )
             })
-
     }
 
+    fun onClickDownload(isZipResource: Boolean, isHumanClick: Boolean = true) {
+        context?.mainPageAssetsViewDataUpdate(
+            downloadAbleState = false,
+            errorString = "",
+            downloadProgressState = -1f
+        )
+        if (isZipResource) {
+            zipResourceDownload()
+        }
+        else {
+            RemoteAPIFilesChecker.checkUpdateLocalAssets(context!!,
+                programConfig.value.useAPIAssetsURL,
+                onFailed = { _, reason ->
+                    context.mainPageAssetsViewDataUpdate(
+                        downloadAbleState = true,
+                        errorString = "",
+                        downloadProgressState = -1f
+                    )
+                    context.mainUIConfirmStatUpdate(true, "Error", reason)
+                },
+                onResult = { data, localVersion ->
+                    if (!isHumanClick) {
+                        if (data.tag_name == localVersion) {
+                            context.mainPageAssetsViewDataUpdate(
+                                downloadAbleState = true,
+                                errorString = "",
+                                downloadProgressState = -1f
+                            )
+                            return@checkUpdateLocalAssets
+                        }
+                    }
+                    context.mainUIConfirmStatUpdate(true, context.getString(R.string.translation_resource_update),
+                        "${data.name}\n$localVersion -> ${data.tag_name}\n${data.body}\n\n${TimeUtils.convertIsoToLocalTime(data.published_at)}",
+                        onConfirm = {
+                            resourceSettingsViewModel.expanded = true
+                            RemoteAPIFilesChecker.updateLocalAssets(context, programConfig.value.useAPIAssetsURL,
+                                onDownload = { progress, _, _ ->
+                                    context.mainPageAssetsViewDataUpdate(downloadProgressState = progress)
+                                },
+                                onFailed = { _, reason -> context.mainPageAssetsViewDataUpdate(
+                                    downloadAbleState = true,
+                                    errorString = reason,
+                                )},
+                                onSuccess = { saveFile, releaseVersion ->
+                                    context.mainPageAssetsViewDataUpdate(
+                                        downloadAbleState = true,
+                                        errorString = "",
+                                        downloadProgressState = -1f
+                                    )
+                                    context.mainPageAssetsViewDataUpdate(
+                                        localAPIResourceVersion = RemoteAPIFilesChecker.getLocalVersion(context)
+                                    )
+                                    context.saveProgramConfig()
+                                    Log.d(TAG, "saved: $releaseVersion $saveFile")
+                                })
+                        },
+                        onCancel = {
+                            context.mainPageAssetsViewDataUpdate(
+                                downloadAbleState = true,
+                                errorString = "",
+                                downloadProgressState = -1f
+                            )
+                        }
+                        )
+                })
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        try {
+            if (context == null) return@LaunchedEffect
+            val localAPIResVer = RemoteAPIFilesChecker.getLocalVersion(context)
+            context.mainPageAssetsViewDataUpdate(
+                localAPIResourceVersion = localAPIResVer
+            )
+            if (isFirstTimeInThisPage) {
+                if (programConfig.value.useAPIAssets && programConfig.value.useAPIAssetsURL.isNotEmpty()) {
+                    onClickDownload(false, false)
+                }
+            }
+        }
+        finally {
+            isFirstTimeInThisPage = false
+        }
+    }
 
     LazyColumn(modifier = modifier
         .sizeIn(maxHeight = screenH)
@@ -190,6 +281,103 @@ fun HomePage(modifier: Modifier = Modifier,
 
                         item {
                             GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
+                                checked = programConfig.value.useAPIAssets,
+                                text = stringResource(R.string.check_resource_from_api)
+                            ) { v -> context?.onPUseAPIAssetsChanged(v) }
+
+                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
+                                expandState = programConfig.value.useAPIAssets,
+                                collapsedHeight = 0.dp,
+                                innerPaddingLeftRight = 8.dp,
+                                showExpand = false
+                            ) {
+                                GakuSwitch(modifier = modifier,
+                                    checked = programConfig.value.delRemoteAfterUpdate,
+                                    text = stringResource(id = R.string.del_remote_after_update)
+                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
+
+                                LazyColumn(modifier = modifier
+                                    // .padding(8.dp)
+                                    .sizeIn(maxHeight = screenH),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    item {
+                                        Row(modifier = modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                            verticalAlignment = Alignment.CenterVertically) {
+
+                                            GakuTextInput(modifier = modifier
+                                                .height(45.dp)
+                                                .padding(end = 8.dp)
+                                                .fillMaxWidth()
+                                                .weight(1f),
+                                                fontSize = 14f,
+                                                value = programConfig.value.useAPIAssetsURL,
+                                                onValueChange = { c -> context?.onPUseAPIAssetsURLChanged(c, 0, 0, 0)},
+                                                label = { Text(stringResource(R.string.api_addr)) },
+                                                keyboardOptions = keyboardOptionsNumber)
+
+                                            if (downloadAble) {
+                                                GakuButton(modifier = modifier
+                                                    .height(40.dp)
+                                                    .sizeIn(minWidth = 80.dp),
+                                                    text = stringResource(R.string.check_update),
+                                                    onClick = { onClickDownload(false) })
+                                            }
+                                            else {
+                                                GakuButton(modifier = modifier
+                                                    .height(40.dp)
+                                                    .sizeIn(minWidth = 80.dp),
+                                                    text = stringResource(id = R.string.cancel), onClick = {
+                                                        FileDownloader.cancel()
+                                                    })
+                                            }
+
+                                        }
+                                    }
+
+                                    if (downloadProgress >= 0) {
+                                        item {
+                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
+                                        }
+                                    }
+
+                                    if (downloadErrorString.isNotEmpty()) {
+                                        item {
+                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
+                                        }
+                                    }
+
+                                    item {
+                                        Text(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                context?.mainPageAssetsViewDataUpdate(
+                                                    localAPIResourceVersion = RemoteAPIFilesChecker.getLocalVersion(
+                                                        context
+                                                    )
+                                                )
+                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localAPIResourceVersion")
+                                    }
+
+                                    item {
+                                        Spacer(Modifier.height(0.dp))
+                                    }
+
+                                }
+
+                            }
+                        }
+
+                        item {
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                            )
+                        }
+
+                        item {
+                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
                                 checked = programConfig.value.useRemoteAssets,
                                 text = stringResource(id = R.string.use_remote_zip_resource)
                             ) { v -> context?.onPUseRemoteAssetsChanged(v) }
@@ -231,7 +419,7 @@ fun HomePage(modifier: Modifier = Modifier,
                                                     .height(40.dp)
                                                     .sizeIn(minWidth = 80.dp),
                                                     text = stringResource(id = R.string.download),
-                                                    onClick = { onClickDownload() })
+                                                    onClick = { onClickDownload(true) })
                                             }
                                             else {
                                                 GakuButton(modifier = modifier

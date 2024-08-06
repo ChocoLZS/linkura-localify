@@ -1,6 +1,7 @@
 package io.github.chinosk.gakumas.localify.ui.pages
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,9 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,7 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chinosk.gakumas.localify.MainActivity
 import io.github.chinosk.gakumas.localify.R
+import io.github.chinosk.gakumas.localify.TAG
+import io.github.chinosk.gakumas.localify.getMainUIConfirmState
+import io.github.chinosk.gakumas.localify.getProgramConfigState
 import io.github.chinosk.gakumas.localify.models.GakumasConfig
+import io.github.chinosk.gakumas.localify.ui.components.GakuGroupConfirm
 import io.github.chinosk.gakumas.localify.ui.theme.GakumasLocalifyTheme
 
 
@@ -36,10 +48,16 @@ import io.github.chinosk.gakumas.localify.ui.theme.GakumasLocalifyTheme
 fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
            previewData: GakumasConfig? = null) {
     val imagePainter = painterResource(R.drawable.bg_pattern)
-    val versionInfo = remember {
-        context?.getVersion() ?: listOf("", "Unknown")
+    var versionInfo by remember {
+        mutableStateOf(context?.getVersion() ?: listOf("", "Unknown"))
     }
     // val config = getConfigState(context, previewData)
+    val confirmState by getMainUIConfirmState(context, null)
+    val programConfig by getProgramConfigState(context)
+
+    LaunchedEffect(programConfig) {
+        versionInfo = context?.getVersion() ?: listOf("", "Unknown")
+    }
 
     Box(
         modifier = Modifier
@@ -65,6 +83,23 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
             SettingsTabs(modifier, listOf(stringResource(R.string.about), stringResource(R.string.home),
                 stringResource(R.string.advanced_settings)),
                 context = context, previewData = previewData, screenH = screenH)
+        }
+
+        if (confirmState.isShow) {
+            GakuGroupConfirm(
+                title = confirmState.title,
+                onCancel = { confirmState.onCancel() },
+                onConfirm = { confirmState.onConfirm() },
+                contentHeightForAnimation = screenH.value * 1.8f
+            ) {
+                LazyColumn(modifier =
+                Modifier.sizeIn(maxHeight = (screenH.value * 0.45f).dp)
+                    .fillMaxWidth()) {
+                    item {
+                        Text(confirmState.content)
+                    }
+                }
+            }
         }
     }
 }

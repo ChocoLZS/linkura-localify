@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.serialization)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -14,8 +15,8 @@ android {
         applicationId "io.github.chinosk.gakumas.localify"
         minSdk 29
         targetSdk 34
-        versionCode 2
-        versionName "v1.2"
+        versionCode 4
+        versionName "v1.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -75,6 +76,7 @@ android {
             mergeAssetsTask.doLast {
                 delete(fileTree(dir: mergeAssetsTask.outputDir, includes: ['gakumas-local/gakuen-adapted-translation-data/**',
                                                                            'gakumas-local/GakumasPreTranslation/**',
+                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
                                                                            'gakumas-local/raw/**']))
             }
         }
@@ -82,6 +84,9 @@ android {
 }
 
 dependencies {
+    // implementation files('libs/lspatch_cleaned.jar')
+    // api 'com.google.guava:guava:32.0.1-jre'
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.material3)
@@ -90,6 +95,14 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.navigation.compose)
+    implementation files('libs/lspatch_cleaned.jar')
+
+    implementation(libs.zip4j)
+    implementation(libs.shizukuApi)
+    implementation(libs.rikka.shizuku.provider)
+    implementation(libs.rikka.refine)
+    implementation(libs.rikka.hidden.stub)
+    implementation(libs.hiddenapibypass)
 
     def composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)

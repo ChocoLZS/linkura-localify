@@ -14,6 +14,14 @@ object FileDownloader {
 
     private var call: Call? = null
 
+    fun requestGet(request: Request, callback: Callback) {
+        val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .build()
+        val call = client.newCall(request)
+        call.enqueue(callback)
+    }
+
     fun downloadFile(
         url: String,
         onDownload: (Float, downloaded: Long, size: Long) -> Unit,

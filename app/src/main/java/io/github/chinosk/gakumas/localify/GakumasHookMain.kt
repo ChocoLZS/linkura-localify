@@ -33,6 +33,7 @@ import java.io.File
 import java.util.Locale
 import kotlin.system.measureTimeMillis
 import io.github.chinosk.gakumas.localify.hookUtils.FileHotUpdater
+import io.github.chinosk.gakumas.localify.hookUtils.FilesChecker.localizationFilesDir
 import io.github.chinosk.gakumas.localify.mainUtils.json
 import io.github.chinosk.gakumas.localify.models.NativeInitProgress
 import io.github.chinosk.gakumas.localify.models.ProgramConfig
@@ -280,7 +281,7 @@ class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
             }
 
             // 使用热更新文件
-            if (programConfig?.useRemoteAssets == true) {
+            if ((programConfig?.useRemoteAssets == true) || (programConfig?.useAPIAssets == true)) {
                 val dataUri = intent.data
                 if (dataUri != null) {
                     if (!externalFilesChecked) {
@@ -288,6 +289,13 @@ class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         // Log.d(TAG, "dataUri: $dataUri")
                         FileHotUpdater.updateFilesFromZip(activity, dataUri, activity.filesDir,
                             programConfig.delRemoteAfterUpdate)
+                    }
+                }
+                else if (programConfig.useAPIAssets) {
+                    if (!File(activity.filesDir, localizationFilesDir).exists() &&
+                        (initConfig?.forceExportResource == false)) {
+                        // 使用 API 资源，不检查内置，API 资源无效，且游戏内没有插件数据时，释放内置数据
+                        FilesChecker.initAndCheck(activity.filesDir, modulePath)
                     }
                 }
             }
