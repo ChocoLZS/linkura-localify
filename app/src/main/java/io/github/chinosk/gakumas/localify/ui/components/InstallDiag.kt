@@ -27,7 +27,7 @@ import java.io.File
 
 
 @Composable
-fun InstallDiag(context: Context?, apkFiles: List<File>, patchCallback: PatchCallback?, reservePatchFiles: Boolean,
+fun InstallDiag(context: PatchActivity?, apkFiles: List<File>, patchCallback: PatchCallback?, reservePatchFiles: Boolean,
                 onFinish: (Int, String?) -> Unit) {
     // val scope = rememberCoroutineScope()
     // var uninstallFirst by remember { mutableStateOf(ShizukuApi.isPackageInstalledWithoutPatch(patchApp.app.packageName)) }

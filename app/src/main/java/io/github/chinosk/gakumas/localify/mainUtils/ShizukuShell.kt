@@ -23,7 +23,7 @@ class ShizukuShell(private var mOutput: MutableList<String>, private var mComman
     val isBusy: Boolean
         get() = mOutput.size > 0 && mOutput[mOutput.size - 1] != "aShell: Finish"
 
-    fun exec() {
+    fun exec(): ShizukuShell {
         try {
             Log.i(shellTag, "Execute: $mCommand")
             shellCallback?.onShellLine(mCommand)
@@ -66,6 +66,7 @@ class ShizukuShell(private var mOutput: MutableList<String>, private var mComman
             mProcess!!.waitFor()
         } catch (ignored: Exception) {
         }
+        return this
     }
 
     fun destroy() {

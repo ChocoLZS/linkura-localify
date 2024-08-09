@@ -1,19 +1,29 @@
 package io.github.chinosk.gakumas.localify
 
+import android.Manifest
+import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
+import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import io.github.chinosk.gakumas.localify.mainUtils.IOnShell
 import io.github.chinosk.gakumas.localify.mainUtils.LSPatchUtils
@@ -29,11 +39,13 @@ import kotlinx.coroutines.withContext
 import org.lsposed.patch.LSPatch
 import org.lsposed.patch.util.Logger
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermissions
+import java.util.concurrent.CountDownLatch
 
 
 interface PatchCallback {
@@ -99,6 +111,137 @@ class PatchActivity : ComponentActivity() {
     private var reservePatchFiles: Boolean = false
     var patchCallback: PatchCallback? = null
 
+    private val writePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode != RESULT_OK) {
+            Toast.makeText(this, "Permission Request Failed.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
+
+    private val writePermissionLauncherQ = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Toast.makeText(this, "Permission Request Failed.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
+
+    private fun checkAndRequestWritePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            /*
+            // 针对 API 级别 30 及以上使用 MediaStore.createWriteRequest
+            val uri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val intentSender = MediaStore.createWriteRequest(contentResolver, listOf(uri)).intentSender
+            writePermissionLauncher.launch(IntentSenderRequest.Builder(intentSender).build())*/
+        }
+        else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+                // 请求 WRITE_EXTERNAL_STORAGE 权限
+                writePermissionLauncherQ.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+
+    private fun writeFileToDownloadFolder(
+        sourceFile: File,
+        targetFolder: String,
+        targetFileName: String
+    ): Boolean {
+        val downloadDirectory = Environment.DIRECTORY_DOWNLOADS
+        val relativePath = "$downloadDirectory/$targetFolder/"
+        val resolver = contentResolver
+
+        // 检查文件是否已经存在
+        val existingUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val query = resolver.query(
+            existingUri,
+            arrayOf(MediaStore.Files.FileColumns._ID),
+            "${MediaStore.Files.FileColumns.RELATIVE_PATH}=? AND ${MediaStore.Files.FileColumns.DISPLAY_NAME}=?",
+            arrayOf(relativePath, targetFileName),
+            null
+        )
+
+        query?.use {
+            if (it.moveToFirst()) {
+                // 如果文件存在，则删除
+                val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID))
+                val deleteUri = MediaStore.Files.getContentUri("external", id)
+                resolver.delete(deleteUri, null, null)
+                Log.d(patchTag, "query delete: $deleteUri")
+            }
+        }
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, targetFileName)
+            put(MediaStore.Downloads.MIME_TYPE, "application/octet-stream")
+            put(MediaStore.Downloads.RELATIVE_PATH, relativePath)
+        }
+
+        var uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        Log.d(patchTag, "insert uri: $uri")
+
+        if (uri == null) {
+            val latch = CountDownLatch(1)
+            val downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val downloadSaveDirectory = File(downloadDirectory, targetFolder)
+            val downloadSaveFile = File(downloadSaveDirectory, targetFileName)
+            MediaScannerConnection.scanFile(this, arrayOf(downloadSaveFile.absolutePath),
+                null
+            ) { _, _ ->
+                Log.d(patchTag, "scanFile finished.")
+                latch.countDown()
+            }
+            latch.await()
+            uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+            if (uri == null) {
+                Log.e(patchTag, "uri is still null")
+                return false
+            }
+        }
+
+        return try {
+            resolver.openOutputStream(uri)?.use { outputStream ->
+                FileInputStream(sourceFile).use { inputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            contentValues.clear()
+            contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
+            resolver.update(uri, contentValues, null, null)
+            true
+        } catch (e: Exception) {
+            resolver.delete(uri, null, null)
+            e.printStackTrace()
+            false
+        }
+    }
+
+
+    private fun deleteFileInDownloadFolder(targetFolder: String, targetFileName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val selection =
+                "${MediaStore.MediaColumns.RELATIVE_PATH} = ? AND ${MediaStore.MediaColumns.DISPLAY_NAME} = ?"
+            val selectionArgs =
+                arrayOf("${Environment.DIRECTORY_DOWNLOADS}/$targetFolder/", targetFileName)
+
+            val uri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            contentResolver.delete(uri, selection, selectionArgs)
+        }
+        else {
+            val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "$targetFolder/$targetFileName")
+            if (file.exists()) {
+                if (file.delete()) {
+                    // Toast.makeText(this, "文件已删除", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     private fun handleSelectedFile(uri: Uri) {
         val fileName = uri.path?.substringAfterLast('/')
         if (fileName != null) {
@@ -110,6 +253,7 @@ class PatchActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         outputDir = "${filesDir.absolutePath}/output"
         // ShizukuApi.init()
+        checkAndRequestWritePermission()
 
         setContent {
             GakumasLocalifyTheme(dynamicColor = false, darkTheme = false) {
@@ -414,7 +558,34 @@ class PatchActivity : ComponentActivity() {
             return movedFiles
         }
 
-        suspend fun installSplitApks(context: Context, apkFiles: List<File>, reservePatchFiles: Boolean,
+        private fun generateNonce(size: Int): String {
+            val nonceScope = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            val scopeSize = nonceScope.length
+            val nonceItem: (Int) -> Char = { nonceScope[(scopeSize * Math.random()).toInt()] }
+            return Array(size, nonceItem).joinToString("")
+        }
+
+        fun saveFilesToDownload(context: PatchActivity, apkFiles: List<File>, targetFolder: String): List<String>? {
+            val ret: MutableList<String> = mutableListOf()
+            apkFiles.forEach { f ->
+                val success = context.writeFileToDownloadFolder(f, "gkms_local_patch", f.name)
+                if (success) {
+                    ret.add(f.name)
+                }
+                else {
+                    val newName = "${generateNonce(6)}${f.name}"
+                    val success2 = context.writeFileToDownloadFolder(f, "gkms_local_patch",
+                        newName)
+                    if (!success2) {
+                        return null
+                    }
+                    ret.add(newName)
+                }
+            }
+            return ret
+        }
+
+        suspend fun installSplitApks(context: PatchActivity, apkFiles: List<File>, reservePatchFiles: Boolean,
                                      patchCallback: PatchCallback?): Pair<Int, String?> {
             Log.i(TAG, "Perform install patched apks")
             var status = PackageInstaller.STATUS_FAILURE
@@ -424,13 +595,27 @@ class PatchActivity : ComponentActivity() {
                 runCatching {
                     val sdcardPath = Environment.getExternalStorageDirectory().path
                     val targetDirectory = File(sdcardPath, "Download/gkms_local_patch")
-                    val savedFiles = saveFileTo(apkFiles, targetDirectory, true, false)
-                    patchCallback?.onLog("Patched files: $savedFiles")
+                    // val savedFiles = saveFileTo(apkFiles, targetDirectory, true, false)
+
+                    val savedFileNames = saveFilesToDownload(context, apkFiles, "gkms_local_patch")
+                    if (savedFileNames == null) {
+                        status = PackageInstaller.STATUS_FAILURE
+                        message = "Save files failed."
+                        return@runCatching
+                    }
+
+                    // patchCallback?.onLog("Patched files: $savedFiles")
+                    patchCallback?.onLog("Patched files: $apkFiles")
 
                     if (!ShizukuApi.isPermissionGranted) {
                         status = PackageInstaller.STATUS_FAILURE
                         message = "Shizuku Not Ready."
-                        if (!reservePatchFiles) savedFiles.forEach { file -> if (file.exists()) file.delete() }
+                        // if (!reservePatchFiles) savedFiles.forEach { file -> if (file.exists()) file.delete() }
+                        if (!reservePatchFiles) {
+                            savedFileNames.forEach { f ->
+                                context.deleteFileInDownloadFolder("gkms_local_patch", f)
+                            }
+                        }
                         return@runCatching
                     }
 
@@ -455,15 +640,25 @@ class PatchActivity : ComponentActivity() {
                     val action = if (reservePatchFiles) "cp" else "mv"
                     val copyFilesCmd: MutableList<String> = mutableListOf()
                     val movedFiles: MutableList<String> = mutableListOf()
+                    savedFileNames.forEach { file ->
+                        val movedFileName = "$installDS/${file}"
+                        movedFiles.add(movedFileName)
+                        val dlSaveFileName = File(targetDirectory, file)
+                        copyFilesCmd.add("$action ${dlSaveFileName.absolutePath} $movedFileName")
+                    }
+                    /*
                     savedFiles.forEach { file ->
                         val movedFileName = "$installDS/${file.name}"
                         movedFiles.add(movedFileName)
                         copyFilesCmd.add("$action ${file.absolutePath} $movedFileName")
                     }
-                    val moveFileCommand = "mkdir $installDS && " +
-                            "chmod 777 $installDS && " +
+                    */
+                    val createDirCommand = "mkdir $installDS"
+                    val moveFileCommand = "chmod 777 $installDS && " +
                             copyFilesCmd.joinToString(" && ")
                     Log.d(TAG, "moveFileCommand: $moveFileCommand")
+
+                    ShizukuShell(mutableListOf(), createDirCommand, ioShell).exec().destroy()
 
                     val cpFileShell = ShizukuShell(mutableListOf(), moveFileCommand, ioShell)
                     cpFileShell.exec()
