@@ -565,21 +565,25 @@ class PatchActivity : ComponentActivity() {
             return Array(size, nonceItem).joinToString("")
         }
 
-        fun saveFilesToDownload(context: PatchActivity, apkFiles: List<File>, targetFolder: String): List<String>? {
+        fun saveFilesToDownload(context: PatchActivity, apkFiles: List<File>, targetFolder: String,
+                                isMove: Boolean): List<String>? {
             val ret: MutableList<String> = mutableListOf()
             apkFiles.forEach { f ->
-                val success = context.writeFileToDownloadFolder(f, "gkms_local_patch", f.name)
+                val success = context.writeFileToDownloadFolder(f, targetFolder, f.name)
                 if (success) {
                     ret.add(f.name)
                 }
                 else {
                     val newName = "${generateNonce(6)}${f.name}"
-                    val success2 = context.writeFileToDownloadFolder(f, "gkms_local_patch",
+                    val success2 = context.writeFileToDownloadFolder(f, targetFolder,
                         newName)
                     if (!success2) {
                         return null
                     }
                     ret.add(newName)
+                }
+                if (isMove) {
+                    f.delete()
                 }
             }
             return ret
@@ -597,7 +601,7 @@ class PatchActivity : ComponentActivity() {
                     val targetDirectory = File(sdcardPath, "Download/gkms_local_patch")
                     // val savedFiles = saveFileTo(apkFiles, targetDirectory, true, false)
 
-                    val savedFileNames = saveFilesToDownload(context, apkFiles, "gkms_local_patch")
+                    val savedFileNames = saveFilesToDownload(context, apkFiles, "gkms_local_patch", true)
                     if (savedFileNames == null) {
                         status = PackageInstaller.STATUS_FAILURE
                         message = "Save files failed."
