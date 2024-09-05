@@ -15,7 +15,7 @@
 
 - [x] 卡片信息、TIPS 等部分的文本 hook (`generic`)
 - [ ] 更多类型的文件替换
-- [ ] LSPatch 集成模式无效
+- [x] LSPatch 集成模式无效
 
 ... and more
 
