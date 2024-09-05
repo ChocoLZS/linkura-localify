@@ -474,12 +474,41 @@ namespace GakumasLocal::HookMain {
         PictureBookLiveThumbnailView_SetData_Orig(self, liveData, isUnlocked, isNew, ct, mtd);
     }
 
+    void* PictureBookWindowPresenter_instance = nullptr;
+    std::string PictureBookWindowPresenter_charaId;
+    DEFINE_HOOK(void*, PictureBookWindowPresenter_GetLiveMusics, (void* self, Il2cppString* charaId, void* mtd)) {
+        // Log::DebugFmt("GetLiveMusics: %s", charaId->ToString().c_str());
+
+        if (Config::unlockAllLive) {
+            PictureBookWindowPresenter_instance = self;
+            PictureBookWindowPresenter_charaId = charaId->ToString();
+        }
+
+        return PictureBookWindowPresenter_GetLiveMusics_Orig(self, charaId, mtd);
+    }
+
+    DEFINE_HOOK(void, PictureBookLiveSelectScreenModel_ctor, (void* self, void* transitionParam, void* musics, void* mtd)) {
+        // Log::DebugFmt("PictureBookLiveSelectScreenModel_ctor");
+
+        if (Config::unlockAllLive) {
+            static auto GetLiveMusics = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.OutGame",
+                                                               "PictureBookWindowPresenter", "GetLiveMusics");
+            if (PictureBookWindowPresenter_instance && !PictureBookWindowPresenter_charaId.empty()) {
+                auto fullMusics = GetLiveMusics->Invoke<void*>(PictureBookWindowPresenter_instance,
+                                                               Il2cppString::New(PictureBookWindowPresenter_charaId));
+                return PictureBookLiveSelectScreenModel_ctor_Orig(self, transitionParam, fullMusics, mtd);
+            }
+        }
+
+        return PictureBookLiveSelectScreenModel_ctor_Orig(self, transitionParam, musics, mtd);
+    }
+
     bool needRestoreHides = false;
     DEFINE_HOOK(void*, PictureBookLiveSelectScreenPresenter_MoveLiveScene, (void* self, void* produceLive,
-            Il2cppString* characterId, Il2cppString* costumeId, Il2cppString* costumeHeadId)) {
+            Il2cppString* characterId, Il2cppString* idolCardId, Il2cppString* costumeId, Il2cppString* costumeHeadId, void* mtd)) {
         needRestoreHides = false;
-        Log::InfoFmt("MoveLiveScene: characterId: %s, costumeId: %s, costumeHeadId: %s,",
-                     characterId->ToString().c_str(), costumeId->ToString().c_str(), costumeHeadId->ToString().c_str());
+        Log::InfoFmt("MoveLiveScene: characterId: %s, idolCardId: %s, costumeId: %s, costumeHeadId: %s,",
+                     characterId->ToString().c_str(), idolCardId->ToString().c_str(), costumeId->ToString().c_str(), costumeHeadId->ToString().c_str());
 
         /*
          characterId: hski, costumeId: hski-cstm-0002, costumeHeadId: costume_head_hski-cstm-0002,
@@ -488,12 +517,13 @@ namespace GakumasLocal::HookMain {
 
         if (Config::dbgMode && Config::enableLiveCustomeDress) {
             // 修改 LiveFixedData_GetCharacter 可以更改 Loading 角色和演唱者名字，而不变更实际登台人
-            return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId,
+            return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId, idolCardId,
                                                                            Config::liveCustomeCostumeId.empty() ? costumeId : Il2cppString::New(Config::liveCustomeCostumeId),
-                                                                           Config::liveCustomeHeadId.empty() ? costumeHeadId : Il2cppString::New(Config::liveCustomeHeadId));
+                                                                           Config::liveCustomeHeadId.empty() ? costumeHeadId : Il2cppString::New(Config::liveCustomeHeadId),
+                                                                           mtd);
         }
 
-        return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId, costumeId, costumeHeadId);
+        return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId, idolCardId, costumeId, costumeHeadId, mtd);
     }
 
     // std::string lastMusicId;
@@ -883,6 +913,12 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(PictureBookLiveThumbnailView_SetData,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame.PictureBook",
                                                "PictureBookLiveThumbnailView", "SetDataAsync", {"*", "*", "*", "*"}));
+        ADD_HOOK(PictureBookWindowPresenter_GetLiveMusics,
+                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
+                                               "PictureBookWindowPresenter", "GetLiveMusics"));
+        ADD_HOOK(PictureBookLiveSelectScreenModel_ctor,
+                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
+                                               "PictureBookLiveSelectScreenModel", ".ctor"));
 
         ADD_HOOK(PictureBookLiveSelectScreenPresenter_MoveLiveScene,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
