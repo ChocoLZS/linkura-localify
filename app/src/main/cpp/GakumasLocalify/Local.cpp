@@ -521,6 +521,17 @@ namespace GakumasLocal::Local {
             return false;
         }
 
+        // 匹配升级卡名
+        if (auto plusPos = origText.find_last_not_of('+'); plusPos != std::string::npos) {
+            const auto noPlusText = origText.substr(0, plusPos + 1);
+
+            if (const auto iter = genericText.find(noPlusText); iter != genericText.end()) {
+                size_t plusCount = origText.length() - (plusPos + 1);
+                *newStr = iter->second + std::string(plusCount, '+');
+                return true;
+            }
+        }
+
         // fmt 文本
         auto fmtText = StringParser::ParseItems::parse(origText, false);
         if (fmtText.isValid) {
