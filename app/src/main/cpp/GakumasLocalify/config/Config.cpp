@@ -21,6 +21,8 @@ namespace GakumasLocal::Config {
     std::string liveCustomeHeadId = "";
     std::string liveCustomeCostumeId = "";
 
+    bool loginAsIOS = false;
+
     bool useCustomeGraphicSettings = false;
     float renderScale = 0.77f;
     int qualitySettingsLevel = 3;
@@ -68,6 +70,7 @@ namespace GakumasLocal::Config {
             GetConfigItem(enableLiveCustomeDress);
             GetConfigItem(liveCustomeHeadId);
             GetConfigItem(liveCustomeCostumeId);
+            GetConfigItem(loginAsIOS);
             GetConfigItem(useCustomeGraphicSettings);
             GetConfigItem(renderScale);
             GetConfigItem(qualitySettingsLevel);

@@ -84,7 +84,7 @@ object FilesChecker {
         for (i in assets.list(localizationFilesDir)!!) {
             if (i.toString() == "version.txt") {
                 val stream = assets.open("$localizationFilesDir/$i")
-                return convertToString(stream)
+                return convertToString(stream).trim()
             }
         }
         return "0.0"
@@ -96,7 +96,7 @@ object FilesChecker {
 
         val versionFile = File(pluginFilesDir, "version.txt")
         if (!versionFile.exists()) return "0.0"
-        return versionFile.readText()
+        return versionFile.readText().trim()
     }
 
     fun convertToString(inputStream: InputStream?): String {

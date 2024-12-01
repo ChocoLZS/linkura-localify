@@ -86,6 +86,10 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.force_export_resource), checked = config.value.forceExportResource) {
                             v -> context?.onForceExportResourceChanged(v)
                     }
+
+                    GakuSwitch(modifier, stringResource(R.string.login_as_ios), checked = config.value.loginAsIOS) {
+                            v -> context?.onLoginAsIOSChanged(v)
+                    }
                 }
             }
 

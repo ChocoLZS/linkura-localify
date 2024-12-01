@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 interface ConfigListener {
     fun onEnabledChanged(value: Boolean)
     fun onForceExportResourceChanged(value: Boolean)
+    fun onLoginAsIOSChanged(value: Boolean)
     fun onTextTestChanged(value: Boolean)
     fun onReplaceFontChanged(value: Boolean)
     fun onLazyInitChanged(value: Boolean)
@@ -113,6 +114,11 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         config.forceExportResource = value
         saveConfig()
         pushKeyEvent(KeyEvent(1145, 30))
+    }
+
+    override fun onLoginAsIOSChanged(value: Boolean) {
+        config.loginAsIOS = value
+        saveConfig()
     }
 
     override fun onReplaceFontChanged(value: Boolean) {

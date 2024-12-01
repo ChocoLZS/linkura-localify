@@ -50,6 +50,7 @@
     <string name="export_text">テキストをエクスポート</string>
     <string name="exposed_dropdown_menu_content_description">ドロップダウンメニューを表示</string>
     <string name="force_export_resource">リソースのアップデートを強制する</string>
+    <string name="login_as_ios">iOSとしてログイン</string>
     <string name="gakumas_localify">Gakumas Localify</string>
     <string name="game_patch">ゲームパッチ</string>
     <string name="graphic_settings">グラフィック設定</string>

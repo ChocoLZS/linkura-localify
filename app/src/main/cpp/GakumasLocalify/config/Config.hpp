@@ -19,6 +19,8 @@ namespace GakumasLocal::Config {
     extern std::string liveCustomeHeadId;
     extern std::string liveCustomeCostumeId;
 
+    extern bool loginAsIOS;
+
     extern bool useCustomeGraphicSettings;
     extern float renderScale;
     extern int qualitySettingsLevel;

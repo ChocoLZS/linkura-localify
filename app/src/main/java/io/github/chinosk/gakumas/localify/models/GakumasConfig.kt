@@ -19,6 +19,8 @@ data class GakumasConfig (
     var liveCustomeHeadId: String = "",
     var liveCustomeCostumeId: String = "",
 
+    var loginAsIOS: Boolean = false,
+
     var useCustomeGraphicSettings: Boolean = false,
     var renderScale: Float = 0.77f,
     var qualitySettingsLevel: Int = 3,

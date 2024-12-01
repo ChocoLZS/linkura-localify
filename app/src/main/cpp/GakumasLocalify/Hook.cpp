@@ -763,6 +763,32 @@ namespace GakumasLocal::HookMain {
         CampusActorController_LateUpdate_Orig(self, mtd);
     }
 
+    DEFINE_HOOK(bool, PlatformInformation_get_IsAndroid, ()) {
+        if (Config::loginAsIOS) {
+            return false;
+        }
+        // Log::DebugFmt("PlatformInformation_get_IsAndroid: 0x%x", ret);
+        return PlatformInformation_get_IsAndroid_Orig();
+    }
+
+    DEFINE_HOOK(bool, PlatformInformation_get_IsIOS, ()) {
+        if (Config::loginAsIOS) {
+            return true;
+        }
+        // Log::DebugFmt("PlatformInformation_get_IsIOS: 0x%x", ret);
+        return PlatformInformation_get_IsIOS_Orig();
+    }
+
+    DEFINE_HOOK(Il2cppString*, ApiBase_GetPlatformString, (void* self, void* mtd)) {
+        if (Config::loginAsIOS) {
+            return Il2cppString::New("iOS");
+        }
+        // auto ret = ApiBase_GetPlatformString_Orig(self, mtd);
+        // Log::DebugFmt("ApiBase_GetPlatformString: %s", ret->ToString().c_str());
+        return ApiBase_GetPlatformString_Orig(self, mtd);
+    }
+
+
     void UpdateSwingBreastBonesData(void* initializeData) {
         if (!Config::enableBreastParam) return;
         static auto CampusActorAnimationInitializeData_klass = Il2cppUtils::GetClass("campus-submodule.Runtime.dll", "ActorAnimation",
@@ -954,6 +980,22 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(CampusActorController_LateUpdate,
                  Il2cppUtils::GetMethodPointer("campus-submodule.Runtime.dll", "Campus.Common",
                                                "CampusActorController", "LateUpdate"));
+
+        ADD_HOOK(PlatformInformation_get_IsAndroid, Il2cppUtils::GetMethodPointer("Firebase.Platform.dll", "Firebase.Platform",
+                                                                         "PlatformInformation", "get_IsAndroid"));
+        ADD_HOOK(PlatformInformation_get_IsIOS, Il2cppUtils::GetMethodPointer("Firebase.Platform.dll", "Firebase.Platform",
+                                                                                  "PlatformInformation", "get_IsIOS"));
+
+        auto api_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.Network", "Api");
+        if (api_klass) {
+            // Qua.Network.ApiBase
+            auto api_parent = UnityResolve::Invoke<Il2cppUtils::Il2CppClassHead*>("il2cpp_class_get_parent", api_klass->address);
+            if (api_parent) {
+                // Log::DebugFmt("api_parent at %p, name: %s::%s", api_parent, api_parent->namespaze, api_parent->name);
+                ADD_HOOK(ApiBase_GetPlatformString, Il2cppUtils::il2cpp_class_get_method_from_name(api_parent, "GetPlatformString", 0)->methodPointer);
+            }
+        }
+
         /*
         static auto CampusActorController_klass = Il2cppUtils::GetClass("campus-submodule.Runtime.dll",
                                                                         "Campus.Common", "CampusActorController");
