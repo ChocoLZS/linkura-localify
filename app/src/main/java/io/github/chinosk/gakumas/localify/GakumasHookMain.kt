@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -282,7 +283,14 @@ class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             // 使用热更新文件
             if ((programConfig?.useRemoteAssets == true) || (programConfig?.useAPIAssets == true)) {
-                val dataUri = intent.data
+                // val dataUri = intent.data
+                val dataUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra("resource_file", Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra<Uri>("resource_file")
+                }
+
                 if (dataUri != null) {
                     if (!externalFilesChecked) {
                         externalFilesChecked = true

@@ -645,7 +645,7 @@ class PatchActivity : ComponentActivity() {
                     val copyFilesCmd: MutableList<String> = mutableListOf()
                     val movedFiles: MutableList<String> = mutableListOf()
                     savedFileNames.forEach { file ->
-                        val movedFileName = "$installDS/${file}"
+                        val movedFileName = "\"$installDS/${file}\""
                         movedFiles.add(movedFileName)
                         val dlSaveFileName = File(targetDirectory, file)
                         copyFilesCmd.add("$action ${dlSaveFileName.absolutePath} $movedFileName")

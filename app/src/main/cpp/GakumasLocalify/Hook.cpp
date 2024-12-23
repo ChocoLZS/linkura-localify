@@ -466,12 +466,60 @@ namespace GakumasLocal::HookMain {
         // return UnityResolve::UnityType::String::New("[I18]" + ret->ToString());
     }
 
-    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetData, (void* self, void* liveData, bool isUnlocked, bool isNew, void* ct, void* mtd)) {
-        // Log::DebugFmt("PictureBookLiveThumbnailView_SetData: isUnlocked: %d, isNew: %d", isUnlocked, isNew);
+    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetData, (void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
+        // Log::DebugFmt("PictureBookLiveThumbnailView_SetData: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d",
+        //              isReleased, isUnlocked, isNew, hasLiveSkin);
         if (Config::dbgMode && Config::unlockAllLive) {
             isUnlocked = true;
+            isReleased = true;
         }
-        PictureBookLiveThumbnailView_SetData_Orig(self, liveData, isUnlocked, isNew, ct, mtd);
+        PictureBookLiveThumbnailView_SetData_Orig(self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
+    }
+
+    std::vector<std::string> GetIdolMusicIdAll(const std::string& charaNameId = "") {
+        // 传入例: fktn
+        // System.Collections.Generic.List`1<valuetype [mscorlib]System.ValueTuple`2<class Campus.Common.Proto.Client.Master.IdolCardSkin, class Campus.Common.Proto.Client.Master.Music>>
+        static auto get_IdolCardSkinMaster = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Master", "MasterManager", "get_IdolCardSkinMaster");
+        static auto Master_GetAllWithSortByKey = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Master", "IdolCardSkinMaster", "GetAllWithSortByKey");
+        static auto IdolCardSkin_get_Id = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_Id");
+        static auto IdolCardSkin_get_IdolCardId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_IdolCardId");
+        static auto IdolCardSkin_GetMusic = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "GetMusic");
+        static auto IdolCardSkin_get_MusicId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_MusicId");
+        static auto GetLiveMusics = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.OutGame",
+                                                           "PictureBookWindowPresenter", "GetLiveMusics");
+
+        auto idolCardSkinMaster = get_IdolCardSkinMaster->Invoke<void*>(nullptr);  // IdolCardSkinMaster
+
+        std::vector<std::string> ret{};
+
+        if (!idolCardSkinMaster) {
+            Log::ErrorFmt("get_IdolCardSkinMaster failed: %p", idolCardSkinMaster);
+            return ret;
+        }
+        // List<IdolCardSkin>
+        auto idolCardSkinList = Master_GetAllWithSortByKey->Invoke<UnityResolve::UnityType::List<void*>*>(idolCardSkinMaster, 0x0, nullptr);
+
+        auto idolCardSkins = idolCardSkinList->ToArray()->ToVector();
+        const auto checkStartCharaId = "i_card-" + charaNameId;
+        // Log::DebugFmt("checkStartCharaId: %s", checkStartCharaId.c_str());
+
+        // origMusics->Clear();
+        for (auto i : idolCardSkins) {
+            if (!i) continue;
+            // auto charaId = IdolCardSkin_get_Id->Invoke<Il2cppString*>(i);
+            auto musicId = IdolCardSkin_get_MusicId->Invoke<Il2cppString*>(i);
+            auto cardId = IdolCardSkin_get_IdolCardId->Invoke<Il2cppString*>(i)->ToString();
+            auto music = IdolCardSkin_GetMusic->Invoke<void*>(i);
+
+            if (charaNameId.empty() || cardId.starts_with(checkStartCharaId)) {
+                std::string musicIdStr = musicId->ToString();
+                // Log::DebugFmt("Add cardId: %s, musicId: %s", cardId.c_str(), musicIdStr.c_str());
+                if (std::find(ret.begin(), ret.end(), musicIdStr) == ret.end()) {
+                    ret.emplace_back(musicIdStr);
+                }
+            }
+        }
+        return ret;
     }
 
     void* PictureBookWindowPresenter_instance = nullptr;
@@ -482,19 +530,46 @@ namespace GakumasLocal::HookMain {
         if (Config::unlockAllLive) {
             PictureBookWindowPresenter_instance = self;
             PictureBookWindowPresenter_charaId = charaId->ToString();
+
+            static auto PictureBookWindowPresenter_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.OutGame",
+                                                                                 "PictureBookWindowPresenter");
+            static auto existsMusicIds_field = PictureBookWindowPresenter_klass->Get<UnityResolve::Field>("_existsMusicIds");
+            auto existsMusicIds = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::List<Il2cppString*>*>(self, existsMusicIds_field);
+
+            if (!existsMusicIds) {
+                static auto List_String_klass = Il2cppUtils::get_system_class_from_reflection_type_str(
+                        "System.Collections.Generic.List`1[System.String]");
+                static auto List_String_ctor_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(List_String_klass, ".ctor", 0);
+                static auto List_String_ctor = reinterpret_cast<void (*)(void*, void*)>(List_String_ctor_mtd->methodPointer);
+                static auto List_String_Add_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(List_String_klass, "Add", 1);
+                static auto List_String_Add = reinterpret_cast<void (*)(void*, void*, void*)>(List_String_Add_mtd->methodPointer);
+
+                auto newList = UnityResolve::Invoke<void*>("il2cpp_object_new", List_String_klass);
+                List_String_ctor(newList, List_String_ctor_mtd);
+
+                auto fullIds = GetIdolMusicIdAll();
+
+                for (auto& i : fullIds) {
+                    // Log::DebugFmt("GetLiveMusics - Add: %s", i.c_str());
+                    // newList->Add(Il2cppString::New(i));
+                    List_String_Add(newList, Il2cppString::New(i), List_String_Add_mtd);
+                }
+                Il2cppUtils::ClassSetFieldValue(self, existsMusicIds_field, newList);
+                // Log::DebugFmt("GetLiveMusics - set end: %d", fullIds.size());
+            }
         }
 
         return PictureBookWindowPresenter_GetLiveMusics_Orig(self, charaId, mtd);
     }
 
-    DEFINE_HOOK(void, PictureBookLiveSelectScreenModel_ctor, (void* self, void* transitionParam, void* musics, void* mtd)) {
+    DEFINE_HOOK(void, PictureBookLiveSelectScreenModel_ctor, (void* self, void* transitionParam, UnityResolve::UnityType::List<void*>* musics, void* mtd)) {
         // Log::DebugFmt("PictureBookLiveSelectScreenModel_ctor");
 
         if (Config::unlockAllLive) {
             static auto GetLiveMusics = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.OutGame",
                                                                "PictureBookWindowPresenter", "GetLiveMusics");
             if (PictureBookWindowPresenter_instance && !PictureBookWindowPresenter_charaId.empty()) {
-                auto fullMusics = GetLiveMusics->Invoke<void*>(PictureBookWindowPresenter_instance,
+                auto fullMusics = GetLiveMusics->Invoke<UnityResolve::UnityType::List<void*>*>(PictureBookWindowPresenter_instance,
                                                                Il2cppString::New(PictureBookWindowPresenter_charaId));
                 return PictureBookLiveSelectScreenModel_ctor_Orig(self, transitionParam, fullMusics, mtd);
             }

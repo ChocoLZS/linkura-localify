@@ -128,7 +128,15 @@ fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
             "io.github.chinosk.gakumas.localify.fileprovider",
             File(targetFile.absolutePath)
         )
-        intent.setDataAndType(dirUri, "resource/file")
+        // intent.setDataAndType(dirUri, "resource/file")
+
+        grantUriPermission(
+            "com.bandainamcoent.idolmaster_gakuen",
+            dirUri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        )
+        intent.putExtra("resource_file", dirUri)
+        // intent.clipData = ClipData.newRawUri("resource_file", dirUri)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
     }
 
