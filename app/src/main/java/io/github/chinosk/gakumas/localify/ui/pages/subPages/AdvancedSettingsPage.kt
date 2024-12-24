@@ -357,6 +357,10 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                             checked = config.value.unlockAllLive) {
                                 v -> context?.onUnlockAllLiveChanged(v)
                         }
+                        GakuSwitch(modifier, stringResource(R.string.unlockAllLiveCostume),
+                            checked = config.value.unlockAllLiveCostume) {
+                                v -> context?.onUnlockAllLiveCostumeChanged(v)
+                        }
                         HorizontalDivider(
                             thickness = 1.dp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)

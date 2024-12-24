@@ -466,14 +466,71 @@ namespace GakumasLocal::HookMain {
         // return UnityResolve::UnityType::String::New("[I18]" + ret->ToString());
     }
 
-    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetData, (void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
-        // Log::DebugFmt("PictureBookLiveThumbnailView_SetData: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d",
-        //              isReleased, isUnlocked, isNew, hasLiveSkin);
+    /*
+    DEFINE_HOOK(void*, UserDataManagerBase_get__userIdolCardSkinList, (void* self, void* mtd)) {  // Live默认选择
+        auto ret = UserDataManagerBase_get__userIdolCardSkinList_Orig(self, mtd);
+        Log::DebugFmt("UserDataManagerBase_get__userIdolCardSkinList: %p", ret);
+        return ret;
+    }
+    DEFINE_HOOK(void*, UserDataManagerBase_get__userCostumeList, (void* self, void* mtd)) {  // 服装选择界面
+        auto ret = UserDataManagerBase_get__userCostumeList_Orig(self, mtd);
+        Log::DebugFmt("UserDataManagerBase_get__userCostumeList: %p", ret);
+        return ret;
+    }
+    DEFINE_HOOK(void*, UserDataManagerBase_get__userCostumeHeadList, (void* self, void* mtd)) {  // 服装选择界面
+        auto ret = UserDataManagerBase_get__userCostumeHeadList_Orig(self, mtd);
+        Log::DebugFmt("UserDataManagerBase_get__userCostumeHeadList: %p", ret);
+        return ret;
+    }*/
+
+    DEFINE_HOOK(void*, UserCostumeCollection_FindBy, (void* self, void* predicate, void* mtd)) {
+        auto ret = UserCostumeCollection_FindBy_Orig(self, predicate, mtd);
+        if (!Config::unlockAllLiveCostume) return ret;
+
+        auto this_klass = Il2cppUtils::get_class_from_instance(self);
+        // auto predicate_klass = Il2cppUtils::get_class_from_instance(predicate);  // System::Predicate`1
+        // Log::DebugFmt("UserCostumeCollection_FindBy this: %s::%s, predicate: %s::%s", this_klass->namespaze, this_klass->name,
+        //               predicate_klass->namespaze, predicate_klass->name);
+
+        static auto UserCostumeCollection_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
+                                                                        "UserCostumeCollection");
+        static auto UserCostumeCollection_GetAllList_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(
+                UserCostumeCollection_klass->address, "GetAllList", 1);
+        static auto UserCostumeCollection_GetAllList = reinterpret_cast<void* (*)(void*, void*)>(UserCostumeCollection_GetAllList_mtd->methodPointer);
+
+        std::string thisKlassName(this_klass->name);
+        // Campus.Common.User::UserCostumeHeadCollection || Campus.Common.User::UserCostumeCollection
+        // 两个 class 的 GetAllList 均使用的父类 Qua.UserDataManagement.UserDataCollectionBase`2 的方法，地址一致
+        if ((thisKlassName == "UserCostumeHeadCollection") || (thisKlassName == "UserCostumeCollection")) {
+            // auto ret_klass = Il2cppUtils::get_class_from_instance(ret);  // WhereEnumerableIterator
+            return UserCostumeCollection_GetAllList(self, nullptr);
+        }
+
+        return ret;
+    }
+
+    DEFINE_HOOK(bool, UserIdolCardSkinCollection_Exists, (void* self, Il2cppString* id, void* mtd)) { // Live默认选择
+        auto ret = UserIdolCardSkinCollection_Exists_Orig(self, id, mtd);
+        // Log::DebugFmt("UserIdolCardSkinCollection_Exists: %s, ret: %d", id->ToString().c_str(), ret);
+        if (!Config::unlockAllLive) return ret;
+
+        if (id) {
+            std::string idStr = id->ToString();
+            if (idStr.starts_with("music") || idStr.starts_with("i_card-skin")) {  // eg. music-all-kllj-006, i_card-skin-hski-3-002
+                return true;
+            }
+        }
+        return ret;
+    }
+
+    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
+        // Log::DebugFmt("PictureBookLiveThumbnailView_SetDataAsync: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d", isReleased, isUnlocked, isNew, hasLiveSkin);
         if (Config::dbgMode && Config::unlockAllLive) {
             isUnlocked = true;
             isReleased = true;
+            hasLiveSkin = true;
         }
-        PictureBookLiveThumbnailView_SetData_Orig(self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
+        PictureBookLiveThumbnailView_SetDataAsync_Orig(self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
     }
 
     std::vector<std::string> GetIdolMusicIdAll(const std::string& charaNameId = "") {
@@ -1011,9 +1068,45 @@ namespace GakumasLocal::HookMain {
                  Il2cppUtils::GetMethodPointer("Octo.dll", "Octo",
                                                "OnDownloadProgress", "Invoke"));
 
-        ADD_HOOK(PictureBookLiveThumbnailView_SetData,
+        /*
+        auto UserDataManager_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
+                                                           "UserDataManager");
+        if (UserDataManager_klass) {
+            auto UserDataManagerBase_klass = UnityResolve::Invoke<Il2cppUtils::Il2CppClassHead*>("il2cpp_class_get_parent", UserDataManager_klass->address);
+            if (UserDataManagerBase_klass) {
+                auto get_userIdolCardSkinList_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(UserDataManagerBase_klass, "get__userIdolCardSkinList", 0);
+                if (get_userIdolCardSkinList_mtd) {
+                    ADD_HOOK(UserDataManagerBase_get__userIdolCardSkinList, get_userIdolCardSkinList_mtd->methodPointer);
+                }
+                auto get_userCostumeList_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(UserDataManagerBase_klass, "get__userCostumeList", 0);
+                if (get_userCostumeList_mtd) {
+                    ADD_HOOK(UserDataManagerBase_get__userCostumeList, get_userCostumeList_mtd->methodPointer);
+                }
+                auto get_userCostumeHeadList_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(UserDataManagerBase_klass, "get__userCostumeHeadList", 0);
+                if (get_userCostumeHeadList_mtd) {
+                    ADD_HOOK(UserDataManagerBase_get__userCostumeHeadList, get_userCostumeHeadList_mtd->methodPointer);
+                }
+            }
+        }*/
+
+        auto UserIdolCardSkinCollection_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
+                                                                      "UserIdolCardSkinCollection");
+        auto UserIdolCardSkinCollection_Exists_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(UserIdolCardSkinCollection_klass->address, "Exists", 1);
+        if (UserIdolCardSkinCollection_Exists_mtd) {
+            ADD_HOOK(UserIdolCardSkinCollection_Exists, UserIdolCardSkinCollection_Exists_mtd->methodPointer);
+        }
+
+        auto UserCostumeCollection_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
+                                                                      "UserCostumeCollection");
+        auto UserCostumeCollection_FindBy_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(
+                UserCostumeCollection_klass->address, "FindBy", 1);
+        if (UserCostumeCollection_FindBy_mtd) {
+            ADD_HOOK(UserCostumeCollection_FindBy, UserCostumeCollection_FindBy_mtd->methodPointer);
+        }
+
+        ADD_HOOK(PictureBookLiveThumbnailView_SetDataAsync,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame.PictureBook",
-                                               "PictureBookLiveThumbnailView", "SetDataAsync", {"*", "*", "*", "*"}));
+                                               "PictureBookLiveThumbnailView", "SetDataAsync", {"*", "*", "*", "*", "*"}));
         ADD_HOOK(PictureBookWindowPresenter_GetLiveMusics,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookWindowPresenter", "GetLiveMusics"));

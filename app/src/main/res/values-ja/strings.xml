@@ -118,6 +118,7 @@
     <string name="translation_repository">翻訳のリポジトリ</string>
     <string name="translation_resource_update">翻訳リソースをアップデート</string>
     <string name="unlockAllLive">すべてのライブを開放</string>
+    <string name="unlockAllLiveCostume">すべてのライブ衣装を開放</string>
     <string name="useCustomeGraphicSettings">カスタムグラフィック設定を使用する</string>
     <string name="use_remote_zip_resource">リモート ZIP リソースを使用する</string>
     <string name="usearmcorrection">Arm コレクションを使用する</string>

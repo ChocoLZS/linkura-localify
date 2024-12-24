@@ -14,6 +14,7 @@ namespace GakumasLocal::Config {
     extern bool enableFreeCamera;
     extern int targetFrameRate;
     extern bool unlockAllLive;
+    extern bool unlockAllLiveCostume;
 
     extern bool enableLiveCustomeDress;
     extern std::string liveCustomeHeadId;

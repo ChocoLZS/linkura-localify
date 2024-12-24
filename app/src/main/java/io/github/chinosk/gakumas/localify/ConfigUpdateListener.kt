@@ -24,6 +24,7 @@ interface ConfigListener {
     fun onEnableFreeCameraChanged(value: Boolean)
     fun onTargetFpsChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun onUnlockAllLiveChanged(value: Boolean)
+    fun onUnlockAllLiveCostumeChanged(value: Boolean)
     fun onLiveCustomeDressChanged(value: Boolean)
     fun onLiveCustomeHeadIdChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun onLiveCustomeCostumeIdChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -149,6 +150,11 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onUnlockAllLiveChanged(value: Boolean) {
         config.unlockAllLive = value
+        saveConfig()
+    }
+
+    override fun onUnlockAllLiveCostumeChanged(value: Boolean) {
+        config.unlockAllLiveCostume = value
         saveConfig()
     }
 

@@ -15,6 +15,7 @@ data class GakumasConfig (
     var enableFreeCamera: Boolean = false,
     var targetFrameRate: Int = 0,
     var unlockAllLive: Boolean = false,
+    var unlockAllLiveCostume: Boolean = false,
     var enableLiveCustomeDress: Boolean = false,
     var liveCustomeHeadId: String = "",
     var liveCustomeCostumeId: String = "",

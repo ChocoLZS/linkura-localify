@@ -16,6 +16,7 @@ namespace GakumasLocal::Config {
     bool enableFreeCamera = false;
     int targetFrameRate = 0;
     bool unlockAllLive = false;
+    bool unlockAllLiveCostume = false;
 
     bool enableLiveCustomeDress = false;
     std::string liveCustomeHeadId = "";
@@ -67,6 +68,7 @@ namespace GakumasLocal::Config {
             GetConfigItem(targetFrameRate);
             GetConfigItem(enableFreeCamera);
             GetConfigItem(unlockAllLive);
+            GetConfigItem(unlockAllLiveCostume);
             GetConfigItem(enableLiveCustomeDress);
             GetConfigItem(liveCustomeHeadId);
             GetConfigItem(liveCustomeCostumeId);

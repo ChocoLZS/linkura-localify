@@ -8,6 +8,7 @@
     <string name="start_game">Start Game / Hot Reload Config</string>
     <string name="setFpsTitle">Max FPS (0 is Use Original Settings)</string>
     <string name="unlockAllLive">Unlock All Live</string>
+    <string name="unlockAllLiveCostume">Unlock All Live Costume</string>
     <string name="liveUseCustomeDress">Live Custom Character</string>
     <string name="live_costume_head_id">Live Custom Head ID (eg. costume_head_hski-cstm-0002)</string>
     <string name="live_custome_dress_id">Live Custom Dress ID (eg. hski-cstm-0002)</string>
