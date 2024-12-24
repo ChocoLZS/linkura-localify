@@ -483,32 +483,6 @@ namespace GakumasLocal::HookMain {
         return ret;
     }*/
 
-    DEFINE_HOOK(void*, UserCostumeCollection_FindBy, (void* self, void* predicate, void* mtd)) {
-        auto ret = UserCostumeCollection_FindBy_Orig(self, predicate, mtd);
-        if (!Config::unlockAllLiveCostume) return ret;
-
-        auto this_klass = Il2cppUtils::get_class_from_instance(self);
-        // auto predicate_klass = Il2cppUtils::get_class_from_instance(predicate);  // System::Predicate`1
-        // Log::DebugFmt("UserCostumeCollection_FindBy this: %s::%s, predicate: %s::%s", this_klass->namespaze, this_klass->name,
-        //               predicate_klass->namespaze, predicate_klass->name);
-
-        static auto UserCostumeCollection_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
-                                                                        "UserCostumeCollection");
-        static auto UserCostumeCollection_GetAllList_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(
-                UserCostumeCollection_klass->address, "GetAllList", 1);
-        static auto UserCostumeCollection_GetAllList = reinterpret_cast<void* (*)(void*, void*)>(UserCostumeCollection_GetAllList_mtd->methodPointer);
-
-        std::string thisKlassName(this_klass->name);
-        // Campus.Common.User::UserCostumeHeadCollection || Campus.Common.User::UserCostumeCollection
-        // 两个 class 的 GetAllList 均使用的父类 Qua.UserDataManagement.UserDataCollectionBase`2 的方法，地址一致
-        if ((thisKlassName == "UserCostumeHeadCollection") || (thisKlassName == "UserCostumeCollection")) {
-            // auto ret_klass = Il2cppUtils::get_class_from_instance(ret);  // WhereEnumerableIterator
-            return UserCostumeCollection_GetAllList(self, nullptr);
-        }
-
-        return ret;
-    }
-
     DEFINE_HOOK(bool, UserIdolCardSkinCollection_Exists, (void* self, Il2cppString* id, void* mtd)) { // Live默认选择
         auto ret = UserIdolCardSkinCollection_Exists_Orig(self, id, mtd);
         // Log::DebugFmt("UserIdolCardSkinCollection_Exists: %s, ret: %d", id->ToString().c_str(), ret);
@@ -533,7 +507,13 @@ namespace GakumasLocal::HookMain {
         PictureBookLiveThumbnailView_SetDataAsync_Orig(self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
     }
 
-    std::vector<std::string> GetIdolMusicIdAll(const std::string& charaNameId = "") {
+    enum class GetIdolIdType {
+        MusicId,
+        CostumeId,
+        CostumeHeadId
+    };
+
+    std::vector<std::string> GetIdolMusicIdAll(const std::string& charaNameId = "", GetIdolIdType getType = GetIdolIdType::MusicId) {
         // 传入例: fktn
         // System.Collections.Generic.List`1<valuetype [mscorlib]System.ValueTuple`2<class Campus.Common.Proto.Client.Master.IdolCardSkin, class Campus.Common.Proto.Client.Master.Music>>
         static auto get_IdolCardSkinMaster = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Master", "MasterManager", "get_IdolCardSkinMaster");
@@ -542,6 +522,8 @@ namespace GakumasLocal::HookMain {
         static auto IdolCardSkin_get_IdolCardId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_IdolCardId");
         static auto IdolCardSkin_GetMusic = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "GetMusic");
         static auto IdolCardSkin_get_MusicId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_MusicId");
+        static auto IdolCardSkin_get_CostumeId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_CostumeId");
+        static auto IdolCardSkin_get_CostumeHeadId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master", "IdolCardSkin", "get_CostumeHeadId");
         static auto GetLiveMusics = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.OutGame",
                                                            "PictureBookWindowPresenter", "GetLiveMusics");
 
@@ -561,21 +543,119 @@ namespace GakumasLocal::HookMain {
         // Log::DebugFmt("checkStartCharaId: %s", checkStartCharaId.c_str());
 
         // origMusics->Clear();
+        UnityResolve::Method* idGetFunc = nullptr;
+        switch (getType) {
+            case GetIdolIdType::MusicId: idGetFunc = IdolCardSkin_get_MusicId;
+                break;
+            case GetIdolIdType::CostumeId: idGetFunc = IdolCardSkin_get_CostumeId;
+                break;
+            case GetIdolIdType::CostumeHeadId: idGetFunc = IdolCardSkin_get_CostumeHeadId;
+                break;
+            default:
+                idGetFunc = IdolCardSkin_get_MusicId;
+        }
+
         for (auto i : idolCardSkins) {
             if (!i) continue;
             // auto charaId = IdolCardSkin_get_Id->Invoke<Il2cppString*>(i);
-            auto musicId = IdolCardSkin_get_MusicId->Invoke<Il2cppString*>(i);
+            auto targetId = idGetFunc->Invoke<Il2cppString*>(i);
             auto cardId = IdolCardSkin_get_IdolCardId->Invoke<Il2cppString*>(i)->ToString();
             auto music = IdolCardSkin_GetMusic->Invoke<void*>(i);
 
             if (charaNameId.empty() || cardId.starts_with(checkStartCharaId)) {
-                std::string musicIdStr = musicId->ToString();
+                std::string musicIdStr = targetId->ToString();
                 // Log::DebugFmt("Add cardId: %s, musicId: %s", cardId.c_str(), musicIdStr.c_str());
                 if (std::find(ret.begin(), ret.end(), musicIdStr) == ret.end()) {
                     ret.emplace_back(musicIdStr);
                 }
             }
         }
+        return ret;
+    }
+
+    void* AddIdsToUserDataCollectionFromMaster(void* origList, std::vector<std::string>& allIds,
+                                               UnityResolve::Method* get_CostumeId, UnityResolve::Method* set_CostumeId, UnityResolve::Method* Clone) {
+        Il2cppUtils::Tools::CSListEditor listEditor(origList);
+        if (listEditor.get_Count() <= 0) {
+            return origList;
+        }
+
+        for (auto i : listEditor) {
+            auto currCostumeId = get_CostumeId->Invoke<Il2cppString*>(i);
+            if (!currCostumeId) continue;
+            std::string currCostumeIdStr = currCostumeId->ToString();
+            if (std::find(allIds.begin(), allIds.end(), currCostumeIdStr) == allIds.end()) {
+                allIds.emplace_back(currCostumeIdStr);
+            }
+        }
+
+        int currIndex = 0;
+        int origSize = listEditor.get_Count();
+        for (auto& i : allIds) {
+            if (i.empty()) continue;
+            // Log::DebugFmt("Try add %s", i.c_str());
+
+            if (currIndex < origSize) {
+                auto userCostume = listEditor.get_Item(currIndex);
+                set_CostumeId->Invoke<void>(userCostume, Il2cppString::New(i));
+                listEditor.set_Item(currIndex, userCostume);
+            }
+            else {
+                auto userCostume = Clone->Invoke<void*>(listEditor.get_Item(0));
+                set_CostumeId->Invoke<void>(userCostume, Il2cppString::New(i));
+                listEditor.Add(userCostume);
+            }
+            currIndex++;
+        }
+        return origList;
+    }
+
+    DEFINE_HOOK(void*, UserCostumeCollection_FindBy, (void* self, void* predicate, void* mtd)) {
+        auto ret = UserCostumeCollection_FindBy_Orig(self, predicate, mtd);
+        if (!Config::unlockAllLiveCostume) return ret;
+
+        auto this_klass = Il2cppUtils::get_class_from_instance(self);
+        // auto predicate_klass = Il2cppUtils::get_class_from_instance(predicate);  // System::Predicate`1
+        // Log::DebugFmt("UserCostumeCollection_FindBy this: %s::%s, predicate: %s::%s", this_klass->namespaze, this_klass->name,
+        //               predicate_klass->namespaze, predicate_klass->name);
+
+        static auto UserCostumeCollection_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
+                                                                        "UserCostumeCollection");
+        static auto UserCostumeCollection_GetAllList_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(
+                UserCostumeCollection_klass->address, "GetAllList", 1);
+        static auto UserCostumeCollection_GetAllList = reinterpret_cast<void* (*)(void*, void*)>(UserCostumeCollection_GetAllList_mtd->methodPointer);
+
+        std::string thisKlassName(this_klass->name);
+        // Campus.Common.User::UserCostumeHeadCollection || Campus.Common.User::UserCostumeCollection
+        // 两个 class 的 GetAllList 均使用的父类 Qua.UserDataManagement.UserDataCollectionBase`2 的方法，地址一致
+        if (thisKlassName == "UserCostumeHeadCollection") {
+            static auto UserCostume_Clone = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostumeHead", "Clone");
+            static auto UserCostume_get_CostumeHeadId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostumeHead", "get_CostumeHeadId");
+            static auto UserCostume_set_CostumeHeadId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostumeHead", "set_CostumeHeadId");
+
+            // auto ret_klass = Il2cppUtils::get_class_from_instance(ret);  // WhereEnumerableIterator
+            auto origList = UserCostumeCollection_GetAllList(self, nullptr);
+
+            auto allIds = GetIdolMusicIdAll("", GetIdolIdType::CostumeHeadId);
+
+            // List<Campus.Common.Proto.Client.Transaction.UserCostumeHead>
+            return AddIdsToUserDataCollectionFromMaster(origList, allIds, UserCostume_get_CostumeHeadId, UserCostume_set_CostumeHeadId, UserCostume_Clone);
+        }
+        else if (thisKlassName == "UserCostumeCollection") {
+            // static auto UserCostume_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostume");
+            static auto UserCostume_Clone = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostume", "Clone");
+            static auto UserCostume_get_CostumeId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostume", "get_CostumeId");
+            static auto UserCostume_set_CostumeId = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Transaction", "UserCostume", "set_CostumeId");
+
+            // auto ret_klass = Il2cppUtils::get_class_from_instance(ret);  // WhereEnumerableIterator
+            auto origList = UserCostumeCollection_GetAllList(self, nullptr);
+
+            auto allIds = GetIdolMusicIdAll("", GetIdolIdType::CostumeId);
+
+            // List<Campus.Common.Proto.Client.Transaction.UserCostume>
+            return AddIdsToUserDataCollectionFromMaster(origList, allIds, UserCostume_get_CostumeId, UserCostume_set_CostumeId, UserCostume_Clone);
+        }
+
         return ret;
     }
 
@@ -598,18 +678,16 @@ namespace GakumasLocal::HookMain {
                         "System.Collections.Generic.List`1[System.String]");
                 static auto List_String_ctor_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(List_String_klass, ".ctor", 0);
                 static auto List_String_ctor = reinterpret_cast<void (*)(void*, void*)>(List_String_ctor_mtd->methodPointer);
-                static auto List_String_Add_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(List_String_klass, "Add", 1);
-                static auto List_String_Add = reinterpret_cast<void (*)(void*, void*, void*)>(List_String_Add_mtd->methodPointer);
 
                 auto newList = UnityResolve::Invoke<void*>("il2cpp_object_new", List_String_klass);
                 List_String_ctor(newList, List_String_ctor_mtd);
+                Il2cppUtils::Tools::CSListEditor<Il2cppString*> newListEditor(newList);
 
                 auto fullIds = GetIdolMusicIdAll();
 
                 for (auto& i : fullIds) {
                     // Log::DebugFmt("GetLiveMusics - Add: %s", i.c_str());
-                    // newList->Add(Il2cppString::New(i));
-                    List_String_Add(newList, Il2cppString::New(i), List_String_Add_mtd);
+                    newListEditor.Add(Il2cppString::New(i));
                 }
                 Il2cppUtils::ClassSetFieldValue(self, existsMusicIds_field, newList);
                 // Log::DebugFmt("GetLiveMusics - set end: %d", fullIds.size());

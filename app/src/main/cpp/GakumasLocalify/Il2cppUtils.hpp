@@ -244,4 +244,95 @@ namespace Il2cppUtils {
         auto reflectionType = assemblyGetType(reflectionAssembly, Il2CppString::New(typeStr));
         return UnityResolve::Invoke<void*>("il2cpp_class_from_system_type", reflectionType);
     }
+
+    namespace Tools {
+
+        template <typename T = void*>
+        class CSListEditor {
+        public:
+            CSListEditor(void* list) {
+                list_klass = get_class_from_instance(list);
+                lst = list;
+
+                lst_get_Count_method = il2cpp_class_get_method_from_name(list_klass, "get_Count", 0);
+                lst_get_Item_method = il2cpp_class_get_method_from_name(list_klass, "get_Item", 1);
+                lst_set_Item_method = il2cpp_class_get_method_from_name(list_klass, "set_Item", 2);
+                lst_Add_method = il2cpp_class_get_method_from_name(list_klass, "Add", 1);
+
+                lst_get_Count = reinterpret_cast<lst_get_Count_t>(lst_get_Count_method->methodPointer);
+                lst_get_Item = reinterpret_cast<lst_get_Item_t>(lst_get_Item_method->methodPointer);
+                lst_set_Item = reinterpret_cast<lst_set_Item_t>(lst_set_Item_method->methodPointer);
+                lst_Add = reinterpret_cast<lst_Add_t>(lst_Add_method->methodPointer);
+            }
+
+            void Add(T value) {
+                lst_Add(lst, value, lst_Add_method);
+            }
+
+            T get_Item(int index) {
+                return lst_get_Item(lst, index, lst_get_Item_method);
+            }
+
+            void set_Item(int index, T value) {
+                return lst_set_Item(lst, index, value, lst_set_Item_method);
+            }
+
+            int get_Count() {
+                return lst_get_Count(lst, lst_get_Count_method);
+            }
+
+            T operator[] (int key) {
+                return get_Item(key);
+            }
+
+            class Iterator {
+            public:
+                Iterator(CSListEditor<T>* editor, int index) : editor(editor), index(index) {}
+
+                T operator*() const {
+                    return editor->get_Item(index);
+                }
+
+                Iterator& operator++() {
+                    ++index;
+                    return *this;
+                }
+
+                bool operator!=(const Iterator& other) const {
+                    return index != other.index;
+                }
+
+            private:
+                CSListEditor<T>* editor;
+                int index;
+            };
+
+            Iterator begin() {
+                return Iterator(this, 0);
+            }
+
+            Iterator end() {
+                return Iterator(this, get_Count());
+            }
+
+            void* lst;
+            void* list_klass;
+        private:
+            typedef T(*lst_get_Item_t)(void*, int, void* mtd);
+            typedef void(*lst_Add_t)(void*, T, void* mtd);
+            typedef void(*lst_set_Item_t)(void*, int, T, void* mtd);
+            typedef int(*lst_get_Count_t)(void*, void* mtd);
+
+            MethodInfo* lst_get_Item_method;
+            MethodInfo* lst_Add_method;
+            MethodInfo* lst_get_Count_method;
+            MethodInfo* lst_set_Item_method;
+
+            lst_get_Item_t lst_get_Item;
+            lst_set_Item_t lst_set_Item;
+            lst_Add_t lst_Add;
+            lst_get_Count_t lst_get_Count;
+        };
+
+    }
 }
