@@ -575,37 +575,26 @@ namespace GakumasLocal::HookMain {
 
     void* AddIdsToUserDataCollectionFromMaster(void* origList, std::vector<std::string>& allIds,
                                                UnityResolve::Method* get_CostumeId, UnityResolve::Method* set_CostumeId, UnityResolve::Method* Clone) {
+        std::unordered_set<std::string> existIds{};
         Il2cppUtils::Tools::CSListEditor listEditor(origList);
         if (listEditor.get_Count() <= 0) {
             return origList;
         }
 
         for (auto i : listEditor) {
-            auto currCostumeId = get_CostumeId->Invoke<Il2cppString*>(i);
-            if (!currCostumeId) continue;
-            std::string currCostumeIdStr = currCostumeId->ToString();
-            if (std::find(allIds.begin(), allIds.end(), currCostumeIdStr) == allIds.end()) {
-                allIds.emplace_back(currCostumeIdStr);
-            }
+            auto costumeId = get_CostumeId->Invoke<Il2cppString*>(i);
+            if (!costumeId) continue;
+            existIds.emplace(costumeId->ToString());
         }
 
-        int currIndex = 0;
-        int origSize = listEditor.get_Count();
         for (auto& i : allIds) {
             if (i.empty()) continue;
             // Log::DebugFmt("Try add %s", i.c_str());
+            if (existIds.contains(i)) continue;
 
-            if (currIndex < origSize) {
-                auto userCostume = listEditor.get_Item(currIndex);
-                set_CostumeId->Invoke<void>(userCostume, Il2cppString::New(i));
-                listEditor.set_Item(currIndex, userCostume);
-            }
-            else {
-                auto userCostume = Clone->Invoke<void*>(listEditor.get_Item(0));
-                set_CostumeId->Invoke<void>(userCostume, Il2cppString::New(i));
-                listEditor.Add(userCostume);
-            }
-            currIndex++;
+            auto userCostume = Clone->Invoke<void*>(listEditor.get_Item(0));
+            set_CostumeId->Invoke<void>(userCostume, Il2cppString::New(i));
+            listEditor.Add(userCostume);
         }
         return origList;
     }
