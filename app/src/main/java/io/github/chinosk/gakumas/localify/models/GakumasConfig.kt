@@ -9,6 +9,7 @@ data class GakumasConfig (
     var lazyInit: Boolean = true,
     var replaceFont: Boolean = true,
     var textTest: Boolean = false,
+    var useMasterTrans: Boolean = true,
     var dumpText: Boolean = false,
     var gameOrientation: Int = 0,
     var forceExportResource: Boolean = false,

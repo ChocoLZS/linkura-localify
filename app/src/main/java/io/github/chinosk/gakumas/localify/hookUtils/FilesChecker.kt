@@ -146,6 +146,7 @@ object FilesChecker {
         val genericTransDir = File(localFilesDir, "genericTrans")
         val genericTransFile = File(localFilesDir, "generic.json")
         val i18nFile = File(localFilesDir, "localization.json")
+        val masterTransDir = File(localFilesDir, "masterTrans")
 
         if (fontFile.exists()) {
             fontFile.delete()
@@ -155,6 +156,9 @@ object FilesChecker {
         }
         if (deleteRecursively(genericTransDir)) {
             genericTransDir.mkdirs()
+        }
+        if (deleteRecursively(masterTransDir)) {
+            masterTransDir.mkdirs()
         }
         if (genericTransFile.exists()) {
             genericTransFile.writeText("{}")

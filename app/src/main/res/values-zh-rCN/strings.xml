@@ -15,6 +15,7 @@
     <string name="useCustomeGraphicSettings">使用自定义画质设置</string>
     <string name="renderscale">RenderScale (0.5/0.59/0.67/0.77/1.0)</string>
     <string name="text_hook_test_mode">文本 hook 测试模式</string>
+    <string name="useMasterDBTrans">使用 MasterDB 本地化</string>
     <string name="export_text">导出文本</string>
     <string name="force_export_resource">启动后强制导出资源</string>
     <string name="login_as_ios">以 iOS 登陆</string>

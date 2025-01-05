@@ -115,6 +115,7 @@
     <string name="template_percent">%1$d パーセント。</string>
     <string name="test_mode_live">テストモード - ライブ</string>
     <string name="text_hook_test_mode">テキストフックテストモード</string>
+    <string name="useMasterDBTrans">MasterDB をローカライズする</string>
     <string name="translation_repository">翻訳のリポジトリ</string>
     <string name="translation_resource_update">翻訳リソースをアップデート</string>
     <string name="unlockAllLive">すべてのライブを開放</string>

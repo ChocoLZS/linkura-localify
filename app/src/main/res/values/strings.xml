@@ -15,6 +15,7 @@
     <string name="useCustomeGraphicSettings">Use Custom Graphics Settings</string>
     <string name="renderscale">RenderScale (0.5/0.59/0.67/0.77/1.0)</string>
     <string name="text_hook_test_mode">Text Hook Test Mode</string>
+    <string name="useMasterDBTrans">Enable MasterDB Localization</string>
     <string name="export_text">Export Text</string>
     <string name="force_export_resource">Force Update Resource</string>
     <string name="login_as_ios">Login as iOS</string>
