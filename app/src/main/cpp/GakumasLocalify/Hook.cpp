@@ -5,6 +5,7 @@
 #include "../deps/UnityResolve/UnityResolve.hpp"
 #include "Il2cppUtils.hpp"
 #include "Local.h"
+#include "MasterLocal.h"
 #include <unordered_set>
 #include "camera/camera.hpp"
 #include "config/Config.hpp"
@@ -12,6 +13,7 @@
 #include <jni.h>
 #include <thread>
 #include <map>
+#include <set>
 
 
 std::unordered_set<void*> hookedStubs{};
@@ -420,6 +422,66 @@ namespace GakumasLocal::HookMain {
         Log::DebugFmt("TextField_set_value: %s", value->ToString().c_str());
         TextField_set_value_Orig(self, value);
     }
+
+    // 未使用的 Hook
+    DEFINE_HOOK(void, EffectGroup_ctor, (void* self, void* mtd)) {
+        // auto self_klass = Il2cppUtils::get_class_from_instance(self);
+        // Log::DebugFmt("EffectGroup_ctor: self: %s::%s", self_klass->namespaze, self_klass->name);
+        EffectGroup_ctor_Orig(self, mtd);
+    }
+
+    // 用于本地化 MasterDB
+    DEFINE_HOOK(void, MessageExtensions_MergeFrom, (void* message, void* span, void* mtd)) {
+        MessageExtensions_MergeFrom_Orig(message, span, mtd);
+        if (message) {
+            auto ret_klass = Il2cppUtils::get_class_from_instance(message);
+            if (ret_klass) {
+                // Log::DebugFmt("LocalizeMasterItem: %s", ret_klass->name);
+                MasterLocal::LocalizeMasterItem(message, ret_klass->name);
+            }
+        }
+    }
+
+    /*
+    // 未使用的 Hook
+    DEFINE_HOOK(void, MasterBase_GetAll, (void* self, UnityResolve::UnityType::Array<UnityResolve::UnityType::Byte>* getAllSQL,
+            int sqlLength, UnityResolve::UnityType::List<void*>* result, void* predicate, void* comparison, void* mtd)) {
+        // result: List<Campus.Common.Proto.Client.Master.*>, 和 query 的表名一致
+
+        MasterBase_GetAll_Orig(self, getAllSQL, sqlLength, result, predicate, comparison, mtd);
+
+        auto data_ptr = reinterpret_cast<std::uint8_t*>(getAllSQL->GetData());
+        std::string qS(data_ptr, data_ptr + sqlLength);
+
+
+        Il2cppUtils::Tools::CSListEditor resultList(result);
+        MasterLocal::LocalizeMaster(qS, result);
+    }
+
+    void LocalizeFindByKey(void* result, void* self) {
+        return;  // 暂时不需要了
+        auto self_klass = Il2cppUtils::get_class_from_instance(self);
+        Log::DebugFmt("Localize: %s", self_klass->name);  // FeatureLockMaster
+        // return;
+
+        if (!result) return;
+        auto result_klass = Il2cppUtils::get_class_from_instance(result);
+        std::string klassName = result_klass->name;
+
+        auto MasterBase_klass = Il2cppUtils::get_class_from_instance(self);
+        auto MasterBase_GetTableName = Il2cppUtils::il2cpp_class_get_method_from_name(MasterBase_klass, "GetTableName", 0);
+        if (MasterBase_GetTableName) {
+            auto tableName = reinterpret_cast<Il2cppString* (*)(void*, void*)>(MasterBase_GetTableName->methodPointer)(self, MasterBase_GetTableName);
+            // Log::DebugFmt("MasterBase_FindByKey: %s", tableName->ToString().c_str());
+
+            if (klassName == "List`1") {
+                MasterLocal::LocalizeMaster(result, tableName->ToString());
+            }
+            else {
+                MasterLocal::LocalizeMasterItem(result, tableName->ToString());
+            }
+        }
+    }*/
 
     DEFINE_HOOK(Il2cppString*, OctoCaching_GetResourceFileName, (void* data, void* method)) {
         auto ret = OctoCaching_GetResourceFileName_Orig(data, method);
@@ -1093,6 +1155,68 @@ namespace GakumasLocal::HookMain {
         return CampusActorAnimation_Setup_Orig(self, rootTrans, initializeData);
     }
 
+/*
+    std::map<std::string, std::pair<uintptr_t, void*>> findByKeyHookAddress{};
+    void* FindByKeyHooks(void* self, void* key, void* mtd) {
+        auto self_klass = Il2cppUtils::get_class_from_instance(self);
+
+        if (auto it = findByKeyHookAddress.find(self_klass->name); it != findByKeyHookAddress.end()) {
+            Log::DebugFmt("FindByKeyHooks Call cache: %s, %p, %p", self_klass->name, it->second.first, it->second.second);
+            return reinterpret_cast<decltype(FindByKeyHooks)*>(it->second.second)(self, key, mtd);
+        }
+        Log::DebugFmt("FindByKeyHooks not in cache: %s", self_klass->name);
+
+        auto FindByKey_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(self_klass, "FindByKey", 1);
+        for (auto& [k, v] : findByKeyHookAddress) {
+            if (FindByKey_mtd->methodPointer == v.first) {
+                findByKeyHookAddress.emplace(self_klass->name, std::make_pair(FindByKey_mtd->methodPointer, v.second));
+                Log::DebugFmt("FindByKeyHooks add to cache: %s", self_klass->name);
+                return reinterpret_cast<decltype(FindByKeyHooks)*>(v.second)(self, key, mtd);
+            }
+        }
+
+        Log::ErrorFmt("FindByKeyHooks not found hook: %s", self_klass->name);
+        return SHADOWHOOK_CALL_PREV(FindByKeyHooks, self, key, mtd);
+    }
+
+    static inline std::vector<void(*)(HookInstaller* hookInstaller)> g_registerMasterFindByKeyHookFuncs;
+
+#define DEF_AND_ADD_MASTER_FINDBYKEY_HOOK(name)                                \
+    using name##_FindByKey_Type = void* (*)(void* self, void* key, void* idx, void* mtd); \
+    inline name##_FindByKey_Type name##_FindByKey_Addr = nullptr;              \
+    inline void* name##_FindByKey_Orig = nullptr;                              \
+    inline void* name##_FindByKey_Hook(void* self, void* key, void* idx, void* mtd) {     \
+        auto result = reinterpret_cast<decltype(name##_FindByKey_Hook)*>(      \
+            name##_FindByKey_Orig)(self, key, idx, mtd);                            \
+        LocalizeFindByKey(result, self);                                       \
+        return result;                                                         \
+    }                                                                          \
+    inline void name##_RegisterHook(HookInstaller* hookInstaller) {            \
+        auto klass = Il2cppUtils::GetClass(                                    \
+            "Assembly-CSharp.dll", "Campus.Common.Master", #name);             \
+        auto mtd = Il2cppUtils::il2cpp_class_get_method_from_name(             \
+            klass->address, "GetData", 2);                                   \
+        ADD_HOOK(name##_FindByKey, mtd->methodPointer);                        \
+    }                                                                          \
+    struct name##_RegisterHookPusher {                                         \
+        name##_RegisterHookPusher() {                                          \
+            g_registerMasterFindByKeyHookFuncs.push_back(&name##_RegisterHook);\
+        }                                                                      \
+    } g_##name##_RegisterHookPusherInst;
+
+    DEF_AND_ADD_MASTER_FINDBYKEY_HOOK(AchievementMaster)
+    DEF_AND_ADD_MASTER_FINDBYKEY_HOOK(ProduceSkillMaster)
+    DEF_AND_ADD_MASTER_FINDBYKEY_HOOK(FeatureLockMaster)
+    DEF_AND_ADD_MASTER_FINDBYKEY_HOOK(ProduceCardMaster)
+
+    // 安装 DEF_AND_ADD_MASTER_FINDBYKEY_HOOK 的 hook
+    void InitMasterHooks(HookInstaller* hookInstaller) {
+        for (auto& func : g_registerMasterFindByKeyHookFuncs) {
+            func(hookInstaller);
+        }
+    }
+*/
+
     void StartInjectFunctions() {
         const auto hookInstaller = Plugin::GetInstance().GetHookInstaller();
         UnityResolve::Init(xdl_open(hookInstaller->m_il2cppLibraryPath.c_str(), RTLD_NOW),
@@ -1122,6 +1246,39 @@ namespace GakumasLocal::HookMain {
 
         ADD_HOOK(TextField_set_value, Il2cppUtils::GetMethodPointer("UnityEngine.UIElementsModule.dll", "UnityEngine.UIElements",
                                                                   "TextField", "set_value"));
+        /* SQL 查询相关函数，不好用
+        // 下面是 byte[] u8 string 转 std::string 的例子
+        auto query = reinterpret_cast<UnityResolve::UnityType::Array<UnityResolve::UnityType::Byte>*>(mtd);
+        auto data_ptr = reinterpret_cast<std::uint8_t*>(query->GetData());
+        std::string qS(data_ptr, data_ptr + lastLength);
+
+        ADD_HOOK(PreparedStatement_ExecuteQuery, Il2cppUtils::GetMethodPointer("quaunity-master-manager.Runtime.dll", "Qua.Master.SQLite",
+                                                                               "PreparedStatement", "ExecuteQuery", {"System.String"}));
+        ADD_HOOK(PreparedStatement_ExecuteQuery_u8, Il2cppUtils::GetMethodPointer("quaunity-master-manager.Runtime.dll", "Qua.Master.SQLite",
+                                                                                  "PreparedStatement", "ExecuteQuery", {"*", "*"}));
+        ADD_HOOK(PreparedStatement_FinalizeStatement, Il2cppUtils::GetMethodPointer("quaunity-master-manager.Runtime.dll", "Qua.Master.SQLite",
+                                                                                  "PreparedStatement", "FinalizeStatement"));
+       */
+
+        // ADD_HOOK(EffectGroup_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.Proto.Client.Master",
+        //                                                          "EffectGroup", ".ctor"));
+
+        ADD_HOOK(MessageExtensions_MergeFrom, Il2cppUtils::GetMethodPointer("Google.Protobuf.dll", "Google.Protobuf",
+                                                                            "MessageExtensions", "MergeFrom", {"Google.Protobuf.IMessage", "System.ReadOnlySpan<System.Byte>"}));
+
+        /* // 此 block 为 MasterBase 相关的 hook，后来发现它们最后都会调用 MessageExtensions.MergeFrom 进行构造，遂停用。现留档以备用
+        // ADD_HOOK(MasterBase_GetAll, Il2cppUtils::GetMethodPointer("quaunity-master-manager.Runtime.dll", "Qua.Master",
+        //                                                          "MasterBase`2", "GetAll", {"*", "*", "*", "*", "*"}));
+
+        // 安装 DEF_AND_ADD_MASTER_FINDBYKEY_HOOK 的 hook
+        InitMasterHooks(hookInstaller);
+
+        auto AchievementMaster_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.Master", "AchievementMaster");
+        auto AchievementMaster_GetAll_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(AchievementMaster_klass->address, "GetAll", 5);
+        // auto AchievementMaster_FindByKey_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(AchievementMaster_klass->address, "FindByKey", 1);
+        // Log::DebugFmt("AchievementMaster_GetAll_mtd at %p", AchievementMaster_GetAll_mtd);
+        ADD_HOOK(MasterBase_GetAll, AchievementMaster_GetAll_mtd->methodPointer);
+        */
 
         ADD_HOOK(OctoCaching_GetResourceFileName, Il2cppUtils::GetMethodPointer("Octo.dll", "Octo.Caching",
                                                                      "OctoCaching", "GetResourceFileName"));
@@ -1304,11 +1461,13 @@ namespace GakumasLocal::HookMain {
         }
 
         Local::LoadData();
+        MasterLocal::LoadData();
 
         if (Config::lazyInit) {
             UnityResolveProgress::classProgress.current = 1;
-            UnityResolveProgress::startInit = false;
+            // UnityResolveProgress::startInit = false;
         }
+        UnityResolveProgress::startInit = false;
 
         Log::Info("Plugin init finished.");
         return ret;

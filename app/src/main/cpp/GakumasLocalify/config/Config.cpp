@@ -11,6 +11,7 @@ namespace GakumasLocal::Config {
     bool replaceFont = true;
     bool forceExportResource = true;
     bool textTest = false;
+    bool useMasterTrans = true;
     int gameOrientation = 0;
     bool dumpText = false;
     bool enableFreeCamera = false;
@@ -64,6 +65,7 @@ namespace GakumasLocal::Config {
             GetConfigItem(forceExportResource);
             GetConfigItem(gameOrientation);
             GetConfigItem(textTest);
+            GetConfigItem(useMasterTrans);
             GetConfigItem(dumpText);
             GetConfigItem(targetFrameRate);
             GetConfigItem(enableFreeCamera);

@@ -42,6 +42,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         GakumasLocalify/Log.cpp
         GakumasLocalify/Misc.cpp
         GakumasLocalify/Local.cpp
+        GakumasLocalify/MasterLocal.cpp
         GakumasLocalify/camera/baseCamera.cpp
         GakumasLocalify/camera/camera.cpp
         GakumasLocalify/config/Config.cpp

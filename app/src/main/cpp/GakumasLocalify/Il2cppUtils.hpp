@@ -14,28 +14,6 @@ namespace Il2cppUtils {
         const char* namespaze;
     };
 
-    struct MethodInfo {
-        uintptr_t methodPointer;
-        uintptr_t invoker_method;
-        const char* name;
-        uintptr_t klass;
-        //const Il2CppType* return_type;
-        //const ParameterInfo* parameters;
-        const void* return_type;
-        const void* parameters;
-        uintptr_t methodDefinition;
-        uintptr_t genericContainer;
-        uint32_t token;
-        uint16_t flags;
-        uint16_t iflags;
-        uint16_t slot;
-        uint8_t parameters_count;
-        uint8_t is_generic : 1;
-        uint8_t is_inflated : 1;
-        uint8_t wrapper_type : 1;
-        uint8_t is_marshaled_from_native : 1;
-    };
-
     struct Il2CppObject
     {
         union
@@ -110,7 +88,37 @@ namespace Il2cppUtils {
         int herz;
     };
 
-    UnityResolve::Class* GetClass(const std::string& assemblyName, const std::string& nameSpaceName,
+    struct FieldInfo {
+        const char* name;
+        const Il2CppType* type;
+        uintptr_t parent;
+        int32_t offset;
+        uint32_t token;
+    };
+
+    struct MethodInfo {
+        uintptr_t methodPointer;
+        uintptr_t invoker_method;
+        const char* name;
+        uintptr_t klass;
+        const Il2CppType* return_type;
+        //const ParameterInfo* parameters;
+        // const void* return_type;
+        const void* parameters;
+        uintptr_t methodDefinition;
+        uintptr_t genericContainer;
+        uint32_t token;
+        uint16_t flags;
+        uint16_t iflags;
+        uint16_t slot;
+        uint8_t parameters_count;
+        uint8_t is_generic : 1;
+        uint8_t is_inflated : 1;
+        uint8_t wrapper_type : 1;
+        uint8_t is_marshaled_from_native : 1;
+    };
+
+    static UnityResolve::Class* GetClass(const std::string& assemblyName, const std::string& nameSpaceName,
                    const std::string& className) {
         const auto assembly = UnityResolve::Get(assemblyName);
         if (!assembly) {
@@ -149,7 +157,7 @@ namespace Il2cppUtils {
         return ret;
     }*/
 
-    UnityResolve::Method* GetMethod(const std::string& assemblyName, const std::string& nameSpaceName,
+    static UnityResolve::Method* GetMethod(const std::string& assemblyName, const std::string& nameSpaceName,
                            const std::string& className, const std::string& methodName, const std::vector<std::string>& args = {}) {
         const auto assembly = UnityResolve::Get(assemblyName);
         if (!assembly) {
@@ -176,7 +184,7 @@ namespace Il2cppUtils {
         return method;
     }
 
-    void* GetMethodPointer(const std::string& assemblyName, const std::string& nameSpaceName,
+    static void* GetMethodPointer(const std::string& assemblyName, const std::string& nameSpaceName,
                            const std::string& className, const std::string& methodName, const std::vector<std::string>& args = {}) {
         auto method = GetMethod(assemblyName, nameSpaceName, className, methodName, args);
         if (method) {
@@ -185,20 +193,19 @@ namespace Il2cppUtils {
         return nullptr;
     }
 
-    void* il2cpp_resolve_icall(const char* s) {
+    static void* il2cpp_resolve_icall(const char* s) {
         return UnityResolve::Invoke<void*>("il2cpp_resolve_icall", s);
     }
 
-    Il2CppClassHead* get_class_from_instance(const void* instance) {
+    static Il2CppClassHead* get_class_from_instance(const void* instance) {
         return static_cast<Il2CppClassHead*>(*static_cast<void* const*>(std::assume_aligned<alignof(void*)>(instance)));
     }
 
-    MethodInfo* il2cpp_class_get_method_from_name(void* klass, const char* name, int argsCount) {
+    static MethodInfo* il2cpp_class_get_method_from_name(void* klass, const char* name, int argsCount) {
         return UnityResolve::Invoke<MethodInfo*>("il2cpp_class_get_method_from_name", klass, name, argsCount);
     }
 
-    void* find_nested_class(void* klass, std::predicate<void*> auto&& predicate)
-    {
+    static void* find_nested_class(void* klass, std::predicate<void*> auto&& predicate) {
         void* iter{};
         while (const auto curNestedClass = UnityResolve::Invoke<void*>("il2cpp_class_get_nested_types", klass, &iter))
         {
@@ -211,24 +218,34 @@ namespace Il2cppUtils {
         return nullptr;
     }
 
-    void* find_nested_class_from_name(void* klass, const char* name)
-    {
+    static void* find_nested_class_from_name(void* klass, const char* name) {
         return find_nested_class(klass, [name = std::string_view(name)](void* nestedClass) {
             return static_cast<Il2CppClassHead*>(nestedClass)->name == name;
         });
     }
 
     template <typename RType>
-    auto ClassGetFieldValue(void* obj, UnityResolve::Field* field) -> RType {
+    static auto ClassGetFieldValue(void* obj, UnityResolve::Field* field) -> RType {
         return *reinterpret_cast<RType*>(reinterpret_cast<uintptr_t>(obj) + field->offset);
     }
 
     template <typename RType>
-    auto ClassSetFieldValue(void* obj, UnityResolve::Field* field, RType value) -> void {
+    static auto ClassGetFieldValue(void* obj, FieldInfo* field) -> RType {
+        return *reinterpret_cast<RType*>(reinterpret_cast<uintptr_t>(obj) + field->offset);
+    }
+
+    template <typename T>
+    static auto ClassSetFieldValue(void* obj, UnityResolve::Field* field, T value) -> void {
+        const auto fieldPtr = static_cast<std::byte*>(obj) + field->offset;
+        std::memcpy(fieldPtr, std::addressof(value), sizeof(T));
+    }
+
+    template <typename RType>
+    static auto ClassSetFieldValue(void* obj, FieldInfo* field, RType value) -> void {
         *reinterpret_cast<RType*>(reinterpret_cast<uintptr_t>(obj) + field->offset) = value;
     }
 
-    void* get_system_class_from_reflection_type_str(const char* typeStr, const char* assemblyName = "mscorlib") {
+    static void* get_system_class_from_reflection_type_str(const char* typeStr, const char* assemblyName = "mscorlib") {
         using Il2CppString = UnityResolve::UnityType::String;
 
         static auto assemblyLoad = reinterpret_cast<void* (*)(Il2CppString*)>(
@@ -243,6 +260,43 @@ namespace Il2cppUtils {
         static auto reflectionAssembly = assemblyLoad(Il2CppString::New(assemblyName));
         auto reflectionType = assemblyGetType(reflectionAssembly, Il2CppString::New(typeStr));
         return UnityResolve::Invoke<void*>("il2cpp_class_from_system_type", reflectionType);
+    }
+
+    static std::unordered_map<std::string, std::unordered_map<int, std::string>> enumToValueMapCache{};
+    static std::unordered_map<int, std::string> EnumToValueMap(Il2CppClassHead* enumClass, bool useCache) {
+        std::unordered_map<int, std::string> ret{};
+        auto isEnum = UnityResolve::Invoke<bool>("il2cpp_class_is_enum", enumClass);
+
+        if (isEnum) {
+            Il2cppUtils::FieldInfo* field = nullptr;
+            void* iter = nullptr;
+
+            std::string cacheName = std::string(enumClass->namespaze) + "::" + enumClass->name;
+            if (useCache) {
+                if (auto it = enumToValueMapCache.find(cacheName); it != enumToValueMapCache.end()) {
+                    return it->second;
+                }
+            }
+
+            while ((field = UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_fields", enumClass, &iter))) {
+                // Log::DebugFmt("field: %s, off: %d", field->name, field->offset);
+                if (field->offset > 0) continue;  // 非 static
+                if (strcmp(field->name, "value__") == 0) {
+                    continue;
+                }
+
+                int value;
+                UnityResolve::Invoke<void>("il2cpp_field_static_get_value", field, &value);
+                // Log::DebugFmt("returnClass: %s - %s: 0x%x", enumClass->name, field->name, value);
+                std::string itemName = std::string(enumClass->name) + "_" + field->name;
+                ret.emplace(value, std::move(itemName));
+            }
+
+            if (useCache) {
+                enumToValueMapCache.emplace(std::move(cacheName), ret);
+            }
+        }
+        return ret;
     }
 
     namespace Tools {

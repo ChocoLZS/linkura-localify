@@ -75,6 +75,10 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
         item {
             GakuGroupBox(modifier, stringResource(R.string.debug_settings)) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    GakuSwitch(modifier, stringResource(R.string.useMasterDBTrans), checked = config.value.useMasterTrans) {
+                            v -> context?.onUseMasterTransChanged(v)
+                    }
+
                     GakuSwitch(modifier, stringResource(R.string.text_hook_test_mode), checked = config.value.textTest) {
                             v -> context?.onTextTestChanged(v)
                     }

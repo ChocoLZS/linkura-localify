@@ -309,7 +309,7 @@ public:
 			pDomain = Invoke<void*>("il2cpp_domain_get");
 			Invoke<void*>("il2cpp_thread_attach", pDomain);
 			ForeachAssembly();
-            if (!lazyInit) UnityResolveProgress::startInit = false;
+            // if (!lazyInit) UnityResolveProgress::startInit = false;
 		}
 		else {
 			pDomain = Invoke<void*>("mono_get_root_domain");

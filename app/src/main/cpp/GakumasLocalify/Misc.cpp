@@ -168,6 +168,33 @@ namespace GakumasLocal::Misc {
                 return fmt;
             }
         }
+
+        std::vector<std::string> split(const std::string& str, char delimiter) {
+            std::vector<std::string> result;
+            std::string current;
+            for (char c : str) {
+                if (c == delimiter) {
+                    if (!current.empty()) {
+                        result.push_back(current);
+                    }
+                    current.clear();
+                } else {
+                    current += c;
+                }
+            }
+            if (!current.empty()) {
+                result.push_back(current);
+            }
+            return result;
+        }
+
+        std::pair<std::string, std::string> split_once(const std::string& str, const std::string& delimiter) {
+            size_t pos = str.find(delimiter);
+            if (pos != std::string::npos) {
+                return {str.substr(0, pos), str.substr(pos + delimiter.size())};
+            }
+            return {str, ""};
+        }
     }
 
 }

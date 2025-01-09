@@ -19,6 +19,7 @@ interface ConfigListener {
     fun onForceExportResourceChanged(value: Boolean)
     fun onLoginAsIOSChanged(value: Boolean)
     fun onTextTestChanged(value: Boolean)
+    fun onUseMasterTransChanged(value: Boolean)
     fun onReplaceFontChanged(value: Boolean)
     fun onLazyInitChanged(value: Boolean)
     fun onEnableFreeCameraChanged(value: Boolean)
@@ -135,6 +136,11 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onTextTestChanged(value: Boolean) {
         config.textTest = value
+        saveConfig()
+    }
+
+    override fun onUseMasterTransChanged(value: Boolean) {
+        config.useMasterTrans = value
         saveConfig()
     }
 

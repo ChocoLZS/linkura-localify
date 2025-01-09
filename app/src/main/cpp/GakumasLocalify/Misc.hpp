@@ -76,6 +76,8 @@ namespace GakumasLocal {
 
         namespace StringFormat {
             std::string stringFormatString(const std::string& fmt, const std::vector<std::string>& vec);
+            std::vector<std::string> split(const std::string& str, char delimiter);
+            std::pair<std::string, std::string> split_once(const std::string& str, const std::string& delimiter);
         }
     }
 }
