@@ -1044,9 +1044,54 @@ namespace GakumasLocal::HookMain {
         if (Config::loginAsIOS) {
             return Il2cppString::New("iOS");
         }
-        // auto ret = ApiBase_GetPlatformString_Orig(self, mtd);
         // Log::DebugFmt("ApiBase_GetPlatformString: %s", ret->ToString().c_str());
         return ApiBase_GetPlatformString_Orig(self, mtd);
+    }
+
+    void ProcessApiBase(void* self) {
+        static void* processedIOS = nullptr;
+
+        if (Config::loginAsIOS) {
+            if (self == processedIOS) return;
+
+            static auto ApiBase_klass = Il2cppUtils::get_class_from_instance(self);
+            static auto platform_field = UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_field_from_name", ApiBase_klass, "_platform");
+             auto platform = Il2cppUtils::ClassGetFieldValue<Il2cppString*>(self, platform_field);
+             Log::DebugFmt("ProcessApiBase platform: %s", platform ? platform->ToString().c_str() : "null");
+             if (platform) {
+                 const auto origPlatform = platform->ToString();
+                 if (origPlatform != "iOS") {
+                     Il2cppUtils::ClassSetFieldValue(self, platform_field, Il2cppString::New("iOS"));
+                     processedIOS = self;
+                 }
+             }
+             else {
+                 Il2cppUtils::ClassSetFieldValue(self, platform_field, Il2cppString::New("iOS"));
+                 processedIOS = self;
+             }
+        }
+        else {
+            if (processedIOS) {
+                Log::DebugFmt("Restore API to Android");
+                static auto ApiBase_klass = Il2cppUtils::get_class_from_instance(self);
+                static auto platform_field = UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_field_from_name", ApiBase_klass, "_platform");
+                Il2cppUtils::ClassSetFieldValue(self, platform_field, Il2cppString::New("Android"));
+                processedIOS = nullptr;
+            }
+        }
+    }
+
+    DEFINE_HOOK(void, ApiBase_ctor, (void* self, void* mtd)) {
+        ApiBase_ctor_Orig(self, mtd);
+        ProcessApiBase(self);
+    }
+
+    DEFINE_HOOK(void*, ApiBase_get_Instance, (void* mtd)) {
+        auto ret = ApiBase_get_Instance_Orig(mtd);
+        if (ret) {
+            ProcessApiBase(ret);
+        }
+        return ret;
     }
 
 
@@ -1384,7 +1429,9 @@ namespace GakumasLocal::HookMain {
             auto api_parent = UnityResolve::Invoke<Il2cppUtils::Il2CppClassHead*>("il2cpp_class_get_parent", api_klass->address);
             if (api_parent) {
                 // Log::DebugFmt("api_parent at %p, name: %s::%s", api_parent, api_parent->namespaze, api_parent->name);
-                ADD_HOOK(ApiBase_GetPlatformString, Il2cppUtils::il2cpp_class_get_method_from_name(api_parent, "GetPlatformString", 0)->methodPointer);
+                ADD_HOOK(ApiBase_GetPlatformString, Il2cppUtils::il2cpp_class_get_method_pointer_from_name(api_parent, "GetPlatformString", 0));
+                ADD_HOOK(ApiBase_ctor, Il2cppUtils::il2cpp_class_get_method_pointer_from_name(api_parent, ".ctor", 0));
+                ADD_HOOK(ApiBase_get_Instance, Il2cppUtils::il2cpp_class_get_method_pointer_from_name(api_parent, "get_Instance", 0));
             }
         }
 

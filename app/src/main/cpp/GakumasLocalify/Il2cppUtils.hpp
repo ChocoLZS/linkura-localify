@@ -205,6 +205,15 @@ namespace Il2cppUtils {
         return UnityResolve::Invoke<MethodInfo*>("il2cpp_class_get_method_from_name", klass, name, argsCount);
     }
 
+    static uintptr_t il2cpp_class_get_method_pointer_from_name(void* klass, const char* name, int argsCount) {
+        auto findKlass = il2cpp_class_get_method_from_name(klass, name, argsCount);
+        if (findKlass) {
+            return findKlass->methodPointer;
+        }
+        Log::ErrorFmt("method: %s not found", name);
+        return 0;
+    }
+
     static void* find_nested_class(void* klass, std::predicate<void*> auto&& predicate) {
         void* iter{};
         while (const auto curNestedClass = UnityResolve::Invoke<void*>("il2cpp_class_get_nested_types", klass, &iter))
