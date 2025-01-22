@@ -1510,10 +1510,6 @@ namespace GakumasLocal::HookMain {
         Local::LoadData();
         MasterLocal::LoadData();
 
-        if (Config::lazyInit) {
-            UnityResolveProgress::classProgress.current = 1;
-            // UnityResolveProgress::startInit = false;
-        }
         UnityResolveProgress::startInit = false;
 
         Log::Info("Plugin init finished.");

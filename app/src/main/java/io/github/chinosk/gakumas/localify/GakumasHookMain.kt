@@ -248,6 +248,9 @@ class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val gkmsData = intent.getStringExtra("gkmsData")
         val programData = intent.getStringExtra("localData")
         if (gkmsData != null) {
+            val readVersion = intent.getStringExtra("lVerName")
+            checkPluginVersion(activity, readVersion)
+
             gkmsDataInited = true
             val initConfig = try {
                 json.decodeFromString<GakumasConfig>(gkmsData)
@@ -311,6 +314,40 @@ class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
             loadConfig(gkmsData)
             Log.d(TAG, "gkmsData: $gkmsData")
         }
+    }
+
+    private fun checkPluginVersion(activity: Activity, readVersion: String?) {
+        val buildVersionName = BuildConfig.VERSION_NAME
+        Log.i(TAG, "Checking Plugin Version: Build: $buildVersionName, Request: $readVersion")
+        if (readVersion?.trim() == buildVersionName.trim()) {
+            return
+        }
+
+        val builder = AlertDialog.Builder(activity)
+        val infoBuilder = AlertDialog.Builder(activity)
+        builder.setTitle("Warning")
+        builder.setCancelable(false)
+        builder.setMessage(when (getCurrentLanguage(activity)) {
+            "zh" -> "检测到插件版本不一致\n内置版本: $buildVersionName\n请求版本: $readVersion\n\n这可能是使用了 LSPatch 的集成模式，仅更新了插件本体，未重新修补游戏导致的。请使用 $readVersion 版本的插件重新修补或使用本地模式。"
+            else -> "Detected plugin version mismatch\nBuilt-in version: $buildVersionName\nRequested version: $readVersion\n\nThis may be caused by using the LSPatch integration mode, where only the plugin itself was updated without re-patching the game. Please re-patch the game using the $readVersion version of the plugin or use the local mode."
+        })
+
+        builder.setPositiveButton("OK") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Exit") { dialog, _ ->
+            dialog.dismiss()
+            activity.finishAffinity()
+        }
+
+        val dialog = builder.create()
+
+        infoBuilder.setOnCancelListener {
+            dialog.show()
+        }
+
+        dialog.show()
     }
 
     private fun showGetConfigFailedImpl(activity: Context, title: String, msg: String, infoButton: String, dlButton: String, okButton: String) {

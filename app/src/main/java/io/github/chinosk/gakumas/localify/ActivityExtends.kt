@@ -107,6 +107,7 @@ fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
             getProgramConfigContent(listOf("transRemoteZipUrl", "useAPIAssetsURL",
                 "localAPIAssetsVersion", "p"), programConfig)
         )
+        putExtra("lVerName", version)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
 
