@@ -1,8 +1,14 @@
 #ifndef GAKUMAS_LOCALIFY_LOG_H
 #define GAKUMAS_LOCALIFY_LOG_H
 
+#include "../platformDefine.hpp"
+
 #include <string>
-#include <jni.h>
+
+#ifndef GKMS_WINDOWS
+    #include <jni.h>
+#endif
+
 
 namespace GakumasLocal::Log {
     std::string StringFormat(const char* fmt, ...);
@@ -18,7 +24,9 @@ namespace GakumasLocal::Log {
     void ShowToast(const char* text);
     void ShowToastFmt(const char* fmt, ...);
 
+#ifndef GKMS_WINDOWS
     void ToastLoop(JNIEnv *env, jclass clazz);
+#endif
 }
 
 #endif //GAKUMAS_LOCALIFY_LOG_H

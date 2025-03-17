@@ -1,8 +1,15 @@
 #include "baseCamera.hpp"
 #include "camera.hpp"
 #include <thread>
-#include "Misc.hpp"
+#include "../Misc.hpp"
 #include "../BaseDefine.h"
+
+#include "../../platformDefine.hpp"
+
+#ifdef GKMS_WINDOWS
+    #include <corecrt_math_defines.h>
+#endif // GKMS_WINDOWS
+
 
 
 namespace GKCamera {

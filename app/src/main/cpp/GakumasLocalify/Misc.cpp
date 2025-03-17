@@ -2,11 +2,15 @@
 
 #include <codecvt>
 #include <locale>
-#include <jni.h>
 #include "fmt/core.h"
 
-
-extern JavaVM* g_javaVM;
+#ifndef GKMS_WINDOWS
+    #include <jni.h>
+    
+    extern JavaVM* g_javaVM;
+#else
+    #include "cpprest/details/http_helpers.h"
+#endif
 
 
 namespace GakumasLocal::Misc {
@@ -20,6 +24,13 @@ namespace GakumasLocal::Misc {
         return utf16conv.to_bytes(str.data(), str.data() + str.size());
     }
 
+#ifdef GKMS_WINDOWS
+    std::string ToUTF8(const std::wstring_view& str) {
+		return utility::conversions::to_utf8string(str.data());
+    }
+#endif
+
+#ifndef GKMS_WINDOWS
     JNIEnv* GetJNIEnv() {
         if (!g_javaVM) return nullptr;
         JNIEnv* env = nullptr;
@@ -31,6 +42,7 @@ namespace GakumasLocal::Misc {
         }
         return env;
     }
+#endif
 
     CSEnum::CSEnum(const std::string& name, const int value) {
         this->Add(name, value);

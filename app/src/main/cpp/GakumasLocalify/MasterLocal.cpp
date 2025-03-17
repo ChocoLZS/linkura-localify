@@ -541,7 +541,8 @@ namespace GakumasLocal::MasterLocal {
                     if (isFailed) break;
                 }
                 if (!isFailed) break;
-                NextLoop:
+            NextLoop:
+                ;
             }
 
             if (isFailed) return false;

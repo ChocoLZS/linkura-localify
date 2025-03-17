@@ -1,6 +1,12 @@
 #include "baseCamera.hpp"
 #include <thread>
 
+#include "../../platformDefine.hpp"
+
+#ifdef GKMS_WINDOWS
+	#include <corecrt_math_defines.h>
+#endif // GKMS_WINDOWS
+
 
 namespace BaseCamera {
 	using Vector3_t = UnityResolve::UnityType::Vector3;

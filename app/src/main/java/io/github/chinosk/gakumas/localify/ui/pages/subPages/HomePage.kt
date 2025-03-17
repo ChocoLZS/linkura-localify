@@ -314,8 +314,8 @@ fun HomePage(modifier: Modifier = Modifier,
                                                 fontSize = 14f,
                                                 value = programConfig.value.useAPIAssetsURL,
                                                 onValueChange = { c -> context?.onPUseAPIAssetsURLChanged(c, 0, 0, 0)},
-                                                label = { Text(stringResource(R.string.api_addr)) },
-                                                keyboardOptions = keyboardOptionsNumber)
+                                                label = { Text(stringResource(R.string.api_addr)) }
+                                            )
 
                                             if (downloadAble) {
                                                 GakuButton(modifier = modifier
@@ -411,8 +411,8 @@ fun HomePage(modifier: Modifier = Modifier,
                                                 fontSize = 14f,
                                                 value = programConfig.value.transRemoteZipUrl,
                                                 onValueChange = { c -> context?.onPTransRemoteZipUrlChanged(c, 0, 0, 0)},
-                                                label = { Text(stringResource(id = R.string.resource_url)) },
-                                                keyboardOptions = keyboardOptionsNumber)
+                                                label = { Text(stringResource(id = R.string.resource_url)) }
+                                            )
 
                                             if (downloadAble) {
                                                 GakuButton(modifier = modifier

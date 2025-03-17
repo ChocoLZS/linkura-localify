@@ -2,10 +2,15 @@
 
 #include <string>
 #include <string_view>
-#include <jni.h>
 #include <deque>
 #include <numeric>
 #include <vector>
+
+#include "../platformDefine.hpp"
+
+#ifndef GKMS_WINDOWS
+    #include <jni.h>
+#endif
 
 
 namespace GakumasLocal {
@@ -14,7 +19,13 @@ namespace GakumasLocal {
     namespace Misc {
         std::u16string ToUTF16(const std::string_view& str);
         std::string ToUTF8(const std::u16string_view& str);
+#ifdef GKMS_WINDOWS
+        std::string ToUTF8(const std::wstring_view& str);
+#endif
+
+#ifndef GKMS_WINDOWS
         JNIEnv* GetJNIEnv();
+#endif
 
         class CSEnum {
         public:

@@ -308,6 +308,22 @@ namespace Il2cppUtils {
         return ret;
     }
 
+    template <typename T = void*>
+    static void iterate_IEnumerable(const void* obj, std::invocable<T> auto&& receiver)
+    {
+        const auto klass = get_class_from_instance(obj);
+        const auto getEnumeratorMethod = reinterpret_cast<void* (*)(const void*)>(il2cpp_class_get_method_from_name(klass, "GetEnumerator", 0)->methodPointer);
+        const auto enumerator = getEnumeratorMethod(obj);
+        const auto enumeratorClass = get_class_from_instance(enumerator);
+        const auto getCurrentMethod = reinterpret_cast<T(*)(void*)>(il2cpp_class_get_method_from_name(enumeratorClass, "get_Current", 0)->methodPointer);
+        const auto moveNextMethod = reinterpret_cast<bool(*)(void*)>(il2cpp_class_get_method_from_name(enumeratorClass, "MoveNext", 0)->methodPointer);
+
+        while (moveNextMethod(enumerator))
+        {
+            static_cast<decltype(receiver)>(receiver)(getCurrentMethod(enumerator));
+        }
+    }
+
     namespace Tools {
 
         template <typename T = void*>

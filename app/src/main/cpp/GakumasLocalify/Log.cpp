@@ -1,14 +1,19 @@
 #include "Log.h"
-#include <android/log.h>
-#include <Misc.hpp>
+#include "Misc.hpp"
 #include <sstream>
 #include <string>
 #include <thread>
 #include <queue>
+#include <cstdarg>
 
-extern JavaVM* g_javaVM;
-extern jclass g_gakumasHookMainClass;
-extern jmethodID showToastMethodId;
+#ifndef GKMS_WINDOWS
+    #include <android/log.h>
+
+    extern JavaVM* g_javaVM;
+    extern jclass g_gakumasHookMainClass;
+    extern jmethodID showToastMethodId;
+#endif // GKMS_WINDOWS
+
 
 #define GetParamStringResult(name)\
     va_list args;\
@@ -75,6 +80,7 @@ namespace GakumasLocal::Log {
         __android_log_write(prio, "GakumasLog", result.c_str());
     }
 
+    /*
     void ShowToastJNI(const char* text) {
         DebugFmt("Toast: %s", text);
 
@@ -99,15 +105,19 @@ namespace GakumasLocal::Log {
 
             g_javaVM->DetachCurrentThread();
         }).detach();
-    }
+    }*/
 
 
     void ShowToast(const std::string& text) {
+#ifndef GKMS_WINDOWS
         showingToasts.push(text);
+#else
+		InfoFmt("Toast: %s", text.c_str());
+#endif
     }
 
     void ShowToast(const char* text) {
-        DebugFmt("Toast: %s", text);
+        // DebugFmt("Toast: %s", text);
         return ShowToast(std::string(text));
     }
 
@@ -125,6 +135,7 @@ namespace GakumasLocal::Log {
         return ret;
     }
 
+#ifndef GKMS_WINDOWS
     void ToastLoop(JNIEnv *env, jclass clazz) {
         const auto toastString = GetQueuedToast();
         if (toastString.empty()) return;
@@ -140,4 +151,6 @@ namespace GakumasLocal::Log {
             _showToastMethodId = env->GetStaticMethodID(clazz, "showToast", "(Ljava/lang/String;)V");
         }
     }
+#endif
+
 }

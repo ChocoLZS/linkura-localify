@@ -1,6 +1,6 @@
 #pragma once
 #include "baseCamera.hpp"
-#include "Joystick/JoystickEvent.h"
+#include "../../deps/Joystick/JoystickEvent.h"
 
 namespace GKCamera {
     enum class CameraMode {

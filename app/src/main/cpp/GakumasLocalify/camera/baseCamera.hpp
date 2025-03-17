@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../deps/UnityResolve/UnityResolve.hpp"
+#include "../../deps/UnityResolve/UnityResolve.hpp"
 
 enum LonMoveHState {
 	LonMoveLeftAndRight,

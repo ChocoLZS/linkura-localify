@@ -90,7 +90,7 @@ namespace GakumasLocal::Local {
             }
             std::ifstream file(filePath);
             if (!file.is_open()) {
-                Log::ErrorFmt("Load %s failed.\n", filePath.c_str());
+                Log::ErrorFmt("Load %s failed.\n", filePath.string().c_str());
                 return;
             }
             std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -112,7 +112,7 @@ namespace GakumasLocal::Local {
             }
         }
         catch (std::exception& e) {
-            Log::ErrorFmt("Load %s failed: %s\n", filePath.c_str(), e.what());
+            Log::ErrorFmt("Load %s failed: %s\n", filePath.string().c_str(), e.what());
         }
     }
 
@@ -447,7 +447,7 @@ namespace GakumasLocal::Local {
             const auto targetFilePath = basePath / "local-files" / "resource" / name;
             // Log::DebugFmt("GetResourceText: %s", targetFilePath.c_str());
             if (exists(targetFilePath)) {
-                auto readStr = readFileToString(targetFilePath);
+                auto readStr = readFileToString(targetFilePath.string());
                 *ret = readStr;
                 return true;
             }

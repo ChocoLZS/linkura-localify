@@ -1,6 +1,7 @@
 #include <string>
 #include "nlohmann/json.hpp"
 #include "../Log.h"
+#include <thread>
 
 namespace GakumasLocal::Config {
     bool isConfigInit = false;
@@ -100,7 +101,6 @@ namespace GakumasLocal::Config {
             GetConfigItem(bLimitYy);
             GetConfigItem(bLimitZx);
             GetConfigItem(bLimitZy);
-
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());

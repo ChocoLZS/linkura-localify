@@ -1,4 +1,3 @@
-#include <android/log.h>
 #include "Hook.h"
 #include "Plugin.h"
 #include "Log.h"
@@ -9,14 +8,20 @@
 #include <unordered_set>
 #include "camera/camera.hpp"
 #include "config/Config.hpp"
-#include "shadowhook.h"
-#include <jni.h>
+// #include <jni.h>
 #include <thread>
 #include <map>
 #include <set>
+#include "../platformDefine.hpp"
+
+#ifdef GKMS_WINDOWS
+    #include "../windowsPlatform.hpp"
+    #include "cpprest/details/http_helpers.h"
+#endif
 
 
 std::unordered_set<void*> hookedStubs{};
+extern std::filesystem::path gakumasLocalPath;
 
 #define DEFINE_HOOK(returnType, name, params)                                                      \
 	using name##_Type = returnType(*) params;                                                      \
@@ -24,26 +29,7 @@ std::unordered_set<void*> hookedStubs{};
 	name##_Type name##_Orig = nullptr;                                                             \
 	returnType name##_Hook params
 
-
-#define ADD_HOOK(name, addr)                                                                       \
-	name##_Addr = reinterpret_cast<name##_Type>(addr);                                             \
-	if (addr) {                                                                                    \
-    	auto stub = hookInstaller->InstallHook(reinterpret_cast<void*>(addr),                      \
-                                               reinterpret_cast<void*>(name##_Hook),               \
-                                               reinterpret_cast<void**>(&name##_Orig));            \
-        if (stub == NULL) {                                                                        \
-            int error_num = shadowhook_get_errno();                                                \
-            const char *error_msg = shadowhook_to_errmsg(error_num);                               \
-            Log::ErrorFmt("ADD_HOOK: %s at %p failed: %s", #name, addr, error_msg);                \
-        }                                                                                          \
-        else {                                                                                     \
-            hookedStubs.emplace(stub);                                                             \
-            GakumasLocal::Log::InfoFmt("ADD_HOOK: %s at %p", #name, addr);                         \
-        }                                                                                          \
-    }                                                                                              \
-    else GakumasLocal::Log::ErrorFmt("Hook failed: %s is NULL", #name, addr);                      \
-    if (Config::lazyInit) UnityResolveProgress::classProgress.current++
-
+/*
 void UnHookAll() {
     for (const auto i: hookedStubs) {
         int result = shadowhook_unhook(i);
@@ -54,7 +40,7 @@ void UnHookAll() {
             GakumasLocal::Log::ErrorFmt("unhook failed: %d - %s", error_num, error_msg);
         }
     }
-}
+}*/
 
 namespace GakumasLocal::HookMain {
     using Il2cppString = UnityResolve::UnityType::String;
@@ -300,9 +286,129 @@ namespace GakumasLocal::HookMain {
         }
     }
 
+    
+#ifdef GKMS_WINDOWS
+    struct TransparentStringHash : std::hash<std::wstring>, std::hash<std::wstring_view>
+    {
+        using is_transparent = void;
+    };
+
+    typedef std::unordered_set<std::wstring, TransparentStringHash, std::equal_to<void>> AssetPathsType;
+    std::map<std::string, AssetPathsType> CustomAssetBundleAssetPaths;
+    std::unordered_map<std::string, uint32_t> CustomAssetBundleHandleMap{};
+    std::list<std::string> g_extra_assetbundle_paths{};
+
+    void LoadExtraAssetBundle() {
+        using Il2CppString = UnityResolve::UnityType::String;
+
+        if (g_extra_assetbundle_paths.empty()) {
+            return;
+        }
+        // CustomAssetBundleHandleMap.clear();
+        // CustomAssetBundleAssetPaths.clear();
+        // assert(!ExtraAssetBundleHandle && ExtraAssetBundleAssetPaths.empty());
+
+        static auto AssetBundle_GetAllAssetNames = reinterpret_cast<void* (*)(void*)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.AssetBundle::GetAllAssetNames()")
+            );
+
+        for (const auto& i : g_extra_assetbundle_paths) {
+            if (CustomAssetBundleHandleMap.contains(i)) continue;
+
+            const auto extraAssetBundle = WinHooks::LoadAssetBundle(i);
+            if (extraAssetBundle)
+            {
+                const auto allAssetPaths = AssetBundle_GetAllAssetNames(extraAssetBundle);
+                AssetPathsType assetPath{};
+                Il2cppUtils::iterate_IEnumerable<Il2CppString*>(allAssetPaths, [&assetPath](Il2CppString* path)
+                    {
+                        // ExtraAssetBundleAssetPaths.emplace(path->start_char);
+                        // printf("Asset loaded: %ls\n", path->start_char);
+                        assetPath.emplace(path->start_char);
+                    });
+                CustomAssetBundleAssetPaths.emplace(i, assetPath);
+                CustomAssetBundleHandleMap.emplace(i, UnityResolve::Invoke<uint32_t>("il2cpp_gchandle_new", extraAssetBundle, false));
+            }
+            else
+            {
+                Log::ErrorFmt("Cannot load asset bundle: %s\n", i.c_str());
+            }
+        }
+    }
+
+    uint32_t GetBundleHandleByAssetName(std::wstring assetName) {
+        for (const auto& i : CustomAssetBundleAssetPaths) {
+            for (const auto& m : i.second) {
+                if (std::equal(m.begin(), m.end(), assetName.begin(), assetName.end(),
+                    [](wchar_t c1, wchar_t c2) {
+                        return std::tolower(c1, std::locale()) == std::tolower(c2, std::locale());
+                    })) {
+                    return CustomAssetBundleHandleMap.at(i.first);
+                }
+            }
+        }
+        return NULL;
+    }
+
+    uint32_t GetBundleHandleByAssetName(std::string assetName) {
+        return GetBundleHandleByAssetName(utility::conversions::to_string_t(assetName));
+    }
+
+    uint32_t ReplaceFontHandle;
+
+    void* GetReplaceFont() {
+        static auto FontClass = Il2cppUtils::GetClass("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font");
+        static auto Font_Type = UnityResolve::Invoke<Il2cppUtils::Il2CppReflectionType*>("il2cpp_type_get_object", 
+            UnityResolve::Invoke<void*>("il2cpp_class_get_type", FontClass->address));
+
+        using Il2CppString = UnityResolve::UnityType::String;
+        const auto fontPath = "assets/fonts/gkamszhfontmix.otf";
+
+        void* replaceFont{};
+        const auto& bundleHandle = GetBundleHandleByAssetName(fontPath);
+        if (bundleHandle)
+        {
+            if (ReplaceFontHandle)
+            {
+                replaceFont = UnityResolve::Invoke<void*>("il2cpp_gchandle_get_target", ReplaceFontHandle);
+                // 加载场景时会被 Resources.UnloadUnusedAssets 干掉，且不受 DontDestroyOnLoad 影响，暂且判断是否存活，并在必要的时候重新加载
+                // TODO: 考虑挂载到 GameObject 上
+                // AssetBundle 不会被干掉
+                if (IsNativeObjectAlive(replaceFont))
+                {
+                    return replaceFont;
+                }
+                else
+                {
+                    UnityResolve::Invoke<void>("il2cpp_gchandle_free", std::exchange(ReplaceFontHandle, 0));
+                }
+            }
+
+            const auto extraAssetBundle = UnityResolve::Invoke<void*>("il2cpp_gchandle_get_target", bundleHandle);
+			static auto AssetBundle_LoadAsset = reinterpret_cast<void* (*)(void* _this, Il2CppString* name, Il2cppUtils::Il2CppReflectionType* type)>(
+                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)")
+				);;
+
+            replaceFont = AssetBundle_LoadAsset(extraAssetBundle, Il2cppString::New(fontPath), Font_Type);
+            if (replaceFont)
+            {
+                ReplaceFontHandle = UnityResolve::Invoke<uint32_t>("il2cpp_gchandle_new", replaceFont, false);
+            }
+            else
+            {
+                Log::Error("Cannot load asset font\n");
+            }
+        }
+        else
+        {
+            Log::Error("Cannot find asset font\n");
+        }
+        return replaceFont;
+    }
+#else
     void* fontCache = nullptr;
     void* GetReplaceFont() {
-        static std::string fontName = Local::GetBasePath() / "local-files" / "gkamsZHFontMIX.otf";
+        static auto fontName = Local::GetBasePath() / "local-files" / "gkamsZHFontMIX.otf";
         if (!std::filesystem::exists(fontName)) {
             return nullptr;
         }
@@ -323,10 +429,11 @@ namespace GakumasLocal::HookMain {
         const auto newFont = Font_klass->New<void*>();
         Font_ctor->Invoke<void>(newFont);
 
-        CreateFontFromPath(newFont, Il2cppString::New(fontName));
+        CreateFontFromPath(newFont, Il2cppString::New(fontName.string()));
         fontCache = newFont;
         return newFont;
     }
+#endif
 
     std::unordered_set<void*> updatedFontPtrs{};
     void UpdateFont(void* TMP_Textself) {
@@ -350,6 +457,7 @@ namespace GakumasLocal::HookMain {
 
         auto newFont = GetReplaceFont();
         if (!newFont) return;
+
         auto fontAsset = get_font->Invoke<void*>(TMP_Textself);
         if (fontAsset) {
             set_sourceFontFile->Invoke<void>(fontAsset, newFont);
@@ -358,6 +466,9 @@ namespace GakumasLocal::HookMain {
                 UpdateFontAssetData->Invoke<void>(fontAsset);
             }
             if (updatedFontPtrs.size() > 200) updatedFontPtrs.clear();
+        }
+        else {
+			Log::Error("UpdateFont: fontAsset is null.");
         }
         set_font->Invoke<void>(TMP_Textself, fontAsset);
 
@@ -1264,8 +1375,17 @@ namespace GakumasLocal::HookMain {
 
     void StartInjectFunctions() {
         const auto hookInstaller = Plugin::GetInstance().GetHookInstaller();
+
+#ifdef GKMS_WINDOWS
+        auto il2cpp_module = GetModuleHandle("GameAssembly.dll");
+        if (!il2cpp_module) {
+            Log::ErrorFmt("GameAssembly.dll not loaded.");
+        }
+        UnityResolve::Init(il2cpp_module, UnityResolve::Mode::Il2Cpp, Config::lazyInit);
+#else
         UnityResolve::Init(xdl_open(hookInstaller->m_il2cppLibraryPath.c_str(), RTLD_NOW),
-                           UnityResolve::Mode::Il2Cpp, Config::lazyInit);
+            UnityResolve::Mode::Il2Cpp, Config::lazyInit);
+#endif
 
         ADD_HOOK(AssetBundle_LoadAssetAsync, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.AssetBundle::LoadAssetAsync_Internal(System.String,System.Type)"));
@@ -1471,11 +1591,21 @@ namespace GakumasLocal::HookMain {
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
         ADD_HOOK(EndCameraRendering, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine.Rendering",
                                                                      "RenderPipeline", "EndCameraRendering"));
+
+#ifdef GKMS_WINDOWS
+        g_extra_assetbundle_paths.push_back((gakumasLocalPath / "local-files/gakumasassets").string());
+		LoadExtraAssetBundle();
+#endif // GKMS_WINDOWS
+
     }
     // 77 2640 5000
 
     DEFINE_HOOK(int, il2cpp_init, (const char* domain_name)) {
+#ifndef GKMS_WINDOWS
         const auto ret = il2cpp_init_Orig(domain_name);
+#else
+        const auto ret = 0;
+#endif
         // InjectFunctions();
 
         Log::Info("Waiting for config...");
@@ -1524,8 +1654,13 @@ namespace GakumasLocal::Hook {
 
         Log::Info("Installing hook");
 
+#ifndef GKMS_WINDOWS
         ADD_HOOK(HookMain::il2cpp_init,
-                  Plugin::GetInstance().GetHookInstaller()->LookupSymbol("il2cpp_init"));
+            Plugin::GetInstance().GetHookInstaller()->LookupSymbol("il2cpp_init"));
+#else
+        HookMain::il2cpp_init_Hook(nullptr);
+#endif
+
 
         Log::Info("Hook installed");
     }

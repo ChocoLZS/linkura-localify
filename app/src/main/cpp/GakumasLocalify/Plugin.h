@@ -4,7 +4,13 @@
 #include "Misc.hpp"
 #include <string>
 #include <memory>
-#include <jni.h>
+
+#include "../platformDefine.hpp"
+
+#ifndef GKMS_WINDOWS
+    #include <jni.h>
+#endif // !GKMS_WINDOWS
+
 
 namespace GakumasLocal {
     struct HookInstaller
