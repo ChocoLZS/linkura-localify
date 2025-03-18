@@ -694,6 +694,7 @@ namespace GakumasLocal::MasterLocal {
                 } break;
                 case JsonValueType::JVT_String: {
                     auto readValue = fc.ReadStringField(mainPk);
+                    if (!readValue) return;
                     baseDataKey.append(readValue->ToString());
                     baseDataKey.push_back('|');
                 } break;

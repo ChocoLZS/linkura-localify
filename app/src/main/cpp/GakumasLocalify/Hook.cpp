@@ -17,6 +17,7 @@
 #ifdef GKMS_WINDOWS
     #include "../windowsPlatform.hpp"
     #include "cpprest/details/http_helpers.h"
+    #include "../resourceUpdate/resourceUpdate.hpp"
 #endif
 
 
@@ -210,14 +211,25 @@ namespace GakumasLocal::HookMain {
         return Unity_set_position_Injected_Orig(self, data);
     }
 
+#ifdef GKMS_WINDOWS
+    DEFINE_HOOK(void*, InternalSetOrientationAsync, (void* retstr, void* self, int type, void* c, void* tc, void* mtd)) {
+        switch (Config::gameOrientation) {
+        case 1: type = 0x2; break;  // FixedPortrait
+        case 2: type = 0x3; break;  // FixedLandscape
+        default: break;
+        }
+        return InternalSetOrientationAsync_Orig(retstr, self, type, c, tc, mtd);
+    }
+#else
     DEFINE_HOOK(void*, InternalSetOrientationAsync, (void* self, int type, void* c, void* tc, void* mtd)) {
         switch (Config::gameOrientation) {
-            case 1: type = 0x2; break;  // FixedPortrait
-            case 2: type = 0x3; break;  // FixedLandscape
-            default: break;
+        case 1: type = 0x2; break;  // FixedPortrait
+        case 2: type = 0x3; break;  // FixedLandscape
+        default: break;
         }
         return InternalSetOrientationAsync_Orig(self, type, c, tc, mtd);
     }
+#endif
 
     DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
         EndCameraRendering_Orig(ctx, camera, method);
@@ -670,6 +682,17 @@ namespace GakumasLocal::HookMain {
         return ret;
     }
 
+#ifdef GKMS_WINDOWS
+    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* retstr, void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
+        // Log::DebugFmt("PictureBookLiveThumbnailView_SetDataAsync: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d", isReleased, isUnlocked, isNew, hasLiveSkin);
+        if (Config::dbgMode && Config::unlockAllLive) {
+            isUnlocked = true;
+            isReleased = true;
+            hasLiveSkin = true;
+        }
+        PictureBookLiveThumbnailView_SetDataAsync_Orig(retstr, self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
+    }
+#else
     DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
         // Log::DebugFmt("PictureBookLiveThumbnailView_SetDataAsync: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d", isReleased, isUnlocked, isNew, hasLiveSkin);
         if (Config::dbgMode && Config::unlockAllLive) {
@@ -679,6 +702,7 @@ namespace GakumasLocal::HookMain {
         }
         PictureBookLiveThumbnailView_SetDataAsync_Orig(self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
     }
+#endif
 
     enum class GetIdolIdType {
         MusicId,
@@ -899,6 +923,12 @@ namespace GakumasLocal::HookMain {
     }
 
     // std::string lastMusicId;
+#ifdef GKMS_WINDOWS
+    DEFINE_HOOK(void*, PictureBookLiveSelectScreenPresenter_OnSelectMusic, (void* retstr, void* self, void* itemModel, void* ct, void* mtd)) {
+        // if (!itemModel) return nullptr;
+        return PictureBookLiveSelectScreenPresenter_OnSelectMusic_Orig(retstr, self, itemModel, ct, mtd);
+    }
+#else
     DEFINE_HOOK(void, PictureBookLiveSelectScreenPresenter_OnSelectMusic, (void* self, void* itemModel, void* ct, void* mtd)) {
         /*  // 修改角色后，Live 结束返回时, itemModel 为 null
         Log::DebugFmt("OnSelectMusic itemModel at %p", itemModel);
@@ -932,6 +962,7 @@ namespace GakumasLocal::HookMain {
         if (!itemModel) return;
         return PictureBookLiveSelectScreenPresenter_OnSelectMusic_Orig(self, itemModel, ct, mtd);
     }
+#endif
 
     DEFINE_HOOK(bool, VLDOF_IsActive, (void* self)) {
         if (Config::enableFreeCamera) return false;
@@ -1183,10 +1214,14 @@ namespace GakumasLocal::HookMain {
         }
         else {
             if (processedIOS) {
-                Log::DebugFmt("Restore API to Android");
+                Log::DebugFmt("Restore API");
                 static auto ApiBase_klass = Il2cppUtils::get_class_from_instance(self);
                 static auto platform_field = UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_field_from_name", ApiBase_klass, "_platform");
+#ifdef GKMS_WINDOWS
+                Il2cppUtils::ClassSetFieldValue(self, platform_field, Il2cppString::New("dmm"));
+#else
                 Il2cppUtils::ClassSetFieldValue(self, platform_field, Il2cppString::New("Android"));
+#endif
                 processedIOS = nullptr;
             }
         }
@@ -1382,6 +1417,7 @@ namespace GakumasLocal::HookMain {
             Log::ErrorFmt("GameAssembly.dll not loaded.");
         }
         UnityResolve::Init(il2cpp_module, UnityResolve::Mode::Il2Cpp, Config::lazyInit);
+        GakumasLocal::WinHooks::Keyboard::InstallWndProcHook();
 #else
         UnityResolve::Init(xdl_open(hookInstaller->m_il2cppLibraryPath.c_str(), RTLD_NOW),
             UnityResolve::Mode::Il2Cpp, Config::lazyInit);
@@ -1493,9 +1529,11 @@ namespace GakumasLocal::HookMain {
             ADD_HOOK(UserCostumeCollection_FindBy, UserCostumeCollection_FindBy_mtd->methodPointer);
         }
 
+        // 双端
         ADD_HOOK(PictureBookLiveThumbnailView_SetDataAsync,
-                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame.PictureBook",
-                                               "PictureBookLiveThumbnailView", "SetDataAsync", {"*", "*", "*", "*", "*"}));
+            Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame.PictureBook",
+                "PictureBookLiveThumbnailView", "SetDataAsync", { "*", "*", "*", "*", "*" }));
+
         ADD_HOOK(PictureBookWindowPresenter_GetLiveMusics,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookWindowPresenter", "GetLiveMusics"));
@@ -1506,9 +1544,11 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(PictureBookLiveSelectScreenPresenter_MoveLiveScene,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookLiveSelectScreenPresenter", "MoveLiveScene"));
+
+        // 双端
         ADD_HOOK(PictureBookLiveSelectScreenPresenter_OnSelectMusic,
-                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
-                                               "PictureBookLiveSelectScreenPresenter", "OnSelectMusicAsync"));
+            Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
+                "PictureBookLiveSelectScreenPresenter", "OnSelectMusicAsync"));
 
         ADD_HOOK(VLDOF_IsActive,
                  Il2cppUtils::GetMethodPointer("Unity.RenderPipelines.Universal.Runtime.dll", "VL.Rendering",
@@ -1575,9 +1615,10 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(Internal_Log, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.DebugLogHandler::Internal_Log(UnityEngine.LogType,UnityEngine.LogOption,System.String,UnityEngine.Object)"));
 
+        // 双端
         ADD_HOOK(InternalSetOrientationAsync,
-                 Il2cppUtils::GetMethodPointer("campus-submodule.Runtime.dll", "Campus.Common",
-                                               "ScreenOrientationControllerBase", "InternalSetOrientationAsync"));
+            Il2cppUtils::GetMethodPointer("campus-submodule.Runtime.dll", "Campus.Common",
+                "ScreenOrientationControllerBase", "InternalSetOrientationAsync"));
 
         ADD_HOOK(Unity_set_position_Injected, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Transform::set_position_Injected(UnityEngine.Vector3&)"));
@@ -1595,6 +1636,7 @@ namespace GakumasLocal::HookMain {
 #ifdef GKMS_WINDOWS
         g_extra_assetbundle_paths.push_back((gakumasLocalPath / "local-files/gakumasassets").string());
 		LoadExtraAssetBundle();
+		GkmsResourceUpdate::CheckUpdateFromAPI(false);
 #endif // GKMS_WINDOWS
 
     }

@@ -52,4 +52,5 @@ namespace GakumasLocal::Config {
     extern float bLimitZy;
 
     void LoadConfig(const std::string& configStr);
+    void SaveConfig(const std::string& configPath);
 }

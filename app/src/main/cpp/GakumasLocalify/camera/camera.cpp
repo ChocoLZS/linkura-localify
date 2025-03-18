@@ -3,7 +3,6 @@
 #include <thread>
 #include "../Misc.hpp"
 #include "../BaseDefine.h"
-
 #include "../../platformDefine.hpp"
 
 #ifdef GKMS_WINDOWS

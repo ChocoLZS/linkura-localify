@@ -2,6 +2,7 @@
 #include "nlohmann/json.hpp"
 #include "../Log.h"
 #include <thread>
+#include <fstream>
 
 namespace GakumasLocal::Config {
     bool isConfigInit = false;
@@ -106,5 +107,67 @@ namespace GakumasLocal::Config {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
         }
         isConfigInit = true;
+    }
+
+    void SaveConfig(const std::string& configPath) {
+        try {
+            nlohmann::json config;
+
+            #define SetConfigItem(name) config[#name] = name
+
+            SetConfigItem(dbgMode);
+            SetConfigItem(enabled);
+            SetConfigItem(lazyInit);
+            SetConfigItem(replaceFont);
+            SetConfigItem(forceExportResource);
+            SetConfigItem(gameOrientation);
+            SetConfigItem(textTest);
+            SetConfigItem(useMasterTrans);
+            SetConfigItem(dumpText);
+            SetConfigItem(targetFrameRate);
+            SetConfigItem(enableFreeCamera);
+            SetConfigItem(unlockAllLive);
+            SetConfigItem(unlockAllLiveCostume);
+            SetConfigItem(enableLiveCustomeDress);
+            SetConfigItem(liveCustomeHeadId);
+            SetConfigItem(liveCustomeCostumeId);
+            SetConfigItem(loginAsIOS);
+            SetConfigItem(useCustomeGraphicSettings);
+            SetConfigItem(renderScale);
+            SetConfigItem(qualitySettingsLevel);
+            SetConfigItem(volumeIndex);
+            SetConfigItem(maxBufferPixel);
+            SetConfigItem(reflectionQualityLevel);
+            SetConfigItem(lodQualityLevel);
+            SetConfigItem(enableBreastParam);
+            SetConfigItem(bDamping);
+            SetConfigItem(bStiffness);
+            SetConfigItem(bSpring);
+            SetConfigItem(bPendulum);
+            SetConfigItem(bPendulumRange);
+            SetConfigItem(bAverage);
+            SetConfigItem(bRootWeight);
+            SetConfigItem(bUseArmCorrection);
+            SetConfigItem(bUseScale);
+            SetConfigItem(bScale);
+            SetConfigItem(bUseLimit);
+            SetConfigItem(bLimitXx);
+            SetConfigItem(bLimitXy);
+            SetConfigItem(bLimitYx);
+            SetConfigItem(bLimitYy);
+            SetConfigItem(bLimitZx);
+            SetConfigItem(bLimitZy);
+
+            std::ofstream out(configPath);
+            if (!out) {
+                Log::ErrorFmt("SaveConfig error: Cannot open file: %s", configPath.c_str());
+                return;
+            }
+            out << config.dump(4);
+			Log::Info("SaveConfig success");
+        }
+        catch (std::exception& e) {
+            Log::ErrorFmt("SaveConfig error: %s", e.what());
+        }
     }
 }
