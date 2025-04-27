@@ -51,6 +51,8 @@ namespace GakumasLocal::Config {
     extern float bLimitZx;
     extern float bLimitZy;
 
+    extern bool dmmUnlockSize;
+
     void LoadConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);
 }

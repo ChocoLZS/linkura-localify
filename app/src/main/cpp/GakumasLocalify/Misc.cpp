@@ -14,6 +14,24 @@
 
 
 namespace GakumasLocal::Misc {
+
+#ifdef GKMS_WINDOWS
+    std::string ToUTF8(const std::wstring_view& str) {
+		return utility::conversions::to_utf8string(str.data());
+    }
+
+    std::u16string ToUTF16(const std::string_view& str) {
+        std::string input(str);
+        std::wstring wstr = utility::conversions::utf8_to_utf16(input);
+        return std::u16string(wstr.begin(), wstr.end());
+    }
+
+    std::string ToUTF8(const std::u16string_view& str) {
+        std::u16string u16(str);
+        std::wstring wstr(u16.begin(), u16.end());
+        return utility::conversions::utf16_to_utf8(wstr);
+    }
+#else
     std::u16string ToUTF16(const std::string_view& str) {
         std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
         return utf16conv.from_bytes(str.data(), str.data() + str.size());
@@ -22,11 +40,6 @@ namespace GakumasLocal::Misc {
     std::string ToUTF8(const std::u16string_view& str) {
         std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
         return utf16conv.to_bytes(str.data(), str.data() + str.size());
-    }
-
-#ifdef GKMS_WINDOWS
-    std::string ToUTF8(const std::wstring_view& str) {
-		return utility::conversions::to_utf8string(str.data());
     }
 #endif
 

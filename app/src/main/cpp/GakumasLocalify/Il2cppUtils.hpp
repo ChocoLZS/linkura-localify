@@ -337,15 +337,21 @@ namespace Il2cppUtils {
                 lst_get_Item_method = il2cpp_class_get_method_from_name(list_klass, "get_Item", 1);
                 lst_set_Item_method = il2cpp_class_get_method_from_name(list_klass, "set_Item", 2);
                 lst_Add_method = il2cpp_class_get_method_from_name(list_klass, "Add", 1);
+                lst_Contains_method = il2cpp_class_get_method_from_name(list_klass, "Contains", 1);
 
                 lst_get_Count = reinterpret_cast<lst_get_Count_t>(lst_get_Count_method->methodPointer);
                 lst_get_Item = reinterpret_cast<lst_get_Item_t>(lst_get_Item_method->methodPointer);
                 lst_set_Item = reinterpret_cast<lst_set_Item_t>(lst_set_Item_method->methodPointer);
                 lst_Add = reinterpret_cast<lst_Add_t>(lst_Add_method->methodPointer);
+                lst_Contains = reinterpret_cast<lst_Contains_t>(lst_Contains_method->methodPointer);
             }
 
             void Add(T value) {
                 lst_Add(lst, value, lst_Add_method);
+            }
+
+            bool Contains(T value) {
+                return lst_Contains(lst, value, lst_Contains_method);
             }
 
             T get_Item(int index) {
@@ -401,16 +407,86 @@ namespace Il2cppUtils {
             typedef void(*lst_Add_t)(void*, T, void* mtd);
             typedef void(*lst_set_Item_t)(void*, int, T, void* mtd);
             typedef int(*lst_get_Count_t)(void*, void* mtd);
+            typedef bool(*lst_Contains_t)(void*, T, void* mtd);
 
             MethodInfo* lst_get_Item_method;
             MethodInfo* lst_Add_method;
             MethodInfo* lst_get_Count_method;
             MethodInfo* lst_set_Item_method;
+            MethodInfo* lst_Contains_method;
 
             lst_get_Item_t lst_get_Item;
             lst_set_Item_t lst_set_Item;
             lst_Add_t lst_Add;
             lst_get_Count_t lst_get_Count;
+            lst_Contains_t lst_Contains;
+        };
+
+
+        template <typename KT = void*, typename VT = void*>
+        class CSDictEditor {
+        public:
+            // @param dict: Dictionary instance.
+            // @param dictTypeStr: Reflection type. eg: "System.Collections.Generic.Dictionary`2[System.Int32, System.Int32]"
+            CSDictEditor(void* dict, const char* dictTypeStr) {
+                dic_klass = Il2cppUtils::get_system_class_from_reflection_type_str(dictTypeStr);
+				initDict(dict);
+            }
+
+            CSDictEditor(void* dict) {
+				dic_klass = get_class_from_instance(dict);
+				initDict(dict);
+            }
+
+            CSDictEditor(void* dict, void* dicClass) {
+                dic_klass = dicClass;
+				initDict(dict);
+            }
+
+            void Add(KT key, VT value) {
+                dic_Add(dict, key, value, Add_method);
+            }
+
+            bool ContainsKey(KT key) {
+                return dic_containsKey(dict, key, ContainsKey_method);
+            }
+
+            VT get_Item(KT key) {
+                return dic_get_Item(dict, key, get_Item_method);
+            }
+
+            VT operator[] (KT key) {
+                return get_Item(key);
+            }
+
+            void* dict;
+            void* dic_klass;
+
+        private:
+            void initDict(void* dict) {
+				// dic_klass = dicClass;
+                this->dict = dict;
+
+                get_Item_method = il2cpp_class_get_method_from_name(dic_klass, "get_Item", 1);
+                Add_method = il2cpp_class_get_method_from_name(dic_klass, "Add", 2);
+                ContainsKey_method = il2cpp_class_get_method_from_name(dic_klass, "ContainsKey", 1);
+
+                dic_get_Item = (dic_get_Item_t)get_Item_method->methodPointer;
+                dic_Add = (dic_Add_t)Add_method->methodPointer;
+                dic_containsKey = (dic_containsKey_t)ContainsKey_method->methodPointer;
+            }
+
+            typedef VT(*dic_get_Item_t)(void*, KT, void* mtd);
+            typedef VT(*dic_Add_t)(void*, KT, VT, void* mtd);
+            typedef VT(*dic_containsKey_t)(void*, KT, void* mtd);
+
+            CSDictEditor();
+            MethodInfo* get_Item_method;
+            MethodInfo* Add_method;
+            MethodInfo* ContainsKey_method;
+            dic_get_Item_t dic_get_Item;
+            dic_Add_t dic_Add;
+            dic_containsKey_t dic_containsKey;
         };
 
     }

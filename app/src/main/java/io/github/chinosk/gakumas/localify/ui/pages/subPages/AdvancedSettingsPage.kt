@@ -365,6 +365,8 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                             checked = config.value.unlockAllLiveCostume) {
                                 v -> context?.onUnlockAllLiveCostumeChanged(v)
                         }
+
+                        /*
                         HorizontalDivider(
                             thickness = 1.dp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
@@ -389,7 +391,7 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                             value = config.value.liveCustomeCostumeId,
                             onValueChange = { c -> context?.onLiveCustomeCostumeIdChanged(c, 0, 0, 0)},
                             label = { Text(stringResource(R.string.live_custome_dress_id)) }
-                        )
+                        )*/
                     }
                 }
             }

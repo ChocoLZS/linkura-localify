@@ -54,6 +54,8 @@ namespace GakumasLocal::Config {
     float bLimitZx = 1.0f;
     float bLimitZy = 1.0f;
 
+    bool dmmUnlockSize = false;
+
     void LoadConfig(const std::string& configStr) {
         try {
             const auto config = nlohmann::json::parse(configStr);
@@ -102,6 +104,7 @@ namespace GakumasLocal::Config {
             GetConfigItem(bLimitYy);
             GetConfigItem(bLimitZx);
             GetConfigItem(bLimitZy);
+            GetConfigItem(dmmUnlockSize);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -157,6 +160,7 @@ namespace GakumasLocal::Config {
             SetConfigItem(bLimitYy);
             SetConfigItem(bLimitZx);
             SetConfigItem(bLimitZy);
+            SetConfigItem(dmmUnlockSize);
 
             std::ofstream out(configPath);
             if (!out) {

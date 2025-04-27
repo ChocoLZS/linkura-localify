@@ -99,6 +99,18 @@ namespace GakumasLocal::HookMain {
         return GetResolution->Invoke<Il2cppUtils::Resolution_t>();
     }
 
+    Il2cppString* ToJsonStr(void* object) {
+        static Il2cppString* (*toJsonStr)(void*) = nullptr;
+		if (!toJsonStr) {
+			toJsonStr = reinterpret_cast<Il2cppString * (*)(void*)>(Il2cppUtils::GetMethodPointer("Newtonsoft.Json.dll", "Newtonsoft.Json",
+                "JsonConvert", "SerializeObject", { "*" }));
+        }
+        if (!toJsonStr) {
+			return nullptr;
+        }
+		return toJsonStr(object);
+    }
+
     DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
         if (Config::enableFreeCamera) {
             if (self == mainCameraCache) {
@@ -514,6 +526,26 @@ namespace GakumasLocal::HookMain {
         UpdateFont(self);
     }
 
+    DEFINE_HOOK(void, TMP_Text_SetText_2, (void* self, Il2cppString* sourceText, bool syncTextInputBox, void* mtd)) {
+		if (!sourceText) {
+			return TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
+		}
+		const std::string origText = sourceText->ToString();
+		std::string transText;
+		if (Local::GetGenericText(origText, &transText)) {
+			const auto newText = UnityResolve::UnityType::String::New(transText);
+			UpdateFont(self);
+			return TMP_Text_SetText_2_Orig(self, newText, syncTextInputBox, mtd);
+		}
+		if (Config::textTest) {
+			TMP_Text_SetText_2_Orig(self, UnityResolve::UnityType::String::New("[TS]" + sourceText->ToString()), syncTextInputBox, mtd);
+		}
+		else {
+			TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
+		}
+		UpdateFont(self);
+    }
+
     DEFINE_HOOK(void, TextMeshProUGUI_Awake, (void* self, void* method)) {
         // Log::InfoFmt("TextMeshProUGUI_Awake at %p, self at %p", TextMeshProUGUI_Awake_Orig, self);
 
@@ -683,24 +715,24 @@ namespace GakumasLocal::HookMain {
     }
 
 #ifdef GKMS_WINDOWS
-    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* retstr, void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
+    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* retstr, void* self, void* liveData, Il2cppString* characterId, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
         // Log::DebugFmt("PictureBookLiveThumbnailView_SetDataAsync: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d", isReleased, isUnlocked, isNew, hasLiveSkin);
         if (Config::dbgMode && Config::unlockAllLive) {
             isUnlocked = true;
             isReleased = true;
             hasLiveSkin = true;
         }
-        PictureBookLiveThumbnailView_SetDataAsync_Orig(retstr, self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
+        PictureBookLiveThumbnailView_SetDataAsync_Orig(retstr, self, liveData, characterId, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
     }
 #else
-    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* self, void* liveData, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
+    DEFINE_HOOK(void, PictureBookLiveThumbnailView_SetDataAsync, (void* self, void* liveData, Il2cppString* characterId, bool isReleased, bool isUnlocked, bool isNew, bool hasLiveSkin, void* ct, void* mtd)) {
         // Log::DebugFmt("PictureBookLiveThumbnailView_SetDataAsync: isReleased: %d, isUnlocked: %d, isNew: %d, hasLiveSkin: %d", isReleased, isUnlocked, isNew, hasLiveSkin);
         if (Config::dbgMode && Config::unlockAllLive) {
             isUnlocked = true;
             isReleased = true;
             hasLiveSkin = true;
         }
-        PictureBookLiveThumbnailView_SetDataAsync_Orig(self, liveData, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
+        PictureBookLiveThumbnailView_SetDataAsync_Orig(self, liveData, characterId, isReleased, isUnlocked, isNew, hasLiveSkin, ct, mtd);
     }
 #endif
 
@@ -845,6 +877,34 @@ namespace GakumasLocal::HookMain {
         return ret;
     }
 
+    void* getCompletedUniTask() {
+        static auto unitask_klass = Il2cppUtils::GetClass("UniTask.dll", "Cysharp.Threading.Tasks", "UniTask");
+        static auto CompletedTask_field = unitask_klass->Get<UnityResolve::Field>("CompletedTask");
+        auto ret = UnityResolve::Invoke<void*>("il2cpp_object_new", unitask_klass->address);
+        UnityResolve::Invoke<void>("il2cpp_field_static_get_value", CompletedTask_field->address, ret);
+        return ret;
+    }
+
+#ifdef GKMS_WINDOWS
+    // 绕过切歌时的等待以及网络请求
+    DEFINE_HOOK(void*, Produce_ViewPictureBookLiveAsync, (void* retstr, Il2cppString* musicId, Il2cppString* characterId,
+        void* ct, void* callOption, void* errorHandlerIl, Il2cppString* requestIdForResponseCache, void* mtd)) {
+
+        // Log::DebugFmt("Produce_ViewPictureBookLiveAsync: %s - %s", musicId->ToString().c_str(), characterId->ToString().c_str());
+        if (Config::unlockAllLive) return getCompletedUniTask();
+        return Produce_ViewPictureBookLiveAsync_Orig(retstr, musicId, characterId, ct, callOption, errorHandlerIl, requestIdForResponseCache, mtd);
+    }
+#else
+    DEFINE_HOOK(void*, Produce_ViewPictureBookLiveAsync, (Il2cppString* musicId, Il2cppString* characterId,
+        void* ct, void* callOption, void* errorHandlerIl, Il2cppString* requestIdForResponseCache, void* mtd)) {
+
+        // Log::DebugFmt("Produce_ViewPictureBookLiveAsync: %s - %s", musicId->ToString().c_str(), characterId->ToString().c_str());
+        if (Config::unlockAllLive) return getCompletedUniTask();
+        return Produce_ViewPictureBookLiveAsync_Orig(musicId, characterId, ct, callOption, errorHandlerIl, requestIdForResponseCache, mtd);
+    }
+#endif // GKMS_WINDOWS
+
+
     void* PictureBookWindowPresenter_instance = nullptr;
     std::string PictureBookWindowPresenter_charaId;
     DEFINE_HOOK(void*, PictureBookWindowPresenter_GetLiveMusics, (void* self, Il2cppString* charaId, void* mtd)) {
@@ -857,27 +917,59 @@ namespace GakumasLocal::HookMain {
             static auto PictureBookWindowPresenter_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.OutGame",
                                                                                  "PictureBookWindowPresenter");
             static auto existsMusicIds_field = PictureBookWindowPresenter_klass->Get<UnityResolve::Field>("_existsMusicIds");
-            auto existsMusicIds = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::List<Il2cppString*>*>(self, existsMusicIds_field);
+            // auto existsMusicIds = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::List<Il2cppString*>*>(self, existsMusicIds_field);
+            auto existsMusicIds = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Dictionary<Il2cppString*, UnityResolve::UnityType::List<Il2cppString*>>*>(self, existsMusicIds_field);
 
             if (!existsMusicIds) {
+                static auto Dict_List_String_klass = Il2cppUtils::get_system_class_from_reflection_type_str(
+                    "System.Collections.Generic.Dictionary`2[System.String, System.Collections.Generic.List`1[System.String]]");
                 static auto List_String_klass = Il2cppUtils::get_system_class_from_reflection_type_str(
-                        "System.Collections.Generic.List`1[System.String]");
+                    "System.Collections.Generic.List`1[System.String]");
                 static auto List_String_ctor_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(List_String_klass, ".ctor", 0);
                 static auto List_String_ctor = reinterpret_cast<void (*)(void*, void*)>(List_String_ctor_mtd->methodPointer);
 
-                auto newList = UnityResolve::Invoke<void*>("il2cpp_object_new", List_String_klass);
-                List_String_ctor(newList, List_String_ctor_mtd);
-                Il2cppUtils::Tools::CSListEditor<Il2cppString*> newListEditor(newList);
-
                 auto fullIds = GetIdolMusicIdAll();
 
+                static auto Dict_List_String_ctor_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(Dict_List_String_klass, ".ctor", 0);
+                static auto Dict_List_String_ctor = reinterpret_cast<void (*)(void*, void*)>(Dict_List_String_ctor_mtd->methodPointer);
+
+                auto newDict = UnityResolve::Invoke<void*>("il2cpp_object_new", Dict_List_String_klass);
+                Dict_List_String_ctor(newDict, Dict_List_String_ctor_mtd);
+                Il2cppUtils::Tools::CSDictEditor<Il2cppString*, void*> newDictEditor(newDict, Dict_List_String_klass);
+
+                // auto fullIds = GetIdolMusicIdAll();
+
                 for (auto& i : fullIds) {
-                    // Log::DebugFmt("GetLiveMusics - Add: %s", i.c_str());
-                    newListEditor.Add(Il2cppString::New(i));
+                    // Log::DebugFmt("GetLiveMusics - Add: %s", i.c_str());  // eg. music-all-amao-001, music-char-hski-001
+                    //newListEditor.Add(Il2cppString::New(i));
+					auto newList = UnityResolve::Invoke<void*>("il2cpp_object_new", List_String_klass);
+                    List_String_ctor(newList, List_String_ctor_mtd);
+					newDictEditor.Add(Il2cppString::New(i), newList);
                 }
-                Il2cppUtils::ClassSetFieldValue(self, existsMusicIds_field, newList);
+                Il2cppUtils::ClassSetFieldValue(self, existsMusicIds_field, newDict);
+                existsMusicIds = reinterpret_cast<decltype(existsMusicIds)>(newDict);
                 // Log::DebugFmt("GetLiveMusics - set end: %d", fullIds.size());
             }
+
+            /*
+            Il2cppUtils::Tools::CSDictEditor<Il2cppString*, void*> dicCheckEditor(existsMusicIds, Dict_List_String_klass);
+            for (auto& i : fullIds) {
+				auto currKeyStr = Il2cppString::New(i);
+                void* currList;
+                if (dicCheckEditor.ContainsKey(currKeyStr)) {
+					currList = dicCheckEditor.get_Item(currKeyStr);
+                }
+                else {
+					currList = UnityResolve::Invoke<void*>("il2cpp_object_new", List_String_klass);
+                    List_String_ctor(currList, List_String_ctor_mtd);
+                }
+                Il2cppUtils::Tools::CSListEditor<Il2cppString*> currListEditor(currList);
+                if (!currListEditor.Contains(charaId)) {
+                    currListEditor.Add(charaId);
+                }
+                
+            }*/
+
         }
 
         return PictureBookWindowPresenter_GetLiveMusics_Orig(self, charaId, mtd);
@@ -886,7 +978,7 @@ namespace GakumasLocal::HookMain {
     DEFINE_HOOK(void, PictureBookLiveSelectScreenModel_ctor, (void* self, void* transitionParam, UnityResolve::UnityType::List<void*>* musics, void* mtd)) {
         // Log::DebugFmt("PictureBookLiveSelectScreenModel_ctor");
 
-        if (Config::unlockAllLive) {
+        if (Config::dbgMode && Config::unlockAllLive) {
             static auto GetLiveMusics = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Campus.OutGame",
                                                                "PictureBookWindowPresenter", "GetLiveMusics");
             if (PictureBookWindowPresenter_instance && !PictureBookWindowPresenter_charaId.empty()) {
@@ -900,17 +992,16 @@ namespace GakumasLocal::HookMain {
     }
 
     bool needRestoreHides = false;
-    DEFINE_HOOK(void*, PictureBookLiveSelectScreenPresenter_MoveLiveScene, (void* self, void* produceLive,
-            Il2cppString* characterId, Il2cppString* idolCardId, Il2cppString* costumeId, Il2cppString* costumeHeadId, void* mtd)) {
+    DEFINE_HOOK(void*, PictureBookLiveSelectScreenPresenter_MoveLiveScene, (void* self, void* produceLive, bool isPlayCharacterFocusCamera, void* mtd)) {
         needRestoreHides = false;
-        Log::InfoFmt("MoveLiveScene: characterId: %s, idolCardId: %s, costumeId: %s, costumeHeadId: %s,",
-                     characterId->ToString().c_str(), idolCardId->ToString().c_str(), costumeId->ToString().c_str(), costumeHeadId->ToString().c_str());
+        // Log::InfoFmt("MoveLiveScene: characterId: %s, idolCardId: %s, costumeId: %s, costumeHeadId: %s,",
+        //              characterId->ToString().c_str(), idolCardId->ToString().c_str(), costumeId->ToString().c_str(), costumeHeadId->ToString().c_str());
 
         /*
          characterId: hski, costumeId: hski-cstm-0002, costumeHeadId: costume_head_hski-cstm-0002,
          characterId: shro, costumeId: shro-cstm-0006, costumeHeadId: costume_head_shro-cstm-0006,
          */
-
+        /*
         if (Config::dbgMode && Config::enableLiveCustomeDress) {
             // 修改 LiveFixedData_GetCharacter 可以更改 Loading 角色和演唱者名字，而不变更实际登台人
             return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId, idolCardId,
@@ -918,8 +1009,9 @@ namespace GakumasLocal::HookMain {
                                                                            Config::liveCustomeHeadId.empty() ? costumeHeadId : Il2cppString::New(Config::liveCustomeHeadId),
                                                                            mtd);
         }
-
-        return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId, idolCardId, costumeId, costumeHeadId, mtd);
+         */
+        // return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, characterId, idolCardId, costumeId, costumeHeadId, mtd);
+        return PictureBookLiveSelectScreenPresenter_MoveLiveScene_Orig(self, produceLive, isPlayCharacterFocusCamera, mtd);
     }
 
     // std::string lastMusicId;
@@ -1240,6 +1332,70 @@ namespace GakumasLocal::HookMain {
         return ret;
     }
 
+#ifdef GKMS_WINDOWS
+    // DMM Only
+    DEFINE_HOOK(void*, WindowHandle_SetWindowLong, (int32_t nIndex, intptr_t dwNewLong, void* mtd)) {
+        if (GakumasLocal::Config::dmmUnlockSize) {
+            // Log::DebugFmt("WindowHandle_SetWindowLong: %d, %p\n", nIndex, dwNewLong);
+
+            if (nIndex == GWLP_WNDPROC) {
+                return 0;
+            }
+        }
+
+		return WindowHandle_SetWindowLong_Orig(nIndex, dwNewLong, mtd);
+    }
+
+    // DMM Only
+	void SetResolution(int width, int height, bool fullscreen) {
+		static auto Screen_SetResolution = reinterpret_cast<void (*)(UINT, UINT, UINT, void*)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate&)"));
+
+        int64_t v8[3];
+        v8[0] = 0x100000000LL;
+		Screen_SetResolution(width, height, 2 * !fullscreen + 1, v8);
+	}
+
+    // DMM Only
+    DEFINE_HOOK(void, WindowManager_ApplyOrientationSettings, (int orientation, void* method)) {
+        if (!GakumasLocal::Config::dmmUnlockSize) return WindowManager_ApplyOrientationSettings_Orig(orientation, method);
+
+        static auto get_Height = reinterpret_cast<int (*)()>(Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::get_height()"));
+        static auto get_Width = reinterpret_cast<int (*)()>(Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::get_width()"));
+
+		static auto lastWidth = -1;
+		static auto lastHeight = -1;
+
+		const auto currWidth = get_Width();
+		const auto currHeight = get_Height();
+
+        if (lastWidth == -1) {
+			lastWidth = currWidth;
+			lastHeight = currHeight;
+            return;
+		}
+
+		const bool lastIsPortrait = lastWidth < lastHeight;
+		const bool currIsPortrait = currWidth < currHeight;
+        if (lastIsPortrait == currIsPortrait) {
+            lastWidth = currWidth;
+            lastHeight = currHeight;
+            return;
+        }
+
+		SetResolution(lastWidth, lastHeight, false);
+		lastWidth = currWidth;
+		lastHeight = currHeight;
+
+		Log::DebugFmt("WindowManager_ApplyOrientationSettings: %d (%d, %d)\n", orientation, get_Width(), get_Height());
+    }
+
+    // DMM Only
+    DEFINE_HOOK(void, AspectRatioHandler_NudgeWindow, (void* method)) {
+		if (!GakumasLocal::Config::dmmUnlockSize) return AspectRatioHandler_NudgeWindow_Orig(method);
+		// printf("AspectRatioHandler_NudgeWindow\n");
+    }
+#endif
 
     void UpdateSwingBreastBonesData(void* initializeData) {
         if (!Config::enableBreastParam) return;
@@ -1444,6 +1600,9 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(TMP_Text_PopulateTextBackingArray, Il2cppUtils::GetMethodPointer("Unity.TextMeshPro.dll", "TMPro",
                                                                   "TMP_Text", "PopulateTextBackingArray",
                                                                   {"System.String", "System.Int32", "System.Int32"}));
+        ADD_HOOK(TMP_Text_SetText_2, Il2cppUtils::GetMethodPointer("Unity.TextMeshPro.dll", "TMPro",
+            "TMP_Text", "SetText",
+            { "System.String", "System.Boolean" }));
 
         ADD_HOOK(TextField_set_value, Il2cppUtils::GetMethodPointer("UnityEngine.UIElementsModule.dll", "UnityEngine.UIElements",
                                                                   "TextField", "set_value"));
@@ -1537,6 +1696,10 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(PictureBookWindowPresenter_GetLiveMusics,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookWindowPresenter", "GetLiveMusics"));
+        
+        ADD_HOOK(Produce_ViewPictureBookLiveAsync,
+            Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "",
+                "Produce", "ViewPictureBookLiveAsync"));
         ADD_HOOK(PictureBookLiveSelectScreenModel_ctor,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookLiveSelectScreenModel", ".ctor"));
@@ -1634,6 +1797,32 @@ namespace GakumasLocal::HookMain {
                                                                      "RenderPipeline", "EndCameraRendering"));
 
 #ifdef GKMS_WINDOWS
+        ADD_HOOK(WindowHandle_SetWindowLong, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+            "WindowHandle", "SetWindowLong"));
+        //ADD_HOOK(WindowHandle_SetWindowLong32, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+        //    "WindowHandle", "SetWindowLong32"));
+        //ADD_HOOK(WindowHandle_SetWindowLongPtr64, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+        //    "WindowHandle", "SetWindowLongPtr64"));
+        //ADD_HOOK(WindowSizeUtility_RestoreWindowSize, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+        //    "WindowSizeUtility", "RestoreWindowSize"));
+        ADD_HOOK(WindowManager_ApplyOrientationSettings, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+            "WindowManager", "ApplyOrientationSettings"));
+        ADD_HOOK(AspectRatioHandler_NudgeWindow, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+            "AspectRatioHandler", "NudgeWindow"));
+        //ADD_HOOK(AspectRatioHandler_WindowProc, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
+        //    "AspectRatioHandler", "WindowProc"));
+
+        if (GakumasLocal::Config::dmmUnlockSize) {
+			std::thread([]() {
+				std::this_thread::sleep_for(std::chrono::seconds(3));
+                    auto hWnd = FindWindowW(L"UnityWndClass", L"gakumas");
+                    // 添加可调整大小的边框和最大化按钮
+                    LONG style = GetWindowLong(hWnd, GWL_STYLE);
+                    style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
+                    SetWindowLong(hWnd, GWL_STYLE, style);
+				}).detach();
+        }
+
         g_extra_assetbundle_paths.push_back((gakumasLocalPath / "local-files/gakumasassets").string());
 		LoadExtraAssetBundle();
 		GkmsResourceUpdate::CheckUpdateFromAPI(false);

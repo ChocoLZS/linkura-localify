@@ -16,7 +16,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 12
-        versionName "v3.0.0"
+        versionName "v3.0.4"
         buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

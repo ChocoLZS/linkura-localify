@@ -17,6 +17,8 @@
 #include "BaseDefine.h"
 #include "string_parser/StringParser.hpp"
 
+// #include "cpprest/details/http_helpers.h"
+
 
 namespace GakumasLocal::Local {
     std::unordered_map<std::string, std::string> i18nData{};
@@ -249,7 +251,7 @@ namespace GakumasLocal::Local {
     }
 
     bool GetSplitTagsTranslation(const std::string& origText, std::string* newText, std::vector<std::string>& unTransResultRet) {
-        if (!origText.contains(L'<')) return false;
+        if (!origText.contains('<')) return false;
         const auto splitResult = SplitByTags(origText);
         if (splitResult.empty()) return false;
 
@@ -289,10 +291,18 @@ namespace GakumasLocal::Local {
 
         std::u16string currentWaitingReplaceText;
 
+#ifdef GKMS_WINDOWS
+#define checkCurrentWaitingReplaceTextAndClear() \
+    if (!currentWaitingReplaceText.empty()) { \
+        auto trimmed = trim(Misc::ToUTF8(currentWaitingReplaceText)); \
+        waitingReplaceTexts.push_back(trimmed); \
+        currentWaitingReplaceText.clear(); }
+#else
 #define checkCurrentWaitingReplaceTextAndClear() \
     if (!currentWaitingReplaceText.empty()) { \
         waitingReplaceTexts.push_back(Misc::ToUTF8(currentWaitingReplaceText)); \
         currentWaitingReplaceText.clear(); }
+#endif
 
         for (char16_t currChar : origText) {
             if (currChar == u'<') {
