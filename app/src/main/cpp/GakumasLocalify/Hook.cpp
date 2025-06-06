@@ -895,12 +895,12 @@ namespace GakumasLocal::HookMain {
         return Produce_ViewPictureBookLiveAsync_Orig(retstr, musicId, characterId, ct, callOption, errorHandlerIl, requestIdForResponseCache, mtd);
     }
 #else
-    DEFINE_HOOK(void*, Produce_ViewPictureBookLiveAsync, (Il2cppString* musicId, Il2cppString* characterId,
-        void* ct, void* callOption, void* errorHandlerIl, Il2cppString* requestIdForResponseCache, void* mtd)) {
+    DEFINE_HOOK(void*, Produce_ViewPictureBookLiveAsync, (void* retstr, void* musicId, void* characterId,
+        void* ct, void* callOption, void* errorHandlerIl, void* requestIdForResponseCache, void* mtd, void* wenhao)) {
 
         // Log::DebugFmt("Produce_ViewPictureBookLiveAsync: %s - %s", musicId->ToString().c_str(), characterId->ToString().c_str());
         if (Config::unlockAllLive) return getCompletedUniTask();
-        return Produce_ViewPictureBookLiveAsync_Orig(musicId, characterId, ct, callOption, errorHandlerIl, requestIdForResponseCache, mtd);
+        return Produce_ViewPictureBookLiveAsync_Orig(retstr, musicId, characterId, ct, callOption, errorHandlerIl, requestIdForResponseCache, mtd, wenhao);
     }
 #endif // GKMS_WINDOWS
 
@@ -1696,10 +1696,13 @@ namespace GakumasLocal::HookMain {
         ADD_HOOK(PictureBookWindowPresenter_GetLiveMusics,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookWindowPresenter", "GetLiveMusics"));
-        
+
+#ifdef GKMS_WINDOWS
+        // 跳过切歌Loading，安卓端会崩溃
         ADD_HOOK(Produce_ViewPictureBookLiveAsync,
             Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "",
                 "Produce", "ViewPictureBookLiveAsync"));
+#endif
         ADD_HOOK(PictureBookLiveSelectScreenModel_ctor,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.OutGame",
                                                "PictureBookLiveSelectScreenModel", ".ctor"));
