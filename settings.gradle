@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Gakumas Localify"
+rootProject.name = "Linkura Localify"
 include ':app'

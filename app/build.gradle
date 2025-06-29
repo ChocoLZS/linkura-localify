@@ -7,12 +7,12 @@ plugins {
 }
 
 android {
-    namespace 'io.github.chinosk.gakumas.localify'
+    namespace 'io.github.chocolzs.linkura.localify'
     compileSdk 34
     ndkVersion "26.3.11579264"
 
     defaultConfig {
-        applicationId "io.github.chinosk.gakumas.localify"
+        applicationId "io.github.chocolzs.linkura.localify"
         minSdk 29
         targetSdk 34
         versionCode 12
@@ -75,10 +75,10 @@ android {
     applicationVariants.configureEach { variant ->
         variant.mergeAssetsProvider.configure { mergeAssetsTask ->
             mergeAssetsTask.doLast {
-                delete(fileTree(dir: mergeAssetsTask.outputDir, includes: ['gakumas-local/gakuen-adapted-translation-data/**',
-                                                                           'gakumas-local/GakumasPreTranslation/**',
-                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
-                                                                           'gakumas-local/raw/**']))
+//                delete(fileTree(dir: mergeAssetsTask.outputDir, includes: ['gakumas-local/gakuen-adapted-translation-data/**',
+//                                                                           'gakumas-local/GakumasPreTranslation/**',
+//                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
+//                                                                           'gakumas-local/raw/**']))
             }
         }
     }

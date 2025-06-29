@@ -36,7 +36,7 @@
 
         <meta-data
             android:name="xposedscope"
-            android:value="com.bandainamcoent.idolmaster_gakuen" />
+            android:value="com.oddno.lovelive" />
 
         <activity
             android:name=".MainActivity"

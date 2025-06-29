@@ -38,7 +38,7 @@
     <string name="advanced_settings">高度な設定</string>
     <string name="androidx_startup">androidx.startup</string>
     <string name="api_addr">API アドレス (GitHub 最新リリース API)</string>
-    <string name="app_name">Gakumas Localify</string>
+    <string name="app_name">Linkura Localify</string>
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
     <string name="average">平均</string>
     <string name="axisx_x">X 軸.x</string>
@@ -95,7 +95,7 @@
     <string name="fab_transformation_scrim_behavior">com.google.android.material.transformation.FabTransformationScrimBehavior</string>
     <string name="fab_transformation_sheet_behavior">com.google.android.material.transformation.FabTransformationSheetBehavior</string>
     <string name="force_export_resource">リソースの更新を強制する</string>
-    <string name="gakumas_localify">Gakumas Localify</string>
+    <string name="gakumas_localify">Linkura Localify</string>
     <string name="game_patch">ゲームパッチ</string>
     <string name="graphic_settings">グラフィック設定</string>
     <string name="hide_bottom_view_on_scroll_behavior">com.google.android.material.behavior.HideBottomViewOnScrollBehavior</string>

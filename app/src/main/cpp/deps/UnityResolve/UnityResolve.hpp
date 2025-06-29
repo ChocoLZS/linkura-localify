@@ -44,8 +44,8 @@
 #endif
 
 #include "xdl.h"
-#include "../../GakumasLocalify/Log.h"
-#include "../../GakumasLocalify/Misc.hpp"
+#include "../../LinkuraLocalify/Log.h"
+#include "../../LinkuraLocalify/Misc.hpp"
 
 class UnityResolveProgress final {
 public:
