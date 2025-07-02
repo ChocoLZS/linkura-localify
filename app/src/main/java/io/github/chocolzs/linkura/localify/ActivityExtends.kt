@@ -5,7 +5,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import io.github.chocolzs.linkura.localify.mainUtils.json
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfigSerializer
 import kotlinx.serialization.SerializationException
@@ -13,7 +13,7 @@ import java.io.File
 
 
 interface IHasConfigItems {
-    var config: GakumasConfig
+    var config: LinkuraConfig
     var programConfig: ProgramConfig
 
     fun saveConfig() {}  // do nothing
@@ -61,10 +61,10 @@ fun <T> T.getProgramConfigContent(
 fun <T> T.loadConfig() where T : Activity, T : IHasConfigItems {
     val configStr = getConfigContent()
     config = try {
-        json.decodeFromString<GakumasConfig>(configStr)
+        json.decodeFromString<LinkuraConfig>(configStr)
     } catch (e: SerializationException) {
         Toast.makeText(this, "配置文件异常: $e", Toast.LENGTH_SHORT).show()
-        GakumasConfig()
+        LinkuraConfig()
     }
     saveConfig()
 

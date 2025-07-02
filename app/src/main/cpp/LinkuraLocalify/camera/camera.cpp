@@ -25,7 +25,7 @@ namespace GKCamera {
     float l_sensitivity = 0.5f;
     float r_sensitivity = 0.5f;
     bool showToast = true;
-    GakumasLocal::Misc::CSEnum bodyPartsEnum("Head", 0xa);
+    LinkuraLocal::Misc::CSEnum bodyPartsEnum("Head", 0xa);
 
 	// bool rMousePressFlg = false;
 
@@ -178,15 +178,15 @@ namespace GKCamera {
         switch (cameraMode) {
             case CameraMode::FREE: {
                 cameraMode = CameraMode::FOLLOW;
-                GakumasLocal::Log::Info("CameraMode: FOLLOW");
+                LinkuraLocal::Log::Info("CameraMode: FOLLOW");
             } break;
             case CameraMode::FOLLOW: {
                 cameraMode = CameraMode::FIRST_PERSON;
-                GakumasLocal::Log::Info("CameraMode: FIRST_PERSON");
+                LinkuraLocal::Log::Info("CameraMode: FIRST_PERSON");
             } break;
             case CameraMode::FIRST_PERSON: {
                 cameraMode = CameraMode::FREE;
-                GakumasLocal::Log::Info("CameraMode: FREE");
+                LinkuraLocal::Log::Info("CameraMode: FREE");
 
             } break;
         }
@@ -197,22 +197,22 @@ namespace GKCamera {
             case CameraMode::FIRST_PERSON: {
                 if (firstPersonRoll == FirstPersonRoll::ENABLE_ROLL) {
                     firstPersonRoll = FirstPersonRoll::DISABLE_ROLL;
-                    GakumasLocal::Log::Info("FirstPersonRoll: DISABLE_ROLL");
+                    LinkuraLocal::Log::Info("FirstPersonRoll: DISABLE_ROLL");
                 }
                 else {
                     firstPersonRoll = FirstPersonRoll::ENABLE_ROLL;
-                    GakumasLocal::Log::Info("FirstPersonRoll: ENABLE_ROLL");
+                    LinkuraLocal::Log::Info("FirstPersonRoll: ENABLE_ROLL");
                 }
             } break;
 
             case CameraMode::FOLLOW: {
                 if (followModeY == FollowModeY::APPLY_Y) {
                     followModeY = FollowModeY::SMOOTH_Y;
-                    GakumasLocal::Log::Info("FollowModeY: SMOOTH_Y");
+                    LinkuraLocal::Log::Info("FollowModeY: SMOOTH_Y");
                 }
                 else {
                     followModeY = FollowModeY::APPLY_Y;
-                    GakumasLocal::Log::Info("FollowModeY: APPLY_Y");
+                    LinkuraLocal::Log::Info("FollowModeY: APPLY_Y");
                 }
             } break;
 
@@ -235,14 +235,14 @@ namespace GKCamera {
     void OnUpDown() {
         if (cameraMode == CameraMode::FOLLOW) {
             const auto currPart = bodyPartsEnum.Last();
-            GakumasLocal::Log::InfoFmt("Look at: %s (0x%x)", currPart.first.c_str(), currPart.second);
+            LinkuraLocal::Log::InfoFmt("Look at: %s (0x%x)", currPart.first.c_str(), currPart.second);
         }
     }
 
     void OnDownDown() {
         if (cameraMode == CameraMode::FOLLOW) {
             const auto currPart = bodyPartsEnum.Next();
-            GakumasLocal::Log::InfoFmt("Look at: %s (0x%x)", currPart.first.c_str(), currPart.second);
+            LinkuraLocal::Log::InfoFmt("Look at: %s (0x%x)", currPart.first.c_str(), currPart.second);
         }
     }
 
@@ -260,7 +260,7 @@ namespace GKCamera {
 
     void ShowToast(const char *text) {
         if (showToast) {
-            GakumasLocal::Log::ShowToast(text);
+            LinkuraLocal::Log::ShowToast(text);
         }
     }
 
@@ -306,7 +306,7 @@ namespace GKCamera {
         if (cameraMode == CameraMode::FOLLOW) {
             const auto currPart = bodyPartsEnum.Next();
             if (showToast) {
-                GakumasLocal::Log::ShowToastFmt("Look at: %s (0x%x)", currPart.first.c_str(),
+                LinkuraLocal::Log::ShowToastFmt("Look at: %s (0x%x)", currPart.first.c_str(),
                                                 currPart.second);
             }
         } else {
@@ -318,7 +318,7 @@ namespace GKCamera {
         if (cameraMode == CameraMode::FOLLOW) {
             const auto currPart = bodyPartsEnum.Last();
             if (showToast) {
-                GakumasLocal::Log::ShowToastFmt("Look at: %s (0x%x)", currPart.first.c_str(),
+                LinkuraLocal::Log::ShowToastFmt("Look at: %s (0x%x)", currPart.first.c_str(),
                                                 currPart.second);
             }
         } else {
@@ -330,7 +330,7 @@ namespace GKCamera {
         if (cameraMode == CameraMode::FOLLOW) {
             OnLeftDown();
             if (showToast) {
-                GakumasLocal::Log::ShowToastFmt("Look at position: %d", followCharaIndex);
+                LinkuraLocal::Log::ShowToastFmt("Look at position: %d", followCharaIndex);
             }
         } else {
             l_sensitivity *= 0.8f;
@@ -341,7 +341,7 @@ namespace GKCamera {
         if (cameraMode == CameraMode::FOLLOW) {
             OnRightDown();
             if (showToast) {
-                GakumasLocal::Log::ShowToastFmt("Look at position: %d", followCharaIndex);
+                LinkuraLocal::Log::ShowToastFmt("Look at position: %d", followCharaIndex);
             }
         } else {
             l_sensitivity *= 1.2f;
@@ -407,7 +407,7 @@ namespace GKCamera {
     }
 
     float CheckNewY(const UnityResolve::UnityType::Vector3& targetPos, const bool recordY,
-                    GakumasLocal::Misc::FixedSizeQueue<float>& recordsY) {
+                    LinkuraLocal::Misc::FixedSizeQueue<float>& recordsY) {
         const auto currentY = targetPos.y;
         static auto lastRetY = currentY;
 
@@ -417,7 +417,7 @@ namespace GKCamera {
         }
 
         const auto currentAvg = recordsY.Average();
-        // GakumasLocal::Log::DebugFmt("currentY: %f, currentAvg: %f, diff: %f", currentY, currentAvg, abs(currentY - currentAvg));
+        // LinkuraLocal::Log::DebugFmt("currentY: %f, currentAvg: %f, diff: %f", currentY, currentAvg, abs(currentY - currentAvg));
 
         if (recordY) {
             recordsY.Push(currentY);
@@ -435,7 +435,7 @@ namespace GKCamera {
     UnityResolve::UnityType::Vector3 CalcFollowModeLookAt(const UnityResolve::UnityType::Vector3& targetPos,
                                                           const UnityResolve::UnityType::Vector3& posOffset,
                                                           const bool recordY) {
-        static GakumasLocal::Misc::FixedSizeQueue<float> recordsY(60);
+        static LinkuraLocal::Misc::FixedSizeQueue<float> recordsY(60);
 
         const float angleX = posOffset.x;
         const float angleRad = (angleX + (followPosOffset.z >= 0 ? 90.0f : -90.0f)) * (M_PI / 180.0f);
@@ -729,7 +729,7 @@ namespace GKCamera {
             JDadDown();
         }
 
-//        GakumasLocal::Log::InfoFmt(
+//        LinkuraLocal::Log::InfoFmt(
 //                "Motion event: action=%d, leftStickX=%.2f, leftStickY=%.2f, rightStickX=%.2f, rightStickY=%.2f, leftTrigger=%.2f, rightTrigger=%.2f, hatX=%.2f, hatY=%.2f",
 //                message, leftStickX, leftStickY, rightStickX, rightStickY, leftTrigger,
 //                rightTrigger, hatX, hatY);

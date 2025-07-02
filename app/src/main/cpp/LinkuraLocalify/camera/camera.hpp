@@ -28,10 +28,10 @@ namespace GKCamera {
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;
     extern UnityResolve::UnityType::Vector3 followPosOffset;
     extern int followCharaIndex;
-    extern GakumasLocal::Misc::CSEnum bodyPartsEnum;
+    extern LinkuraLocal::Misc::CSEnum bodyPartsEnum;
 
     float CheckNewY(const UnityResolve::UnityType::Vector3& targetPos, const bool recordY,
-                    GakumasLocal::Misc::FixedSizeQueue<float>& recordsY);
+                    LinkuraLocal::Misc::FixedSizeQueue<float>& recordsY);
 
     UnityResolve::UnityType::Vector3 CalcPositionFromLookAt(const UnityResolve::UnityType::Vector3& target,
                                                             const UnityResolve::UnityType::Vector3& offset);

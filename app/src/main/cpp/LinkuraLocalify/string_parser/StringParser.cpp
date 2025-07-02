@@ -42,7 +42,7 @@ namespace StringParser {
             result.isValid = false;
             return result;
         }
-        std::u16string origText = GakumasLocal::Misc::ToUTF16(str);
+        std::u16string origText = LinkuraLocal::Misc::ToUTF16(str);
         bool isInTag = false;
         bool isInFlagSequence = false;
         std::u16string currentCacheText;
@@ -51,7 +51,7 @@ namespace StringParser {
             if (parseTags && currChar == u'<') {
                 if (!currentCacheText.empty()) {
                     result.items.push_back({isInFlagSequence ? ParseItemType::FLAG : ParseItemType::TEXT,
-                                            GakumasLocal::Misc::ToUTF8(currentCacheText)});
+                                            LinkuraLocal::Misc::ToUTF8(currentCacheText)});
                     currentCacheText.clear();
                     isInFlagSequence = false;
                 }
@@ -60,20 +60,20 @@ namespace StringParser {
             } else if (parseTags && currChar == u'>') {
                 isInTag = false;
                 currentCacheText.push_back(currChar);
-                result.items.push_back({ParseItemType::FLAG, GakumasLocal::Misc::ToUTF8(currentCacheText)});
+                result.items.push_back({ParseItemType::FLAG, LinkuraLocal::Misc::ToUTF8(currentCacheText)});
                 currentCacheText.clear();
             } else if (isInTag) {
                 currentCacheText.push_back(currChar);
             } else if (splitFlags.contains(currChar)) {
                 if (!isInFlagSequence && !currentCacheText.empty()) {
-                    result.items.push_back({ParseItemType::TEXT, GakumasLocal::Misc::ToUTF8(currentCacheText)});
+                    result.items.push_back({ParseItemType::TEXT, LinkuraLocal::Misc::ToUTF8(currentCacheText)});
                     currentCacheText.clear();
                 }
                 isInFlagSequence = true;
                 currentCacheText.push_back(currChar);
             } else {
                 if (isInFlagSequence && !currentCacheText.empty()) {
-                    result.items.push_back({ParseItemType::FLAG, GakumasLocal::Misc::ToUTF8(currentCacheText)});
+                    result.items.push_back({ParseItemType::FLAG, LinkuraLocal::Misc::ToUTF8(currentCacheText)});
                     currentCacheText.clear();
                     isInFlagSequence = false;
                 }
@@ -83,7 +83,7 @@ namespace StringParser {
 
         if (!currentCacheText.empty()) {
             result.items.push_back({isInFlagSequence ? ParseItemType::FLAG : ParseItemType::TEXT,
-                                    GakumasLocal::Misc::ToUTF8(currentCacheText)});
+                                    LinkuraLocal::Misc::ToUTF8(currentCacheText)});
         }
 
         for (auto& i : result.items) {
@@ -100,14 +100,14 @@ namespace StringParser {
         if (!valueTarget.isValid) return "";
         const auto fmtText = textTarget.ToFmtString();
         const auto values = valueTarget.GetFlagValues();
-        const std::string ret = GakumasLocal::Misc::StringFormat::stringFormatString(fmtText, values);
+        const std::string ret = LinkuraLocal::Misc::StringFormat::stringFormatString(fmtText, values);
         return {ret.begin(), ret.end()};
     }
 
     std::string ParseItems::MergeText(const std::string &newStr) {
         if (!isValid) return "";
         const auto values = GetFlagValues();
-        return GakumasLocal::Misc::StringFormat::stringFormatString(newStr, values);
+        return LinkuraLocal::Misc::StringFormat::stringFormatString(newStr, values);
     }
 
     int ParseItems::GetFlagCount() {

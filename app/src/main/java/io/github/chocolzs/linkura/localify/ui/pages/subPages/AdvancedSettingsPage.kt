@@ -31,7 +31,7 @@ import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.getConfigState
 import io.github.chocolzs.linkura.localify.models.BreastCollapsibleBoxViewModel
 import io.github.chocolzs.linkura.localify.models.BreastCollapsibleBoxViewModelFactory
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.base.CollapsibleBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
@@ -41,7 +41,7 @@ import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
 @Composable
 fun AdvanceSettingsPage(modifier: Modifier = Modifier,
              context: MainActivity? = null,
-             previewData: GakumasConfig? = null,
+             previewData: LinkuraConfig? = null,
              bottomSpacerHeight: Dp = 120.dp,
              screenH: Dp = 1080.dp) {
     val config = getConfigState(context, previewData)
@@ -406,6 +406,6 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
 @Composable
-fun AdvanceSettingsPagePreview(modifier: Modifier = Modifier, data: GakumasConfig = GakumasConfig()) {
+fun AdvanceSettingsPagePreview(modifier: Modifier = Modifier, data: LinkuraConfig = LinkuraConfig()) {
     AdvanceSettingsPage(modifier, previewData = data)
 }

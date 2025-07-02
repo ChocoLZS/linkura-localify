@@ -49,7 +49,7 @@ import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.mainUtils.FileDownloader
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.TimeUtils
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.models.ResourceCollapsibleBoxViewModel
 import io.github.chocolzs.linkura.localify.models.ResourceCollapsibleBoxViewModelFactory
 import io.github.chocolzs.linkura.localify.ui.components.base.CollapsibleBox
@@ -64,7 +64,7 @@ import java.io.File
 @Composable
 fun HomePage(modifier: Modifier = Modifier,
              context: MainActivity? = null,
-             previewData: GakumasConfig? = null,
+             previewData: LinkuraConfig? = null,
              bottomSpacerHeight: Dp = 120.dp,
              screenH: Dp = 1080.dp) {
     val config = getConfigState(context, previewData)
@@ -664,6 +664,6 @@ fun HomePage(modifier: Modifier = Modifier,
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
 @Composable
-fun HomePagePreview(modifier: Modifier = Modifier, data: GakumasConfig = GakumasConfig()) {
+fun HomePagePreview(modifier: Modifier = Modifier, data: LinkuraConfig = LinkuraConfig()) {
     HomePage(modifier, previewData = data)
 }

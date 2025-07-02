@@ -14,8 +14,8 @@
         }                                                                                          \
         else {                                                                                     \
             hookedStubs.emplace(stub);                                                             \
-            GakumasLocal::Log::InfoFmt("ADD_HOOK: %s at %p", #name, addr);                         \
+            LinkuraLocal::Log::InfoFmt("ADD_HOOK: %s at %p", #name, addr);                         \
         }                                                                                          \
     }                                                                                              \
-    else GakumasLocal::Log::ErrorFmt("Hook failed: %s is NULL", #name, addr);                      \
+    else LinkuraLocal::Log::ErrorFmt("Hook failed: %s is NULL", #name, addr);                      \
     if (Config::lazyInit) UnityResolveProgress::classProgress.current++

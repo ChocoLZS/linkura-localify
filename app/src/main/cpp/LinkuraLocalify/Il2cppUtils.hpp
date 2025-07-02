@@ -122,12 +122,12 @@ namespace Il2cppUtils {
                    const std::string& className) {
         const auto assembly = UnityResolve::Get(assemblyName);
         if (!assembly) {
-            Log::ErrorFmt("GetMethodPointer error: assembly %s not found.", assemblyName.c_str());
+            Log::ErrorFmt("GetClass error: assembly %s not found.", assemblyName.c_str());
             return nullptr;
         }
         const auto pClass = assembly->Get(className, nameSpaceName);
         if (!pClass) {
-            Log::ErrorFmt("GetMethodPointer error: Class %s::%s not found.", nameSpaceName.c_str(), className.c_str());
+            Log::ErrorFmt("GetClass error: Class %s::%s not found.", nameSpaceName.c_str(), className.c_str());
             return nullptr;
         }
         return pClass;
@@ -214,6 +214,33 @@ namespace Il2cppUtils {
         return 0;
     }
 
+    static void* GetClassIl2cpp(const std::string& assemblyName, const std::string& nameSpaceName,
+                                const std::string& className) {
+        const auto assembly = UnityResolve::Get(assemblyName);
+        if (!assembly) {
+            Log::ErrorFmt("GetClassIl2cpp error: assembly %s not found.", assemblyName.c_str());
+            return nullptr;
+        }
+        const auto image = UnityResolve::Invoke<void*>("il2cpp_assembly_get_image", assembly->address);
+        if (!image) {
+            Log::ErrorFmt("GetClassIl2cpp error: assembly %s not found.", assemblyName.c_str());
+            return nullptr;
+        }
+        return UnityResolve::Invoke<void*>("il2cpp_class_from_name", image, nameSpaceName.c_str(), className.c_str());
+    }
+    static MethodInfo* GetMethodIl2cpp(const char* assemblyName, const char* nameSpaceName,
+                                                 const char* className, const char* methodName, const int argsCount) {
+        auto klass = GetClassIl2cpp(assemblyName, nameSpaceName, className);
+        if (!klass) {
+            Log::ErrorFmt("GetMethodIl2cpp error: Class %s::%s not found.", nameSpaceName, className);
+            return nullptr;
+        }
+        return il2cpp_class_get_method_from_name(klass, methodName, argsCount);
+    }
+    static MethodInfo* GetMethodIl2cpp(void* klass, const char* methodName, const int argsCount) {
+        return il2cpp_class_get_method_from_name(klass, methodName, argsCount);
+    }
+
     static void* find_nested_class(void* klass, std::predicate<void*> auto&& predicate) {
         void* iter{};
         while (const auto curNestedClass = UnityResolve::Invoke<void*>("il2cpp_class_get_nested_types", klass, &iter))
@@ -229,6 +256,7 @@ namespace Il2cppUtils {
 
     static void* find_nested_class_from_name(void* klass, const char* name) {
         return find_nested_class(klass, [name = std::string_view(name)](void* nestedClass) {
+            // TODO, Regex or match
             return static_cast<Il2CppClassHead*>(nestedClass)->name == name;
         });
     }

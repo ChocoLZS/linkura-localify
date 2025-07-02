@@ -39,14 +39,14 @@ import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.TAG
 import io.github.chocolzs.linkura.localify.getMainUIConfirmState
 import io.github.chocolzs.linkura.localify.getProgramConfigState
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupConfirm
 import io.github.chocolzs.linkura.localify.ui.theme.GakumasLocalifyTheme
 
 
 @Composable
 fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
-           previewData: GakumasConfig? = null) {
+           previewData: LinkuraConfig? = null) {
     val imagePainter = painterResource(R.drawable.bg_pattern)
     var versionInfo by remember {
         mutableStateOf(context?.getVersion() ?: listOf("", "Unknown"))
@@ -139,7 +139,7 @@ fun imageRepeater(
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO, widthDp = 380)
 @Composable
 fun MainUIPreview(modifier: Modifier = Modifier) {
-    val previewConfig = GakumasConfig()
+    val previewConfig = LinkuraConfig()
     previewConfig.enabled = true
 
     GakumasLocalifyTheme {

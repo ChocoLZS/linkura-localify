@@ -21,7 +21,7 @@ UnityResolveProgress::Progress UnityResolveProgress::classProgress{};
 
 namespace
 {
-    class AndroidHookInstaller : public GakumasLocal::HookInstaller
+    class AndroidHookInstaller : public LinkuraLocal::HookInstaller
     {
     public:
         explicit AndroidHookInstaller(const std::string& il2cppLibraryPath, const std::string& localizationFilesDir)
@@ -40,9 +40,9 @@ namespace
             return shadowhook_hook_func_addr(addr, hook, orig);
         }
 
-        GakumasLocal::OpaqueFunctionPointer LookupSymbol(const char* name) override
+        LinkuraLocal::OpaqueFunctionPointer LookupSymbol(const char* name) override
         {
-            return reinterpret_cast<GakumasLocal::OpaqueFunctionPointer>(xdl_sym(m_Il2CppLibrary, name, NULL));
+            return reinterpret_cast<LinkuraLocal::OpaqueFunctionPointer>(xdl_sym(m_Il2CppLibrary, name, NULL));
         }
 
     private:
@@ -70,7 +70,7 @@ Java_io_github_chocolzs_linkura_localify_GakumasHookMain_initHook(JNIEnv *env, j
     const auto localizationFilesDirChars = env->GetStringUTFChars(localizationFilesDir, nullptr);
     const std::string localizationFilesDirCharsStr = localizationFilesDirChars;
 
-    auto& plugin = GakumasLocal::Plugin::GetInstance();
+    auto& plugin = LinkuraLocal::Plugin::GetInstance();
     plugin.InstallHook(std::make_unique<AndroidHookInstaller>(targetLibraryPathStr, localizationFilesDirCharsStr));
 }
 
@@ -78,7 +78,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_io_github_chocolzs_linkura_localify_GakumasHookMain_keyboardEvent(JNIEnv *env, jclass clazz, jint key_code, jint action) {
     GKCamera::on_cam_rawinput_keyboard(action, key_code);
-    const auto msg = GakumasLocal::Local::OnKeyDown(action, key_code);
+    const auto msg = LinkuraLocal::Local::OnKeyDown(action, key_code);
     if (!msg.empty()) {
         g_gakumasHookMainClass = clazz;
         showToastMethodId = env->GetStaticMethodID(clazz, "showToast", "(Ljava/lang/String;)V");
@@ -114,14 +114,14 @@ Java_io_github_chocolzs_linkura_localify_GakumasHookMain_loadConfig(JNIEnv *env,
                                                                    jstring config_json_str) {
     const auto configJsonStrChars = env->GetStringUTFChars(config_json_str, nullptr);
     const std::string configJson = configJsonStrChars;
-    GakumasLocal::Config::LoadConfig(configJson);
+    LinkuraLocal::Config::LoadConfig(configJson);
 }
 
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_chocolzs_linkura_localify_GakumasHookMain_pluginCallbackLooper(JNIEnv *env,
                                                                              jclass clazz) {
-    GakumasLocal::Log::ToastLoop(env, clazz);
+    LinkuraLocal::Log::ToastLoop(env, clazz);
 
     if (UnityResolveProgress::startInit) {
         return 9;

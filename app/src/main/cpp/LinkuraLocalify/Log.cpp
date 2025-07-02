@@ -40,7 +40,7 @@ namespace LinkuraLocal::Log {
     }
 
     void Log(int prio, const char* msg) {
-        __android_log_write(prio, "GakumasLocal-Native", msg);
+        __android_log_write(prio, "LinkuraLocal-Native", msg);
     }
 
     void LogFmt(int prio, const char* fmt, ...) {

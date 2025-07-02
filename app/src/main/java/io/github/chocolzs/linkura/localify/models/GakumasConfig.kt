@@ -3,7 +3,7 @@ package io.github.chocolzs.linkura.localify.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GakumasConfig (
+data class LinkuraConfig (
     var dbgMode: Boolean = false,
     var enabled: Boolean = true,
     var lazyInit: Boolean = true,

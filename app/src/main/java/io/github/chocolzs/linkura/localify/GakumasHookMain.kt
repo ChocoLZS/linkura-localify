@@ -24,7 +24,7 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -253,7 +253,7 @@ class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             l4DataInited = true
             val initConfig = try {
-                json.decodeFromString<GakumasConfig>(l4Data)
+                json.decodeFromString<LinkuraConfig>(l4Data)
             }
             catch (e: Exception) {
                 null

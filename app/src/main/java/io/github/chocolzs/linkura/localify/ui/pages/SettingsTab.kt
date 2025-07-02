@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.chocolzs.linkura.localify.MainActivity
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.onClickStartGame
 import io.github.chocolzs.linkura.localify.ui.components.GakuTabRow
 import io.github.chocolzs.linkura.localify.ui.components.icons.AutoFixHigh
@@ -40,7 +40,7 @@ import io.github.chocolzs.linkura.localify.ui.pages.subPages.HomePage
 fun SettingsTabs(modifier: Modifier = Modifier,
                  titles: List<String>,
                  context: MainActivity? = null,
-                 previewData: GakumasConfig? = null,
+                 previewData: LinkuraConfig? = null,
                  screenH: Dp = 1080.dp
 ) {
 
@@ -103,5 +103,5 @@ fun SettingsTabs(modifier: Modifier = Modifier,
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO, heightDp = 760)
 @Composable
 fun SettingTabsPreview(modifier: Modifier = Modifier) {
-    SettingsTabs(titles = listOf("TAB 1", "TAB 2", "TAB 3"), previewData = GakumasConfig())
+    SettingsTabs(titles = listOf("TAB 1", "TAB 2", "TAB 3"), previewData = LinkuraConfig())
 }

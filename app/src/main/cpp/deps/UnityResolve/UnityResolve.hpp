@@ -1462,11 +1462,11 @@ public:
 					// using convert_typeX = std::codecvt_utf8<wchar_t>;
 					// std::wstring_convert<convert_typeX> converterX;
 					// return converterX.to_bytes(m_firstChar);
-                    return GakumasLocal::Misc::ToUTF8(chars);
+                    return LinkuraLocal::Misc::ToUTF8(chars);
 				}
 				catch (std::exception& e) {
 					std::cout << "String Invoke Error\n";
-                    GakumasLocal::Log::ErrorFmt("String Invoke Error: %s", e.what());
+                    LinkuraLocal::Log::ErrorFmt("String Invoke Error: %s", e.what());
 					return {};
 				}
 			}
@@ -1485,7 +1485,7 @@ public:
                 }
                 catch (std::exception& e) {
                     std::cout << "String Invoke Error\n";
-                    GakumasLocal::Log::ErrorFmt("String Invoke Error: %s", e.what());
+                    LinkuraLocal::Log::ErrorFmt("String Invoke Error: %s", e.what());
                     return {};
                 }
             }

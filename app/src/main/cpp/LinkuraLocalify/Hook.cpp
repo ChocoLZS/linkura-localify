@@ -38,7 +38,7 @@ void UnHookAll() {
         {
             int error_num = shadowhook_get_errno();
             const char *error_msg = shadowhook_to_errmsg(error_num);
-            GakumasLocal::Log::ErrorFmt("unhook failed: %d - %s", error_num, error_msg);
+            LinkuraLocal::Log::ErrorFmt("unhook failed: %d - %s", error_num, error_msg);
         }
     }
 }*/
@@ -94,15 +94,15 @@ namespace LinkuraLocal::HookMain {
         auto result = SchoolResolution_GetResolution_Orig(quality, orientation);
         u_int64_t width = 1920, height = 1080;
         switch (quality) {
-            case SchoolResolution_LiveAreaQuality::Low:
+            case SchoolResolution_LiveAreaQuality::Low: // 1080p
                 width = orientation == LiveScreenOrientation::Landscape ? 1920 : 1080;
                 height = orientation == LiveScreenOrientation::Landscape ? 1080 : 1920;
                 break;
-            case SchoolResolution_LiveAreaQuality::Middle:
+            case SchoolResolution_LiveAreaQuality::Middle: // 2k
                 width = orientation == LiveScreenOrientation::Landscape ? 2560 : 1440;
                 height = orientation == LiveScreenOrientation::Landscape ? 1440 : 2560;
                 break;
-            case SchoolResolution_LiveAreaQuality::High:
+            case SchoolResolution_LiveAreaQuality::High: // 4k
                 width = orientation == LiveScreenOrientation::Landscape ? 3840 : 2160;
                 height = orientation == LiveScreenOrientation::Landscape ? 2160 : 3840;
                 break;
@@ -111,18 +111,53 @@ namespace LinkuraLocal::HookMain {
                 height = result >> 32;
                 break;
         }
-//        Log::ShowToastFmt("切换分辨率至: %d x %d, 返回结果: %p", width, height, result);
+        Log::DebugFmt("切换分辨率至: %d x %d, 返回结果: %p", width, height, result);
         return (u_int64_t)(height << 32 | width);
     }
 
-//    DEFINE_HOOK(void, )
+    Il2cppString* ToJsonStr(void* object) {
+        static Il2cppString* (*toJsonStr)(void*) = nullptr;
+        if (!toJsonStr) {
+            toJsonStr = reinterpret_cast<Il2cppString * (*)(void*)>(Il2cppUtils::GetMethodPointer("Newtonsoft.Json.dll", "Newtonsoft.Json",
+                                                                                                  "JsonConvert", "SerializeObject", { "*" }));
+        }
+        if (!toJsonStr) {
+            return nullptr;
+        }
+        return toJsonStr(object);
+    }
+    DEFINE_HOOK(void*, ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync , (void* _this, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync HOOKED!!!");
+        auto result = ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Orig(_this, method_info);
+        return result;
+    }
+    DEFINE_HOOK(void*, ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext , (void* _this, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext HOOKED!!!");
+        auto result = ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Orig(_this, method_info);
+        return result;
+    }
 
-    // bool IsNativeObjectAlive(void* obj) {
-    //     static UnityResolve::Method* IsNativeObjectAliveMtd = nullptr;
-    //     if (!IsNativeObjectAliveMtd) IsNativeObjectAliveMtd = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
-    //                                                                                  "Object", "IsNativeObjectAlive");
-    //     return IsNativeObjectAliveMtd->Invoke<bool>(obj);
-    // }
+    DEFINE_HOOK(void* , ApiClient_Deserialize, (void* _this, void* response, void* type, void* method_info)) {
+        Log::DebugFmt("ApiClient_Deserialize HOOKED!!!");
+        Il2cppUtils::Il2CppObject* result = reinterpret_cast<Il2cppUtils::Il2CppObject*>(ApiClient_Deserialize_Orig(_this, response, type, method_info));
+        Log::DebugFmt("Caller: %p | %p", __builtin_return_address(0),
+                      __builtin_return_address(1));
+        std::vector<char> chars = {};
+        for (int i = 0;i < 500;i++) {
+            auto addr = ToJsonStr(result)->chars;
+            chars.push_back(addr[i]);
+        }
+
+        Log::DebugFmt("ApiClient_Deserialize result: %s", chars.data() );
+        return result;
+    }
+
+     bool IsNativeObjectAlive(void* obj) {
+         static UnityResolve::Method* IsNativeObjectAliveMtd = nullptr;
+         if (!IsNativeObjectAliveMtd) IsNativeObjectAliveMtd = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
+                                                                                      "Object", "IsNativeObjectAlive");
+         return IsNativeObjectAliveMtd->Invoke<bool>(obj);
+     }
 
     // UnityResolve::UnityType::Camera* mainCameraCache = nullptr;
     // UnityResolve::UnityType::Transform* cameraTransformCache = nullptr;
@@ -138,18 +173,6 @@ namespace LinkuraLocal::HookMain {
     //     static auto GetResolution = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
     //                                                        "Screen", "get_currentResolution");
     //     return GetResolution->Invoke<Il2cppUtils::Resolution_t>();
-    // }
-
-    // Il2cppString* ToJsonStr(void* object) {
-    //     static Il2cppString* (*toJsonStr)(void*) = nullptr;
-	// 	if (!toJsonStr) {
-	// 		toJsonStr = reinterpret_cast<Il2cppString * (*)(void*)>(Il2cppUtils::GetMethodPointer("Newtonsoft.Json.dll", "Newtonsoft.Json",
-    //             "JsonConvert", "SerializeObject", { "*" }));
-    //     }
-    //     if (!toJsonStr) {
-	// 		return nullptr;
-    //     }
-	// 	return toJsonStr(object);
     // }
 
     // DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
@@ -207,7 +230,7 @@ namespace LinkuraLocal::HookMain {
     //                         *value = cacheRotation;
     //                     }
     //                     else {
-    //                         static GakumasLocal::Misc::FixedSizeQueue<float> recordsY(60);
+    //                         static LinkuraLocal::Misc::FixedSizeQueue<float> recordsY(60);
     //                         const auto newY = GKCamera::CheckNewY(cacheLookAt, true, recordsY);
     //                         UnityResolve::UnityType::Vector3 newCacheLookAt{cacheLookAt.x, newY, cacheLookAt.z};
     //                         lookat_injected(self, &newCacheLookAt, &worldUp);
@@ -1373,7 +1396,7 @@ namespace LinkuraLocal::HookMain {
 #ifdef GKMS_WINDOWS
     // // DMM Only
     // DEFINE_HOOK(void*, WindowHandle_SetWindowLong, (int32_t nIndex, intptr_t dwNewLong, void* mtd)) {
-    //     if (GakumasLocal::Config::dmmUnlockSize) {
+    //     if (LinkuraLocal::Config::dmmUnlockSize) {
     //         // Log::DebugFmt("WindowHandle_SetWindowLong: %d, %p\n", nIndex, dwNewLong);
 
     //         if (nIndex == GWLP_WNDPROC) {
@@ -1396,7 +1419,7 @@ namespace LinkuraLocal::HookMain {
 
     // // DMM Only
     // DEFINE_HOOK(void, WindowManager_ApplyOrientationSettings, (int orientation, void* method)) {
-    //     if (!GakumasLocal::Config::dmmUnlockSize) return WindowManager_ApplyOrientationSettings_Orig(orientation, method);
+    //     if (!LinkuraLocal::Config::dmmUnlockSize) return WindowManager_ApplyOrientationSettings_Orig(orientation, method);
 
     //     static auto get_Height = reinterpret_cast<int (*)()>(Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::get_height()"));
     //     static auto get_Width = reinterpret_cast<int (*)()>(Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::get_width()"));
@@ -1430,7 +1453,7 @@ namespace LinkuraLocal::HookMain {
 
     // // DMM Only
     // DEFINE_HOOK(void, AspectRatioHandler_NudgeWindow, (void* method)) {
-	// 	if (!GakumasLocal::Config::dmmUnlockSize) return AspectRatioHandler_NudgeWindow_Orig(method);
+	// 	if (!LinkuraLocal::Config::dmmUnlockSize) return AspectRatioHandler_NudgeWindow_Orig(method);
 	// 	// printf("AspectRatioHandler_NudgeWindow\n");
     // }
 #endif
@@ -1611,7 +1634,7 @@ namespace LinkuraLocal::HookMain {
         //     Log::ErrorFmt("GameAssembly.dll not loaded.");
         // }
         // UnityResolve::Init(il2cpp_module, UnityResolve::Mode::Il2Cpp, Config::lazyInit);
-        // GakumasLocal::WinHooks::Keyboard::InstallWndProcHook();
+        // LinkuraLocal::WinHooks::Keyboard::InstallWndProcHook();
 #else
         UnityResolve::Init(xdl_open(hookInstaller->m_il2cppLibraryPath.c_str(), RTLD_NOW),
             UnityResolve::Mode::Il2Cpp, Config::lazyInit);
@@ -1713,7 +1736,37 @@ namespace LinkuraLocal::HookMain {
 
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                                       "SchoolResolution", "GetResolution"));
-//        ADD_HOOK()
+
+        // Fes live camera unlock
+        ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api",
+                                                                                                "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
+        ADD_HOOK(ApiClient_Deserialize, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client","ApiClient", "Deserialize"));
+        auto ArchiveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi");
+        if (ArchiveApi_klass) {
+            auto ArchiveGetFesArchiveDataWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetFesArchiveDataWithHttpInfoAsync>d__30");
+            Log::DebugFmt("ArchiveGetWithArchiveDataWithHttpInfoAsync_klass name is: %s", static_cast<Il2cppUtils::Il2CppClassHead*>(ArchiveGetFesArchiveDataWithHttpInfoAsync_klass)->name);
+            auto method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetFesArchiveDataWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext, method->methodPointer);
+            }
+        }
+
+//        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataAsync_d_klass: %p\n", ArchiveApi_ArchiveGetFesArchiveDataAsync_d_klass);
+//        auto ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_method =
+//                Il2cppUtils::il2cpp_class_get_method_from_name(ArchiveApi_ArchiveGetFesArchiveDataAsync_d_klass, "MoveNext", 0);
+//        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_method: %p\n", ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_method);
+//        uintptr_t ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_addr = 0;
+//
+//        if (ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_method) {
+//
+//            ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_addr = ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_method->methodPointer;
+////            ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataAsync_d_29_MoveNext, ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_addr);
+//        }
+//        else {
+//            Log::Debug("ArchiveApi_ArchiveGetFesArchiveDataAsync_d__29_MoveNext_method not found.\n");
+//        }
+
+
         // auto UserIdolCardSkinCollection_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Campus.Common.User",
         //                                                               "UserIdolCardSkinCollection");
         // auto UserIdolCardSkinCollection_Exists_mtd = Il2cppUtils::il2cpp_class_get_method_from_name(UserIdolCardSkinCollection_klass->address, "Exists", 1);
@@ -1825,7 +1878,7 @@ namespace LinkuraLocal::HookMain {
         // // 双端
         // ADD_HOOK(InternalSetOrientationAsync,
         //     Il2cppUtils::GetMethodPointer("campus-submodule.Runtime.dll", "Campus.Common",
-        //         "ScreenOrientationControllerBase", "InternalSetOrientationAsync"));
+        //         "ScreenOrientationControllerBase", "));
 
         // ADD_HOOK(Unity_set_position_Injected, Il2cppUtils::il2cpp_resolve_icall(
         //         "UnityEngine.Transform::set_position_Injected(UnityEngine.Vector3&)"));
@@ -1856,7 +1909,7 @@ namespace LinkuraLocal::HookMain {
         // //ADD_HOOK(AspectRatioHandler_WindowProc, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Campus.Common.StandAloneWindow",
         // //    "AspectRatioHandler", "WindowProc"));
 
-        // if (GakumasLocal::Config::dmmUnlockSize) {
+        // if (LinkuraLocal::Config::dmmUnlockSize) {
 		// 	std::thread([]() {
 		// 		std::this_thread::sleep_for(std::chrono::seconds(3));
         //             auto hWnd = FindWindowW(L"UnityWndClass", L"gakumas");

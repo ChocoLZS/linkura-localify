@@ -4,7 +4,7 @@ import android.util.Log
 import android.view.KeyEvent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModel
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModelFactory
@@ -77,7 +77,7 @@ interface ConfigListener {
                                 onCancel: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) })
 }
 
-class UserConfigViewModelFactory(private val initialValue: GakumasConfig) : ViewModelProvider.Factory {
+class UserConfigViewModelFactory(private val initialValue: LinkuraConfig) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserConfigViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
@@ -87,9 +87,9 @@ class UserConfigViewModelFactory(private val initialValue: GakumasConfig) : View
     }
 }
 
-class UserConfigViewModel(initValue: GakumasConfig) : ViewModel() {
+class UserConfigViewModel(initValue: LinkuraConfig) : ViewModel() {
     val configState = MutableStateFlow(initValue)
-    val config: StateFlow<GakumasConfig> = configState.asStateFlow()
+    val config: StateFlow<LinkuraConfig> = configState.asStateFlow()
 }
 
 

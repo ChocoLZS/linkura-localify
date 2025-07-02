@@ -33,14 +33,14 @@ import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker.convertToString
 import io.github.chocolzs.linkura.localify.mainUtils.json
 import io.github.chocolzs.linkura.localify.models.AboutPageConfig
-import io.github.chocolzs.linkura.localify.models.GakumasConfig
+import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 
 
 @Composable
 fun AboutPage(modifier: Modifier = Modifier,
              context: MainActivity? = null,
-             previewData: GakumasConfig? = null,
+             previewData: LinkuraConfig? = null,
              bottomSpacerHeight: Dp = 120.dp,
              screenH: Dp = 1080.dp) {
     // val config = getConfigState(context, previewData)
@@ -216,6 +216,6 @@ fun NetworkSvgImage(
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
 @Composable
-fun AboutPagePreview(modifier: Modifier = Modifier, data: GakumasConfig = GakumasConfig()) {
+fun AboutPagePreview(modifier: Modifier = Modifier, data: LinkuraConfig = LinkuraConfig()) {
     AboutPage(modifier, previewData = data)
 }
