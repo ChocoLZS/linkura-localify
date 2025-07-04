@@ -7,7 +7,7 @@
                 {"name": "Github", "link": "https://github.com/ChocoLZS"},
                 {"name": "Bilibili", "link": "https://space.bilibili.com/2200311"}
             ]
-        },
+        }
     ],
     "contrib_img": {
         "plugin": "https://contrib.rocks/image?repo=chinosk6/gakuen-imas-localify",
