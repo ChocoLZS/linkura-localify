@@ -16,7 +16,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +30,7 @@ import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuShell
 import io.github.chocolzs.linkura.localify.ui.components.InstallDiag
 import io.github.chocolzs.linkura.localify.ui.pages.PatchPage
-import io.github.chocolzs.linkura.localify.ui.theme.GakumasLocalifyTheme
+import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -256,7 +255,7 @@ class PatchActivity : ComponentActivity() {
         checkAndRequestWritePermission()
 
         setContent {
-            GakumasLocalifyTheme(dynamicColor = false, darkTheme = false) {
+            LocalifyTheme(dynamicColor = false, darkTheme = false) {
                 val scope = rememberCoroutineScope()
                 var installing by remember { mutableStateOf(false) }
 

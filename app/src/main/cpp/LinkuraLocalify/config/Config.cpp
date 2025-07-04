@@ -13,6 +13,7 @@ namespace LinkuraLocal::Config {
     bool fesArchiveUnlockTicket = false;
     bool lazyInit = true;
     bool replaceFont = true;
+    bool dumpText = false;
     bool enableFreeCamera = false;
     int targetFrameRate = 0;
 
@@ -28,6 +29,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(fesArchiveUnlockTicket);
             GetConfigItem(lazyInit);
             GetConfigItem(replaceFont);
+            GetConfigItem(dumpText);
             GetConfigItem(targetFrameRate);
             GetConfigItem(enableFreeCamera);
         }
@@ -49,6 +51,7 @@ namespace LinkuraLocal::Config {
             SetConfigItem(renderHighResolution);
             SetConfigItem(fesArchiveUnlockTicket);
             SetConfigItem(replaceFont);
+            SetConfigItem(dumpText);
             SetConfigItem(targetFrameRate);
             SetConfigItem(enableFreeCamera);
 

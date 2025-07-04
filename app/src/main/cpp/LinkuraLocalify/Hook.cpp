@@ -144,6 +144,7 @@ namespace LinkuraLocal::HookMain {
                         "ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext HOOKED");
                 json["selectable_camera_types"] = {1,2,3,4};
                 json["ticket_rank"] = 6;
+                json["has_extra_admission"] = "true";
                 result = Il2cppUtils::FromJsonStr(json.dump(), type);
             }
         }

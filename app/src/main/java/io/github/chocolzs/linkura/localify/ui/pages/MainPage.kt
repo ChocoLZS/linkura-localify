@@ -1,7 +1,6 @@
 package io.github.chocolzs.linkura.localify.ui.pages
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,12 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chocolzs.linkura.localify.MainActivity
 import io.github.chocolzs.linkura.localify.R
-import io.github.chocolzs.linkura.localify.TAG
 import io.github.chocolzs.linkura.localify.getMainUIConfirmState
 import io.github.chocolzs.linkura.localify.getProgramConfigState
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupConfirm
-import io.github.chocolzs.linkura.localify.ui.theme.GakumasLocalifyTheme
+import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 
 
 @Composable
@@ -81,7 +78,8 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
             Text(text = "Assets version: ${versionInfo[1]}", fontSize = 13.sp)
 
             SettingsTabs(modifier, listOf(stringResource(R.string.about), stringResource(R.string.home),
-                stringResource(R.string.advanced_settings)),
+//                stringResource(R.string.advanced_settings)
+                ),
                 context = context, previewData = previewData, screenH = screenH)
         }
 
@@ -142,7 +140,7 @@ fun MainUIPreview(modifier: Modifier = Modifier) {
     val previewConfig = LinkuraConfig()
     previewConfig.enabled = true
 
-    GakumasLocalifyTheme {
+    LocalifyTheme {
         MainUI(previewData = previewConfig)
     }
 }

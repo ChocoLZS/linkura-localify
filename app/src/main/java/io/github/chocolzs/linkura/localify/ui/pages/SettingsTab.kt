@@ -60,7 +60,7 @@ fun SettingsTabs(modifier: Modifier = Modifier,
                 when (page) {
                     0 -> AboutPage(modifier, context = context, previewData = previewData, screenH = screenH)
                     1 -> HomePage(modifier, context = context, previewData = previewData, screenH = screenH)
-                    2 -> AdvanceSettingsPage(modifier, context = context, previewData = previewData, screenH = screenH)
+//                    2 -> AdvanceSettingsPage(modifier, context = context, previewData = previewData, screenH = screenH)
                 }
             }
         }
@@ -103,5 +103,7 @@ fun SettingsTabs(modifier: Modifier = Modifier,
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO, heightDp = 760)
 @Composable
 fun SettingTabsPreview(modifier: Modifier = Modifier) {
-    SettingsTabs(titles = listOf("TAB 1", "TAB 2", "TAB 3"), previewData = LinkuraConfig())
+    SettingsTabs(titles = listOf("TAB 1", "TAB 2"
+//        , "TAB 3"
+    ), previewData = LinkuraConfig())
 }

@@ -80,7 +80,7 @@ fun AboutPage(modifier: Modifier = Modifier,
         item {
             Text(stringResource(R.string.about_about_title), fontSize = 24.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
             Text(stringResource(R.string.about_about_p1))
-            Text(stringResource(R.string.about_about_p2))
+//            Text(stringResource(R.string.about_about_p2))
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -129,29 +129,29 @@ fun AboutPage(modifier: Modifier = Modifier,
             }
         }
 
-        item {
-            Text(stringResource(R.string.contributors), fontSize = 24.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
-
-            Text(stringResource(R.string.plugin_code), fontSize = 16.sp)
-            NetworkSvgImage(
-                url = contributorInfo.contrib_img.plugin,
-                contentDescription = "plugin-contrib"
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(stringResource(R.string.translation_repository), fontSize = 16.sp)
-            NetworkSvgImage(
-                url = contributorInfo.contrib_img.translation,
-                contentDescription = "translation-contrib"
-            )
-            contributorInfo.contrib_img.translations.forEach { url ->
-                Spacer(modifier = Modifier.height(2.dp))
-                NetworkSvgImage(
-                    url = url,
-                    contentDescription = "translation-contrib"
-                )
-            }
-        }
+//        item {
+//            Text(stringResource(R.string.contributors), fontSize = 24.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
+//
+//            Text(stringResource(R.string.plugin_code), fontSize = 16.sp)
+//            NetworkSvgImage(
+//                url = contributorInfo.contrib_img.plugin,
+//                contentDescription = "plugin-contrib"
+//            )
+//
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(stringResource(R.string.translation_repository), fontSize = 16.sp)
+//            NetworkSvgImage(
+//                url = contributorInfo.contrib_img.translation,
+//                contentDescription = "translation-contrib"
+//            )
+//            contributorInfo.contrib_img.translations.forEach { url ->
+//                Spacer(modifier = Modifier.height(2.dp))
+//                NetworkSvgImage(
+//                    url = url,
+//                    contentDescription = "translation-contrib"
+//                )
+//            }
+//        }
 
         item {
             HorizontalDivider(

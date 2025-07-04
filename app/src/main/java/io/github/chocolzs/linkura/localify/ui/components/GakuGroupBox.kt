@@ -46,7 +46,7 @@ fun GakuGroupBox(
                 modifier = modifier
                     .fillMaxWidth()
                     .background(Color.Transparent)
-                    .height(23.dp)
+                    .height(32.dp)
                     .clickable {
                         onHeadClick()
                     }
@@ -64,7 +64,7 @@ fun GakuGroupBox(
                     color = Color.White,
                     modifier = modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = (maxWidth.value * 0.043f).dp)
+                        .padding(start = (maxWidth.value * 0.063f).dp)
                 )
                 if (rightHead != null) {
                     Box(modifier = Modifier

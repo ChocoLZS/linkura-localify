@@ -799,11 +799,11 @@ namespace LinkuraLocal::MasterLocal {
 
     }
 
-    void LocalizeMasterItem(void* item, const std::string& tableName) {
-        if (!Config::useMasterTrans) return;
-        // Log::DebugFmt("LocalizeMasterItem: %s", tableName.c_str());
-        FieldController fc(item);
-        LocalizeMasterItem(fc, tableName);
-    }
+//    void LocalizeMasterItem(void* item, const std::string& tableName) {
+//        if (!Config::useMasterTrans) return;
+//        // Log::DebugFmt("LocalizeMasterItem: %s", tableName.c_str());
+//        FieldController fc(item);
+//        LocalizeMasterItem(fc, tableName);
+//    }
 
 } // namespace LinkuraLocal::MasterLocal

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -40,11 +41,12 @@ fun GakuButton(
     textColor: Color? = null
 ) {
     var buttonSize by remember { mutableStateOf(IntSize.Zero) }
-
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val primaryContainerColor = MaterialTheme.colorScheme.primaryContainer
     val gradient = remember(buttonSize) {
         Brush.linearGradient(
             colors = bgColors
-                ?: if (enabled) listOf(Color(0xFFFF5F19), Color(0xFFFFA028)) else
+                ?: if (enabled) listOf(primaryColor, primaryContainerColor) else
                     listOf(Color(0xFFF9F9F9), Color(0xFFF0F0F0)),
             start = Offset(0f, 0f),
             end = Offset(buttonSize.width.toFloat(), buttonSize.height.toFloat()) // 动态终点
@@ -67,7 +69,7 @@ fun GakuButton(
             .border(borderWidth, borderColor, shape),
         contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text = text, color = textColor ?: if (enabled) Color.White else Color(0xFF111111))
+        Text(text = text, color = textColor ?: if (enabled) MaterialTheme.colorScheme.onPrimary else Color(0xFF111111))
     }
 }
 
@@ -75,6 +77,8 @@ fun GakuButton(
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
 @Composable
 fun GakuButtonPreview() {
-    GakuButton(modifier = Modifier.width(80.dp).height(40.dp), text = "Button", onClick = {},
+    GakuButton(modifier = Modifier
+        .width(80.dp)
+        .height(40.dp), text = "Button", onClick = {},
         enabled = true)
 }

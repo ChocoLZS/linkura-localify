@@ -25,7 +25,7 @@ import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModel
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModelFactory
 import io.github.chocolzs.linkura.localify.ui.pages.MainUI
-import io.github.chocolzs.linkura.localify.ui.theme.GakumasLocalifyTheme
+import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         ShizukuApi.init()
 
         setContent {
-            GakumasLocalifyTheme(dynamicColor = false, darkTheme = false) {
+            LocalifyTheme(dynamicColor = false, darkTheme = false) {
                 MainUI(context = this)
             }
         }

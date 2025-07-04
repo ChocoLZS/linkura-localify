@@ -42,7 +42,7 @@ import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
 
 val TAG = "LinkuraLocalify"
 
-class GakumasHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
+class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private lateinit var modulePath: String
     private var nativeLibLoadSuccess: Boolean
     private var alreadyInitialized = false

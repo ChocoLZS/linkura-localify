@@ -245,13 +245,13 @@ fun HomePage(modifier: Modifier = Modifier,
 //            Spacer(Modifier.height(6.dp))
 //        }
         item {
-            GakuGroupBox(modifier = modifier, "Temp l4 Settings") {
+            GakuGroupBox(modifier = modifier, "Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    GakuSwitch(modifier, "高分辨率渲染", checked = config.value.renderHighResolution) {
+                    GakuSwitch(modifier, stringResource(R.string.hook_render_highResolution_title), checked = config.value.renderHighResolution) {
                             v -> context?.onRenderHighResolutionChanged(v)
                     }
 
-                    GakuSwitch(modifier, "解锁fes live回放S票", checked = config.value.fesArchiveUnlockTicket) {
+                    GakuSwitch(modifier, stringResource(R.string.hook_fesArchive_unlockTicket_title), checked = config.value.fesArchiveUnlockTicket) {
                             v -> context?.onFesArchiveUnlockTicketChanged(v)
                     }
 
@@ -260,237 +260,237 @@ fun HomePage(modifier: Modifier = Modifier,
             }
             Spacer(Modifier.height(6.dp))
         }
+//        item {
+//            GakuGroupBox(modifier, stringResource(R.string.resource_settings),
+//                contentPadding = 0.dp,
+//                onHeadClick = {
+//                    resourceSettingsViewModel.expanded = !resourceSettingsViewModel.expanded
+//                }) {
+//                CollapsibleBox(modifier = modifier,
+//                    viewModel = resourceSettingsViewModel
+//                ) {
+//                    LazyColumn(modifier = modifier
+//                        // .padding(8.dp)
+//                        .sizeIn(maxHeight = screenH),
+//                        // verticalArrangement = Arrangement.spacedBy(12.dp)
+//                    ) {
+//                        item {
+//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp),
+//                                checked = programConfig.value.checkBuiltInAssets,
+//                                text = stringResource(id = R.string.check_built_in_resource)
+//                            ) { v -> context?.onPCheckBuiltInAssetsChanged(v) }
+//                        }
+//                        item {
+//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
+//                                checked = programConfig.value.cleanLocalAssets,
+//                                text = stringResource(id = R.string.delete_plugin_resource)
+//                            ) { v -> context?.onPCleanLocalAssetsChanged(v) }
+//                        }
+//
+//                        item {
+//                            HorizontalDivider(
+//                                thickness = 1.dp,
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+//                            )
+//                        }
+//
+//                        item {
+//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
+//                                checked = programConfig.value.useAPIAssets,
+//                                text = stringResource(R.string.check_resource_from_api)
+//                            ) { v -> context?.onPUseAPIAssetsChanged(v) }
+//
+//                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
+//                                expandState = programConfig.value.useAPIAssets,
+//                                collapsedHeight = 0.dp,
+//                                innerPaddingLeftRight = 8.dp,
+//                                showExpand = false
+//                            ) {
+//                                GakuSwitch(modifier = modifier,
+//                                    checked = programConfig.value.delRemoteAfterUpdate,
+//                                    text = stringResource(id = R.string.del_remote_after_update)
+//                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
+//
+//                                LazyColumn(modifier = modifier
+//                                    // .padding(8.dp)
+//                                    .sizeIn(maxHeight = screenH),
+//                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+//                                ) {
+//                                    item {
+//                                        Row(modifier = modifier.fillMaxWidth(),
+//                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+//                                            verticalAlignment = Alignment.CenterVertically) {
+//
+//                                            GakuTextInput(modifier = modifier
+//                                                .height(45.dp)
+//                                                .padding(end = 8.dp)
+//                                                .fillMaxWidth()
+//                                                .weight(1f),
+//                                                fontSize = 14f,
+//                                                value = programConfig.value.useAPIAssetsURL,
+//                                                onValueChange = { c -> context?.onPUseAPIAssetsURLChanged(c, 0, 0, 0)},
+//                                                label = { Text(stringResource(R.string.api_addr)) }
+//                                            )
+//
+//                                            if (downloadAble) {
+//                                                GakuButton(modifier = modifier
+//                                                    .height(40.dp)
+//                                                    .sizeIn(minWidth = 80.dp),
+//                                                    text = stringResource(R.string.check_update),
+//                                                    onClick = { onClickDownload(false) })
+//                                            }
+//                                            else {
+//                                                GakuButton(modifier = modifier
+//                                                    .height(40.dp)
+//                                                    .sizeIn(minWidth = 80.dp),
+//                                                    text = stringResource(id = R.string.cancel), onClick = {
+//                                                        FileDownloader.cancel()
+//                                                    })
+//                                            }
+//
+//                                        }
+//                                    }
+//
+//                                    if (downloadProgress >= 0) {
+//                                        item {
+//                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
+//                                        }
+//                                    }
+//
+//                                    if (downloadErrorString.isNotEmpty()) {
+//                                        item {
+//                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
+//                                        }
+//                                    }
+//
+//                                    item {
+//                                        Text(modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .clickable {
+//                                                context?.mainPageAssetsViewDataUpdate(
+//                                                    localAPIResourceVersion = RemoteAPIFilesChecker.getLocalVersion(
+//                                                        context
+//                                                    )
+//                                                )
+//                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localAPIResourceVersion")
+//                                    }
+//
+//                                    item {
+//                                        Spacer(Modifier.height(0.dp))
+//                                    }
+//
+//                                }
+//
+//                            }
+//                        }
+//
+//                        item {
+//                            HorizontalDivider(
+//                                thickness = 1.dp,
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+//                            )
+//                        }
+//
+//                        item {
+//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
+//                                checked = programConfig.value.useRemoteAssets,
+//                                text = stringResource(id = R.string.use_remote_zip_resource)
+//                            ) { v -> context?.onPUseRemoteAssetsChanged(v) }
+//
+//                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
+//                                expandState = programConfig.value.useRemoteAssets,
+//                                collapsedHeight = 0.dp,
+//                                innerPaddingLeftRight = 8.dp,
+//                                showExpand = false
+//                            ) {
+//                                GakuSwitch(modifier = modifier,
+//                                    checked = programConfig.value.delRemoteAfterUpdate,
+//                                    text = stringResource(id = R.string.del_remote_after_update)
+//                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
+//
+//                                LazyColumn(modifier = modifier
+//                                    // .padding(8.dp)
+//                                    .sizeIn(maxHeight = screenH),
+//                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+//                                ) {
+//                                    item {
+//                                        Row(modifier = modifier.fillMaxWidth(),
+//                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+//                                            verticalAlignment = Alignment.CenterVertically) {
+//
+//                                            GakuTextInput(modifier = modifier
+//                                                .height(45.dp)
+//                                                .padding(end = 8.dp)
+//                                                .fillMaxWidth()
+//                                                .weight(1f),
+//                                                fontSize = 14f,
+//                                                value = programConfig.value.transRemoteZipUrl,
+//                                                onValueChange = { c -> context?.onPTransRemoteZipUrlChanged(c, 0, 0, 0)},
+//                                                label = { Text(stringResource(id = R.string.resource_url)) }
+//                                            )
+//
+//                                            if (downloadAble) {
+//                                                GakuButton(modifier = modifier
+//                                                    .height(40.dp)
+//                                                    .sizeIn(minWidth = 80.dp),
+//                                                    text = stringResource(id = R.string.download),
+//                                                    onClick = { onClickDownload(true) })
+//                                            }
+//                                            else {
+//                                                GakuButton(modifier = modifier
+//                                                    .height(40.dp)
+//                                                    .sizeIn(minWidth = 80.dp),
+//                                                    text = stringResource(id = R.string.cancel), onClick = {
+//                                                        FileDownloader.cancel()
+//                                                    })
+//                                            }
+//
+//                                        }
+//                                    }
+//
+//                                    if (downloadProgress >= 0) {
+//                                        item {
+//                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
+//                                        }
+//                                    }
+//
+//                                    if (downloadErrorString.isNotEmpty()) {
+//                                        item {
+//                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
+//                                        }
+//                                    }
+//
+//                                    item {
+//                                        Text(modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .clickable {
+//                                                val file =
+//                                                    File(context?.filesDir, "update_trans.zip")
+//                                                context?.mainPageAssetsViewDataUpdate(
+//                                                    localResourceVersionState = FileHotUpdater
+//                                                        .getZipResourceVersion(file.absolutePath)
+//                                                        .toString()
+//                                                )
+//                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localResourceVersion")
+//                                    }
+//
+//                                    item {
+//                                        Spacer(Modifier.height(0.dp))
+//                                    }
+//
+//                                }
+//
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            Spacer(Modifier.height(6.dp))
+//        }
+
         item {
-            GakuGroupBox(modifier, stringResource(R.string.resource_settings),
-                contentPadding = 0.dp,
-                onHeadClick = {
-                    resourceSettingsViewModel.expanded = !resourceSettingsViewModel.expanded
-                }) {
-                CollapsibleBox(modifier = modifier,
-                    viewModel = resourceSettingsViewModel
-                ) {
-                    LazyColumn(modifier = modifier
-                        // .padding(8.dp)
-                        .sizeIn(maxHeight = screenH),
-                        // verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        item {
-                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp),
-                                checked = programConfig.value.checkBuiltInAssets,
-                                text = stringResource(id = R.string.check_built_in_resource)
-                            ) { v -> context?.onPCheckBuiltInAssetsChanged(v) }
-                        }
-                        item {
-                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-                                checked = programConfig.value.cleanLocalAssets,
-                                text = stringResource(id = R.string.delete_plugin_resource)
-                            ) { v -> context?.onPCleanLocalAssetsChanged(v) }
-                        }
-
-                        item {
-                            HorizontalDivider(
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                            )
-                        }
-
-                        item {
-                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-                                checked = programConfig.value.useAPIAssets,
-                                text = stringResource(R.string.check_resource_from_api)
-                            ) { v -> context?.onPUseAPIAssetsChanged(v) }
-
-                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
-                                expandState = programConfig.value.useAPIAssets,
-                                collapsedHeight = 0.dp,
-                                innerPaddingLeftRight = 8.dp,
-                                showExpand = false
-                            ) {
-                                GakuSwitch(modifier = modifier,
-                                    checked = programConfig.value.delRemoteAfterUpdate,
-                                    text = stringResource(id = R.string.del_remote_after_update)
-                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
-
-                                LazyColumn(modifier = modifier
-                                    // .padding(8.dp)
-                                    .sizeIn(maxHeight = screenH),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    item {
-                                        Row(modifier = modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                            verticalAlignment = Alignment.CenterVertically) {
-
-                                            GakuTextInput(modifier = modifier
-                                                .height(45.dp)
-                                                .padding(end = 8.dp)
-                                                .fillMaxWidth()
-                                                .weight(1f),
-                                                fontSize = 14f,
-                                                value = programConfig.value.useAPIAssetsURL,
-                                                onValueChange = { c -> context?.onPUseAPIAssetsURLChanged(c, 0, 0, 0)},
-                                                label = { Text(stringResource(R.string.api_addr)) }
-                                            )
-
-                                            if (downloadAble) {
-                                                GakuButton(modifier = modifier
-                                                    .height(40.dp)
-                                                    .sizeIn(minWidth = 80.dp),
-                                                    text = stringResource(R.string.check_update),
-                                                    onClick = { onClickDownload(false) })
-                                            }
-                                            else {
-                                                GakuButton(modifier = modifier
-                                                    .height(40.dp)
-                                                    .sizeIn(minWidth = 80.dp),
-                                                    text = stringResource(id = R.string.cancel), onClick = {
-                                                        FileDownloader.cancel()
-                                                    })
-                                            }
-
-                                        }
-                                    }
-
-                                    if (downloadProgress >= 0) {
-                                        item {
-                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
-                                        }
-                                    }
-
-                                    if (downloadErrorString.isNotEmpty()) {
-                                        item {
-                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
-                                        }
-                                    }
-
-                                    item {
-                                        Text(modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                context?.mainPageAssetsViewDataUpdate(
-                                                    localAPIResourceVersion = RemoteAPIFilesChecker.getLocalVersion(
-                                                        context
-                                                    )
-                                                )
-                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localAPIResourceVersion")
-                                    }
-
-                                    item {
-                                        Spacer(Modifier.height(0.dp))
-                                    }
-
-                                }
-
-                            }
-                        }
-
-                        item {
-                            HorizontalDivider(
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                            )
-                        }
-
-                        item {
-                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-                                checked = programConfig.value.useRemoteAssets,
-                                text = stringResource(id = R.string.use_remote_zip_resource)
-                            ) { v -> context?.onPUseRemoteAssetsChanged(v) }
-
-                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
-                                expandState = programConfig.value.useRemoteAssets,
-                                collapsedHeight = 0.dp,
-                                innerPaddingLeftRight = 8.dp,
-                                showExpand = false
-                            ) {
-                                GakuSwitch(modifier = modifier,
-                                    checked = programConfig.value.delRemoteAfterUpdate,
-                                    text = stringResource(id = R.string.del_remote_after_update)
-                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
-
-                                LazyColumn(modifier = modifier
-                                    // .padding(8.dp)
-                                    .sizeIn(maxHeight = screenH),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    item {
-                                        Row(modifier = modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                            verticalAlignment = Alignment.CenterVertically) {
-
-                                            GakuTextInput(modifier = modifier
-                                                .height(45.dp)
-                                                .padding(end = 8.dp)
-                                                .fillMaxWidth()
-                                                .weight(1f),
-                                                fontSize = 14f,
-                                                value = programConfig.value.transRemoteZipUrl,
-                                                onValueChange = { c -> context?.onPTransRemoteZipUrlChanged(c, 0, 0, 0)},
-                                                label = { Text(stringResource(id = R.string.resource_url)) }
-                                            )
-
-                                            if (downloadAble) {
-                                                GakuButton(modifier = modifier
-                                                    .height(40.dp)
-                                                    .sizeIn(minWidth = 80.dp),
-                                                    text = stringResource(id = R.string.download),
-                                                    onClick = { onClickDownload(true) })
-                                            }
-                                            else {
-                                                GakuButton(modifier = modifier
-                                                    .height(40.dp)
-                                                    .sizeIn(minWidth = 80.dp),
-                                                    text = stringResource(id = R.string.cancel), onClick = {
-                                                        FileDownloader.cancel()
-                                                    })
-                                            }
-
-                                        }
-                                    }
-
-                                    if (downloadProgress >= 0) {
-                                        item {
-                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
-                                        }
-                                    }
-
-                                    if (downloadErrorString.isNotEmpty()) {
-                                        item {
-                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
-                                        }
-                                    }
-
-                                    item {
-                                        Text(modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                val file =
-                                                    File(context?.filesDir, "update_trans.zip")
-                                                context?.mainPageAssetsViewDataUpdate(
-                                                    localResourceVersionState = FileHotUpdater
-                                                        .getZipResourceVersion(file.absolutePath)
-                                                        .toString()
-                                                )
-                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localResourceVersion")
-                                    }
-
-                                    item {
-                                        Spacer(Modifier.height(0.dp))
-                                    }
-
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(6.dp))
-        }
-
-        item {
-            GakuGroupBox(modifier = modifier, contentPadding = 0.dp, title = stringResource(R.string.graphic_settings)) {
+            GakuGroupBox(modifier = modifier, contentPadding = 12.dp, title = stringResource(R.string.graphic_settings)) {
                 LazyColumn(modifier = Modifier
                     .sizeIn(maxHeight = screenH),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -508,162 +508,162 @@ fun HomePage(modifier: Modifier = Modifier,
                             keyboardOptions = keyboardOptionsNumber)
                     }
 
-                    item {
-                        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(stringResource(R.string.orientation_lock))
-                            Row(modifier = modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                val radioModifier = remember {
-                                    modifier
-                                        .height(40.dp)
-                                        .weight(1f)
-                                }
+//                    item {
+//                        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+//                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
+//                            Text(stringResource(R.string.orientation_lock))
+//                            Row(modifier = modifier.fillMaxWidth(),
+//                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+//                                val radioModifier = remember {
+//                                    modifier
+//                                        .height(40.dp)
+//                                        .weight(1f)
+//                                }
+//
+//                                GakuRadio(modifier = radioModifier,
+//                                    text = stringResource(R.string.orientation_orig), selected = config.value.gameOrientation == 0,
+//                                    onClick = { context?.onGameOrientationChanged(0) })
+//
+//                                GakuRadio(modifier = radioModifier,
+//                                    text = stringResource(R.string.orientation_portrait), selected = config.value.gameOrientation == 1,
+//                                    onClick = { context?.onGameOrientationChanged(1) })
+//
+//                                GakuRadio(modifier = radioModifier,
+//                                    text = stringResource(R.string.orientation_landscape), selected = config.value.gameOrientation == 2,
+//                                    onClick = { context?.onGameOrientationChanged(2) })
+//                            }
+//                        }
+//                    }
 
-                                GakuRadio(modifier = radioModifier,
-                                    text = stringResource(R.string.orientation_orig), selected = config.value.gameOrientation == 0,
-                                    onClick = { context?.onGameOrientationChanged(0) })
-
-                                GakuRadio(modifier = radioModifier,
-                                    text = stringResource(R.string.orientation_portrait), selected = config.value.gameOrientation == 1,
-                                    onClick = { context?.onGameOrientationChanged(1) })
-
-                                GakuRadio(modifier = radioModifier,
-                                    text = stringResource(R.string.orientation_landscape), selected = config.value.gameOrientation == 2,
-                                    onClick = { context?.onGameOrientationChanged(2) })
-                            }
-                        }
-                    }
-
-                    item {
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                        )
-                    }
-
-                    item {
-                        GakuSwitch(modifier.padding(start = 8.dp, end = 8.dp),
-                            stringResource(R.string.useCustomeGraphicSettings),
-                            checked = config.value.useCustomeGraphicSettings) {
-                                v -> context?.onUseCustomeGraphicSettingsChanged(v)
-                        }
-
-                        CollapsibleBox(modifier = modifier,
-                            expandState = config.value.useCustomeGraphicSettings,
-                            collapsedHeight = 0.dp,
-                            showExpand = false
-                        ) {
-                            LazyColumn(modifier = modifier
-                                .padding(8.dp)
-                                .sizeIn(maxHeight = screenH)
-                                .fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                item {
-                                    Row(modifier = modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        val buttonModifier = remember {
-                                            modifier
-                                                .height(40.dp)
-                                                .weight(1f)
-                                        }
-
-                                        GakuButton(modifier = buttonModifier,
-                                            text = stringResource(R.string.max_high), onClick = { context?.onChangePresetQuality(4) })
-
-                                        GakuButton(modifier = buttonModifier,
-                                            text = stringResource(R.string.very_high), onClick = { context?.onChangePresetQuality(3) })
-
-                                        GakuButton(modifier = buttonModifier,
-                                            text = stringResource(R.string.hign), onClick = { context?.onChangePresetQuality(2) })
-
-                                        GakuButton(modifier = buttonModifier,
-                                            text = stringResource(R.string.middle), onClick = { context?.onChangePresetQuality(1) })
-
-                                        GakuButton(modifier = buttonModifier,
-                                            text = stringResource(R.string.low), onClick = { context?.onChangePresetQuality(0) })
-                                    }
-                                }
-
-                                item {
-                                    Row(modifier = modifier,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        val textInputModifier = remember {
-                                            modifier
-                                                .height(45.dp)
-                                                .weight(1f)
-                                        }
-
-                                        GakuTextInput(modifier = textInputModifier,
-                                            fontSize = 14f,
-                                            value = config.value.renderScale.toString(),
-                                            onValueChange = { c -> context?.onRenderScaleChanged(c, 0, 0, 0)},
-                                            label = { Text(stringResource(R.string.renderscale)) },
-                                            keyboardOptions = keyBoardOptionsDecimal)
-
-                                        GakuTextInput(modifier = textInputModifier,
-                                            fontSize = 14f,
-                                            value = config.value.qualitySettingsLevel.toString(),
-                                            onValueChange = { c -> context?.onQualitySettingsLevelChanged(c, 0, 0, 0)},
-                                            label = { Text("QualityLevel (1/1/2/3/5)") },
-                                            keyboardOptions = keyboardOptionsNumber)
-                                    }
-                                }
-
-                                item {
-                                    Row(modifier = modifier,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        val textInputModifier = remember {
-                                            modifier
-                                                .height(45.dp)
-                                                .weight(1f)
-                                        }
-
-                                        GakuTextInput(modifier = textInputModifier,
-                                            fontSize = 14f,
-                                            value = config.value.volumeIndex.toString(),
-                                            onValueChange = { c -> context?.onVolumeIndexChanged(c, 0, 0, 0)},
-                                            label = { Text("VolumeIndex (0/1/2/3/4)") },
-                                            keyboardOptions = keyboardOptionsNumber)
-
-                                        GakuTextInput(modifier = textInputModifier,
-                                            fontSize = 14f,
-                                            value = config.value.maxBufferPixel.toString(),
-                                            onValueChange = { c -> context?.onMaxBufferPixelChanged(c, 0, 0, 0)},
-                                            label = { Text("MaxBufferPixel (1024/1440/2538/3384/8190)", fontSize = 10.sp) },
-                                            keyboardOptions = keyboardOptionsNumber)
-                                    }
-                                }
-
-                                item {
-                                    Row(modifier = modifier,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        val textInputModifier = remember {
-                                            modifier
-                                                .height(45.dp)
-                                                .weight(1f)
-                                        }
-
-                                        GakuTextInput(modifier = textInputModifier,
-                                            fontSize = 14f,
-                                            value = config.value.reflectionQualityLevel.toString(),
-                                            onValueChange = { c -> context?.onReflectionQualityLevelChanged(c, 0, 0, 0)},
-                                            label = { Text( text = "ReflectionLevel (0~5)") },
-                                            keyboardOptions = keyboardOptionsNumber)
-
-                                        GakuTextInput(modifier = textInputModifier,
-                                            fontSize = 14f,
-                                            value = config.value.lodQualityLevel.toString(),
-                                            onValueChange = { c -> context?.onLodQualityLevelChanged(c, 0, 0, 0)},
-                                            label = { Text("LOD Level (0~5)") },
-                                            keyboardOptions = keyboardOptionsNumber)
-                                    }
-                                }
-                            }
-                        }
-
-                    }
+//                    item {
+//                        HorizontalDivider(
+//                            thickness = 1.dp,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+//                        )
+//                    }
+//
+//                    item {
+//                        GakuSwitch(modifier.padding(start = 8.dp, end = 8.dp),
+//                            stringResource(R.string.useCustomeGraphicSettings),
+//                            checked = config.value.useCustomeGraphicSettings) {
+//                                v -> context?.onUseCustomeGraphicSettingsChanged(v)
+//                        }
+//
+//                        CollapsibleBox(modifier = modifier,
+//                            expandState = config.value.useCustomeGraphicSettings,
+//                            collapsedHeight = 0.dp,
+//                            showExpand = false
+//                        ) {
+//                            LazyColumn(modifier = modifier
+//                                .padding(8.dp)
+//                                .sizeIn(maxHeight = screenH)
+//                                .fillMaxWidth(),
+//                                verticalArrangement = Arrangement.spacedBy(12.dp)
+//                            ) {
+//                                item {
+//                                    Row(modifier = modifier.fillMaxWidth(),
+//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+//                                        val buttonModifier = remember {
+//                                            modifier
+//                                                .height(40.dp)
+//                                                .weight(1f)
+//                                        }
+//
+//                                        GakuButton(modifier = buttonModifier,
+//                                            text = stringResource(R.string.max_high), onClick = { context?.onChangePresetQuality(4) })
+//
+//                                        GakuButton(modifier = buttonModifier,
+//                                            text = stringResource(R.string.very_high), onClick = { context?.onChangePresetQuality(3) })
+//
+//                                        GakuButton(modifier = buttonModifier,
+//                                            text = stringResource(R.string.hign), onClick = { context?.onChangePresetQuality(2) })
+//
+//                                        GakuButton(modifier = buttonModifier,
+//                                            text = stringResource(R.string.middle), onClick = { context?.onChangePresetQuality(1) })
+//
+//                                        GakuButton(modifier = buttonModifier,
+//                                            text = stringResource(R.string.low), onClick = { context?.onChangePresetQuality(0) })
+//                                    }
+//                                }
+//
+//                                item {
+//                                    Row(modifier = modifier,
+//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+//                                        val textInputModifier = remember {
+//                                            modifier
+//                                                .height(45.dp)
+//                                                .weight(1f)
+//                                        }
+//
+//                                        GakuTextInput(modifier = textInputModifier,
+//                                            fontSize = 14f,
+//                                            value = config.value.renderScale.toString(),
+//                                            onValueChange = { c -> context?.onRenderScaleChanged(c, 0, 0, 0)},
+//                                            label = { Text(stringResource(R.string.renderscale)) },
+//                                            keyboardOptions = keyBoardOptionsDecimal)
+//
+//                                        GakuTextInput(modifier = textInputModifier,
+//                                            fontSize = 14f,
+//                                            value = config.value.qualitySettingsLevel.toString(),
+//                                            onValueChange = { c -> context?.onQualitySettingsLevelChanged(c, 0, 0, 0)},
+//                                            label = { Text("QualityLevel (1/1/2/3/5)") },
+//                                            keyboardOptions = keyboardOptionsNumber)
+//                                    }
+//                                }
+//
+//                                item {
+//                                    Row(modifier = modifier,
+//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+//                                        val textInputModifier = remember {
+//                                            modifier
+//                                                .height(45.dp)
+//                                                .weight(1f)
+//                                        }
+//
+//                                        GakuTextInput(modifier = textInputModifier,
+//                                            fontSize = 14f,
+//                                            value = config.value.volumeIndex.toString(),
+//                                            onValueChange = { c -> context?.onVolumeIndexChanged(c, 0, 0, 0)},
+//                                            label = { Text("VolumeIndex (0/1/2/3/4)") },
+//                                            keyboardOptions = keyboardOptionsNumber)
+//
+//                                        GakuTextInput(modifier = textInputModifier,
+//                                            fontSize = 14f,
+//                                            value = config.value.maxBufferPixel.toString(),
+//                                            onValueChange = { c -> context?.onMaxBufferPixelChanged(c, 0, 0, 0)},
+//                                            label = { Text("MaxBufferPixel (1024/1440/2538/3384/8190)", fontSize = 10.sp) },
+//                                            keyboardOptions = keyboardOptionsNumber)
+//                                    }
+//                                }
+//
+//                                item {
+//                                    Row(modifier = modifier,
+//                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+//                                        val textInputModifier = remember {
+//                                            modifier
+//                                                .height(45.dp)
+//                                                .weight(1f)
+//                                        }
+//
+//                                        GakuTextInput(modifier = textInputModifier,
+//                                            fontSize = 14f,
+//                                            value = config.value.reflectionQualityLevel.toString(),
+//                                            onValueChange = { c -> context?.onReflectionQualityLevelChanged(c, 0, 0, 0)},
+//                                            label = { Text( text = "ReflectionLevel (0~5)") },
+//                                            keyboardOptions = keyboardOptionsNumber)
+//
+//                                        GakuTextInput(modifier = textInputModifier,
+//                                            fontSize = 14f,
+//                                            value = config.value.lodQualityLevel.toString(),
+//                                            onValueChange = { c -> context?.onLodQualityLevelChanged(c, 0, 0, 0)},
+//                                            label = { Text("LOD Level (0~5)") },
+//                                            keyboardOptions = keyboardOptionsNumber)
+//                                    }
+//                                }
+//                            }
+//                        }
+//
+//                    }
 
                 }
 

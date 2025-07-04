@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -60,7 +61,7 @@ fun GakuTabRow(
                             Modifier
                                 .tabIndicatorOffset(tabPositions[pagerState.currentPage])
                                 .height(4.dp)
-                                .background(Color(0xFFFFA500))
+                                .background(MaterialTheme.colorScheme.primary)
                                 .padding(horizontal = 4.dp)
                         )
                     }
@@ -80,7 +81,8 @@ fun GakuTabRow(
                             text = {
                                 Text(
                                     text = title,
-                                    color = if (pagerState.currentPage == index) Color(0xFFFFA500) else Color.Black
+                                    color = if (pagerState.currentPage == index) MaterialTheme.colorScheme.primaryContainer else Color.Black,
+                                    fontWeight = if (pagerState.currentPage == index) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
                                 )
                             }
                         )

@@ -29,7 +29,7 @@ object FilesChecker {
     fun checkFiles() {
         val installedVersion = getInstalledVersion()
         val pluginVersion = getPluginVersion()
-        Log.d("GakumasLocal", "installedVer: $installedVersion, pluginVer: $pluginVersion")
+        Log.d("LinkuraLocal", "installedVer: $installedVersion, pluginVer: $pluginVersion")
 
         if (pluginVersion != installedVersion) {
             updateFiles()
@@ -40,7 +40,7 @@ object FilesChecker {
         if (filesUpdated) return
         filesUpdated = true
 
-        Log.i("GakumasLocal", "Updating files...")
+        Log.i("LinkuraLocal", "Updating files...")
         val pluginBasePath = File(filesDir, localizationFilesDir)
         if (!pluginBasePath.exists()) {
             pluginBasePath.mkdirs()
@@ -75,7 +75,7 @@ object FilesChecker {
             }
         }
 
-        Log.i("GakumasLocal", "Updated")
+        Log.i("LinkuraLocal", "Updated")
     }
 
     fun getPluginVersion(): String {

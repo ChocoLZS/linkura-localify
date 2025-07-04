@@ -3,7 +3,7 @@ package io.github.chocolzs.linkura.localify.hookUtils
 import android.app.Activity
 import android.net.Uri
 import android.util.Log
-import io.github.chocolzs.linkura.localify.GakumasHookMain
+import io.github.chocolzs.linkura.localify.LinkuraHookMain
 import io.github.chocolzs.linkura.localify.TAG
 import java.io.BufferedReader
 import java.io.File
@@ -138,7 +138,7 @@ object FileHotUpdater {
 
     fun updateFilesFromZip(activity: Activity, zipFileUri: Uri, filesDir: File, deleteAfterUpdate: Boolean) {
         try {
-            GakumasHookMain.showToast("Updating files from zip...")
+            LinkuraHookMain.showToast("Updating files from zip...")
 
             var basePath: String?
             activity.contentResolver.openInputStream(zipFileUri).use {
@@ -163,18 +163,18 @@ object FileHotUpdater {
                     if (deleteAfterUpdate) {
                         activity.contentResolver.delete(zipFileUri, null, null)
                     }
-                    GakumasHookMain.showToast("Update success.")
+                    LinkuraHookMain.showToast("Update success.")
                 }
             }
 
         }
         catch (e: java.io.FileNotFoundException) {
             Log.i(TAG, "updateFilesFromZip - file not found: $e")
-            GakumasHookMain.showToast("Update file not found.")
+            LinkuraHookMain.showToast("Update file not found.")
         }
         catch (e: Exception) {
             Log.e(TAG, "updateFilesFromZip failed: $e")
-            GakumasHookMain.showToast("Updating files failed: $e")
+            LinkuraHookMain.showToast("Updating files failed: $e")
         }
     }
 

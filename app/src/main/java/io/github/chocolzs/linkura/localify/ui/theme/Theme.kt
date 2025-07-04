@@ -23,14 +23,16 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFFF89400),
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
+    primary = HasuPrimary,
+    primaryContainer = Color(0xfff0c8c3),
+    secondary = HasuTitle,
+    tertiary = Pink40,
+    onPrimary = HasuStrong,
+    background = HasuBg
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
+
     onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
@@ -39,7 +41,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun GakumasLocalifyTheme(
+fun LocalifyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -60,7 +62,7 @@ fun GakumasLocalifyTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

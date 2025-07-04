@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
@@ -33,7 +34,7 @@ fun GakuSwitch(modifier: Modifier = Modifier,
             modifier = Modifier,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color(0xFFFFFFFF),
-                checkedTrackColor = Color(0xFFF9C114),
+                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
 
                 uncheckedThumbColor = Color(0xFFFFFFFF),
                 uncheckedTrackColor = Color(0xFFCFD8DC),
