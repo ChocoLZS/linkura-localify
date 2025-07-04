@@ -10,7 +10,7 @@
     #include <android/log.h>
 
     extern JavaVM* g_javaVM;
-    extern jclass g_gakumasHookMainClass;
+    extern jclass g_linkuraHookMainClass;
     extern jmethodID showToastMethodId;
 #endif // GKMS_WINDOWS
 
@@ -90,7 +90,7 @@ namespace LinkuraLocal::Log {
                 return;
             }
 
-            jclass& kotlinClass = g_gakumasHookMainClass;
+            jclass& kotlinClass = g_linkuraHookMainClass;
             if (!kotlinClass) {
                 g_javaVM->DetachCurrentThread();
                 return;

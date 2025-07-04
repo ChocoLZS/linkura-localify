@@ -20,7 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class io.github.chocolzs.linkura.localify.GakumasHookMain {
+-keep class io.github.chocolzs.linkura.localify.LinkuraHookMain {
     <init>();
     native <methods>;
 }
