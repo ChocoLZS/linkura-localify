@@ -5,7 +5,7 @@
 
 namespace Il2cppUtils {
     using namespace LinkuraLocal;
-
+    using Il2CppString = UnityResolve::UnityType::String;
     struct Il2CppClassHead {
         // The following fields are always valid for a Il2CppClass structure
         const void* image;
@@ -197,8 +197,15 @@ namespace Il2cppUtils {
         return UnityResolve::Invoke<void*>("il2cpp_resolve_icall", s);
     }
 
+
     static Il2CppClassHead* get_class_from_instance(const void* instance) {
         return static_cast<Il2CppClassHead*>(*static_cast<void* const*>(std::assume_aligned<alignof(void*)>(instance)));
+    }
+
+    static void* get_system_type_from_instance(const void* instance) {
+        auto klass = Il2cppUtils::get_class_from_instance(instance);
+        auto type = UnityResolve::Invoke<void*>("il2cpp_class_get_type", klass);
+        return UnityResolve::Invoke<Il2cppUtils::Il2CppReflectionType*>("il2cpp_type_get_object", type);
     }
 
     static MethodInfo* il2cpp_class_get_method_from_name(void* klass, const char* name, int argsCount) {
@@ -283,7 +290,6 @@ namespace Il2cppUtils {
     }
 
     static void* get_system_class_from_reflection_type_str(const char* typeStr, const char* assemblyName = "mscorlib") {
-        using Il2CppString = UnityResolve::UnityType::String;
 
         static auto assemblyLoad = reinterpret_cast<void* (*)(Il2CppString*)>(
                 GetMethodPointer("mscorlib.dll", "System.Reflection",
@@ -350,6 +356,35 @@ namespace Il2cppUtils {
         {
             static_cast<decltype(receiver)>(receiver)(getCurrentMethod(enumerator));
         }
+    }
+
+    static Il2CppString* ToJsonStr(void* object) {
+        static Il2CppString* (*toJsonStr)(void*) = nullptr;
+        if (!toJsonStr) {
+            toJsonStr = reinterpret_cast<Il2CppString * (*)(void*)>(Il2cppUtils::GetMethodPointer("Newtonsoft.Json.dll", "Newtonsoft.Json",
+                                                                                                  "JsonConvert", "SerializeObject", { "*" }));
+        }
+        if (!toJsonStr) {
+            return nullptr;
+        }
+        return toJsonStr(object);
+    }
+
+    static void* FromJsonStr(Il2CppString* jsonString, void* targetType) {
+        static void* (*fromJsonStr)(Il2CppString*, void*) = nullptr;
+        if (!fromJsonStr) {
+            fromJsonStr = reinterpret_cast<void* (*)(Il2CppString*, void*)>(Il2cppUtils::GetMethodPointer("Newtonsoft.Json.dll", "Newtonsoft.Json",
+                                                                                                          "JsonConvert", "DeserializeObject", { "System.String", "System.Type" }));
+        }
+        if (!fromJsonStr) {
+            return nullptr;
+        }
+        return fromJsonStr(jsonString, targetType);
+    }
+
+    static void* FromJsonStr(const std::string& jsonString, void* targetType) {
+        auto il2cppJsonString = Il2CppString::New(jsonString);
+        return FromJsonStr(il2cppJsonString, targetType);
     }
 
     namespace Tools {

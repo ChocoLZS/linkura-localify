@@ -16,6 +16,8 @@ import kotlinx.coroutines.runBlocking
 
 interface ConfigListener {
     fun onEnabledChanged(value: Boolean)
+    fun onRenderHighResolutionChanged(value: Boolean)
+    fun onFesArchiveUnlockTicketChanged(value: Boolean)
     fun onForceExportResourceChanged(value: Boolean)
     fun onLoginAsIOSChanged(value: Boolean)
     fun onTextTestChanged(value: Boolean)
@@ -110,6 +112,16 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         config.enabled = value
         saveConfig()
         pushKeyEvent(KeyEvent(1145, 29))
+    }
+
+    override fun onRenderHighResolutionChanged(value: Boolean) {
+        config.renderHighResolution = value
+        saveConfig()
+    }
+
+    override fun onFesArchiveUnlockTicketChanged(value: Boolean) {
+        config.fesArchiveUnlockTicket = value
+        saveConfig()
     }
 
     override fun onForceExportResourceChanged(value: Boolean) {

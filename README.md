@@ -30,5 +30,6 @@
 - [Il2CppDumper](https://github.com/Perfare/Il2CppDumper)
 - [ida-pro-mcp](https://github.com/mrexodia/ida-pro-mcp)
 - [gakuen-imas-localify](https://github.com/chinosk6/gakuen-imas-localify)
+- [inspix-hailstorm](https://github.com/vertesan/inspix-hailstorm)
 - You
 

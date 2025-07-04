@@ -225,26 +225,41 @@ fun HomePage(modifier: Modifier = Modifier,
         .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+//        item {
+//            GakuGroupBox(modifier = modifier, stringResource(R.string.basic_settings)) {
+//                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+//                    GakuSwitch(modifier, stringResource(R.string.enable_plugin), checked = config.value.enabled) {
+//                            v -> context?.onEnabledChanged(v)
+//                    }
+//
+//                    GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
+//                            v -> context?.onLazyInitChanged(v)
+//                    }
+//
+//                    GakuSwitch(modifier, stringResource(R.string.replace_font), checked = config.value.replaceFont) {
+//                            v -> context?.onReplaceFontChanged(v)
+//                    }
+//
+//                }
+//            }
+//            Spacer(Modifier.height(6.dp))
+//        }
         item {
-            GakuGroupBox(modifier = modifier, stringResource(R.string.basic_settings)) {
+            GakuGroupBox(modifier = modifier, "Temp l4 Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    GakuSwitch(modifier, stringResource(R.string.enable_plugin), checked = config.value.enabled) {
-                            v -> context?.onEnabledChanged(v)
+                    GakuSwitch(modifier, "高分辨率渲染", checked = config.value.renderHighResolution) {
+                            v -> context?.onRenderHighResolutionChanged(v)
                     }
 
-                    GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
-                            v -> context?.onLazyInitChanged(v)
+                    GakuSwitch(modifier, "解锁fes live回放S票", checked = config.value.fesArchiveUnlockTicket) {
+                            v -> context?.onFesArchiveUnlockTicketChanged(v)
                     }
 
-                    GakuSwitch(modifier, stringResource(R.string.replace_font), checked = config.value.replaceFont) {
-                            v -> context?.onReplaceFontChanged(v)
-                    }
 
                 }
             }
             Spacer(Modifier.height(6.dp))
         }
-
         item {
             GakuGroupBox(modifier, stringResource(R.string.resource_settings),
                 contentPadding = 0.dp,
