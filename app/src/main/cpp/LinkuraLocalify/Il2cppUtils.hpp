@@ -6,6 +6,8 @@
 namespace Il2cppUtils {
     using namespace LinkuraLocal;
     using Il2CppString = UnityResolve::UnityType::String;
+    template <typename T>
+    using Il2CppArray = UnityResolve::UnityType::Array<T>;
     struct Il2CppClassHead {
         // The following fields are always valid for a Il2CppClass structure
         const void* image;
@@ -132,6 +134,69 @@ namespace Il2cppUtils {
         }
         return pClass;
     }
+
+    // UnityResolve.hpp static auto ForeachFields il2cpp only
+    static auto ForeachFields(UnityResolve::Class* klass, void* pKlass) -> void {
+        void* iter = nullptr;
+        void* field;
+        do {
+            if ((field = UnityResolve::Invoke<void*>("il2cpp_class_get_fields", pKlass, &iter))) {
+                const auto pField = new UnityResolve::Field{ .address = field, .name = UnityResolve::Invoke<const char*>("il2cpp_field_get_name", field), .type = new UnityResolve::Type{.address = UnityResolve::Invoke<void*>("il2cpp_field_get_type", field)}, .klass = klass, .offset = UnityResolve::Invoke<int>("il2cpp_field_get_offset", field), .static_field = false, .vTable = nullptr };
+                int        tSize{};
+                pField->static_field = pField->offset <= 0;
+                pField->type->name = UnityResolve::Invoke<const char*>("il2cpp_type_get_name", pField->type->address);
+                pField->type->size = -1;
+                klass->fields.push_back(pField);
+            }
+        } while (field);
+    }
+
+    static auto ForeachMethod(UnityResolve::Class* klass, void* pKlass) -> void {
+        // 遍历方法
+        void* iter = nullptr;
+        void* method;
+        do {
+            if ((method = UnityResolve::Invoke<void*>("il2cpp_class_get_methods", pKlass, &iter))) {
+                int        fFlags{};
+                const auto pMethod = new UnityResolve::Method{};
+                pMethod->address = method;
+                pMethod->name = UnityResolve::Invoke<const char*>("il2cpp_method_get_name", method);
+                pMethod->klass = klass;
+                pMethod->return_type = new UnityResolve::Type{ .address = UnityResolve::Invoke<void*>("il2cpp_method_get_return_type", method), };
+                pMethod->flags = UnityResolve::Invoke<int>("il2cpp_method_get_flags", method, &fFlags);
+
+                int tSize{};
+                pMethod->static_function = pMethod->flags & 0x10;
+                pMethod->return_type->name = UnityResolve::Invoke<const char*>("il2cpp_type_get_name", pMethod->return_type->address);
+                pMethod->return_type->size = -1;
+                pMethod->function = *static_cast<void**>(method);
+                klass->methods.push_back(pMethod);
+                const auto argCount = UnityResolve::Invoke<int>("il2cpp_method_get_param_count", method);
+                for (auto index = 0; index < argCount; index++) pMethod->args.push_back(new UnityResolve::Method::Arg{ UnityResolve::Invoke<const char*>("il2cpp_method_get_param_name", method, index), new UnityResolve::Type{.address = UnityResolve::Invoke<void*>("il2cpp_method_get_param", method, index), .name = UnityResolve::Invoke<const char*>("il2cpp_type_get_name", UnityResolve::Invoke<void*>("il2cpp_method_get_param", method, index)), .size = -1} });
+            }
+        } while (method);
+    }
+
+
+    static UnityResolve::Class* ToUnityResolveClass(void* pClass) {
+        const auto pAClass = new UnityResolve::Class();
+        pAClass->address = pClass;
+        pAClass->name = UnityResolve::Invoke<const char*>("il2cpp_class_get_name", pClass);
+        if (const auto pPClass = UnityResolve::Invoke<void*>("il2cpp_class_get_parent", pClass)) pAClass->parent = UnityResolve::Invoke<const char*>("il2cpp_class_get_name", pPClass);
+        pAClass->namespaze = "";
+        ForeachFields(pAClass, pClass);
+        ForeachMethod(pAClass, pClass);
+        void* i_class{};
+        void* iter{};
+        do {
+            if ((i_class = UnityResolve::Invoke<void*>("il2cpp_class_get_interfaces", pClass, &iter))) {
+                Log::DebugFmt("Starting get foreach");
+                ForeachFields(pAClass, i_class);
+                ForeachMethod(pAClass, i_class);
+            }
+        } while (i_class);
+        return pAClass;
+    }
     /*
     UnityResolve::Method* GetMethodIl2cpp(const char* assemblyName, const char* nameSpaceName,
                                     const char* className, const char* methodName, const int argsCount) {
@@ -210,6 +275,10 @@ namespace Il2cppUtils {
 
     static MethodInfo* il2cpp_class_get_method_from_name(void* klass, const char* name, int argsCount) {
         return UnityResolve::Invoke<MethodInfo*>("il2cpp_class_get_method_from_name", klass, name, argsCount);
+    }
+
+    static Il2cppUtils::FieldInfo* il2cpp_class_get_field_from_name(void* klass, const char* filedName) {
+        return UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_field_from_name", klass, filedName);
     }
 
     static uintptr_t il2cpp_class_get_method_pointer_from_name(void* klass, const char* name, int argsCount) {

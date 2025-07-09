@@ -597,10 +597,10 @@ class PatchActivity : ComponentActivity() {
             withContext(Dispatchers.IO) {
                 runCatching {
                     val sdcardPath = Environment.getExternalStorageDirectory().path
-                    val targetDirectory = File(sdcardPath, "Download/gkms_local_patch")
+                    val targetDirectory = File(sdcardPath, "Download/linkura_local_patch")
                     // val savedFiles = saveFileTo(apkFiles, targetDirectory, true, false)
 
-                    val savedFileNames = saveFilesToDownload(context, apkFiles, "gkms_local_patch", true)
+                    val savedFileNames = saveFilesToDownload(context, apkFiles, "linkura_local_patch", true)
                     if (savedFileNames == null) {
                         status = PackageInstaller.STATUS_FAILURE
                         message = "Save files failed."
@@ -616,7 +616,7 @@ class PatchActivity : ComponentActivity() {
                         // if (!reservePatchFiles) savedFiles.forEach { file -> if (file.exists()) file.delete() }
                         if (!reservePatchFiles) {
                             savedFileNames.forEach { f ->
-                                context.deleteFileInDownloadFolder("gkms_local_patch", f)
+                                context.deleteFileInDownloadFolder("linkura_local_patch", f)
                             }
                         }
                         return@runCatching
@@ -638,7 +638,7 @@ class PatchActivity : ComponentActivity() {
                         uninstallShell.destroy()
                     }
 
-                    val installDS = "/data/local/tmp/gkms_local_patch"
+                    val installDS = "/data/local/tmp/linkura_local_patch"
 
                     val action = if (reservePatchFiles) "cp" else "mv"
                     val copyFilesCmd: MutableList<String> = mutableListOf()

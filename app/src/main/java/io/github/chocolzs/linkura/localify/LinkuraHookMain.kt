@@ -145,7 +145,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     showGetConfigFailed(currActivity)
                 }
                 else {
-                    initGkmsConfig(currActivity)
+                    initLinkuraConfig(currActivity)
                 }
             }
         })
@@ -159,7 +159,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     showGetConfigFailed(currActivity)
                 }
                 else {
-                    initGkmsConfig(currActivity)
+                    initLinkuraConfig(currActivity)
                 }
             }
         })
@@ -243,7 +243,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
-    fun initGkmsConfig(activity: Activity) {
+    fun initLinkuraConfig(activity: Activity) {
         val intent = activity.intent
         val l4Data = intent.getStringExtra("l4Data")
         val programData = intent.getStringExtra("localData")
@@ -439,7 +439,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     putExtra("l4Data", "{}")
                 }
             }
-            initGkmsConfig(fakeActivity)
+            initLinkuraConfig(fakeActivity)
         }
 
     }
