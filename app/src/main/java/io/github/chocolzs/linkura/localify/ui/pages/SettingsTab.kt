@@ -60,7 +60,7 @@ fun SettingsTabs(modifier: Modifier = Modifier,
                 when (page) {
                     0 -> AboutPage(modifier, context = context, previewData = previewData, screenH = screenH)
                     1 -> HomePage(modifier, context = context, previewData = previewData, screenH = screenH)
-//                    2 -> AdvanceSettingsPage(modifier, context = context, previewData = previewData, screenH = screenH)
+                    2 -> AdvanceSettingsPage(modifier, context = context, previewData = previewData, screenH = screenH)
                 }
             }
         }

@@ -17,6 +17,7 @@
 #include <string_view>
 #include <locale>
 #include <codecvt>
+#include <chrono>
 
 
 std::unordered_set<void*> hookedStubs{};
@@ -104,7 +105,18 @@ namespace LinkuraLocal::HookMain {
                     break;
             }
             result = (u_int64_t)(height << 32 | width);
-            Log::DebugFmt("切换分辨率至: %d x %d, 返回结果: %p", width, height, result);
+//            Log::DebugFmt("切换分辨率至: %d x %d, 返回结果: %p", width, height, result);
+        }
+        // debug field
+        {
+           auto mainCamera =  UnityResolve::UnityType::Camera::GetMain();
+           Log::DebugFmt("MainCamera: %p", mainCamera);
+           auto cameras = UnityResolve::UnityType::Camera::GetAllCamera();
+           for (auto camera : cameras) {
+               Log::DebugFmt("Camera: %p", camera);
+           }
+
+
         }
         return result;
     }
@@ -320,25 +332,60 @@ namespace LinkuraLocal::HookMain {
 //        Log::DebugFmt("End for class");
 //        auto cameraPoint_displayName = Il2cppUtils::ClassGetFieldValue<Il2cppString*>(cameraPoint, cameraPoint_displayName_filed);
 //        Log::DebugFmt("cameraPoint_displayName is: %s", cameraPoint_displayName->ToString().c_str());
-        return FixedCamera_Initialize_Orig(self, cameraPoint, index);
+        FixedCamera_Initialize_Orig(self, cameraPoint, index);
+
+        // 打印camera component
+        static auto get_CameraComponent = UnityResolve::Get("Core.dll")->Get("BaseCamera")->Get<UnityResolve::Method>("get_CameraComponent");
+        auto cameraComponent = get_CameraComponent->Invoke<UnityResolve::UnityType::Camera*>(self);
+        Log::DebugFmt("camera component is at %p", cameraComponent);
+
+
     }
 
     // debug mode preset cameras, fixed camera and timeline camera
+    // 直播的camera 不会在这里初始化，直播的camera类型在动捕文件中定义
+    // 对于直播来说理论上没有用
     DEFINE_HOOK(void, CameraManager_CreatePresetCameras, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("CameraManager_CreatePresetCameras HOOKED");
         CameraManager_CreatePresetCameras_Orig(self, method);
         auto cameraManager_klass = Il2cppUtils::ToUnityResolveClass(Il2cppUtils::get_class_from_instance(self));
         auto cameraDict = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Dictionary<void*, Il2cppUtils::Il2CppObject *>*>(self, cameraManager_klass->Get<UnityResolve::Field>("cameraDict"));
-        Log::DebugFmt("cameraDict: %p, %s", cameraDict, cameraDict->GetType()->GetFullName().c_str());
-//        auto cameraDictArr = cameraDict->pEntries;
-//        for (int i = 0; i < cameraDictArr->max_length; i++) {
-//            auto camera = cameraDictArr->At(i);
-//            if (camera) {
-//                Log::DebugFmt("camera: %p", camera->tKey);
-//            }
-//
-//        }
+        Log::DebugFmt("cameraDict: %p, arr max_length is %d, arr bounds %p",
+                      cameraDict, cameraDict->pEntries->max_length, cameraDict->pEntries->bounds);
+        auto cameraDictArr = cameraDict->pEntries; // 遍历key value
+        for (int i = 0; i < cameraDictArr->max_length; i++) {
+            auto camera = cameraDictArr->At(i);
+            Log::DebugFmt("preset camera is at %p", camera);
+        }
+
     }
+
+    enum CameraType {
+        // Token: 0x04001010 RID: 4112
+        Invalid,
+        // Token: 0x04001011 RID: 4113
+        FixedCamera,
+        // Token: 0x04001012 RID: 4114
+        TargetCamera,
+        // Token: 0x04001013 RID: 4115
+        VirtualCamera,
+        // Token: 0x04001014 RID: 4116
+        CameraMan,
+        // Token: 0x04001015 RID: 4117
+        LoopCamera,
+        // Token: 0x04001016 RID: 4118
+        AudienceCamera,
+        // Token: 0x04001017 RID: 4119
+        AnimationCamera,
+        // Token: 0x04001018 RID: 4120
+        SmartPhoneCamera,
+        // Token: 0x04001019 RID: 4121
+        RedSpyCamera,
+        // Token: 0x0400101A RID: 4122
+        TimelineCamera,
+        // Token: 0x0400101B RID: 4123
+        LookAtCamera
+    };
 
     // 没用
     DEFINE_HOOK(void, SwipeCamera_ctor, (Il2cppUtils::Il2CppObject* self, void* method)) {
@@ -349,161 +396,184 @@ namespace LinkuraLocal::HookMain {
 
 #pragma endregion
 
-//#pragma region FreeCamera
-//    bool IsNativeObjectAlive(void* obj) {
-//        if (!obj) return false;
-//        static UnityResolve::Method* IsNativeObjectAliveMtd = nullptr;
-//        if (!IsNativeObjectAliveMtd) IsNativeObjectAliveMtd = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
-//                                                                                     "Object", "IsNativeObjectAlive");
-//        return IsNativeObjectAliveMtd->Invoke<bool>(obj);
-//    }
-//    UnityResolve::UnityType::Camera* mainCameraCache = nullptr;
-//    UnityResolve::UnityType::Transform* cameraTransformCache = nullptr;
-//    UnityResolve::UnityType::Transform* cacheTrans = nullptr;
-//    UnityResolve::UnityType::Quaternion cacheRotation{};
-//    UnityResolve::UnityType::Vector3 cachePosition{};
-//    UnityResolve::UnityType::Vector3 cacheForward{};
-//    UnityResolve::UnityType::Vector3 cacheLookAt{};
-//    // 设置主相机以及相机移动 transform
-//    void CheckAndUpdateMainCamera() {
-//        if (!Config::enableFreeCamera) return;
-//        if (IsNativeObjectAlive(mainCameraCache) && IsNativeObjectAlive(cameraTransformCache)) return;
-//        Log::DebugFmt("mainCameraCache is Alive");
-//
-//        mainCameraCache = UnityResolve::UnityType::Camera::GetMain();
-//        Log::DebugFmt("mainCameraCache is at %p", mainCameraCache);
-//        cameraTransformCache = mainCameraCache->GetTransform();
-//    }
-//    // 不知何用
+#pragma region FreeCamera
+    bool IsNativeObjectAlive(void* obj) {
+        if (!obj) return false;
+        static UnityResolve::Method* IsNativeObjectAliveMtd = nullptr;
+        if (!IsNativeObjectAliveMtd) IsNativeObjectAliveMtd = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
+                                                                                     "Object", "IsNativeObjectAlive");
+        return IsNativeObjectAliveMtd->Invoke<bool>(obj);
+    }
+    UnityResolve::UnityType::Camera* mainCameraCache = nullptr;
+    UnityResolve::UnityType::Transform* cameraTransformCache = nullptr;
+    UnityResolve::UnityType::Transform* cacheTrans = nullptr;
+    UnityResolve::UnityType::Quaternion cacheRotation{};
+    UnityResolve::UnityType::Vector3 cachePosition{};
+    UnityResolve::UnityType::Vector3 cacheForward{};
+    UnityResolve::UnityType::Vector3 cacheLookAt{};
+    // 设置主相机以及相机移动 transform
+    void CheckAndUpdateMainCamera() {
+        if (!Config::enableFreeCamera) return;
+        if (IsNativeObjectAlive(mainCameraCache) && IsNativeObjectAlive(cameraTransformCache)) return;
+        Log::DebugFmt("mainCameraCache is Alive");
+
+        mainCameraCache = UnityResolve::UnityType::Camera::GetMain();
+        Log::DebugFmt("mainCameraCache is at %p", mainCameraCache);
+        if (mainCameraCache) cameraTransformCache = mainCameraCache->GetTransform();
+    }
+    // 不知何用
 //    DEFINE_HOOK(bool, VLDOF_IsActive, (void* self)) {
-//        if (Config::enableFreeCamera) return false;
+////        if (Config::enableFreeCamera) return false;
 //        Log::DebugFmt("VLDOF_IsActive HOOKED");
 //        return VLDOF_IsActive_Orig(self);
 //    }
-//    // hook set FOV函数，如果是自由相机，则强制设置fov = 60
-//    DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
-//        if (Config::enableFreeCamera) {
+    // hook set FOV函数，如果是自由相机，则强制设置fov = 60
+    DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
+
+        static auto last_log_time = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - last_log_time).count() >= 5) {
+            Log::DebugFmt("Unity_set_fieldOfView HOOKED: camera is %p", self);
+            last_log_time = now;
+        }
+        if (Config::enableFreeCamera && mainCameraCache) {
 //            Log::DebugFmt("Unity_set_fieldOfView HOOKED");
+            Unity_set_fieldOfView_Orig(mainCameraCache, GKCamera::baseCamera.fov);
 //            if (self == mainCameraCache) {
 //                value = GKCamera::baseCamera.fov;
 //            }
-//        }
-//        Unity_set_fieldOfView_Orig(self, value);
-//    }
-//    // hook get FOV函数，如果是自由相机，则强制返回fov = 60
-//    DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
-//        if (Config::enableFreeCamera) {
+        }
+        Unity_set_fieldOfView_Orig(self, value);
+    }
+    // hook get FOV函数，如果是自由相机，则强制返回fov = 60
+    DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
+        if (Config::enableFreeCamera) {
 //            Log::DebugFmt("Unity_get_fieldOfView HOOKED");
-//            if (self == mainCameraCache) {
+            if (mainCameraCache) {
 //                static auto get_orthographic = reinterpret_cast<bool (*)(void*)>(Il2cppUtils::il2cpp_resolve_icall(
 //                        "UnityEngine.Camera::get_orthographic()"
 //                ));
 //                static auto set_orthographic = reinterpret_cast<bool (*)(void*, bool)>(Il2cppUtils::il2cpp_resolve_icall(
 //                        "UnityEngine.Camera::set_orthographic(System.Boolean)"
 //                ));
-//
-//                for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
-//                    // Log::DebugFmt("get_orthographic: %d", get_orthographic(i));
-//                    // set_orthographic(i, false);
-//                    Unity_set_fieldOfView_Orig(i, GKCamera::baseCamera.fov);
-//                }
-//                Unity_set_fieldOfView_Orig(self, GKCamera::baseCamera.fov);
-//
-//                // Log::DebugFmt("main - get_orthographic: %d", get_orthographic(self));
+
+                for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
+                    // Log::DebugFmt("get_orthographic: %d", get_orthographic(i));
+                    // set_orthographic(i, false);
+                    Unity_set_fieldOfView_Orig(i, GKCamera::baseCamera.fov);
+                }
+                Unity_set_fieldOfView_Orig(mainCameraCache, GKCamera::baseCamera.fov);
+
+                // Log::DebugFmt("main - get_orthographic: %d", get_orthographic(self));
 //                return GKCamera::baseCamera.fov;
-//            }
-//        }
-//        return Unity_get_fieldOfView_Orig(self);
-//    }
-//    // 设置旋转操作
-//    DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
-//        if (Config::enableFreeCamera) {
+            }
+        }
+        return Unity_get_fieldOfView_Orig(self);
+    }
+    // 设置旋转操作
+    DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
+        if (Config::enableFreeCamera && cameraTransformCache) {
 //            Log::DebugFmt("Unity_set_rotation_Injected HOOKED");
-//            static auto lookat_injected = reinterpret_cast<void (*)(void*self,
-//                                                                    UnityResolve::UnityType::Vector3* worldPosition, UnityResolve::UnityType::Vector3* worldUp)>(
-//                    Il2cppUtils::il2cpp_resolve_icall(
-//                            "UnityEngine.Transform::Internal_LookAt_Injected(UnityEngine.Vector3&,UnityEngine.Vector3&)"));
-//            static auto worldUp = UnityResolve::UnityType::Vector3(0, 1, 0);
-//
+            static auto lookat_injected = reinterpret_cast<void (*)(void*cameraTransformCache,
+                                                                    UnityResolve::UnityType::Vector3* worldPosition, UnityResolve::UnityType::Vector3* worldUp)>(
+                    Il2cppUtils::il2cpp_resolve_icall(
+                            "UnityEngine.Transform::Internal_LookAt_Injected(UnityEngine.Vector3&,UnityEngine.Vector3&)"));
+            static auto worldUp = UnityResolve::UnityType::Vector3(0, 1, 0);
+
 //            if (cameraTransformCache == self) {
-//                const auto cameraMode = GKCamera::GetCameraMode();
-//                if (cameraMode == GKCamera::CameraMode::FIRST_PERSON) {
-//                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
-//                        if (GKCamera::GetFirstPersonRoll() == GKCamera::FirstPersonRoll::ENABLE_ROLL) {
-//                            *value = cacheRotation;
-//                        }
-//                        else {
-//                            static LinkuraLocal::Misc::FixedSizeQueue<float> recordsY(60);
-//                            const auto newY = GKCamera::CheckNewY(cacheLookAt, true, recordsY);
-//                            UnityResolve::UnityType::Vector3 newCacheLookAt{cacheLookAt.x, newY, cacheLookAt.z};
-//                            lookat_injected(self, &newCacheLookAt, &worldUp);
-//                            return;
-//                        }
-//                    }
-//                }
-//                else if (cameraMode == GKCamera::CameraMode::FOLLOW) {
-//                    auto newLookAtPos = GKCamera::CalcFollowModeLookAt(cachePosition,
-//                                                                       GKCamera::followPosOffset, true);
-//                    lookat_injected(self, &newLookAtPos, &worldUp);
+                const auto cameraMode = GKCamera::GetCameraMode();
+                if (cameraMode == GKCamera::CameraMode::FIRST_PERSON) {
+                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
+                        if (GKCamera::GetFirstPersonRoll() == GKCamera::FirstPersonRoll::ENABLE_ROLL) {
+                            *value = cacheRotation;
+                        }
+                        else {
+                            static LinkuraLocal::Misc::FixedSizeQueue<float> recordsY(60);
+                            const auto newY = GKCamera::CheckNewY(cacheLookAt, true, recordsY);
+                            UnityResolve::UnityType::Vector3 newCacheLookAt{cacheLookAt.x, newY, cacheLookAt.z};
+                            lookat_injected(self, &newCacheLookAt, &worldUp);
+                            return;
+                        }
+                    }
+                }
+                else if (cameraMode == GKCamera::CameraMode::FOLLOW) {
+                    auto newLookAtPos = GKCamera::CalcFollowModeLookAt(cachePosition,
+                                                                       GKCamera::followPosOffset, true);
+                    lookat_injected(self, &newLookAtPos, &worldUp);
+                    return;
+                }
+                else {
+                    auto& origCameraLookat = GKCamera::baseCamera.lookAt;
+                    lookat_injected(cameraTransformCache, &origCameraLookat, &worldUp);
+                    // Log::DebugFmt("fov: %f, target: %f", Unity_get_fieldOfView_Orig(mainCameraCache), GKCamera::baseCamera.fov);
 //                    return;
-//                }
-//                else {
-//                    auto& origCameraLookat = GKCamera::baseCamera.lookAt;
-//                    lookat_injected(self, &origCameraLookat, &worldUp);
-//                    // Log::DebugFmt("fov: %f, target: %f", Unity_get_fieldOfView_Orig(mainCameraCache), GKCamera::baseCamera.fov);
-//                    return;
-//                }
+                }
 //            }
-//        }
-//        return Unity_set_rotation_Injected_Orig(self, value);
-//    }
-//    // hook 位移操作
-//    DEFINE_HOOK(void, Unity_set_position_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Vector3* data)) {
-//        if (Config::enableFreeCamera) {
+        }
+        return Unity_set_rotation_Injected_Orig(self, value);
+    }
+    // hook 位移操作
+    DEFINE_HOOK(void, Unity_set_position_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Vector3* data)) {
+        if (Config::enableFreeCamera && cameraTransformCache) {
 //            Log::DebugFmt("Unity_set_position_Injected HOOKED");
 //            CheckAndUpdateMainCamera();
 //            Log::DebugFmt("Check and update main camera finished");
 //            if (cameraTransformCache == self) {
-//                const auto cameraMode = GKCamera::GetCameraMode();
-//                if (cameraMode == GKCamera::CameraMode::FIRST_PERSON) {
-//                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
-//                        *data = GKCamera::CalcFirstPersonPosition(cachePosition, cacheForward, GKCamera::firstPersonPosOffset);
-//                    }
-//
-//                }
-//                else if (cameraMode == GKCamera::CameraMode::FOLLOW) {
-//                    auto newLookAtPos = GKCamera::CalcFollowModeLookAt(cachePosition, GKCamera::followPosOffset);
-//                    auto pos = GKCamera::CalcPositionFromLookAt(newLookAtPos, GKCamera::followPosOffset);
-//                    data->x = pos.x;
-//                    data->y = pos.y;
-//                    data->z = pos.z;
-//                }
-//                else {
-//                    //Log::DebugFmt("MainCamera set pos: %f, %f, %f", data->x, data->y, data->z);
-//                    auto& origCameraPos = GKCamera::baseCamera.pos;
+                const auto cameraMode = GKCamera::GetCameraMode();
+                if (cameraMode == GKCamera::CameraMode::FIRST_PERSON) {
+                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
+                        *data = GKCamera::CalcFirstPersonPosition(cachePosition, cacheForward, GKCamera::firstPersonPosOffset);
+                    }
+
+                }
+                else if (cameraMode == GKCamera::CameraMode::FOLLOW) {
+                    auto newLookAtPos = GKCamera::CalcFollowModeLookAt(cachePosition, GKCamera::followPosOffset);
+                    auto pos = GKCamera::CalcPositionFromLookAt(newLookAtPos, GKCamera::followPosOffset);
+                    data->x = pos.x;
+                    data->y = pos.y;
+                    data->z = pos.z;
+                }
+                else {
+                    auto& origCameraPos = GKCamera::baseCamera.pos;
+                    UnityResolve::UnityType::Vector3 newPos{origCameraPos.x, origCameraPos.y, origCameraPos.z};
+                    Log::DebugFmt("MainCamera set pos: %f, %f, %f", newPos.x, newPos.y, newPos.z);
+                    Unity_set_position_Injected_Orig(cameraTransformCache, &newPos);
 //                    data->x = origCameraPos.x;
 //                    data->y = origCameraPos.y;
 //                    data->z = origCameraPos.z;
-//                }
+                }
 //            }
-//        }
-//
-//        return Unity_set_position_Injected_Orig(self, data);
-//    }
-//    // 这是？但是与Unity有关
-//    DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
-//        EndCameraRendering_Orig(ctx, camera, method);
-//
-//        if (Config::enableFreeCamera && mainCameraCache) {
+        }
+
+        return Unity_set_position_Injected_Orig(self, data);
+    }
+    // 这是？但是与Unity有关
+    DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
+        EndCameraRendering_Orig(ctx, camera, method);
+
+        if (Config::enableFreeCamera && mainCameraCache) {
 //            Log::DebugFmt("EndCameraRendering HOOKED: mainCameraCache %p", mainCameraCache);
-//            Unity_set_fieldOfView_Orig(mainCameraCache, GKCamera::baseCamera.fov);
-////            if (GKCamera::GetCameraMode() == GKCamera::CameraMode::FIRST_PERSON) {
-////                mainCameraCache->SetNearClipPlane(0.001f);
-////            }
-//        }
-//    }
-//
-//#pragma endregion
+            Unity_set_fieldOfView_Orig(mainCameraCache, GKCamera::baseCamera.fov);
+            if (GKCamera::GetCameraMode() == GKCamera::CameraMode::FIRST_PERSON) {
+                mainCameraCache->SetNearClipPlane(0.001f);
+            }
+        }
+    }
+
+    // 可能只对wm有用，wm只会调用一次，而且调用的就是我们需要的camera?
+    // fes live一定没用
+    // 活动记录没用
+    DEFINE_HOOK(UnityResolve::UnityType::Camera*, CameraManager_GetCamera, (Il2cppUtils::Il2CppObject* self, CameraType cameraType , int cameraId , void* method)) {
+        Log::DebugFmt("CameraManager_GetCamera HOOKED");
+        Log::DebugFmt("cameraType: %d, cameraId: %d", cameraType, cameraId);
+        auto camera =  CameraManager_GetCamera_Orig(self, cameraType, cameraId, method);
+        Log::DebugFmt("Get camera at %p", camera);
+        mainCameraCache = camera;
+        if (mainCameraCache) cameraTransformCache = mainCameraCache->GetTransform();
+        return camera;
+    }
+
+#pragma endregion
 
 
     void StartInjectFunctions() {
@@ -545,25 +615,27 @@ namespace LinkuraLocal::HookMain {
         ADD_HOOK(DynamicCamera_FindCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "DynamicCamera", "FindCamera"));
         ADD_HOOK(FixedCamera_Initialize, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FixedCamera", "Initialize"));
         ADD_HOOK(CameraManager_CreatePresetCameras, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "CreatePresetCameras"));
+        ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
+
         // not used
         ADD_HOOK(SwipeCamera_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "SwipeCamera", ".ctor"));
 #pragma endregion
 
-//#pragma region FreeCamera_ADD_HOOK
+#pragma region FreeCamera_ADD_HOOK
 //        ADD_HOOK(VLDOF_IsActive,
 //                 Il2cppUtils::GetMethodPointer("Unity.RenderPipelines.Universal.Runtime.dll", "VL.Rendering",
 //                                               "VLDOF", "IsActive"));
-//        ADD_HOOK(Unity_set_position_Injected, Il2cppUtils::il2cpp_resolve_icall(
-//                "UnityEngine.Transform::set_position_Injected(UnityEngine.Vector3&)"));
-//        ADD_HOOK(Unity_set_rotation_Injected, Il2cppUtils::il2cpp_resolve_icall(
-//                "UnityEngine.Transform::set_rotation_Injected(UnityEngine.Quaternion&)"));
-//        ADD_HOOK(Unity_get_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
-//                                                                      "Camera", "get_fieldOfView"));
-//        ADD_HOOK(Unity_set_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
-//                                                                      "Camera", "set_fieldOfView"));
-//        ADD_HOOK(EndCameraRendering, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine.Rendering",
-//                                                                   "RenderPipeline", "EndCameraRendering"));
-//#pragma endregion
+        ADD_HOOK(Unity_set_position_Injected, Il2cppUtils::il2cpp_resolve_icall(
+                "UnityEngine.Transform::set_position_Injected(UnityEngine.Vector3&)"));
+        ADD_HOOK(Unity_set_rotation_Injected, Il2cppUtils::il2cpp_resolve_icall(
+                "UnityEngine.Transform::set_rotation_Injected(UnityEngine.Quaternion&)"));
+        ADD_HOOK(Unity_get_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
+                                                                      "Camera", "get_fieldOfView"));
+        ADD_HOOK(Unity_set_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
+                                                                      "Camera", "set_fieldOfView"));
+        ADD_HOOK(EndCameraRendering, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine.Rendering",
+                                                                   "RenderPipeline", "EndCameraRendering"));
+#pragma endregion
 
         ADD_HOOK(Internal_LogException, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.DebugLogHandler::Internal_LogException(System.Exception,UnityEngine.Object)"));
@@ -608,6 +680,7 @@ namespace LinkuraLocal::HookMain {
         }
 
         StartInjectFunctions();
+        GKCamera::initCameraSettings(); // free camera
 
         if (Config::lazyInit) {
             UnityResolveProgress::assembliesProgress.current = 2;
