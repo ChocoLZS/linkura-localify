@@ -2,11 +2,18 @@
 #include "baseCamera.hpp"
 #include "../../deps/Joystick/JoystickEvent.h"
 
-namespace GKCamera {
+namespace L4Camera {
     enum class CameraMode {
         FREE,
         FIRST_PERSON,
         FOLLOW
+    };
+
+    enum class CameraSceneType {
+        NONE,
+        WITH_LIVE,
+        FES_LIVE,
+        STORY
     };
 
     enum class FirstPersonRoll {
@@ -23,6 +30,8 @@ namespace GKCamera {
     CameraMode GetCameraMode();
     void SetFirstPersonRoll(FirstPersonRoll mode);
     FirstPersonRoll GetFirstPersonRoll();
+    void SetCameraSceneType(CameraSceneType type);
+    CameraSceneType GetCameraSceneType();
 
     extern BaseCamera::Camera baseCamera;
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;

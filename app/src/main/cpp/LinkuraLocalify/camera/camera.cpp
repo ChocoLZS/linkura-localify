@@ -4,6 +4,7 @@
 #include "../Misc.hpp"
 #include "../BaseDefine.h"
 #include "../../platformDefine.hpp"
+#include "../Log.h"
 
 #ifdef GKMS_WINDOWS
     #include <corecrt_math_defines.h>
@@ -11,11 +12,12 @@
 
 
 
-namespace GKCamera {
+namespace L4Camera {
 	BaseCamera::Camera baseCamera{};
     CameraMode cameraMode = CameraMode::FREE;
     FirstPersonRoll firstPersonRoll = FirstPersonRoll::ENABLE_ROLL;
     FollowModeY followModeY = FollowModeY::SMOOTH_Y;
+    CameraSceneType cameraSceneType = CameraSceneType::NONE;
 
     UnityResolve::UnityType::Vector3 firstPersonPosOffset{0, 0.064f, 0.000f};
     UnityResolve::UnityType::Vector3 followPosOffset{0, 0, 1.5};
@@ -45,6 +47,14 @@ namespace GKCamera {
         return firstPersonRoll;
     }
 
+    void SetCameraSceneType(CameraSceneType type) {
+        cameraSceneType = type;
+    }
+
+    CameraSceneType GetCameraSceneType() {
+        return cameraSceneType;
+    }
+
 
     void reset_camera() {
         followCharaIndex = 0;
@@ -55,6 +65,7 @@ namespace GKCamera {
 	}
 
 	void camera_forward() {  // 向前
+        LinkuraLocal::Log::DebugFmt("forward triggered");
         switch (cameraMode) {
             case CameraMode::FREE: {
                 baseCamera.set_lon_move(0, LonMoveHState::LonMoveForward);

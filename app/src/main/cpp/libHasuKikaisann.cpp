@@ -77,7 +77,7 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_initHook(JNIEnv *env, j
 extern "C"
 JNIEXPORT void JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_keyboardEvent(JNIEnv *env, jclass clazz, jint key_code, jint action) {
-    GKCamera::on_cam_rawinput_keyboard(action, key_code);
+    L4Camera::on_cam_rawinput_keyboard(action, key_code);
     const auto msg = LinkuraLocal::Local::OnKeyDown(action, key_code);
     if (!msg.empty()) {
         g_linkuraHookMainClass = clazz;
@@ -105,7 +105,7 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_joystickEvent(JNIEnv *e
                                                                       jfloat hatX,
                                                                       jfloat hatY) {
     JoystickEvent event(action, leftStickX, leftStickY, rightStickX, rightStickY, leftTrigger, rightTrigger, hatX, hatY);
-    GKCamera::on_cam_rawinput_joystick(event);
+    L4Camera::on_cam_rawinput_joystick(event);
 }
 
 extern "C"
