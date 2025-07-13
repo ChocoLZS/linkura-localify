@@ -367,7 +367,8 @@ namespace LinkuraLocal::HookMain {
         TimelineCamera,
         LookAtCamera
     };
-    // fes live / with meets
+    // fes live / with meets, but we treat it as with live
+    // when every dynamic camera change, this will be called
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, CameraManager_GetCamera, (Il2cppUtils::Il2CppObject* self, CameraType cameraType , int cameraId , void* method)) {
         Log::DebugFmt("CameraManager_GetCamera HOOKED");
         auto camera =  CameraManager_GetCamera_Orig(self, cameraType, cameraId, method);
@@ -383,9 +384,16 @@ namespace LinkuraLocal::HookMain {
         return camera;
     }
     // chapter switch
+    // this will be called when chapter page closed in with meets
+    uintptr_t LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr = 0;
     DEFINE_HOOK(void, LiveConnectChapterModel_NewChapterConfirmed, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
-        if (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::FES_LIVE) unregisterMainCamera();
+        auto caller = __builtin_return_address(0);
+        Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed caller is %p", caller);
+        IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 3000) {
+            Log::DebugFmt("UnregisterMainCamera is called in LiveConnectChapterModel_NewChapterConfirmed %d", (uintptr_t)caller - LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr);
+            if (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::FES_LIVE) unregisterMainCamera();
+        }
         LiveConnectChapterModel_NewChapterConfirmed_Orig(self, method);
     }
     // exit
@@ -408,6 +416,7 @@ namespace LinkuraLocal::HookMain {
         registerMainCamera(storyCamera, L4Camera::CameraSceneType::STORY);
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        Log::DebugFmt("StoryScene_OnFinalize HOOKED");
         unregisterMainCamera();
         L4Camera::reset_camera();
         StoryScene_OnFinalize_Orig(self, method);
@@ -463,13 +472,13 @@ namespace LinkuraLocal::HookMain {
 #pragma region FreeCamera_ADD_HOOK
         ADD_HOOK(FesLiveFixedCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveFixedCamera", "GetCamera"));
         ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
-//        auto LiveConnectChapterListPresenter_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterListPresenter");
-//        auto display_klass = Il2cppUtils::find_nested_class_from_name(LiveConnectChapterListPresenter_klass, "<>c__DisplayClass10_0");
-//        auto createAvailableChapterNodeView_klass = Il2cppUtils::find_nested_class_from_name(display_klass, "<<CreateAvailableChapterNodeView>b__2>d");
-//        auto method = Il2cppUtils::GetMethodIl2cpp(createAvailableChapterNodeView_klass, "MoveNext", 0);
-//        if (method) {
-//            ADD_HOOK(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext, method->methodPointer);
-//        }
+       auto LiveConnectChapterListPresenter_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterListPresenter");
+       auto display_klass = Il2cppUtils::find_nested_class_from_name(LiveConnectChapterListPresenter_klass, "<>c__DisplayClass10_0");
+       auto createAvailableChapterNodeView_klass = Il2cppUtils::find_nested_class_from_name(display_klass, "<<CreateAvailableChapterNodeView>b__2>d");
+       auto method = Il2cppUtils::GetMethodIl2cpp(createAvailableChapterNodeView_klass, "MoveNext", 0);
+       if (method) {
+           LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr = method->methodPointer;
+       }
         ADD_HOOK(LiveConnectChapterModel_NewChapterConfirmed, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterModel", "NewChapterConfirmed"));
         ADD_HOOK(LiveSceneController_FinalizeSceneAsync, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "LiveSceneController", "FinalizeSceneAsync"));
         ADD_HOOK(StoryModelSpaceManager_Init, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StoryModelSpaceManager", "Init"));

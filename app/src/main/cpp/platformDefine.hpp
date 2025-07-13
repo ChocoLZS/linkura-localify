@@ -40,7 +40,8 @@
 
 #define IF_CALLER_WITHIN(func_start_addr, caller_actual_addr, size_range) \
     /* The actual 'if' for the user's code block */ \
-    if (reinterpret_cast<uintptr_t>(caller_actual_addr) > reinterpret_cast<uintptr_t>(func_start_addr) && \
+    if (\
+        (reinterpret_cast<uintptr_t>(caller_actual_addr) > reinterpret_cast<uintptr_t>(func_start_addr)) && \
         (reinterpret_cast<uintptr_t>(caller_actual_addr) - reinterpret_cast<uintptr_t>(func_start_addr)) < static_cast<uintptr_t>(size_range))
 
 //#define GET_ASYNC_MOVENEXT_ADDR(assemblyName, nameSpaceName, className, nestedClass, ptr) \
