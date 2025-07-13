@@ -1,0 +1,16 @@
+{
+    "plugin_repo": "https://github.com/ChocoLZS/linkura-localify",
+    "main_contributors": [
+        {
+            "name": "chocoie (Plugin code)",
+            "links": [
+                {"name": "Github", "link": "https://github.com/ChocoLZS"},
+                {"name": "Bilibili", "link": "https://space.bilibili.com/2200311"}
+            ]
+        }
+    ],
+    "contrib_img": {
+        "plugin": "https://contrib.rocks/image?repo=ChocoLZS/linkura-localify",
+        "translation": "https://contrib.rocks/image?repo=chinosk6/GakumasTranslationData"
+    }
+}

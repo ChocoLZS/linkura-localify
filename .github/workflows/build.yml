@@ -1,0 +1,87 @@
+name: Android CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4.2.1
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Setup Android Development Environment
+      uses: android-actions/setup-android@v3
+
+    - name: install dependencies
+      run: |
+        sdkmanager --install "cmake;3.22.1"
+        echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" > local.properties
+        echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+        npm install -g pnpm
+
+    - name: Update Submodules
+      run: |
+        git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
+      continue-on-error: true
+
+    # - name: Pull Assets
+    #   run: |
+    #     git clone https://${{ secrets.ACCESS_TOKEN_GITHUB }}@github.com/DreamGallery/Campus-adv-txts.git app/src/main/assets/gakumas-local/gakumas-raw-txts
+    #     mv app/src/main/assets/gakumas-local/gakumas-raw-txts/Resource app/src/main/assets/gakumas-local/raw
+    #     rm -rf app/src/main/assets/gakumas-local/gakumas-raw-txts
+    #   continue-on-error: true
+
+    # - name: Build Assets
+    #   run: |
+    #     mv app/src/main/assets/gakumas-local/GakumasPreTranslation/.env.sample app/src/main/assets/gakumas-local/GakumasPreTranslation/.env
+    #     cd app/src/main/assets/gakumas-local && make build-resource
+    #   continue-on-error: true
+
+    # - name: Write branch and commit info
+    #   run: |
+    #     branch=$(git rev-parse --abbrev-ref HEAD)
+    #     hash=$(git rev-parse --short=8 HEAD)
+    #     echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
+              
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - uses: actions/upload-artifact@v4
+      id: upload_unsigned_v4
+      with:
+        name: LinkuraLocalify-Unsigned-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+      continue-on-error: true
+
+    - uses: r0adkll/sign-android-release@v1
+      name: Sign app APK
+      id: sign_app
+      with:
+        releaseDirectory: app/build/outputs/apk/debug
+        signingKeyBase64: ${{ secrets.KEYSTOREB64 }}
+        alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      env:
+        BUILD_TOOLS_VERSION: "34.0.0"
+      continue-on-error: true
+
+    - uses: actions/upload-artifact@v4
+      id: upload_signed_v4
+      with:
+        name: LinkuraLocalify-Signed-apk
+        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+      continue-on-error: true
+

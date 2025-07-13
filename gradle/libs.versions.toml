@@ -1,0 +1,66 @@
+[versions]
+accompanistPager = "0.30.0"
+activityCompose = "1.9.0"
+hiddenapibypass = "4.3"
+shizukuApi = "12.1.0"
+hiddenapi-refine = "4.3.0"
+hiddenapi-stub = "4.2.0"
+okhttpBom = "4.12.0"
+xposedApi = "82"
+appcompat = "1.7.0"
+coil = "2.6.0"
+composeBom = "2024.06.00"
+agp = "8.5.0"
+coreKtx = "1.13.1"
+kotlin = "2.0.0"
+lifecycle = "2.8.2"
+material = "1.12.0"
+navigationCompose = "2.7.7"
+xdl = "2.1.1"
+shadowhook = "1.0.10"
+serialization="1.7.1"
+zip4j = "2.9.1"
+
+[libraries]
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPager" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-animation = { module = "androidx.compose.animation:animation" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-foundation-layout = { module = "androidx.compose.foundation:foundation-layout" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-material = { module = "androidx.compose.material:material" }
+androidx-material3 = { module = "androidx.compose.material3:material3" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-runtime = { module = "androidx.compose.runtime:runtime" }
+androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
+shizukuApi = { module = "dev.rikka.shizuku:api", version.ref = "shizukuApi" }
+rikka-shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizukuApi" }
+rikka-refine = { module = "dev.rikka.tools.refine:runtime", version.ref = "hiddenapi-refine" }
+rikka-hidden-stub = { module = "dev.rikka.hidden:stub", version.ref = "hiddenapi-stub" }
+
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor" }
+okhttp = { module = "com.squareup.okhttp3:okhttp" }
+okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttpBom" }
+xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposedApi" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+shadowhook = { module = "com.bytedance.android:shadowhook", version.ref = "shadowhook" }
+xdl = { module = "io.github.hexhacking:xdl", version.ref = "xdl" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

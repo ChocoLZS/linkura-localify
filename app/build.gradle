@@ -1,0 +1,135 @@
+plugins {
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.serialization)
+    id("kotlin-parcelize")
+}
+
+android {
+    namespace 'io.github.chocolzs.linkura.localify'
+    compileSdk 34
+    ndkVersion "26.3.11579264"
+
+    defaultConfig {
+        applicationId "io.github.chocolzs.linkura.localify"
+        minSdk 29
+        targetSdk 34
+        versionCode 12
+        versionName "v3.1.0"
+        buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+            }
+        }
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "ENABLE_LOG", "true"
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    buildFeatures {
+        buildConfig true
+        compose true
+        prefab true
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
+
+    packaging {
+        jniLibs {
+            pickFirsts += "**/libxdl.so"
+            pickFirsts += "**/libshadowhook.so"
+        }
+        resources {
+            excludes += "**/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "kotlin/**"
+            excludes += "**.bin"
+        }
+    }
+
+    applicationVariants.configureEach { variant ->
+        variant.mergeAssetsProvider.configure { mergeAssetsTask ->
+            mergeAssetsTask.doLast {
+//                delete(fileTree(dir: mergeAssetsTask.outputDir, includes: ['gakumas-local/gakuen-adapted-translation-data/**',
+//                                                                           'gakumas-local/GakumasPreTranslation/**',
+//                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
+//                                                                           'gakumas-local/raw/**']))
+            }
+        }
+    }
+}
+
+dependencies {
+    // implementation files('libs/lspatch_cleaned.jar')
+    // api 'com.google.guava:guava:32.0.1-jre'
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.material3)
+    implementation(libs.material)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.navigation.compose)
+    implementation files('libs/lspatch_cleaned.jar')
+
+    implementation(libs.zip4j)
+    implementation(libs.shizukuApi)
+    implementation(libs.rikka.shizuku.provider)
+    implementation(libs.rikka.refine)
+    implementation(libs.rikka.hidden.stub)
+    implementation(libs.hiddenapibypass)
+
+    def composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+    implementation(libs.androidx.runtime)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.animation)
+    implementation(libs.androidx.ui.tooling.preview)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
+    implementation(libs.xdl)
+    implementation(libs.shadowhook)
+    compileOnly(libs.xposed.api)
+    implementation(libs.kotlinx.serialization.json)
+}

@@ -1,0 +1,56 @@
+package io.github.chocolzs.linkura.localify.models
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class LinkuraConfig (
+    var dbgMode: Boolean = false,
+    var enabled: Boolean = true,
+    var renderHighResolution: Boolean = true,
+    var fesArchiveUnlockTicket: Boolean = false,
+    var lazyInit: Boolean = true,
+    var replaceFont: Boolean = true,
+    var textTest: Boolean = false,
+    var useMasterTrans: Boolean = true,
+    var dumpText: Boolean = false,
+    var gameOrientation: Int = 0,
+    var forceExportResource: Boolean = false,
+    var enableFreeCamera: Boolean = false,
+    var targetFrameRate: Int = 0,
+    var unlockAllLive: Boolean = false,
+    var unlockAllLiveCostume: Boolean = false,
+    var enableLiveCustomeDress: Boolean = false,
+    var liveCustomeHeadId: String = "",
+    var liveCustomeCostumeId: String = "",
+
+    var loginAsIOS: Boolean = false,
+
+    var useCustomeGraphicSettings: Boolean = false,
+    var renderScale: Float = 0.77f,
+    var qualitySettingsLevel: Int = 3,
+    var volumeIndex: Int = 3,
+    var maxBufferPixel: Int = 3384,
+    var reflectionQualityLevel: Int = 4,  // 0~5
+    var lodQualityLevel: Int = 4,  // 0~5
+
+    var enableBreastParam: Boolean = false,
+    var bDamping: Float = 0.33f,
+    var bStiffness: Float = 0.08f,
+    var bSpring: Float = 1.0f,
+    var bPendulum: Float = 0.055f,
+    var bPendulumRange: Float = 0.15f,
+    var bAverage: Float = 0.20f,
+    var bRootWeight: Float = 0.5f,
+    var bUseArmCorrection: Boolean = true,
+    var bUseScale: Boolean = false,
+    var bScale: Float = 1.0f,
+    var bUseLimit: Boolean = true,
+    var bLimitXx: Float = 1.0f,
+    var bLimitXy: Float = 1.0f,
+    var bLimitYx: Float = 1.0f,
+    var bLimitYy: Float = 1.0f,
+    var bLimitZx: Float = 1.0f,
+    var bLimitZy: Float = 1.0f,
+
+    var pf: Boolean = false
+)
