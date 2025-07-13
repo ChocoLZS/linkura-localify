@@ -1,25 +1,22 @@
 # linkura-localify
 
-[中文](doc/zh/README.md) | [日本語](doc/jp/README.md) | [English](doc/en/README.md)
-
-
 [![GitHub stars](https://img.shields.io/github/stars/ChocoLZS/linkura-localify?style=social)](https://github.com/ChocoLZS/linkura-localify/stargazers) [![GitHub forks](https://img.shields.io/github/forks/ChocoLZS/linkura-localify?style=social)](https://github.com/ChocoLZS/linkura-localify/network/members) [![GitHub license](https://img.shields.io/github/license/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify) [![GitHub contributors](https://img.shields.io/github/contributors/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/graphs/contributors)
 [![GitHub issues](https://img.shields.io/github/issues/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues) [![GitHub issues closed](https://img.shields.io/github/issues-closed/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/pulls) [![GitHub last commit](https://img.shields.io/github/last-commit/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/commits) 
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify) [![GitHub repo size](https://img.shields.io/github/repo-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify)
 
 
-基于 [**`学园偶像大师 本地化插件`**](https://github.com/chinosk6/gakuen-imas-localify) 的整体框架 二次开发
+[**`学園アイドルマスター ローカライゼーションプラグイン`**](https://github.com/chinosk6/gakuen-imas-localify) の全体フレームワークをベースとした二次開発
 
-- 林库拉(リンクラ) 本地化插件
-- **开发中**
+- リンクラ(リンクラ) ローカライゼーションプラグイン
+- **開発中**
 
-# Usage
+# 使用方法
 
-- 这是一个 XPosed 插件，已 Root 用户可以使用 [LSPosed](https://github.com/LSPosed/LSPosed)，未 Root 用户可以使用 [LSPatch](https://github.com/LSPosed/LSPatch)。
-- 安卓 15 及以上的用户，请使用 [JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) 或 [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch)。因为原版已停止更新。
-- 关于模拟器的选择，请参考 [模拟器参考](doc/zh/simulator.md)。
+- これはXPosedプラグインです。Root化済みユーザーは [LSPosed](https://github.com/LSPosed/LSPosed) を、Root化していないユーザーは [LSPatch](https://github.com/LSPosed/LSPatch) を使用できます。
+- Android 15以上のユーザーは、[JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) または [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch) を使用してください。オリジナル版は更新が停止されているためです。
+- エミュレーターの選択については、[エミュレーター参考資料](simulator.md) をご覧ください。
 
-# Development
+# 開発
 
 > TODO
 
@@ -27,7 +24,7 @@
 
 [![Star History Chart](https://api.star-history.com/svg?repos=chinosk6/gakuen-imas-localify&type=Date)](https://star-history.com/#chinosk6/gakuen-imas-localify&Date) -->
 
-# Special Thanks
+# 特別な感謝
 
 - [gkmasToolkit](https://github.com/kishidanatsumi/gkmasToolkit)
 - [UmaPyogin-Android](https://github.com/akemimadoka/UmaPyogin-Android)
@@ -40,4 +37,3 @@
 - [gakuen-imas-localify](https://github.com/chinosk6/gakuen-imas-localify)
 - [inspix-hailstorm](https://github.com/vertesan/inspix-hailstorm)
 - You
-

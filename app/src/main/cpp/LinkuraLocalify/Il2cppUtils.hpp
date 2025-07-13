@@ -314,6 +314,7 @@ namespace Il2cppUtils {
         return il2cpp_class_get_method_from_name(klass, methodName, argsCount);
     }
     static MethodInfo* GetMethodIl2cpp(void* klass, const char* methodName, const int argsCount) {
+        if (!klass) return nullptr;
         return il2cpp_class_get_method_from_name(klass, methodName, argsCount);
     }
 
