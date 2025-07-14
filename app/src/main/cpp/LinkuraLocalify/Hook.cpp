@@ -270,6 +270,9 @@ namespace LinkuraLocal::HookMain {
     DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
         if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
             if (IsNativeObjectAlive(mainCameraCache)) {
+                for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
+                    Unity_set_fieldOfView_Orig(i, L4Camera::baseCamera.fov);
+                }
                 Unity_set_fieldOfView_Orig(mainCameraCache, L4Camera::baseCamera.fov);
             }
             if (self == mainCameraCache) return L4Camera::baseCamera.fov;
@@ -413,7 +416,7 @@ namespace LinkuraLocal::HookMain {
         StoryModelSpaceManager_Init_Orig(self, method);
         auto modelSpace = get_ModelSpace->Invoke<Il2cppUtils::Il2CppObject*>(self);
         auto storyCamera = get_StoryCamera->Invoke<UnityResolve::UnityType::Camera*>(modelSpace);
-        registerMainCamera(storyCamera, L4Camera::CameraSceneType::STORY);
+        registerMainCamera(storyCamera, L4Camera::CameraSceneType::STORY, true);
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
