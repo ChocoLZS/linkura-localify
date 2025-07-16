@@ -254,30 +254,8 @@ namespace LinkuraLocal::HookMain {
 
     void unregisterMainCamera() {
         if (!Config::enableFreeCamera) return;
-        Log::DebugFmt("Unregister main camera");
         L4Camera::SetCameraSceneType(L4Camera::CameraSceneType::NONE);
-    }
-
-    DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
-            if (IsNativeObjectAlive(mainCameraCache)) {
-                Unity_set_fieldOfView_Orig(mainCameraCache, L4Camera::baseCamera.fov);
-            }
-            if (self == mainCameraCache) return;
-        }
-        Unity_set_fieldOfView_Orig(self, value);
-    }
-    DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
-            if (IsNativeObjectAlive(mainCameraCache)) {
-                for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
-                    Unity_set_fieldOfView_Orig(i, L4Camera::baseCamera.fov);
-                }
-                Unity_set_fieldOfView_Orig(mainCameraCache, L4Camera::baseCamera.fov);
-            }
-            if (self == mainCameraCache) return L4Camera::baseCamera.fov;
-        }
-        return Unity_get_fieldOfView_Orig(self);
+        Log::DebugFmt("Unregister main camera");
     }
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
         if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
@@ -344,17 +322,39 @@ namespace LinkuraLocal::HookMain {
         Unity_set_position_Injected_Orig(self, data);
     }
 
-    DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
-        EndCameraRendering_Orig(ctx, camera, method);
-
+    DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
+        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+            if (IsNativeObjectAlive(mainCameraCache) && self == mainCameraCache) {
+                value = L4Camera::baseCamera.fov;
+            }
+        }
+        Unity_set_fieldOfView_Orig(self, value);
+    }
+    DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
         if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
             if (IsNativeObjectAlive(mainCameraCache)) {
+                for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
+                    Unity_set_fieldOfView_Orig(i, L4Camera::baseCamera.fov);
+                }
+            }
+            if (self == mainCameraCache) {
                 Unity_set_fieldOfView_Orig(mainCameraCache, L4Camera::baseCamera.fov);
+                return L4Camera::baseCamera.fov;
+            }
+        }
+        return Unity_get_fieldOfView_Orig(self);
+    }
+    DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
+        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+            if (IsNativeObjectAlive(mainCameraCache)) {
+                // prevent crash for with live and fes live & remain the free fov for story
+                if (L4Camera::GetCameraSceneType() == L4Camera::CameraSceneType::STORY) Unity_set_fieldOfView_Orig(mainCameraCache, L4Camera::baseCamera.fov);
                 if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
                     mainCameraCache->SetNearClipPlane(0.001f);
                 }
             }
         }
+        EndCameraRendering_Orig(ctx, camera, method);
     }
     enum CameraType {
         Invalid,
@@ -390,12 +390,12 @@ namespace LinkuraLocal::HookMain {
     // this will be called when chapter page closed in with meets
     uintptr_t LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr = 0;
     DEFINE_HOOK(void, LiveConnectChapterModel_NewChapterConfirmed, (Il2cppUtils::Il2CppObject* self, void* method)) {
-        Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
         auto caller = __builtin_return_address(0);
-        Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed caller is %p", caller);
-        IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 3000) {
-            Log::DebugFmt("UnregisterMainCamera is called in LiveConnectChapterModel_NewChapterConfirmed %d", (uintptr_t)caller - LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr);
-            if (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::FES_LIVE) unregisterMainCamera();
+        IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
+            // fes live will use the same fixed camera at all time
+            if (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::FES_LIVE) {
+                unregisterMainCamera();
+            }
         }
         LiveConnectChapterModel_NewChapterConfirmed_Orig(self, method);
     }
@@ -482,6 +482,19 @@ namespace LinkuraLocal::HookMain {
        if (method) {
            LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr = method->methodPointer;
        }
+//       auto LiveSystemSceneController_PrepareChangeSceneAsync_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "LiveSystemSceneController");
+//       auto prepareChangeSceneAsync_klass = Il2cppUtils::find_nested_class_from_name(LiveSystemSceneController_PrepareChangeSceneAsync_klass, "<PrepareChangeSceneAsync>d__1");
+//       method = Il2cppUtils::GetMethodIl2cpp(prepareChangeSceneAsync_klass, "MoveNext", 0);
+//       if (method) {
+//           // not used for chapter
+//           ADD_HOOK(LiveSystemSceneController_PrepareChangeSceneAsync_MoveNext, method->methodPointer);
+//       }
+//       // not used for chapter
+//        LiveSceneController_PrepareChangeSceneAsync_Addr = reinterpret_cast<uintptr_t>(Il2cppUtils::GetMethodPointer(
+//                "Core.dll", "Inspix", "LiveSceneController", "PrepareChangeSceneAsync"));
+//       ADD_HOOK(LiveSceneControllerLogic_FindAssetPaths, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "LiveSceneControllerLogic", "FindAssetPaths"));
+//        ADD_HOOK(LiveContentsLoader_LoadLiveContentsAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveContentsLoader", "LoadLiveContentsAsync"));
+//        ADD_HOOK(CameraManager_RemoveCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "RemoveCamera"));
         ADD_HOOK(LiveConnectChapterModel_NewChapterConfirmed, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterModel", "NewChapterConfirmed"));
         ADD_HOOK(LiveSceneController_FinalizeSceneAsync, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "LiveSceneController", "FinalizeSceneAsync"));
         ADD_HOOK(StoryModelSpaceManager_Init, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StoryModelSpaceManager", "Init"));
@@ -517,8 +530,6 @@ namespace LinkuraLocal::HookMain {
 
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                  "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
-        // ADD_HOOK(EndCameraRendering, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine.Rendering",
-        //                                                              "RenderPipeline", "EndCameraRendering"));
 
 
     }
