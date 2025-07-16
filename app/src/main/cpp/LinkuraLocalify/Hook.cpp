@@ -252,9 +252,13 @@ namespace LinkuraLocal::HookMain {
         L4Camera::SetCameraSceneType(cameraSceneType);
     }
 
-    void unregisterMainCamera() {
+    void unregisterMainCamera(bool cleanup = false) {
         if (!Config::enableFreeCamera) return;
         L4Camera::SetCameraSceneType(L4Camera::CameraSceneType::NONE);
+        if (cleanup) {
+            mainCameraCache = nullptr;
+            cameraTransformCache = nullptr;
+        }
         Log::DebugFmt("Unregister main camera");
     }
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
@@ -420,7 +424,7 @@ namespace LinkuraLocal::HookMain {
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
-        unregisterMainCamera();
+        unregisterMainCamera(true);
         L4Camera::reset_camera();
         StoryScene_OnFinalize_Orig(self, method);
     }
