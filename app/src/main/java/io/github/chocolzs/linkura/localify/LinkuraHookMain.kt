@@ -15,11 +15,14 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.core.content.edit
 import com.bytedance.shadowhook.ShadowHook
 import com.bytedance.shadowhook.ShadowHook.ConfigBuilder
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -40,9 +43,14 @@ import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
 
+import java.io.IOException
+import java.io.OutputStream
+import android.net.LocalSocket
+import android.net.LocalSocketAddress
+
 val TAG = "LinkuraLocalify"
 
-class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
+class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private lateinit var modulePath: String
     private var nativeLibLoadSuccess: Boolean
     private var alreadyInitialized = false
@@ -54,6 +62,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private var getConfigError: Exception? = null
     private var externalFilesChecked: Boolean = false
     private var gameActivity: Activity? = null
+
+    private var socket: LocalSocket? = null
+    private var outputStream: OutputStream? = null
+    private val socketAddress = LocalSocketAddress("camera_data_socket")
+
+
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 //        if (lpparam.packageName == "io.github.chocolzs.linkura.localify") {
@@ -209,6 +223,32 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
         startLoop()
     }
 
+    private fun ensureSocketConnected() {
+        if (socket == null || !socket!!.isConnected) {
+            try {
+                closeSocket() // Close any existing resources
+                socket = LocalSocket()
+                socket?.connect(socketAddress)
+                outputStream = socket?.outputStream
+                Log.i(TAG, "Successfully connected to socket.")
+            } catch (e: IOException) {
+                Log.w(TAG, "Failed to connect to socket: ${e.message}")
+                closeSocket()
+            }
+        }
+    }
+
+    private fun closeSocket() {
+        try {
+            outputStream?.close()
+        } catch (e: IOException) { /* Ignore */ }
+        try {
+            socket?.close()
+        } catch (e: IOException) { /* Ignore */ }
+        outputStream = null
+        socket = null
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun startLoop() {
         GlobalScope.launch {
@@ -238,6 +278,29 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
                     lastFrameStartInit = NativeInitProgress.startInit
                 }
+
+                // Send camera data via Local Socket for cross-process communication
+                try {
+                    val json = getCameraInfoJson()
+                    if (json.isNotBlank()) {
+                        ensureSocketConnected()
+                        outputStream?.let {
+                            try {
+                                it.write((json + "\n").toByteArray())
+                                it.flush()
+                                Log.v(TAG, "Camera data sent via socket: $json")
+                            } catch (e: IOException) {
+                                Log.e(TAG, "Error sending camera data", e)
+                                // Connection might be broken, try to reconnect in the next loop
+                                closeSocket()
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in camera data loop", e)
+                }
+
+
                 delay(interval - timeTaken)
             }
         }
@@ -493,9 +556,18 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         @JvmStatic
         external fun pluginCallbackLooper(): Int
-        
+
         @JvmStatic
         external fun getCameraInfoJson(): String
+
+        fun getPref(path: String) : XSharedPreferences? {
+            val pref = XSharedPreferences(BuildConfig.APPLICATION_ID, path)
+            Log.d(TAG, "get perf perf file is ${pref.file.absolutePath}")
+            return if(pref.file.canRead()) pref else null
+        }
+
+        // lazy loads when needed
+        val prefForCameraData by lazy { getPref("camera_data") }
     }
 
     init {

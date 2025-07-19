@@ -701,5 +701,7 @@ namespace LinkuraLocal::Hook {
         Log::Info("Hook installed");
     }
 
-
+    std::string getCameraInfo() {
+        return HookMain::getCameraInfo();
+    }
 }

@@ -22,7 +22,10 @@ fun CameraControl(
 
     // Check permission status on composition
     LaunchedEffect(Unit) {
+        Log.d(TAG, "CameraControl LaunchedEffect: checking permissions")
         hasPermission = OverlayManager.hasOverlayPermission(context)
+        Log.d(TAG, "CameraControl initial permission state: $hasPermission")
+        Log.d(TAG, "CameraControl initial overlay state: $isOverlayEnabled")
     }
 
     GakuGroupBox(
@@ -64,7 +67,13 @@ fun CameraControl(
                             text = "Grant Permission",
                             onClick = {
                                 Log.d(TAG, "Grant Permission button clicked")
-                                OverlayManager.requestOverlayPermission(context)
+                                Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
+                                try {
+                                    OverlayManager.requestOverlayPermission(context)
+                                    Log.d(TAG, "Permission request completed")
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error requesting permission", e)
+                                }
                             }
                         )
                     }
@@ -83,17 +92,31 @@ fun CameraControl(
                     GakuButton(
                         text = if (isOverlayEnabled) "Stop Overlay" else "Start Overlay",
                         onClick = {
-                            Log.d(TAG, "Toggle overlay button clicked, current state: $isOverlayEnabled")
+                            Log.d(TAG, "=== OVERLAY BUTTON CLICKED ===")
+                            Log.d(TAG, "Current overlay state: $isOverlayEnabled")
+                            Log.d(TAG, "Current permission state: $hasPermission")
+                            Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
+                            Log.d(TAG, "Context package: ${context.packageName}")
+                            
                             try {
+                                Log.d(TAG, "About to call OverlayManager.toggleCameraOverlay")
                                 val newState = OverlayManager.toggleCameraOverlay(context)
+                                Log.d(TAG, "OverlayManager.toggleCameraOverlay returned: $newState")
+                                
                                 isOverlayEnabled = newState
-                                Log.d(TAG, "Overlay toggle completed, new state: $newState")
+                                Log.d(TAG, "Updated UI state to: $isOverlayEnabled")
+                                Log.d(TAG, "=== OVERLAY TOGGLE COMPLETED ===")
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error toggling overlay", e)
+                                Log.e(TAG, "=== EXCEPTION IN OVERLAY TOGGLE ===", e)
+                                Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")
+                                Log.e(TAG, "Exception message: ${e.message}")
+                                Log.e(TAG, "Exception cause: ${e.cause}")
+                                Log.e(TAG, "Stack trace: ${e.stackTrace.contentToString()}")
                             }
                         }
                     )
                 }
+            }
                 
                 if (isOverlayEnabled) {
                     Card(
@@ -112,4 +135,3 @@ fun CameraControl(
             }
         }
     }
-}

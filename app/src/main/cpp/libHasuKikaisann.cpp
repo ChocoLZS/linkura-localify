@@ -159,10 +159,15 @@ JNIEXPORT jstring JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoJson(JNIEnv *env, jclass clazz) {
     try {
         std::string jsonString = LinkuraLocal::Hook::getCameraInfo();
-        return env->NewStringUTF(jsonString.c_str());
+        
+        jstring result = env->NewStringUTF(jsonString.c_str());
+        return result;
     } catch (const std::exception& e) {
         // Return error JSON if something goes wrong
         std::string errorJson = "{\"isValid\":false,\"error\":\"" + std::string(e.what()) + "\"}";
+        return env->NewStringUTF(errorJson.c_str());
+    } catch (...) {
+        std::string errorJson = "{\"isValid\":false,\"error\":\"Unknown exception\"}";
         return env->NewStringUTF(errorJson.c_str());
     }
 }
