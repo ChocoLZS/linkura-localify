@@ -56,4 +56,17 @@ namespace L4Camera {
     void on_cam_rawinput_keyboard(int message, int key);
     void on_cam_rawinput_joystick(JoystickEvent event);
 	void initCameraSettings();
+
+    struct CameraInfo {
+        UnityResolve::UnityType::Vector3 position{0, 0, 0};
+        UnityResolve::UnityType::Quaternion rotation{0, 0, 0, 1};
+        float fov = 60.0f;
+        bool isValid = false;
+    };
+
+    extern CameraInfo currentCameraInfo;
+    void UpdateCameraInfo(const UnityResolve::UnityType::Vector3& pos, 
+                         const UnityResolve::UnityType::Quaternion& rot, 
+                         float fieldOfView);
+    CameraInfo GetCurrentCameraInfo();
 }

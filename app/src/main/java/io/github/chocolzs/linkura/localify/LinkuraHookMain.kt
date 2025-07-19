@@ -493,6 +493,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         @JvmStatic
         external fun pluginCallbackLooper(): Int
+        
+        @JvmStatic
+        external fun getCameraInfoJson(): String
     }
 
     init {
