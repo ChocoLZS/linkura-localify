@@ -36,6 +36,7 @@ import io.github.chocolzs.linkura.localify.ui.components.base.CollapsibleBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
+import io.github.chocolzs.linkura.localify.ui.components.CameraControl
 
 
 @Composable
@@ -69,6 +70,11 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                 }
             }
 
+            Spacer(Modifier.height(6.dp))
+        }
+
+        item {
+            CameraControl(modifier = modifier)
             Spacer(Modifier.height(6.dp))
         }
 

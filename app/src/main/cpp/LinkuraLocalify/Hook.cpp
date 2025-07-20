@@ -152,6 +152,12 @@ namespace LinkuraLocal::HookMain {
         return Unity_set_targetFrameRate_Orig(configFps == 0 ? value: configFps);
     }
 
+    // 👀
+    DEFINE_HOOK(void, CoverImageCommandReceiver_Awake, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        CoverImageCommandReceiver_Awake_Orig(self, method);
+        Log::DebugFmt("CoverImageCommandReceiver_Awake HOOKED");
+    }
+
 #pragma endregion
 
 #pragma region FreeCamera
@@ -204,6 +210,10 @@ namespace LinkuraLocal::HookMain {
                 auto transform = currentCameraCache->GetTransform();
                 auto position = currentCameraTransformCache->GetPosition();
                 auto rotation = currentCameraTransformCache->GetRotation();
+                
+                // Update global camera info for JNI access
+                L4Camera::UpdateCameraInfo(position, rotation, fov);
+                
                 Log::DebugFmt("Camera Info - Position: (%.3f, %.3f, %.3f), Rotation: (%.3f, %.3f, %.3f, %.3f), Fov: (%.3f)",
                               position.x, position.y, position.z,
                               rotation.x, rotation.y, rotation.z, rotation.w,
@@ -213,6 +223,40 @@ namespace LinkuraLocal::HookMain {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         Log::DebugFmt("cameraInfoLoopFunction ended");
+    }
+
+    std::string getCameraInfo() {
+        nlohmann::json json;
+        
+        if (currentCameraCache && IsNativeObjectAlive(currentCameraCache)) {
+            try {
+                auto fov = currentCameraCache->GetFoV();
+                auto transform = currentCameraCache->GetTransform();
+                auto position = currentCameraTransformCache->GetPosition();
+                auto rotation = currentCameraTransformCache->GetRotation();
+                
+                json["isValid"] = true;
+                json["position"]["x"] = position.x;
+                json["position"]["y"] = position.y;
+                json["position"]["z"] = position.z;
+                json["rotation"]["x"] = rotation.x;
+                json["rotation"]["y"] = rotation.y;
+                json["rotation"]["z"] = rotation.z;
+                json["rotation"]["w"] = rotation.w;
+                json["fov"] = fov;
+                json["mode"] = static_cast<int>(L4Camera::GetCameraMode());
+                json["sceneType"] = static_cast<int>(L4Camera::GetCameraSceneType());
+            } catch (const std::exception& e) {
+                Log::ErrorFmt("getCameraInfo exception: %s", e.what());
+                json["isValid"] = false;
+                json["error"] = e.what();
+            }
+        } else {
+            json["isValid"] = false;
+            json["error"] = "Camera not available";
+        }
+        
+        return json.dump();
     }
 
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
@@ -507,6 +551,8 @@ namespace LinkuraLocal::HookMain {
 
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                                       "SchoolResolution", "GetResolution"));
+        // 👀
+        ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
         // Fes live camera unlock
         ADD_HOOK(ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveSetFesCameraWithHttpInfoAsync"));
 
@@ -661,5 +707,9 @@ namespace LinkuraLocal::Hook {
 
 
         Log::Info("Hook installed");
+    }
+
+    std::string getCameraInfo() {
+        return HookMain::getCameraInfo();
     }
 }

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package linkura.ipc;
+
+option java_package = "io.github.chocolzs.linkura.localify.ipc";
+option java_outer_classname = "LinkuraMessages";
+
+// Message envelope for routing different message types
+message MessageEnvelope {
+  MessageType type = 1;
+  bytes payload = 2;
+}
+
+// Supported message types
+enum MessageType {
+  UNKNOWN = 0;
+  CAMERA_DATA = 1;
+  // Future message types can be added here
+}
+
+// Camera data message
+message CameraData {
+  bool is_valid = 1;
+  Vector3 position = 2;
+  Quaternion rotation = 3;
+  float fov = 4;
+  int32 mode = 5;
+  int32 scene_type = 6;
+}
+
+// 3D Vector
+message Vector3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+// Quaternion for rotation
+message Quaternion {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+  float w = 4;
+}

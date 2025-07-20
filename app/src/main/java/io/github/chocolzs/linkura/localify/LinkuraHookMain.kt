@@ -15,11 +15,14 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.core.content.edit
 import com.bytedance.shadowhook.ShadowHook
 import com.bytedance.shadowhook.ShadowHook.ConfigBuilder
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -40,9 +43,13 @@ import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
 
+import io.github.chocolzs.linkura.localify.ipc.SocketManager
+import io.github.chocolzs.linkura.localify.ipc.MessageConverter
+import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+
 val TAG = "LinkuraLocalify"
 
-class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
+class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private lateinit var modulePath: String
     private var nativeLibLoadSuccess: Boolean
     private var alreadyInitialized = false
@@ -54,6 +61,10 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private var getConfigError: Exception? = null
     private var externalFilesChecked: Boolean = false
     private var gameActivity: Activity? = null
+
+    private val socketManager: SocketManager by lazy { SocketManager.getInstance() }
+
+
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 //        if (lpparam.packageName == "io.github.chocolzs.linkura.localify") {
@@ -209,6 +220,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
         startLoop()
     }
 
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun startLoop() {
         GlobalScope.launch {
@@ -238,6 +250,26 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
                     lastFrameStartInit = NativeInitProgress.startInit
                 }
+
+                // Send camera data via protobuf socket for cross-process communication
+                try {
+                    val json = getCameraInfoJson()
+                    if (json.isNotBlank()) {
+                        val cameraData = MessageConverter.jsonToCameraData(json)
+                        if (cameraData != null) {
+                            val success = socketManager.sendMessage(MessageType.CAMERA_DATA, cameraData)
+                            if (success) {
+                                Log.v(TAG, "Camera data sent via socket")
+                            } else {
+                                Log.w(TAG, "Failed to send camera data via socket")
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in camera data loop", e)
+                }
+
+
                 delay(interval - timeTaken)
             }
         }
@@ -493,6 +525,18 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         @JvmStatic
         external fun pluginCallbackLooper(): Int
+
+        @JvmStatic
+        external fun getCameraInfoJson(): String
+
+        fun getPref(path: String) : XSharedPreferences? {
+            val pref = XSharedPreferences(BuildConfig.APPLICATION_ID, path)
+            Log.d(TAG, "get perf perf file is ${pref.file.absolutePath}")
+            return if(pref.file.canRead()) pref else null
+        }
+
+        // lazy loads when needed
+        val prefForCameraData by lazy { getPref("camera_data") }
     }
 
     init {

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.serialization)
     id("kotlin-parcelize")
+    id("com.google.protobuf") version "0.9.5"
 }
 
 android {
@@ -72,6 +73,17 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            proto {
+                srcDir 'src/main/proto'
+            }
+            java {
+                srcDirs += "${protobuf.generatedFilesBaseDir}/main/java"
+            }
+        }
+    }
+
     applicationVariants.configureEach { variant ->
         variant.mergeAssetsProvider.configure { mergeAssetsTask ->
             mergeAssetsTask.doLast {
@@ -79,6 +91,21 @@ android {
 //                                                                           'gakumas-local/GakumasPreTranslation/**',
 //                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
 //                                                                           'gakumas-local/raw/**']))
+            }
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.31.1"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                java {
+                    option 'lite'
+                }
             }
         }
     }
@@ -132,4 +159,7 @@ dependencies {
     implementation(libs.shadowhook)
     compileOnly(libs.xposed.api)
     implementation(libs.kotlinx.serialization.json)
+
+    // Protobuf
+    implementation 'com.google.protobuf:protobuf-javalite:4.31.1'
 }
