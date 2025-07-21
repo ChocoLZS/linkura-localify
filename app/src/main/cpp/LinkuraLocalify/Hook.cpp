@@ -244,7 +244,6 @@ namespace LinkuraLocal::HookMain {
         
         std::string serialized_data;
         cameraData.SerializeToString(&serialized_data);
-        Log::DebugFmt("serialized_data length is %d", serialized_data.size());
         return {serialized_data.begin(), serialized_data.end()};
     }
 
