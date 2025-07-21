@@ -99,6 +99,7 @@ jobs:
           name: Release ${{ steps.get_tag.outputs.tag_name }}
           body: ${{ steps.prepare_release_body.outputs.release_body }}
           files: ${{ steps.rename_apk.outputs.apk_path }}
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
