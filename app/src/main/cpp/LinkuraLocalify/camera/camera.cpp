@@ -663,7 +663,7 @@ namespace L4Camera {
 			case KEY_R: {
 				if (message == WM_KEYDOWN) reset_camera();
 			} break;
-            case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
+            // case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
             case KEY_V: if (message == WM_KEYDOWN) SwitchCameraSubMode(); break;
                 // 手柄操作响应
                 case BTN_A:

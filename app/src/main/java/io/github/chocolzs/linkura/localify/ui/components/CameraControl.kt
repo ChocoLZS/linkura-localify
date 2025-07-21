@@ -7,7 +7,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.ui.overlay.OverlayManager
 
 @Composable
@@ -22,14 +24,11 @@ fun CameraControl(
 
     // Check permission status on composition
     LaunchedEffect(Unit) {
-        Log.d(TAG, "CameraControl LaunchedEffect: checking permissions")
         hasPermission = OverlayManager.hasOverlayPermission(context)
-        Log.d(TAG, "CameraControl initial permission state: $hasPermission")
-        Log.d(TAG, "CameraControl initial overlay state: $isOverlayEnabled")
     }
 
     GakuGroupBox(
-        title = "Camera Info Overlay",
+        title = stringResource(R.string.overlay_camera_info_title),
         modifier = modifier
     ) {
         Column(
@@ -39,7 +38,7 @@ fun CameraControl(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Display camera parameters in a floating window",
+                text = stringResource(R.string.overlay_camera_info_description),
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -53,18 +52,18 @@ fun CameraControl(
                         modifier = Modifier.padding(12.dp)
                     ) {
                         Text(
-                            text = "Permission Required",
+                            text = stringResource(R.string.overlay_camera_info_permission_required),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Text(
-                            text = "The app needs permission to display overlays on other apps.",
+                            text = stringResource(R.string.overlay_camera_info_permission_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         GakuButton(
-                            text = "Grant Permission",
+                            text = stringResource(R.string.overlay_camera_info_grant_permission),
                             onClick = {
                                 Log.d(TAG, "Grant Permission button clicked")
                                 Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
@@ -85,12 +84,12 @@ fun CameraControl(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isOverlayEnabled) "Overlay Active" else "Overlay Inactive",
+                        text = if (isOverlayEnabled) stringResource(R.string.overlay_camera_info_status_active) else stringResource(R.string.overlay_camera_info_status_inactive),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     
                     GakuButton(
-                        text = if (isOverlayEnabled) "Stop Overlay" else "Start Overlay",
+                        text = if (isOverlayEnabled) stringResource(R.string.overlay_camera_info_stop) else stringResource(R.string.overlay_camera_info_start),
                         onClick = {
                             try {
                                 val newState = OverlayManager.toggleCameraOverlay(context)
@@ -115,7 +114,7 @@ fun CameraControl(
                         )
                     ) {
                         Text(
-                            text = "Camera overlay is running. The floating window shows real-time camera parameters including position, rotation, FOV, mode, and scene type.",
+                            text = stringResource(R.string.overlay_camera_info_running_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(12.dp)

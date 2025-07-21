@@ -325,9 +325,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                             val cameraData = CameraData.parseFrom(protobufData)
                             if (socketClient.isClientConnected()) {
                                 val success = socketClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
-                                if (success) {
-                                    Log.v(TAG, "Camera data sent via socket")
-                                } else {
+                                if (!success) {
                                     Log.w(TAG, "Failed to send camera data via socket")
                                 }
                             }

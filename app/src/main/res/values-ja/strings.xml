@@ -354,4 +354,16 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="usescale">胸の大きさを使用する</string>
     <string name="very_high">最高</string>
     <string name="warning">警告</string>
+    
+    <!-- Camera Overlay -->
+    <string name="overlay.camera_info.title">カメラ情報オーバーレイ</string>
+    <string name="overlay.camera_info.description">フローティングウィンドウでカメラパラメータを表示</string>
+    <string name="overlay.camera_info.permission_required">権限が必要</string>
+    <string name="overlay.camera_info.permission_description">アプリが他のアプリの上にオーバーレイを表示するための権限が必要です。</string>
+    <string name="overlay.camera_info.grant_permission">権限を付与</string>
+    <string name="overlay.camera_info.status_active">オーバーレイ有効</string>
+    <string name="overlay.camera_info.status_inactive">オーバーレイ無効</string>
+    <string name="overlay.camera_info.start">オーバーレイ開始</string>
+    <string name="overlay.camera_info.stop">オーバーレイ停止</string>
+    <string name="overlay.camera_info.running_description">カメラオーバーレイが実行中です。フローティングウィンドウは位置、回転、FOV、モード、シーンタイプを含むリアルタイムカメラパラメータを表示します。</string>
 </resources>
