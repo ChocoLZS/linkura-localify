@@ -19,6 +19,8 @@ namespace L4Camera {
     FollowModeY followModeY = FollowModeY::SMOOTH_Y;
     CameraSceneType cameraSceneType = CameraSceneType::NONE;
 
+    CameraInfo currentCameraInfo;
+
     UnityResolve::UnityType::Vector3 firstPersonPosOffset{0, 0.064f, 0.000f};
     UnityResolve::UnityType::Vector3 followPosOffset{0, 0, 1.5};
     UnityResolve::UnityType::Vector2 followLookAtOffset{0, 0};
@@ -661,7 +663,7 @@ namespace L4Camera {
 			case KEY_R: {
 				if (message == WM_KEYDOWN) reset_camera();
 			} break;
-            case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
+            // case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
             case KEY_V: if (message == WM_KEYDOWN) SwitchCameraSubMode(); break;
                 // 手柄操作响应
                 case BTN_A:
@@ -749,5 +751,18 @@ namespace L4Camera {
 		reset_camera();
 		cameraRawInputThread();
 	}
+
+    void UpdateCameraInfo(const UnityResolve::UnityType::Vector3& pos, 
+                         const UnityResolve::UnityType::Quaternion& rot, 
+                         float fieldOfView) {
+        currentCameraInfo.position = pos;
+        currentCameraInfo.rotation = rot;
+        currentCameraInfo.fov = fieldOfView;
+        currentCameraInfo.isValid = true;
+    }
+
+    CameraInfo GetCurrentCameraInfo() {
+        return currentCameraInfo;
+    }
 
 }

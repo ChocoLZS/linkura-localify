@@ -15,11 +15,14 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.core.content.edit
 import com.bytedance.shadowhook.ShadowHook
 import com.bytedance.shadowhook.ShadowHook.ConfigBuilder
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -40,9 +43,13 @@ import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
 
+import io.github.chocolzs.linkura.localify.ipc.DuplexSocketClient
+import io.github.chocolzs.linkura.localify.ipc.MessageRouter
+import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+
 val TAG = "LinkuraLocalify"
 
-class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
+class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private lateinit var modulePath: String
     private var nativeLibLoadSuccess: Boolean
     private var alreadyInitialized = false
@@ -54,6 +61,72 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private var getConfigError: Exception? = null
     private var externalFilesChecked: Boolean = false
     private var gameActivity: Activity? = null
+
+    private val socketClient: DuplexSocketClient by lazy { DuplexSocketClient.getInstance() }
+    private val messageRouter: MessageRouter by lazy { MessageRouter() }
+    private var isCameraDataLoopEnabled = false
+    
+    private val socketClientHandler = object : DuplexSocketClient.MessageHandler {
+        override fun onMessageReceived(type: MessageType, payload: ByteArray) {
+            messageRouter.routeMessage(type, payload)
+        }
+        
+        override fun onConnected() {
+            Log.i(TAG, "Socket client connected to server")
+        }
+        
+        override fun onDisconnected() {
+            Log.i(TAG, "Socket client disconnected from server")
+            isCameraDataLoopEnabled = false
+        }
+        
+        override fun onConnectionFailed() {
+            Log.w(TAG, "Socket client failed to connect to server")
+        }
+    }
+    
+    private val configUpdateHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                updateConfig(payload)
+                Log.i(TAG, "Config update sent to native layer")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing config update", e)
+                false
+            }
+        }
+    }
+    
+    private val overlayControlHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val overlayControl = OverlayControl.parseFrom(payload)
+                when (overlayControl.action) {
+                    OverlayAction.START_OVERLAY -> {
+                        isCameraDataLoopEnabled = true
+                        Log.i(TAG, "Camera data loop enabled by overlay control")
+                    }
+                    OverlayAction.STOP_OVERLAY -> {
+                        isCameraDataLoopEnabled = false
+                        Log.i(TAG, "Camera data loop disabled by overlay control")
+                    }
+                    else -> {
+                        Log.w(TAG, "Unknown overlay action: ${overlayControl.action}")
+                        return false
+                    }
+                }
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing overlay control", e)
+                false
+            }
+        }
+    }
+
+    private fun onStartHandler() {
+        socketClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
+    }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 //        if (lpparam.packageName == "io.github.chocolzs.linkura.localify") {
@@ -147,6 +220,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 else {
                     initLinkuraConfig(currActivity)
                 }
+                onStartHandler()
             }
         })
 
@@ -203,11 +277,15 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     )
 
                     alreadyInitialized = true
+                    
+                    // Setup socket client for duplex communication
+                    setupSocketClient()
                 }
             })
 
         startLoop()
     }
+
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun startLoop() {
@@ -238,8 +316,42 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
                     lastFrameStartInit = NativeInitProgress.startInit
                 }
+
+                // Send camera data via protobuf socket for cross-process communication
+                if (isCameraDataLoopEnabled) {
+                    try {
+                        val protobufData = getCameraInfoProtobuf()
+                        if (protobufData.isNotEmpty()) {
+                            val cameraData = CameraData.parseFrom(protobufData)
+                            if (socketClient.isClientConnected()) {
+                                val success = socketClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
+                                if (!success) {
+                                    Log.w(TAG, "Failed to send camera data via socket")
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in camera data loop", e)
+                    }
+                }
+
+
                 delay(interval - timeTaken)
             }
+        }
+    }
+
+    private fun setupSocketClient() {
+        // Register message handlers
+        messageRouter.registerHandler(MessageType.CONFIG_UPDATE, configUpdateHandler)
+        messageRouter.registerHandler(MessageType.OVERLAY_CONTROL, overlayControlHandler)
+        
+        // Add client handler and start client
+        socketClient.addMessageHandler(socketClientHandler)
+        if (socketClient.startClient()) {
+            Log.i(TAG, "Duplex socket client started successfully")
+        } else {
+            Log.w(TAG, "Failed to start duplex socket client")
         }
     }
 
@@ -493,6 +605,21 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         @JvmStatic
         external fun pluginCallbackLooper(): Int
+
+        @JvmStatic
+        external fun getCameraInfoProtobuf(): ByteArray
+        
+        @JvmStatic
+        external fun updateConfig(configUpdateData: ByteArray)
+
+        fun getPref(path: String) : XSharedPreferences? {
+            val pref = XSharedPreferences(BuildConfig.APPLICATION_ID, path)
+            Log.d(TAG, "get perf perf file is ${pref.file.absolutePath}")
+            return if(pref.file.canRead()) pref else null
+        }
+
+        // lazy loads when needed
+        val prefForCameraData by lazy { getPref("camera_data") }
     }
 
     init {

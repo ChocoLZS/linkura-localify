@@ -107,4 +107,16 @@
 
     <string name="about_contributors_asset_file">about_contributors_zh_cn.json</string>
     <string name="default_assets_check_api">https://uma.chinosk6.cn/api/gkms_trans_data</string>
+    
+    <!-- Camera Overlay -->
+    <string name="overlay.camera_info.title">摄像机信息悬浮窗</string>
+    <string name="overlay.camera_info.description">在悬浮窗中显示摄像机参数</string>
+    <string name="overlay.camera_info.permission_required">需要权限</string>
+    <string name="overlay.camera_info.permission_description">应用需要悬浮窗权限才能在其他应用上方显示内容。</string>
+    <string name="overlay.camera_info.grant_permission">授予权限</string>
+    <string name="overlay.camera_info.status_active">悬浮窗已启用</string>
+    <string name="overlay.camera_info.status_inactive">悬浮窗未启用</string>
+    <string name="overlay.camera_info.start">启动悬浮窗</string>
+    <string name="overlay.camera_info.stop">停止悬浮窗</string>
+    <string name="overlay.camera_info.running_description">摄像机悬浮窗正在运行。悬浮窗显示实时摄像机参数，包括位置、旋转、视野角、模式和场景类型。</string>
 </resources>

@@ -6,6 +6,8 @@
 # Sets the minimum CMake version required for this project.
 cmake_minimum_required(VERSION 3.22.1)
 
+include(FetchContent)
+
 # Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
 # Since this is the top level CMakeLists.txt, the project name is also accessible
 # with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
@@ -17,6 +19,20 @@ add_compile_options(-Wno-undefined-bool-conversion)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23")
+
+# Fetch protobuf
+FetchContent_Declare(
+  protobuf
+  GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
+  GIT_TAG        v4.31.1
+  GIT_SHALLOW    TRUE
+)
+
+set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(protobuf_BUILD_PROTOC_BINARIES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(protobuf)
 
 find_package(xdl REQUIRED CONFIG)
 find_package(shadowhook REQUIRED CONFIG)
@@ -47,13 +63,17 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         LinkuraLocalify/camera/camera.cpp
         LinkuraLocalify/config/Config.cpp
         LinkuraLocalify/string_parser/StringParser.cpp
+        # Generated protobuf files
+        build/linkura_messages.pb.cc
         )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} xdl::xdl)
 target_link_libraries(${CMAKE_PROJECT_NAME} shadowhook::shadowhook)
+target_link_libraries(${CMAKE_PROJECT_NAME} protobuf::libprotobuf-lite)
 
 include_directories(LinkuraLocalify)
 include_directories(${CMAKE_SOURCE_DIR}/deps)
+include_directories(${CMAKE_SOURCE_DIR}/build)
 
 set(FMT_DIR "${CMAKE_SOURCE_DIR}/deps/fmt-11.0.2")
 include_directories(${FMT_DIR}/include)

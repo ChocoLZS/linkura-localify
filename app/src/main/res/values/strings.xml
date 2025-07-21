@@ -107,4 +107,16 @@
 
     <string name="about_contributors_asset_file">about_contributors_en.json</string>
     <string name="default_assets_check_api">https://api.github.com/repos/NatsumeLS/Gakumas-Translation-Data-EN/releases/latest</string>
+    
+    <!-- Camera Overlay -->
+    <string name="overlay.camera_info.title">Camera Info Overlay</string>
+    <string name="overlay.camera_info.description">Display camera parameters in a floating window</string>
+    <string name="overlay.camera_info.permission_required">Permission Required</string>
+    <string name="overlay.camera_info.permission_description">The app needs permission to display overlays on other apps.</string>
+    <string name="overlay.camera_info.grant_permission">Grant Permission</string>
+    <string name="overlay.camera_info.status_active">Overlay Active</string>
+    <string name="overlay.camera_info.status_inactive">Overlay Inactive</string>
+    <string name="overlay.camera_info.start">Start Overlay</string>
+    <string name="overlay.camera_info.stop">Stop Overlay</string>
+    <string name="overlay.camera_info.running_description">Camera overlay is running. The floating window shows real-time camera parameters including position, rotation, FOV, mode, and scene type.</string>
 </resources>

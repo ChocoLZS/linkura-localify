@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.serialization)
     id("kotlin-parcelize")
+    id("com.google.protobuf") version "0.9.5"
 }
 
 android {
@@ -16,7 +17,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 12
-        versionName "v0.0.3"
+        versionName "v0.1.0"
         buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -72,6 +73,17 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            proto {
+                srcDir 'src/main/proto'
+            }
+            java {
+                srcDirs += "${protobuf.generatedFilesBaseDir}/main/java"
+            }
+        }
+    }
+
     applicationVariants.configureEach { variant ->
         variant.mergeAssetsProvider.configure { mergeAssetsTask ->
             mergeAssetsTask.doLast {
@@ -79,6 +91,39 @@ android {
 //                                                                           'gakumas-local/GakumasPreTranslation/**',
 //                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
 //                                                                           'gakumas-local/raw/**']))
+            }
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                java {
+                    option 'lite'
+                }
+            }
+            task.doLast {
+                // Generate C++ protobuf files for native code
+                def protoSrcDir = "${projectDir}/src/main/proto"
+                def cppOutDir = "${projectDir}/src/main/cpp/build"
+                
+                // Use the protoc binary downloaded by Gradle
+                def protocPath = protobuf.tools.protoc.artifact
+                def protocExe = configurations.protobufToolsLocator_protoc.singleFile
+                
+                fileTree(dir: protoSrcDir, include: '**/*.proto').each { protoFile ->
+                    exec {
+                        commandLine protocExe, 
+                            '--cpp_out=lite:' + cppOutDir,
+                            '--proto_path=' + protoSrcDir,
+                            protoFile.absolutePath
+                    }
+                }
             }
         }
     }
@@ -132,4 +177,7 @@ dependencies {
     implementation(libs.shadowhook)
     compileOnly(libs.xposed.api)
     implementation(libs.kotlinx.serialization.json)
+
+    // Protobuf
+    implementation(libs.protobuf.javalite)
 }

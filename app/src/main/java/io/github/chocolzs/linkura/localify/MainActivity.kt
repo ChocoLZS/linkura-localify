@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.hookUtils.MainKeyEventDispatcher
+import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
 import io.github.chocolzs.linkura.localify.mainUtils.json
@@ -24,6 +25,8 @@ import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModel
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModelFactory
+import io.github.chocolzs.linkura.localify.ui.overlay.CameraOverlayService
+import io.github.chocolzs.linkura.localify.ui.overlay.CameraOverlayService.Companion
 import io.github.chocolzs.linkura.localify.ui.pages.MainUI
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +44,8 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
 
     override lateinit var programConfigFactory: ProgramConfigViewModelFactory
     override lateinit var programConfigViewModel: ProgramConfigViewModel
+
+    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
 
 
     private fun showToast(message: String) {
@@ -135,6 +140,12 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         programConfigViewModel = ViewModelProvider(this, programConfigFactory)[ProgramConfigViewModel::class.java]
 
         ShizukuApi.init()
+
+        if (socketServer.startServer()) {
+            Log.i(TAG, "Duplex socket server started in main Activity")
+        } else {
+            Log.e(TAG, "Failed to start duplex socket server in main Activity")
+        }
 
         setContent {
             LocalifyTheme(dynamicColor = false, darkTheme = false) {

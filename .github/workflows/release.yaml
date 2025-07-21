@@ -75,14 +75,31 @@ jobs:
           echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
           echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
 
+      - name: Prepare Release Body
+        id: prepare_release_body
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+          version="${tag_name#v}"
+          
+          # Read the template and replace placeholders
+          template_content=$(cat .github/release_template.md)
+          release_body="${template_content//VERSION/$version}"
+          release_body="${release_body//vVERSION/$tag_name}"
+          
+          # Save to output
+          echo "release_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$release_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
         if: inputs.create_release == true
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_tag.outputs.tag_name }}
           name: Release ${{ steps.get_tag.outputs.tag_name }}
+          body: ${{ steps.prepare_release_body.outputs.release_body }}
           files: ${{ steps.rename_apk.outputs.apk_path }}
-          generate_release_notes: true
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
