@@ -1,3 +1,12 @@
+## 中文
+
+
+## 日本語 Claudeによる翻訳
+
+
+## English powered by Claude
+
+
 <div align=center>
 
 [![Release Downloads](https://img.shields.io/github/downloads/ChocoLZS/linkura-localify/vVERSION/total?style=flat-square&logo=github)](https://img.shields.io/github/downloads/ChocoLZS/linkura-localify/vVERSION/)
