@@ -177,9 +177,8 @@ namespace LinkuraLocal::HookMain {
     UnityResolve::UnityType::Vector3 cacheForward{};
     UnityResolve::UnityType::Vector3 cacheLookAt{};
 
-    void registerMainFreeCamera(UnityResolve::UnityType::Camera* mainCamera, L4Camera::CameraSceneType cameraSceneType, bool forceOverride = false) {
+    void registerMainFreeCamera(UnityResolve::UnityType::Camera* mainCamera, L4Camera::CameraSceneType cameraSceneType) {
         if (!Config::enableFreeCamera) return;
-        if (IsNativeObjectAlive(mainFreeCameraCache) && IsNativeObjectAlive(freeCameraTransformCache) && !forceOverride) return;
         mainFreeCameraCache = mainCamera;
         if (mainFreeCameraCache) freeCameraTransformCache = mainFreeCameraCache->GetTransform();
         L4Camera::SetCameraSceneType(cameraSceneType);
@@ -365,8 +364,10 @@ namespace LinkuraLocal::HookMain {
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, CameraManager_GetCamera, (Il2cppUtils::Il2CppObject* self, CameraType cameraType , int cameraId , void* method)) {
         Log::DebugFmt("CameraManager_GetCamera HOOKED");
         auto camera =  CameraManager_GetCamera_Orig(self, cameraType, cameraId, method);
-        registerMainFreeCamera(camera, L4Camera::CameraSceneType::WITH_LIVE);
-        registerCurrentCamera(camera);
+        if (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::FES_LIVE) {
+            registerMainFreeCamera(camera, L4Camera::CameraSceneType::WITH_LIVE);
+            registerCurrentCamera(camera);
+        }
         
         return camera;
     }
@@ -403,7 +404,7 @@ namespace LinkuraLocal::HookMain {
         StoryModelSpaceManager_Init_Orig(self, method);
         auto modelSpace = get_ModelSpace->Invoke<Il2cppUtils::Il2CppObject*>(self);
         auto storyCamera = get_StoryCamera->Invoke<UnityResolve::UnityType::Camera*>(modelSpace);
-        registerMainFreeCamera(storyCamera, L4Camera::CameraSceneType::STORY, true);
+        registerMainFreeCamera(storyCamera, L4Camera::CameraSceneType::STORY);
         registerCurrentCamera(storyCamera);
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
@@ -421,7 +422,7 @@ namespace LinkuraLocal::HookMain {
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, FesLiveFixedCamera_GetCamera, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("FesLiveFixedCamera_GetCamera HOOKED");
         auto camera = FesLiveFixedCamera_GetCamera_Orig(self, method);
-        registerMainFreeCamera(camera, L4Camera::CameraSceneType::FES_LIVE, true);
+        registerMainFreeCamera(camera, L4Camera::CameraSceneType::FES_LIVE);
         registerCurrentCamera(camera);
         return camera;
     }
