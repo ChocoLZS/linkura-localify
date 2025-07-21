@@ -11,6 +11,7 @@
 #include "LinkuraLocalify/camera/camera.hpp"
 #include "LinkuraLocalify/config/Config.hpp"
 #include "Joystick/JoystickEvent.h"
+#include "build/linkura_messages.pb.h"
 
 JavaVM* g_javaVM = nullptr;
 jclass g_linkuraHookMainClass = nullptr;
@@ -155,19 +156,58 @@ Java_io_github_chocolzs_linkura_localify_models_NativeInitProgress_pluginInitPro
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoJson(JNIEnv *env, jclass clazz) {
+JNIEXPORT jbyteArray JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoProtobuf(JNIEnv *env, jclass clazz) {
     try {
-        std::string jsonString = LinkuraLocal::Hook::getCameraInfo();
+        std::vector<uint8_t> protobufData = LinkuraLocal::Hook::getCameraInfoProtobuf();
         
-        jstring result = env->NewStringUTF(jsonString.c_str());
+        jbyteArray result = env->NewByteArray(protobufData.size());
+        env->SetByteArrayRegion(result, 0, protobufData.size(), 
+                               reinterpret_cast<const jbyte*>(protobufData.data()));
         return result;
     } catch (const std::exception& e) {
-        // Return error JSON if something goes wrong
-        std::string errorJson = "{\"isValid\":false,\"error\":\"" + std::string(e.what()) + "\"}";
-        return env->NewStringUTF(errorJson.c_str());
+        // Return empty byte array if something goes wrong
+        jbyteArray result = env->NewByteArray(0);
+        return result;
     } catch (...) {
-        std::string errorJson = "{\"isValid\":false,\"error\":\"Unknown exception\"}";
-        return env->NewStringUTF(errorJson.c_str());
+        jbyteArray result = env->NewByteArray(0);
+        return result;
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_updateConfig(JNIEnv *env, jclass clazz,
+                                                                     jbyteArray config_update_data) {
+    try {
+        jsize dataSize = env->GetArrayLength(config_update_data);
+        if (dataSize == 0) {
+            return;
+        }
+        
+        jbyte* dataElements = env->GetByteArrayElements(config_update_data, nullptr);
+        if (dataElements == nullptr) {
+            return;
+        }
+        
+        // Parse protobuf data
+        linkura::ipc::ConfigUpdate configUpdate;
+        if (!configUpdate.ParseFromArray(dataElements, dataSize)) {
+            env->ReleaseByteArrayElements(config_update_data, dataElements, JNI_ABORT);
+            LinkuraLocal::Log::Error("Failed to parse config update protobuf");
+            return;
+        }
+        
+        env->ReleaseByteArrayElements(config_update_data, dataElements, JNI_ABORT);
+        
+        // Apply configuration updates
+        LinkuraLocal::Config::UpdateConfig(configUpdate);
+        
+        LinkuraLocal::Log::Info("Config hot-reload applied successfully");
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("Error in updateConfig: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("Unknown error in updateConfig");
     }
 }

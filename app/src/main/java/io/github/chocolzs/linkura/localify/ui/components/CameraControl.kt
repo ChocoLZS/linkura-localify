@@ -92,20 +92,10 @@ fun CameraControl(
                     GakuButton(
                         text = if (isOverlayEnabled) "Stop Overlay" else "Start Overlay",
                         onClick = {
-                            Log.d(TAG, "=== OVERLAY BUTTON CLICKED ===")
-                            Log.d(TAG, "Current overlay state: $isOverlayEnabled")
-                            Log.d(TAG, "Current permission state: $hasPermission")
-                            Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
-                            Log.d(TAG, "Context package: ${context.packageName}")
-                            
                             try {
-                                Log.d(TAG, "About to call OverlayManager.toggleCameraOverlay")
                                 val newState = OverlayManager.toggleCameraOverlay(context)
-                                Log.d(TAG, "OverlayManager.toggleCameraOverlay returned: $newState")
                                 
                                 isOverlayEnabled = newState
-                                Log.d(TAG, "Updated UI state to: $isOverlayEnabled")
-                                Log.d(TAG, "=== OVERLAY TOGGLE COMPLETED ===")
                             } catch (e: Exception) {
                                 Log.e(TAG, "=== EXCEPTION IN OVERLAY TOGGLE ===", e)
                                 Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")

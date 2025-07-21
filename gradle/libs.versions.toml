@@ -18,6 +18,7 @@ material = "1.12.0"
 navigationCompose = "2.7.7"
 xdl = "2.1.1"
 shadowhook = "1.0.10"
+protobuf = "4.31.1"
 serialization="1.7.1"
 zip4j = "2.9.1"
 
@@ -56,6 +57,7 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 shadowhook = { module = "com.bytedance.android:shadowhook", version.ref = "shadowhook" }
 xdl = { module = "io.github.hexhacking:xdl", version.ref = "xdl" }
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 

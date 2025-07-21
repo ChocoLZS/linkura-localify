@@ -1,8 +1,9 @@
 package io.github.chocolzs.linkura.localify.ui.overlay
 
-import io.github.chocolzs.linkura.localify.ipc.SocketService
-import io.github.chocolzs.linkura.localify.ipc.MessageConverter
+import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
+import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
@@ -40,7 +41,7 @@ import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.int
 
-class CameraOverlayService : SocketService(), LifecycleOwner, SavedStateRegistryOwner {
+class CameraOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     companion object {
         private const val TAG = "CameraOverlayService"
     }
@@ -49,6 +50,54 @@ class CameraOverlayService : SocketService(), LifecycleOwner, SavedStateRegistry
     private var overlayView: View? = null
     private val handler = Handler(Looper.getMainLooper())
     private var cameraInfoState by mutableStateOf<CameraInfo?>(null)
+    
+    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
+    private val messageRouter: MessageRouter by lazy { MessageRouter() }
+    
+    private val socketServerHandler = object : DuplexSocketServer.MessageHandler {
+        override fun onMessageReceived(type: MessageType, payload: ByteArray) {
+            messageRouter.routeMessage(type, payload)
+        }
+
+        override fun onClientConnected() {
+        }
+
+        override fun onClientDisconnected() {
+        }
+    }
+    
+    private val cameraDataHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val cameraData = CameraData.parseFrom(payload)
+                handler.post {
+                    updateCameraInfoFromProtobuf(cameraData)
+                }
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling camera data", e)
+                false
+            }
+        }
+    }
+
+    private val overlayRequestHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val request = CameraOverlayRequest.parseFrom(payload)
+                handler.post {
+                    val overlayControl = OverlayControl.newBuilder()
+                        .setAction(OverlayAction.START_OVERLAY)
+                        .build()
+                    socketServer.sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+                }
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling CameraOverlayRequest", e)
+                false
+            }
+        }
+    }
 
 
 
@@ -80,13 +129,82 @@ class CameraOverlayService : SocketService(), LifecycleOwner, SavedStateRegistry
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    override fun onCreate() {
+        super.onCreate()
+        Log.d(TAG, "CameraOverlayService onCreate")
+        
+        // Initialize lifecycle components
+        savedStateRegistryController = SavedStateRegistryController.create(this)
+        lifecycleRegistry = LifecycleRegistry(this)
+
+        // Restore saved state and move to CREATED state
+        savedStateRegistryController.performRestore(null)
+        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+
+        try {
+            createOverlay()
+            setupSocketServer()
+            if (socketServer.isConnected()) {
+                // Send start overlay command to enable camera data loop
+                val overlayControl = OverlayControl.newBuilder()
+                    .setAction(OverlayAction.START_OVERLAY)
+                    .build()
+                socketServer.sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+            }
+            // Move to STARTED state after successful initialization
+            lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onCreate", e)
+            throw e
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand called with intent: $intent, flags: $flags, startId: $startId")
         return START_STICKY
     }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "CameraOverlayService onDestroy")
+        
+        try {
+            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
 
+            // Send stop overlay command before shutting down
+            if (socketServer.isConnected()) {
+                val overlayControl = OverlayControl.newBuilder()
+                    .setAction(OverlayAction.STOP_OVERLAY)
+                    .build()
+                socketServer.sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+            }
+            
+            // Clean up socket server
+            socketServer.removeMessageHandler(socketServerHandler)
+            messageRouter.clearHandlers(MessageType.CAMERA_DATA)
+            messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
 
+            overlayView?.let {
+                windowManager?.removeView(it)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onDestroy", e)
+        }
+    }
 
+    private fun setupSocketServer() {
+        // Register message handlers
+        messageRouter.registerHandler(MessageType.CAMERA_DATA, cameraDataHandler)
+        messageRouter.registerHandler(MessageType.CAMERA_OVERLAY_REQUEST, overlayRequestHandler)
+        
+        // Add server handler and start server
+        socketServer.addMessageHandler(socketServerHandler)
+        if (socketServer.startServer()) {
+            Log.i(TAG, "Duplex socket server started for camera overlay")
+        } else {
+            Log.e(TAG, "Failed to start duplex socket server for camera overlay")
+        }
+    }
 
     private fun createOverlay() {
         Log.d(TAG, "createOverlay called")
@@ -111,31 +229,19 @@ class CameraOverlayService : SocketService(), LifecycleOwner, SavedStateRegistry
                 PixelFormat.TRANSLUCENT
             )
 
-            params.gravity = Gravity.TOP or Gravity.START
-            params.x = 50
+            params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            params.x = 0
             params.y = 100
-            Log.d(TAG, "Layout params configured")
-
-            Log.d(TAG, "About to create ComposeView")
             overlayView = ComposeView(this).apply {
-                Log.d(TAG, "ComposeView instantiated, setting up lifecycle")
 
                 // Set up ViewTreeLifecycleOwner and ViewTreeSavedStateRegistryOwner
                 this.setViewTreeLifecycleOwner(this@CameraOverlayService)
                 this.setViewTreeSavedStateRegistryOwner(this@CameraOverlayService)
-                Log.d(TAG, "ViewTree owners set")
-
-                Log.d(TAG, "Setting content")
                 setContent {
-                    Log.d(TAG, "Setting CameraInfoOverlay content")
                     CameraInfoOverlay()
                 }
             }
-            Log.d(TAG, "ComposeView created and content set")
-
-            Log.d(TAG, "About to add view to window manager")
             windowManager?.addView(overlayView, params)
-            Log.d(TAG, "Overlay view added to window manager successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error creating overlay", e)
             throw e
@@ -259,71 +365,4 @@ class CameraOverlayService : SocketService(), LifecycleOwner, SavedStateRegistry
         }
     }
 
-    // SocketService implementation
-    override fun onSocketServiceCreate() {
-        // Initialize lifecycle components
-        savedStateRegistryController = SavedStateRegistryController.create(this)
-        lifecycleRegistry = LifecycleRegistry(this)
-
-        // Restore saved state and move to CREATED state
-        savedStateRegistryController.performRestore(null)
-        lifecycleRegistry.currentState = Lifecycle.State.CREATED
-
-        try {
-            createOverlay()
-
-            // Setup as server to receive camera data
-            if (setupAsServer()) {
-                Log.d(TAG, "Socket server setup successful")
-            } else {
-                Log.e(TAG, "Failed to setup socket server")
-            }
-
-            // Move to STARTED state after successful initialization
-            lifecycleRegistry.currentState = Lifecycle.State.STARTED
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in onCreate", e)
-            throw e
-        }
-    }
-
-    override fun onSocketServiceDestroy() {
-        try {
-            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-
-            overlayView?.let {
-                windowManager?.removeView(it)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in onDestroy", e)
-        }
-    }
-
-    override fun handleReceivedMessage(type: MessageType, payload: ByteArray) {
-        when (type) {
-            MessageType.CAMERA_DATA -> {
-                val cameraData = MessageConverter.parseCameraDataFromPayload(payload)
-                if (cameraData != null) {
-                    handler.post {
-                        updateCameraInfoFromProtobuf(cameraData)
-                    }
-                } else {
-                    Log.e(TAG, "Failed to parse camera data from payload")
-                }
-            }
-            else -> {
-                Log.w(TAG, "Received unknown message type: $type")
-            }
-        }
-    }
-
-    override fun onSocketClientConnected() {
-        super.onSocketClientConnected()
-        Log.i(TAG, "Camera data client connected")
-    }
-
-    override fun onSocketClientDisconnected() {
-        super.onSocketClientDisconnected()
-        Log.i(TAG, "Camera data client disconnected")
-    }
 }

@@ -40,21 +40,16 @@ object OverlayManager {
     
     fun startCameraOverlay(context: Context): Boolean {
         Log.d(TAG, "startCameraOverlay called with context: ${context.javaClass.simpleName}")
-        
-        Log.d(TAG, "Checking overlay permission...")
+
         if (!hasOverlayPermission(context)) {
-            Log.w(TAG, "No overlay permission, requesting...")
             requestOverlayPermission(context)
             return false
         }
-        Log.d(TAG, "Overlay permission granted")
         
         if (!isServiceRunning) {
             try {
-                Log.d(TAG, "Service not running, starting CameraOverlayService...")
                 
                 val intent = Intent(context, CameraOverlayService::class.java)
-                Log.d(TAG, "Intent created: $intent")
                 
                 val serviceResult = context.startService(intent)
                 Log.d(TAG, "startService returned: $serviceResult")
@@ -81,7 +76,6 @@ object OverlayManager {
                 val intent = Intent(context, CameraOverlayService::class.java)
                 context.stopService(intent)
                 isServiceRunning = false
-                Log.d(TAG, "CameraOverlayService stopped")
             } catch (e: Exception) {
                 Log.e(TAG, "Error stopping overlay service", e)
             }

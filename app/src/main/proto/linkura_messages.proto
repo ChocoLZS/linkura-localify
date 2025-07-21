@@ -15,12 +15,15 @@ message MessageEnvelope {
 enum MessageType {
   UNKNOWN = 0;
   CAMERA_DATA = 1;
+  CONFIG_UPDATE = 2;
+  OVERLAY_CONTROL = 3;
+  CAMERA_OVERLAY_REQUEST = 4;
   // Future message types can be added here
 }
 
 // Camera data message
 message CameraData {
-  bool is_valid = 1;
+  optional bool is_valid = 1; // when only is_valid set, ensure the data is not empty
   Vector3 position = 2;
   Quaternion rotation = 3;
   float fov = 4;
@@ -41,4 +44,44 @@ message Quaternion {
   float y = 2;
   float z = 3;
   float w = 4;
+}
+
+// Config update operation types
+enum ConfigUpdateType {
+  FULL_UPDATE = 0;      // Complete configuration replacement
+  PARTIAL_UPDATE = 1;   // Only update specified fields
+}
+
+// Configuration update message
+message ConfigUpdate {
+  ConfigUpdateType update_type = 1;
+  
+  // Configuration fields (only set fields will be updated in PARTIAL_UPDATE mode)
+  optional bool dbg_mode = 2;
+  optional bool enabled = 3;
+  optional bool render_high_resolution = 4;
+  optional bool fes_archive_unlock_ticket = 5;
+  optional bool lazy_init = 6;
+  optional bool replace_font = 7;
+  optional bool text_test = 8;
+  optional bool dump_text = 9;
+  optional bool enable_free_camera = 10;
+  optional int32 target_frame_rate = 11;
+}
+
+// Overlay control actions
+enum OverlayAction {
+  START_OVERLAY = 0;    // Start camera overlay display
+  STOP_OVERLAY = 1;     // Stop camera overlay display
+  // Future overlay actions can be added here
+}
+
+// Overlay control message
+message OverlayControl {
+  OverlayAction action = 1;
+  optional string extra_data = 2;  // Additional parameters if needed
+}
+
+message CameraOverlayRequest {
+  // empty
 }
