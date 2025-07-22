@@ -63,6 +63,11 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         LinkuraLocalify/camera/camera.cpp
         LinkuraLocalify/config/Config.cpp
         LinkuraLocalify/string_parser/StringParser.cpp
+        # Hook modules
+        LinkuraLocalify/hooks/HookDebug.cpp
+        LinkuraLocalify/hooks/HookLiveRender.cpp
+        LinkuraLocalify/hooks/HookCamera.cpp
+#        LinkuraLocalify/hooks/HookStory.cpp
         # Generated protobuf files
         build/linkura_messages.pb.cc
         )
