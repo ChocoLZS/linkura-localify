@@ -13,6 +13,13 @@ namespace LinkuraLocal::HookLiveRender {
         Portrait
     };
 
+    enum SetPlayPosition_State {
+        Nothing,
+        UpdateReceived
+    };
+
+    SetPlayPosition_State setPlayPositionState = SetPlayPosition_State::Nothing;
+
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
@@ -42,6 +49,13 @@ namespace LinkuraLocal::HookLiveRender {
                     break;
             }
             result = (u_int64_t)(height << 32 | width);
+        }
+        if (setPlayPositionState == SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
+            RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
+                    HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                    HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+            );
+            setPlayPositionState = SetPlayPosition_State::Nothing;
         }
         return result;
     }
@@ -132,12 +146,10 @@ namespace LinkuraLocal::HookLiveRender {
     std::vector<uint8_t> getCurrentArchiveInfo() {
         try {
             linkura::ipc::ArchiveInfo archiveInfo;
-            
-
-            
             // Get duration from cached archive data
             auto archiveDataIt = HookShare::Shareable::archiveData.find(HookShare::Shareable::currentArchiveId);
             if (archiveDataIt != HookShare::Shareable::archiveData.end()) {
+                Log::DebugFmt("getCurrentArchiveInfo: duration=%lld", archiveDataIt->second.duration);
                 archiveInfo.set_duration(archiveDataIt->second.duration);
             } else {
                 archiveInfo.set_duration(0);
@@ -146,32 +158,27 @@ namespace LinkuraLocal::HookLiveRender {
             // Serialize to protobuf
             std::vector<uint8_t> result(archiveInfo.ByteSize());
             archiveInfo.SerializeToArray(result.data(), result.size());
-            
-            Log::DebugFmt("getCurrentArchiveInfo: archive_id=%s, duration=%lld", 
-                         archiveInfo.archive_id().c_str(), archiveInfo.duration());
-            
+
+            Log::DebugFmt("getCurrentArchiveInfo: duration=%lld",
+                         archiveInfo.duration());
+
             return result;
         } catch (const std::exception& e) {
             Log::ErrorFmt("Error in getCurrentArchiveInfo: %s", e.what());
             return std::vector<uint8_t>();
         }
     }
-    
-    void setArchivePosition(uint32_t seconds) {
+
+    void setArchivePosition(float seconds) {
         try {
             if (HookShare::Shareable::realtimeRenderingArchiveControllerCache == nullptr) {
                 Log::Error("setArchivePosition: No cached archive controller available");
                 return;
             }
-            
-            Log::DebugFmt("setArchivePosition: Setting position to %u seconds", seconds);
-            
-            // Call the original Unity function with cached controller
-            RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
-                HookShare::Shareable::realtimeRenderingArchiveControllerCache, 
-                static_cast<float>(seconds)
-            );
-            
+
+            Log::DebugFmt("setArchivePosition: Setting position to %f seconds", seconds);
+            setPlayPositionState = SetPlayPosition_State::UpdateReceived;
+            HookShare::Shareable::realtimeRenderingArchivePositionSeconds = seconds;
         } catch (const std::exception& e) {
             Log::ErrorFmt("Error in setArchivePosition: %s", e.what());
         }

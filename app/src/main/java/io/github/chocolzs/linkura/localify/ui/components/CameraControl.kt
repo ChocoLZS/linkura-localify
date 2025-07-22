@@ -92,7 +92,7 @@ fun CameraControl(
                         text = if (isOverlayEnabled) stringResource(R.string.overlay_camera_info_stop) else stringResource(R.string.overlay_camera_info_start),
                         onClick = {
                             try {
-                                val newState = OverlayManager.toggleCameraOverlay(context)
+                                val newState = OverlayManager.toggleOverlay(context)
                                 
                                 isOverlayEnabled = newState
                             } catch (e: Exception) {

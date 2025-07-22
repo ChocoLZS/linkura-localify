@@ -179,6 +179,7 @@ extern "C"
 JNIEXPORT jbyteArray JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCurrentArchiveInfo(JNIEnv *env, jclass clazz) {
     try {
+        LinkuraLocal::Log::DebugFmt("getCurrentArchiveInfo jni called");
         std::vector<uint8_t> protobufData = LinkuraLocal::HookLiveRender::getCurrentArchiveInfo();
 
         jbyteArray result = env->NewByteArray(protobufData.size());
@@ -197,36 +198,11 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCurrentArchiveInfo(J
 extern "C"
 JNIEXPORT void JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_setArchivePosition(JNIEnv *env, jclass clazz,
-                                                                                   jbyteArray position_data) {
+                                                                                   jfloat seconds) {
     try {
-        jsize dataSize = env->GetArrayLength(position_data);
-        if (dataSize == 0) {
-            LinkuraLocal::Log::Error("setArchivePosition: Empty position data");
-            return;
-        }
-        
-        jbyte* dataElements = env->GetByteArrayElements(position_data, nullptr);
-        if (dataElements == nullptr) {
-            LinkuraLocal::Log::Error("setArchivePosition: Failed to get byte array elements");
-            return;
-        }
-        
-        // Parse protobuf data
-        linkura::ipc::ArchivePositionRequest positionRequest;
-        if (!positionRequest.ParseFromArray(dataElements, dataSize)) {
-            env->ReleaseByteArrayElements(position_data, dataElements, JNI_ABORT);
-            LinkuraLocal::Log::Error("Failed to parse archive position request protobuf");
-            return;
-        }
-        
-        env->ReleaseByteArrayElements(position_data, dataElements, JNI_ABORT);
-        
-        float seconds = positionRequest.seconds();
         LinkuraLocal::Log::DebugFmt("setArchivePosition: Received request to set position to %f seconds", seconds);
-        
-        // Convert float seconds to uint32_t and call the HookLiveRender function
-        uint32_t secondsUint = static_cast<uint32_t>(seconds);
-        LinkuraLocal::HookLiveRender::setArchivePosition(secondsUint);
+
+        LinkuraLocal::HookLiveRender::setArchivePosition(seconds);
         
         LinkuraLocal::Log::Info("Archive position set successfully");
         

@@ -123,6 +123,67 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             }
         }
     }
+    
+    private val archiveInfoHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val archiveInfoRequest = ArchiveInfo.parseFrom(payload)
+                // Get archive info from native layer
+                val archiveInfoBytes = getCurrentArchiveInfo()
+                
+                if (archiveInfoBytes.isNotEmpty()) {
+                    // Parse the archive info from native layer
+                    val nativeArchiveInfo = ArchiveInfo.parseFrom(archiveInfoBytes)
+                    
+                    if (socketClient.isClientConnected()) {
+                        val success = socketClient.sendMessage(MessageType.ARCHIVE_INFO, nativeArchiveInfo)
+                        if (success) {
+                            Log.i(TAG, "Archive info sent: duration=${nativeArchiveInfo.duration}ms")
+                        } else {
+                            Log.w(TAG, "Failed to send archive info")
+                        }
+                    }
+                } else {
+                    // No archive info available, send empty response with duration 0
+                    val emptyResponse = ArchiveInfo.newBuilder()
+                        .setDuration(0L)
+                        .build()
+                    
+                    if (socketClient.isClientConnected()) {
+                        val success = socketClient.sendMessage(MessageType.ARCHIVE_INFO, emptyResponse)
+                        if (success) {
+                            Log.i(TAG, "Archive info sent: no archive running (duration=0)")
+                        } else {
+                            Log.w(TAG, "Failed to send archive info")
+                        }
+                    }
+                }
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing archive info request", e)
+                false
+            }
+        }
+    }
+    
+    private val archivePositionSetHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                Log.i(TAG, "Received archive position and ready to set position")
+                val positionRequest = ArchivePositionSetRequest.parseFrom(payload)
+                Log.i(TAG, "Received archive position: seconds=${positionRequest.seconds}")
+                val seconds = positionRequest.seconds
+                
+                // Call native function to set archive position
+                setArchivePosition(seconds)
+                Log.i(TAG, "Archive position set to: ${seconds}s")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing archive position set request", e)
+                false
+            }
+        }
+    }
 
     private fun onStartHandler() {
         socketClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
@@ -345,6 +406,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         // Register message handlers
         messageRouter.registerHandler(MessageType.CONFIG_UPDATE, configUpdateHandler)
         messageRouter.registerHandler(MessageType.OVERLAY_CONTROL, overlayControlHandler)
+        messageRouter.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
+        messageRouter.registerHandler(MessageType.ARCHIVE_POSITION_SET_REQUEST, archivePositionSetHandler)
         
         // Add client handler and start client
         socketClient.addMessageHandler(socketClientHandler)
@@ -611,6 +674,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         @JvmStatic
         external fun updateConfig(configUpdateData: ByteArray)
+        
+        @JvmStatic
+        external fun getCurrentArchiveInfo(): ByteArray
+        
+        @JvmStatic
+        external fun setArchivePosition(seconds: Float)
 
         fun getPref(path: String) : XSharedPreferences? {
             val pref = XSharedPreferences(BuildConfig.APPLICATION_ID, path)

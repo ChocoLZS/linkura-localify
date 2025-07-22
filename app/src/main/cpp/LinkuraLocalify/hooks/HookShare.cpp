@@ -7,6 +7,7 @@ namespace LinkuraLocal::HookShare {
         // memory leak ?
         std::unordered_map<std::string, ArchiveData> archiveData{};
         void* realtimeRenderingArchiveControllerCache = nullptr;
+        float realtimeRenderingArchivePositionSeconds = 0;
         std::string currentArchiveId = "";
     }
 
