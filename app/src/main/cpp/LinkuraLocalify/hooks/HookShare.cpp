@@ -1,4 +1,3 @@
-#pragma once
 #include "../HookMain.h"
 #include "../Misc.hpp"
 
@@ -9,6 +8,28 @@ namespace LinkuraLocal::HookShare {
         void* realtimeRenderingArchiveControllerCache = nullptr;
         float realtimeRenderingArchivePositionSeconds = 0;
         std::string currentArchiveId = "";
+        RenderScene renderScene = RenderScene::None;
+
+        // Function implementations
+        void resetRenderScene() {
+            renderScene = RenderScene::None;
+        }
+
+        bool renderSceneIsNone() {
+            return renderScene == RenderScene::None;
+        }
+
+        bool renderSceneIsFesLive() {
+            return renderScene == RenderScene::FesLive;
+        }
+
+        bool renderSceneIsWithLive() {
+            return renderScene == RenderScene::WithLive;
+        }
+
+        bool renderSceneIsStory() {
+            return renderScene == RenderScene::Story;
+        }
     }
 
 #pragma region HttpRequests
@@ -45,6 +66,39 @@ namespace LinkuraLocal::HookShare {
         return result;
     }
 
+    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync HOOKED");
+        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
+        Shareable::currentArchiveId = json["archives_id"].get<std::string>();
+        Shareable::renderScene = Shareable::RenderScene::FesLive;
+        return ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Orig(self,
+                                                                         request,
+                                                                         cancellation_token, method_info);
+    }
+    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
+        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
+        Shareable::currentArchiveId = json["archives_id"].get<std::string>();
+        Shareable::renderScene = Shareable::RenderScene::WithLive;
+        return ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Orig(self,
+                                                                          request,
+                                                                          cancellation_token, method_info);
+    }
+
+    DEFINE_HOOK(void* , FesliveApi_FesliveEnterWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Shareable::renderScene = Shareable::RenderScene::FesLive;
+        return FesliveApi_FesliveEnterWithHttpInfoAsync_Orig(self,
+                                                                          request,
+                                                                          cancellation_token, method_info);
+    }
+
+    DEFINE_HOOK(void* , WithliveApi_WithliveEnterWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Shareable::renderScene = Shareable::RenderScene::WithLive;
+        return WithliveApi_WithliveEnterWithHttpInfoAsync_Orig(self,
+                                                             request,
+                                                             cancellation_token, method_info);
+    }
+
 #pragma endregion
 
     void Install(HookInstaller* hookInstaller) {
@@ -67,5 +121,14 @@ namespace LinkuraLocal::HookShare {
                 ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = method->methodPointer;
             }
         }
+#pragma region RenderScene
+
+        ADD_HOOK(FesliveApi_FesliveEnterWithHttpInfoAsync , Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "FesliveApi", "FesliveEnterWithHttpInfoAsync"));
+        ADD_HOOK(WithliveApi_WithliveEnterWithHttpInfoAsync , Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "WithliveApi", "WithliveEnterWithHttpInfoAsync"));
+        ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
+        ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
+
+
+#pragma endregion
     }
 }

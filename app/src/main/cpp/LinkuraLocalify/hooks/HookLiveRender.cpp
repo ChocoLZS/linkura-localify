@@ -1,6 +1,7 @@
 #include "../HookMain.h"
 #include "../../deps/nlohmann/json.hpp"
 #include "../../build/linkura_messages.pb.h"
+#include <thread>
 
 namespace LinkuraLocal::HookLiveRender {
     enum struct SchoolResolution_LiveAreaQuality {
@@ -51,6 +52,12 @@ namespace LinkuraLocal::HookLiveRender {
             result = (u_int64_t)(height << 32 | width);
         }
         if (setPlayPositionState == SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
+            if (HookShare::Shareable::renderSceneIsWithLive()) {
+                HookShare::Shareable::resetRenderScene();
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                HookCamera::unregisterMainFreeCamera(true);
+                HookCamera::unregisterCurrentCamera();
+            }
             RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
                     HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                     HookShare::Shareable::realtimeRenderingArchivePositionSeconds
@@ -76,25 +83,6 @@ namespace LinkuraLocal::HookLiveRender {
                                                                     request,
                                                                     cancellation_token, method_info);
     }
-
-    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync HOOKED");
-        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-        HookShare::Shareable::currentArchiveId = json["archives_id"].get<std::string>();
-        return ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Orig(self,
-                                                                          request,
-                                                                          cancellation_token, method_info);
-    }
-    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
-        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-        HookShare::Shareable::currentArchiveId = json["archives_id"].get<std::string>();
-        return ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Orig(self,
-                                                                          request,
-                                                                          cancellation_token, method_info);
-    }
-
-
 
     /**
      * @brief set target frame rate for unity engine
@@ -193,8 +181,6 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
-        ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
-        ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
 
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));

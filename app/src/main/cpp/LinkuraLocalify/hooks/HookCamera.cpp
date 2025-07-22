@@ -14,16 +14,14 @@ namespace LinkuraLocal::HookCamera {
     UnityResolve::UnityType::Vector3 cacheForward{};
     UnityResolve::UnityType::Vector3 cacheLookAt{};
 
-    void registerMainFreeCamera(UnityResolve::UnityType::Camera* mainCamera, L4Camera::CameraSceneType cameraSceneType) {
+    void registerMainFreeCamera(UnityResolve::UnityType::Camera* mainCamera) {
         if (!Config::enableFreeCamera) return;
         mainFreeCameraCache = mainCamera;
         if (mainFreeCameraCache) freeCameraTransformCache = mainFreeCameraCache->GetTransform();
-        L4Camera::SetCameraSceneType(cameraSceneType);
     }
 
     void unregisterMainFreeCamera(bool cleanup = false) {
         if (!Config::enableFreeCamera) return;
-        L4Camera::SetCameraSceneType(L4Camera::CameraSceneType::NONE);
         if (cleanup) {
             mainFreeCameraCache = nullptr;
             freeCameraTransformCache = nullptr;
@@ -42,6 +40,13 @@ namespace LinkuraLocal::HookCamera {
     }
     void unregisterCurrentCamera() {
         currentCameraRegistered = false;
+    }
+
+    void onRenderExit(bool cleanup = false) {
+        HookShare::Shareable::resetRenderScene();
+        unregisterMainFreeCamera(cleanup);
+        unregisterCurrentCamera();
+        L4Camera::reset_camera();
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
@@ -69,7 +74,7 @@ namespace LinkuraLocal::HookCamera {
 
                 cameraData.set_fov(fov);
                 cameraData.set_mode(static_cast<int32_t>(L4Camera::GetCameraMode()));
-                cameraData.set_scene_type(static_cast<int32_t>(L4Camera::GetCameraSceneType()));
+                cameraData.set_scene_type(static_cast<int32_t>(HookShare::Shareable::renderScene));
             } catch (const std::exception& e) {
                 Log::ErrorFmt("getCameraInfo exception: %s", e.what());
                 cameraData.set_is_valid(false);
@@ -84,7 +89,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+        if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
             if (IsNativeObjectAlive(freeCameraTransformCache)) {
                 static auto lookat_injected = reinterpret_cast<void (*)(void*freeCameraTransformCache,
                                                                         UnityResolve::UnityType::Vector3* worldPosition, UnityResolve::UnityType::Vector3* worldUp)>(
@@ -121,7 +126,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, Unity_set_position_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Vector3* data)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+        if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
             if (IsNativeObjectAlive(freeCameraTransformCache)) {
                 const auto cameraMode = L4Camera::GetCameraMode();
                 if (cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
@@ -149,7 +154,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+        if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
             if (IsNativeObjectAlive(mainFreeCameraCache) && self == mainFreeCameraCache) {
                 value = L4Camera::baseCamera.fov;
             }
@@ -157,7 +162,7 @@ namespace LinkuraLocal::HookCamera {
         Unity_set_fieldOfView_Orig(self, value);
     }
     DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+        if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
             if (IsNativeObjectAlive(mainFreeCameraCache)) {
                 for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
                     Unity_set_fieldOfView_Orig(i, L4Camera::baseCamera.fov);
@@ -171,10 +176,10 @@ namespace LinkuraLocal::HookCamera {
         return Unity_get_fieldOfView_Orig(self);
     }
     DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
-        if (Config::enableFreeCamera && (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::NONE)) {
+        if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
             if (IsNativeObjectAlive(mainFreeCameraCache)) {
                 // prevent crash for with live and fes live & remain the free fov for story
-                if (L4Camera::GetCameraSceneType() == L4Camera::CameraSceneType::STORY) Unity_set_fieldOfView_Orig(mainFreeCameraCache, L4Camera::baseCamera.fov);
+                if (HookShare::Shareable::renderSceneIsStory()) Unity_set_fieldOfView_Orig(mainFreeCameraCache, L4Camera::baseCamera.fov);
                 if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
                     mainFreeCameraCache->SetNearClipPlane(0.001f);
                 }
@@ -201,8 +206,9 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, CameraManager_GetCamera, (Il2cppUtils::Il2CppObject* self, CameraType cameraType , int cameraId , void* method)) {
         Log::DebugFmt("CameraManager_GetCamera HOOKED");
         auto camera =  CameraManager_GetCamera_Orig(self, cameraType, cameraId, method);
-        if (L4Camera::GetCameraSceneType() != L4Camera::CameraSceneType::FES_LIVE) {
-            registerMainFreeCamera(camera, L4Camera::CameraSceneType::WITH_LIVE);
+        if (!HookShare::Shareable::renderSceneIsFesLive()) {
+            HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
+            registerMainFreeCamera(camera);
             registerCurrentCamera(camera);
         }
 
@@ -216,7 +222,8 @@ namespace LinkuraLocal::HookCamera {
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
             // fes live will use the same fixed camera at all time
-            if (L4Camera::GetCameraSceneType() == L4Camera::CameraSceneType::WITH_LIVE) {
+            if (HookShare::Shareable::renderSceneIsWithLive()) {
+                HookShare::Shareable::resetRenderScene();
                 unregisterMainFreeCamera();
                 unregisterCurrentCamera();
             }
@@ -226,14 +233,13 @@ namespace LinkuraLocal::HookCamera {
     // exit
     DEFINE_HOOK(void*, LiveSceneController_FinalizeSceneAsync, (Il2cppUtils::Il2CppObject* self, void* token, void* method)) {
         Log::DebugFmt("LiveSceneController_FinalizeSceneAsync HOOKED");
-        unregisterMainFreeCamera();
-        unregisterCurrentCamera();
-        L4Camera::reset_camera();
+        onRenderExit();
         return LiveSceneController_FinalizeSceneAsync_Orig(self, token, method);
     }
 
     DEFINE_HOOK(void, StoryModelSpaceManager_Init, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryModelSpaceManager_Init HOOKED");
+        HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::Story;
 
         static auto get_ModelSpace = UnityResolve::Get("Assembly-CSharp.dll")->Get(
                 "StoryModelSpaceManager")->Get<UnityResolve::Method>("get_modelSpace");
@@ -241,14 +247,12 @@ namespace LinkuraLocal::HookCamera {
         StoryModelSpaceManager_Init_Orig(self, method);
         auto modelSpace = get_ModelSpace->Invoke<Il2cppUtils::Il2CppObject*>(self);
         auto storyCamera = get_StoryCamera->Invoke<UnityResolve::UnityType::Camera*>(modelSpace);
-        registerMainFreeCamera(storyCamera, L4Camera::CameraSceneType::STORY);
+        registerMainFreeCamera(storyCamera);
         registerCurrentCamera(storyCamera);
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
-        unregisterMainFreeCamera(true);
-        unregisterCurrentCamera();
-        L4Camera::reset_camera();
+        onRenderExit(true);
         StoryScene_OnFinalize_Orig(self, method);
     }
 
@@ -259,7 +263,7 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, FesLiveFixedCamera_GetCamera, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("FesLiveFixedCamera_GetCamera HOOKED");
         auto camera = FesLiveFixedCamera_GetCamera_Orig(self, method);
-        registerMainFreeCamera(camera, L4Camera::CameraSceneType::FES_LIVE);
+        registerMainFreeCamera(camera);
         registerCurrentCamera(camera);
         return camera;
     }

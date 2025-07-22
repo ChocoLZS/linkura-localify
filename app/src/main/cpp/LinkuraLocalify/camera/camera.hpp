@@ -9,13 +9,6 @@ namespace L4Camera {
         FOLLOW
     };
 
-    enum class CameraSceneType {
-        NONE,
-        WITH_LIVE,
-        FES_LIVE,
-        STORY
-    };
-
     enum class FirstPersonRoll {
         ENABLE_ROLL,
         DISABLE_ROLL
@@ -30,8 +23,6 @@ namespace L4Camera {
     CameraMode GetCameraMode();
     void SetFirstPersonRoll(FirstPersonRoll mode);
     FirstPersonRoll GetFirstPersonRoll();
-    void SetCameraSceneType(CameraSceneType type);
-    CameraSceneType GetCameraSceneType();
 
     extern BaseCamera::Camera baseCamera;
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;

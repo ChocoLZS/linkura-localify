@@ -17,7 +17,6 @@ namespace L4Camera {
     CameraMode cameraMode = CameraMode::FREE;
     FirstPersonRoll firstPersonRoll = FirstPersonRoll::ENABLE_ROLL;
     FollowModeY followModeY = FollowModeY::SMOOTH_Y;
-    CameraSceneType cameraSceneType = CameraSceneType::NONE;
 
     CameraInfo currentCameraInfo;
 
@@ -48,15 +47,6 @@ namespace L4Camera {
     FirstPersonRoll GetFirstPersonRoll() {
         return firstPersonRoll;
     }
-
-    void SetCameraSceneType(CameraSceneType type) {
-        cameraSceneType = type;
-    }
-
-    CameraSceneType GetCameraSceneType() {
-        return cameraSceneType;
-    }
-
 
     void reset_camera() {
         followCharaIndex = 0;
