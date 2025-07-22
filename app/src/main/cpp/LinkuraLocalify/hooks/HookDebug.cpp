@@ -15,9 +15,15 @@ namespace LinkuraLocal::HookDebug {
         Log::LogUnityLog(ANDROID_LOG_VERBOSE, "Internal_Log:\n%s", content->ToString().c_str());
     }
 
+    // 👀
     DEFINE_HOOK(void, CoverImageCommandReceiver_Awake, (Il2cppUtils::Il2CppObject* self, void* method)) {
-        CoverImageCommandReceiver_Awake_Orig(self, method);
         Log::DebugFmt("CoverImageCommandReceiver_Awake HOOKED");
+        CoverImageCommandReceiver_Awake_Orig(self, method);
+    }
+    // 👀
+    DEFINE_HOOK(void, CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self,void* character, void* method)) {
+        Log::DebugFmt("CharacterVisibleReceiver_SetupExistCharacter HOOKED");
+        CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
     }
 
     void Install(HookInstaller* hookInstaller) {
@@ -28,5 +34,6 @@ namespace LinkuraLocal::HookDebug {
         
 //        // 👀
 //        ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
+//        ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
     }
 }

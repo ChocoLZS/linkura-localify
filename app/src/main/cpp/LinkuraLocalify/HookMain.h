@@ -2,7 +2,6 @@
 
 #include <set>
 #include <unordered_set>
-#include "shadowhook.h"
 #include "../platformDefine.hpp"
 #include "config/Config.hpp"
 #include <nlohmann/json.hpp>
