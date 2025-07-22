@@ -4,6 +4,9 @@
 #include <locale>
 #include "fmt/core.h"
 
+#include <stdexcept>
+#include <cstdio>
+
 #ifndef GKMS_WINDOWS
     #include <jni.h>
     
@@ -222,4 +225,42 @@ namespace LinkuraLocal::Misc {
         }
     }
 
+    namespace Time {
+        long long parseISOTime(const std::string& isoTime) {
+            std::string timeStr = isoTime;
+            if (!timeStr.empty() && timeStr.back() == 'Z') {
+                timeStr.pop_back();
+            }
+
+            int year, month, day, hour, minute, second, milliseconds = 0;
+
+            size_t dotPos = timeStr.find('.');
+            if (dotPos != std::string::npos) {
+                std::string msStr = timeStr.substr(dotPos + 1);
+                timeStr = timeStr.substr(0, dotPos);
+
+                if (msStr.length() > 3) msStr = msStr.substr(0, 3);
+                else if (msStr.length() < 3) msStr += std::string(3 - msStr.length(), '0');
+                milliseconds = std::stoi(msStr);
+            }
+
+            if (sscanf(timeStr.c_str(), "%d-%d-%dT%d:%d:%d",
+                       &year, &month, &day, &hour, &minute, &second) != 6) {
+                throw std::runtime_error("Invalid time format");
+            }
+
+            auto isLeap = [](int y) { return (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0); };
+            auto daysInMonth = [&](int m, int y) {
+                int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+                return (m == 2 && isLeap(y)) ? 29 : days[m-1];
+            };
+
+            long days = 0;
+            for (int y = 1970; y < year; ++y) days += isLeap(y) ? 366 : 365;
+            for (int m = 1; m < month; ++m) days += daysInMonth(m, year);
+            days += day - 1;
+
+            return (days * 24LL * 3600 + hour * 3600LL + minute * 60 + second) * 1000 + milliseconds;
+        }
+    }
 }

@@ -159,7 +159,7 @@ extern "C"
 JNIEXPORT jbyteArray JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoProtobuf(JNIEnv *env, jclass clazz) {
     try {
-        std::vector<uint8_t> protobufData = LinkuraLocal::Hook::getCameraInfoProtobuf();
+        std::vector<uint8_t> protobufData = LinkuraLocal::HookCamera::getCameraInfoProtobuf();
         
         jbyteArray result = env->NewByteArray(protobufData.size());
         env->SetByteArrayRegion(result, 0, protobufData.size(), 
@@ -172,6 +172,44 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoProtobuf(J
     } catch (...) {
         jbyteArray result = env->NewByteArray(0);
         return result;
+    }
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCurrentArchiveInfo(JNIEnv *env, jclass clazz) {
+    try {
+        LinkuraLocal::Log::DebugFmt("getCurrentArchiveInfo jni called");
+        std::vector<uint8_t> protobufData = LinkuraLocal::HookLiveRender::getCurrentArchiveInfo();
+
+        jbyteArray result = env->NewByteArray(protobufData.size());
+        env->SetByteArrayRegion(result, 0, protobufData.size(),
+                                reinterpret_cast<const jbyte*>(protobufData.data()));
+        return result;
+    } catch (const std::exception& e) {
+        jbyteArray result = env->NewByteArray(0);
+        return result;
+    } catch (...) {
+        jbyteArray result = env->NewByteArray(0);
+        return result;
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_setArchivePosition(JNIEnv *env, jclass clazz,
+                                                                                   jfloat seconds) {
+    try {
+        LinkuraLocal::Log::DebugFmt("setArchivePosition: Received request to set position to %f seconds", seconds);
+
+        LinkuraLocal::HookLiveRender::setArchivePosition(seconds);
+        
+        LinkuraLocal::Log::Info("Archive position set successfully");
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("Error in setArchivePosition: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("Unknown error in setArchivePosition");
     }
 }
 

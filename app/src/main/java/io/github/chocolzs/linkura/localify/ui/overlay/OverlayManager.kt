@@ -38,8 +38,8 @@ object OverlayManager {
         }
     }
     
-    fun startCameraOverlay(context: Context): Boolean {
-        Log.d(TAG, "startCameraOverlay called with context: ${context.javaClass.simpleName}")
+    fun startOverlay(context: Context): Boolean {
+        Log.d(TAG, "startOverlay called with context: ${context.javaClass.simpleName}")
 
         if (!hasOverlayPermission(context)) {
             requestOverlayPermission(context)
@@ -48,14 +48,13 @@ object OverlayManager {
         
         if (!isServiceRunning) {
             try {
-                
-                val intent = Intent(context, CameraOverlayService::class.java)
+                val intent = Intent(context, OverlayService::class.java)
                 
                 val serviceResult = context.startService(intent)
                 Log.d(TAG, "startService returned: $serviceResult")
                 
                 isServiceRunning = true
-                Log.d(TAG, "CameraOverlayService started successfully, marking as running")
+                Log.d(TAG, "OverlayService started successfully, marking as running")
                 return true
             } catch (e: SecurityException) {
                 Log.e(TAG, "SecurityException starting overlay service", e)
@@ -69,11 +68,14 @@ object OverlayManager {
         return false
     }
     
-    fun stopCameraOverlay(context: Context) {
-        Log.d(TAG, "stopCameraOverlay called")
+    @Deprecated("Use startOverlay() instead")
+    fun startCameraOverlay(context: Context): Boolean = startOverlay(context)
+    
+    fun stopOverlay(context: Context) {
+        Log.d(TAG, "stopOverlay called")
         if (isServiceRunning) {
             try {
-                val intent = Intent(context, CameraOverlayService::class.java)
+                val intent = Intent(context, OverlayService::class.java)
                 context.stopService(intent)
                 isServiceRunning = false
             } catch (e: Exception) {
@@ -82,15 +84,21 @@ object OverlayManager {
         }
     }
     
-    fun toggleCameraOverlay(context: Context): Boolean {
-        Log.d(TAG, "toggleCameraOverlay called, current state: $isServiceRunning")
+    @Deprecated("Use stopOverlay() instead")
+    fun stopCameraOverlay(context: Context) = stopOverlay(context)
+    
+    fun toggleOverlay(context: Context): Boolean {
+        Log.d(TAG, "toggleOverlay called, current state: $isServiceRunning")
         return if (isServiceRunning) {
-            stopCameraOverlay(context)
+            stopOverlay(context)
             false
         } else {
-            startCameraOverlay(context)
+            startOverlay(context)
         }
     }
+    
+    @Deprecated("Use toggleOverlay() instead")
+    fun toggleCameraOverlay(context: Context): Boolean = toggleOverlay(context)
     
     fun isOverlayRunning(): Boolean = isServiceRunning
 }

@@ -1,15 +1,13 @@
-#ifndef LINKURA_LOCALIFY_HOOK_H
-#define LINKURA_LOCALIFY_HOOK_H
+#pragma once
 
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "HookMain.h"
 
 namespace LinkuraLocal::Hook
 {
     void Install();
-    std::string getCameraInfo();
-    std::vector<uint8_t> getCameraInfoProtobuf();
 }
 
-#endif //LINKURA_LOCALIFY_HOOK_H
+

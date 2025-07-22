@@ -79,12 +79,10 @@ jobs:
         id: prepare_release_body
         run: |
           tag_name="${{ steps.get_tag.outputs.tag_name }}"
-          version="${tag_name#v}"
           
           # Read the template and replace placeholders
           template_content=$(cat .github/release_template.md)
-          release_body="${template_content//VERSION/$version}"
-          release_body="${release_body//vVERSION/$tag_name}"
+          release_body="${template_content//VERSION/$tag_name}"
           
           # Save to output
           echo "release_body<<EOF" >> $GITHUB_OUTPUT
