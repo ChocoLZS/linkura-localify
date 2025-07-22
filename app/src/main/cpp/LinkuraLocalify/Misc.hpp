@@ -90,5 +90,9 @@ namespace LinkuraLocal {
             std::vector<std::string> split(const std::string& str, char delimiter);
             std::pair<std::string, std::string> split_once(const std::string& str, const std::string& delimiter);
         }
+
+        namespace Time {
+            long long parseISOTime(const std::string& isoTime);
+        }
     }
 }

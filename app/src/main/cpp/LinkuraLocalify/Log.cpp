@@ -75,6 +75,15 @@ namespace LinkuraLocal::Log {
         Debug(result.c_str());
     }
 
+    void Verbose(const char* msg) {
+        Log(ANDROID_LOG_VERBOSE, msg);
+    }
+
+    void VerboseFmt(const char* fmt, ...) {
+        GetParamStringResult(result);
+        Verbose(result.c_str());
+    }
+
     void LogUnityLog(int prio, const char* fmt, ...) {
         GetParamStringResult(result);
         __android_log_write(prio, "LinkuraLog", result.c_str());

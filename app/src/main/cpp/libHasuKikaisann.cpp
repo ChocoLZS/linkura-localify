@@ -159,7 +159,7 @@ extern "C"
 JNIEXPORT jbyteArray JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoProtobuf(JNIEnv *env, jclass clazz) {
     try {
-        std::vector<uint8_t> protobufData = LinkuraLocal::Hook::getCameraInfoProtobuf();
+        std::vector<uint8_t> protobufData = LinkuraLocal::HookCamera::getCameraInfoProtobuf();
         
         jbyteArray result = env->NewByteArray(protobufData.size());
         env->SetByteArrayRegion(result, 0, protobufData.size(), 
@@ -172,6 +172,68 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCameraInfoProtobuf(J
     } catch (...) {
         jbyteArray result = env->NewByteArray(0);
         return result;
+    }
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_getCurrentArchiveInfo(JNIEnv *env, jclass clazz) {
+    try {
+        std::vector<uint8_t> protobufData = LinkuraLocal::HookLiveRender::getCurrentArchiveInfo();
+
+        jbyteArray result = env->NewByteArray(protobufData.size());
+        env->SetByteArrayRegion(result, 0, protobufData.size(),
+                                reinterpret_cast<const jbyte*>(protobufData.data()));
+        return result;
+    } catch (const std::exception& e) {
+        jbyteArray result = env->NewByteArray(0);
+        return result;
+    } catch (...) {
+        jbyteArray result = env->NewByteArray(0);
+        return result;
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_setArchivePosition(JNIEnv *env, jclass clazz,
+                                                                                   jbyteArray position_data) {
+    try {
+        jsize dataSize = env->GetArrayLength(position_data);
+        if (dataSize == 0) {
+            LinkuraLocal::Log::Error("setArchivePosition: Empty position data");
+            return;
+        }
+        
+        jbyte* dataElements = env->GetByteArrayElements(position_data, nullptr);
+        if (dataElements == nullptr) {
+            LinkuraLocal::Log::Error("setArchivePosition: Failed to get byte array elements");
+            return;
+        }
+        
+        // Parse protobuf data
+        linkura::ipc::ArchivePositionRequest positionRequest;
+        if (!positionRequest.ParseFromArray(dataElements, dataSize)) {
+            env->ReleaseByteArrayElements(position_data, dataElements, JNI_ABORT);
+            LinkuraLocal::Log::Error("Failed to parse archive position request protobuf");
+            return;
+        }
+        
+        env->ReleaseByteArrayElements(position_data, dataElements, JNI_ABORT);
+        
+        float seconds = positionRequest.seconds();
+        LinkuraLocal::Log::DebugFmt("setArchivePosition: Received request to set position to %f seconds", seconds);
+        
+        // Convert float seconds to uint32_t and call the HookLiveRender function
+        uint32_t secondsUint = static_cast<uint32_t>(seconds);
+        LinkuraLocal::HookLiveRender::setArchivePosition(secondsUint);
+        
+        LinkuraLocal::Log::Info("Archive position set successfully");
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("Error in setArchivePosition: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("Unknown error in setArchivePosition");
     }
 }
 

@@ -18,6 +18,8 @@ enum MessageType {
   CONFIG_UPDATE = 2;
   OVERLAY_CONTROL = 3;
   CAMERA_OVERLAY_REQUEST = 4;
+  ARCHIVE_INFO = 5;
+  ARCHIVE_POSITION_SET_REQUEST = 6;
   // Future message types can be added here
 }
 
@@ -84,4 +86,14 @@ message OverlayControl {
 
 message CameraOverlayRequest {
   // empty
+}
+
+// Archive information message
+message ArchiveInfo {
+  optional int64 duration = 1; // Duration in milliseconds
+}
+
+// Archive position control message
+message ArchivePositionSetRequest {
+  optional float seconds = 1; // Position to seek to in seconds
 }

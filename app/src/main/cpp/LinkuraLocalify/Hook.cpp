@@ -1,5 +1,4 @@
 #include "Hook.h"
-#include "HookMain.h"
 #include "Local.h"
 #include "MasterLocal.h"
 #include "camera/camera.hpp"
@@ -131,9 +130,5 @@ namespace LinkuraLocal::Hook {
 #endif
 
         Log::Info("Hook installed");
-    }
-
-    std::vector<uint8_t> getCameraInfoProtobuf() {
-        return HookCamera::getCameraInfoProtobuf();
     }
 }

@@ -29,6 +29,8 @@ namespace LinkuraLocal::HookCamera {
 
 namespace LinkuraLocal::HookLiveRender {
     void Install(HookInstaller* hookInstaller);
+    std::vector<uint8_t> getCurrentArchiveInfo();
+    void setArchivePosition(uint32_t seconds);
 }
 
 namespace LinkuraLocal::HookStory {
@@ -37,4 +39,14 @@ namespace LinkuraLocal::HookStory {
 
 namespace LinkuraLocal::HookShare {
     void Install(HookInstaller* hookInstaller);
+
+    namespace Shareable {
+        struct ArchiveData {
+            std::string id;
+            long long duration;
+        };
+        extern std::unordered_map<std::string, ArchiveData> archiveData;
+        extern void* realtimeRenderingArchiveControllerCache;
+        extern std::string currentArchiveId;
+    }
 }

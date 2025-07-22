@@ -1,5 +1,6 @@
 #include "../HookMain.h"
 #include "../../deps/nlohmann/json.hpp"
+#include "../../build/linkura_messages.pb.h"
 
 namespace LinkuraLocal::HookLiveRender {
     enum struct SchoolResolution_LiveAreaQuality {
@@ -12,11 +13,9 @@ namespace LinkuraLocal::HookLiveRender {
         Portrait
     };
 
-    void* realtimeRenderingArchiveControllerCache = nullptr;
-
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
-        realtimeRenderingArchiveControllerCache = self;
+        HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
 
@@ -28,17 +27,14 @@ namespace LinkuraLocal::HookLiveRender {
                 case SchoolResolution_LiveAreaQuality::Low: // 1080p
                     width = orientation == LiveScreenOrientation::Landscape ? 1920 : 1080;
                     height = orientation == LiveScreenOrientation::Landscape ? 1080 : 1920;
-                    if (realtimeRenderingArchiveControllerCache) RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(realtimeRenderingArchiveControllerCache, 1920);
                     break;
                 case SchoolResolution_LiveAreaQuality::Middle: // 2k
                     width = orientation == LiveScreenOrientation::Landscape ? 2560 : 1440;
                     height = orientation == LiveScreenOrientation::Landscape ? 1440 : 2560;
-                    if (realtimeRenderingArchiveControllerCache) RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(realtimeRenderingArchiveControllerCache, 2560);
                     break;
                 case SchoolResolution_LiveAreaQuality::High: // 4k
                     width = orientation == LiveScreenOrientation::Landscape ? 3840 : 2160;
                     height = orientation == LiveScreenOrientation::Landscape ? 2160 : 3840;
-                    if (realtimeRenderingArchiveControllerCache) RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(realtimeRenderingArchiveControllerCache, 3840);
                     break;
                 default:
                     width = result & 0xffffffff;
@@ -67,6 +63,23 @@ namespace LinkuraLocal::HookLiveRender {
                                                                     cancellation_token, method_info);
     }
 
+    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync HOOKED");
+        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
+        HookShare::Shareable::currentArchiveId = json["archives_id"].get<std::string>();
+        return ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Orig(self,
+                                                                          request,
+                                                                          cancellation_token, method_info);
+    }
+    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
+        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
+        HookShare::Shareable::currentArchiveId = json["archives_id"].get<std::string>();
+        return ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Orig(self,
+                                                                          request,
+                                                                          cancellation_token, method_info);
+    }
+
 
 
     /**
@@ -75,39 +88,6 @@ namespace LinkuraLocal::HookLiveRender {
     DEFINE_HOOK(void, Unity_set_targetFrameRate, (int value)) {
         const auto configFps = Config::targetFrameRate;
         return Unity_set_targetFrameRate_Orig(configFps == 0 ? value: configFps);
-    }
-
-    // 👀
-    DEFINE_HOOK(void, CoverImageCommandReceiver_Awake, (Il2cppUtils::Il2CppObject* self, void* method)) {
-        CoverImageCommandReceiver_Awake_Orig(self, method);
-        Log::DebugFmt("CoverImageCommandReceiver_Awake HOOKED");
-    }
-
-    DEFINE_HOOK(void*, FesConnectArchivePlayer_get_CurrentTime, (void* self)) {
-//        static auto TimeSpan_klass = Il2cppUtils::GetClass("mscorlib.dll", "System", "TimeSpan");
-//        static auto _ticks_field = TimeSpan_klass->Get<UnityResolve::Field>("_ticks");
-        static auto TimeSpan_get_TotalSeconds = Il2cppUtils::GetMethod("mscorlib.dll", "System", "TimeSpan", "get_TotalSeconds");
-        Log::DebugFmt("FesConnectArchivePlayer_get_CurrentTime HOOKED");
-        auto timeSpan = FesConnectArchivePlayer_get_CurrentTime_Orig(self);
-        auto seconds = TimeSpan_get_TotalSeconds->Invoke<double>(timeSpan);
-        Log::DebugFmt("FesConnectArchivePlayer_get_CurrentTime seconds %f", seconds);
-        return timeSpan;
-    }
-
-    DEFINE_HOOK(void*, FesConnectArchivePlayer_get_RunningTime, (void* self)) {
-//        static auto TimeSpan_klass = Il2cppUtils::GetClass("mscorlib.dll", "System", "TimeSpan");
-//        static auto _ticks_field = TimeSpan_klass->Get<UnityResolve::Field>("_ticks");
-        static auto TimeSpan_get_TotalSeconds = Il2cppUtils::GetMethod("mscorlib.dll", "System", "TimeSpan", "get_TotalSeconds");
-        Log::DebugFmt("FesConnectArchivePlayer_get_RunningTime HOOKED");
-        auto timeSpan = FesConnectArchivePlayer_get_RunningTime_Orig(self);
-        auto seconds = TimeSpan_get_TotalSeconds->Invoke<double>(timeSpan);
-        Log::DebugFmt("FesConnectArchivePlayer_get_RunningTime seconds %f", seconds);
-        return timeSpan;
-    }
-
-    DEFINE_HOOK(void, FesConnectArchivePlayer_JumpTimeAsync_MoveNext, (void* self, void* method)) {
-        Log::DebugFmt("FesConnectArchivePlayer_JumpTimeAsync_MoveNext HOOKED");
-        FesConnectArchivePlayer_JumpTimeAsync_MoveNext_Orig(self, method);
     }
 
     DEFINE_HOOK(void*, FesConnectArchivePlayer_JumpTimeAsync, (void* self, void* timespan, void* method)) {
@@ -122,8 +102,8 @@ namespace LinkuraLocal::HookLiveRender {
 //        TimeSpan_ctor(newTimeSpan, 25, 25, 25, 25, 25);
 //        Log::DebugFmt("new timespan is created at %p", newTimeSpan);
 
-        static auto uTimeSpan_klass = Il2cppUtils::GetClass("mscorlib.dll", "System", "TimeSpan");
-        static auto uTimeSpan_ctor = Il2cppUtils::GetMethod("mscorlib.dll", "System", "TimeSpan", ".ctor", {"System.Int32","System.Int32","System.Int32","System.Int32","System.Int32"});
+//        static auto uTimeSpan_klass = Il2cppUtils::GetClass("mscorlib.dll", "System", "TimeSpan");
+//        static auto uTimeSpan_ctor = Il2cppUtils::GetMethod("mscorlib.dll", "System", "TimeSpan", ".ctor", {"System.Int32","System.Int32","System.Int32","System.Int32","System.Int32"});
 //        const auto uNewTimeSpan = uTimeSpan_klass->New<void*>();
 //        uTimeSpan_ctor->Invoke<void>(uNewTimeSpan, 25, 25, 25, 25, 25);
 
@@ -148,20 +128,54 @@ namespace LinkuraLocal::HookLiveRender {
         return FesConnectArchivePlayer_JumpTimeAsync_Orig(self, timespan, method);
     }
 
-    DEFINE_HOOK(Il2cppUtils::Il2CppObject*, M3U8Live_get_TotalSegmentsDuration, (void* self, void* method)) {
-//        Log::DebugFmt("M3U8Live_get_TotalSegmentsDuration HOOKED");
-        auto result = M3U8Live_get_TotalSegmentsDuration_Orig(self, method);
-//        if (result) {
-//            Log::DebugFmt("M3U8Live_get_TotalSegmentsDuration result: %p", result);
-//            static auto TimeSpan_klass = Il2cppUtils::GetClass("mscorlib.dll", "System", "TimeSpan");
-//            Log::DebugFmt("M3U8Live_get_TotalSegmentsDuration TimeSpan_klass: %p", TimeSpan_klass);
-//            static auto _ticks_field = TimeSpan_klass->Get<UnityResolve::Field>("_ticks");
-//            Log::DebugFmt("M3U8Live_get_TotalSegmentsDuration _ticks_field: %p", _ticks_field);
-//
-//        }
-        return result;
-    }
 
+    std::vector<uint8_t> getCurrentArchiveInfo() {
+        try {
+            linkura::ipc::ArchiveInfo archiveInfo;
+            
+
+            
+            // Get duration from cached archive data
+            auto archiveDataIt = HookShare::Shareable::archiveData.find(HookShare::Shareable::currentArchiveId);
+            if (archiveDataIt != HookShare::Shareable::archiveData.end()) {
+                archiveInfo.set_duration(archiveDataIt->second.duration);
+            } else {
+                archiveInfo.set_duration(0);
+            }
+
+            // Serialize to protobuf
+            std::vector<uint8_t> result(archiveInfo.ByteSize());
+            archiveInfo.SerializeToArray(result.data(), result.size());
+            
+            Log::DebugFmt("getCurrentArchiveInfo: archive_id=%s, duration=%lld", 
+                         archiveInfo.archive_id().c_str(), archiveInfo.duration());
+            
+            return result;
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Error in getCurrentArchiveInfo: %s", e.what());
+            return std::vector<uint8_t>();
+        }
+    }
+    
+    void setArchivePosition(uint32_t seconds) {
+        try {
+            if (HookShare::Shareable::realtimeRenderingArchiveControllerCache == nullptr) {
+                Log::Error("setArchivePosition: No cached archive controller available");
+                return;
+            }
+            
+            Log::DebugFmt("setArchivePosition: Setting position to %u seconds", seconds);
+            
+            // Call the original Unity function with cached controller
+            RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
+                HookShare::Shareable::realtimeRenderingArchiveControllerCache, 
+                static_cast<float>(seconds)
+            );
+            
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Error in setArchivePosition: %s", e.what());
+        }
+    }
 
     void Install(HookInstaller* hookInstaller) {
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
@@ -169,21 +183,24 @@ namespace LinkuraLocal::HookLiveRender {
         
         // Fes live camera unlock
         ADD_HOOK(ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveSetFesCameraWithHttpInfoAsync"));
+        ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
+        ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
+                "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
+        ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
+        ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
 
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));
 //        ADD_HOOK(FesConnectArchivePlayer_get_RunningTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_RunningTime"));
-        auto FesConnectArchivePlayer_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer");
-        if (FesConnectArchivePlayer_klass) {
-            auto JumpTimeAsync_klass = Il2cppUtils::find_nested_class_from_name(FesConnectArchivePlayer_klass, "<JumpTimeAsync>d__11");
-            auto method = Il2cppUtils::GetMethodIl2cpp(JumpTimeAsync_klass, "MoveNext", 0);
-            ADD_HOOK(FesConnectArchivePlayer_JumpTimeAsync_MoveNext, method->methodPointer);
-        }
-        ADD_HOOK(FesConnectArchivePlayer_JumpTimeAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "JumpTimeAsync"));
-        ADD_HOOK(M3U8Live_get_TotalSegmentsDuration, Il2cppUtils::GetMethodPointer("Alstromeria.dll", "Alst.Archive", "M3U8Live", "get_TotalSegmentsDuration"));
-        ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
+//        auto FesConnectArchivePlayer_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer");
+//        if (FesConnectArchivePlayer_klass) {
+//            auto JumpTimeAsync_klass = Il2cppUtils::find_nested_class_from_name(FesConnectArchivePlayer_klass, "<JumpTimeAsync>d__11");
+//            auto method = Il2cppUtils::GetMethodIl2cpp(JumpTimeAsync_klass, "MoveNext", 0);
+//            ADD_HOOK(FesConnectArchivePlayer_JumpTimeAsync_MoveNext, method->methodPointer);
+//        }
+//        ADD_HOOK(FesConnectArchivePlayer_JumpTimeAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "JumpTimeAsync"));
+//        ADD_HOOK(M3U8Live_get_TotalSegmentsDuration, Il2cppUtils::GetMethodPointer("Alstromeria.dll", "Alst.Archive", "M3U8Live", "get_TotalSegmentsDuration"));
 
-        ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
-                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
     }
+
 }
