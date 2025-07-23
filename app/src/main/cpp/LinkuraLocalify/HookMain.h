@@ -54,11 +54,16 @@ namespace LinkuraLocal::HookShare {
             WithLive,
             Story
         };
+        enum SetPlayPosition_State {
+            Nothing,
+            UpdateReceived
+        };
         extern std::unordered_map<std::string, ArchiveData> archiveData;
         extern void* realtimeRenderingArchiveControllerCache;
         extern float realtimeRenderingArchivePositionSeconds;
         extern std::string currentArchiveId;
         extern RenderScene renderScene;
+        extern SetPlayPosition_State setPlayPositionState;
 
         // Function declarations (implementations in HookShare.cpp)
         void resetRenderScene();

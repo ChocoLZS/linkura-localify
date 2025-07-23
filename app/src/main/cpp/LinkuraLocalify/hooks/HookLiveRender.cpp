@@ -2,6 +2,7 @@
 #include "../../deps/nlohmann/json.hpp"
 #include "../../build/linkura_messages.pb.h"
 #include <thread>
+#include <chrono>
 
 namespace LinkuraLocal::HookLiveRender {
     enum struct SchoolResolution_LiveAreaQuality {
@@ -13,13 +14,6 @@ namespace LinkuraLocal::HookLiveRender {
         Landscape,
         Portrait
     };
-
-    enum SetPlayPosition_State {
-        Nothing,
-        UpdateReceived
-    };
-
-    SetPlayPosition_State setPlayPositionState = SetPlayPosition_State::Nothing;
 
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
@@ -51,18 +45,17 @@ namespace LinkuraLocal::HookLiveRender {
             }
             result = (u_int64_t)(height << 32 | width);
         }
-        if (setPlayPositionState == SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
+        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
             if (HookShare::Shareable::renderSceneIsWithLive()) {
                 HookShare::Shareable::resetRenderScene();
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                HookCamera::unregisterMainFreeCamera(true);
                 HookCamera::unregisterCurrentCamera();
+                HookCamera::unregisterMainFreeCamera(false);
             }
             RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
                     HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                     HookShare::Shareable::realtimeRenderingArchivePositionSeconds
             );
-            setPlayPositionState = SetPlayPosition_State::Nothing;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         }
         return result;
     }
@@ -165,7 +158,7 @@ namespace LinkuraLocal::HookLiveRender {
             }
 
             Log::DebugFmt("setArchivePosition: Setting position to %f seconds", seconds);
-            setPlayPositionState = SetPlayPosition_State::UpdateReceived;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::UpdateReceived;
             HookShare::Shareable::realtimeRenderingArchivePositionSeconds = seconds;
         } catch (const std::exception& e) {
             Log::ErrorFmt("Error in setArchivePosition: %s", e.what());

@@ -47,11 +47,19 @@ namespace LinkuraLocal::HookCamera {
         unregisterMainFreeCamera(cleanup);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
+        HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
+        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived) {
+            Log::DebugFmt("With Live ready to set play position");
+            return {};
+        }
+        if (!currentCameraRegistered || HookShare::Shareable::renderSceneIsNone()) {
+            Log::DebugFmt("Camera Data return false");
+            return {};
+        }
         linkura::ipc::CameraData cameraData;
-
         if (currentCameraRegistered && currentCameraCache && IsNativeObjectAlive(currentCameraCache)) {
             try {
                 auto fov = currentCameraCache->GetFoV();

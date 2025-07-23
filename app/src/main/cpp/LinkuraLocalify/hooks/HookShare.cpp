@@ -9,6 +9,7 @@ namespace LinkuraLocal::HookShare {
         float realtimeRenderingArchivePositionSeconds = 0;
         std::string currentArchiveId = "";
         RenderScene renderScene = RenderScene::None;
+        SetPlayPosition_State setPlayPositionState = SetPlayPosition_State::Nothing;
 
         // Function implementations
         void resetRenderScene() {
