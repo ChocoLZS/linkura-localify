@@ -85,11 +85,11 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             createOverlay()
             isVisible = true
             
-            // Send start overlay command to enable camera data loop
+            // Send start camera info overlay command to enable camera data loop
             val overlayControl = OverlayControl.newBuilder()
-                .setAction(OverlayAction.START_OVERLAY)
+                .setAction(OverlayAction.START_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
         } catch (e: Exception) {
             Log.e(TAG, "Error showing camera overlay", e)
         }
@@ -99,11 +99,11 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
         if (!isVisible) return
         
         try {
-            // Send stop overlay command
+            // Send stop camera info overlay command
             val overlayControl = OverlayControl.newBuilder()
-                .setAction(OverlayAction.STOP_OVERLAY)
+                .setAction(OverlayAction.STOP_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
             
             overlayView?.let { view ->
                 parentService.getWindowManagerInstance()?.removeView(view)

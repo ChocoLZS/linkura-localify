@@ -64,7 +64,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
 
     private val socketClient: DuplexSocketClient by lazy { DuplexSocketClient.getInstance() }
     private val messageRouter: MessageRouter by lazy { MessageRouter() }
-    private var isCameraDataLoopEnabled = false
+    private var isOverlayLoopEnabled = false
+    private var isCameraInfoOverlayEnabled = false
     
     private val socketClientHandler = object : DuplexSocketClient.MessageHandler {
         override fun onMessageReceived(type: MessageType, payload: ByteArray) {
@@ -77,7 +78,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         override fun onDisconnected() {
             Log.i(TAG, "Socket client disconnected from server")
-            isCameraDataLoopEnabled = false
+            isOverlayLoopEnabled = false
+            isCameraInfoOverlayEnabled = false
         }
         
         override fun onConnectionFailed() {
@@ -104,11 +106,11 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 val overlayControl = OverlayControl.parseFrom(payload)
                 when (overlayControl.action) {
                     OverlayAction.START_OVERLAY -> {
-                        isCameraDataLoopEnabled = true
+                        isOverlayLoopEnabled = true
                         Log.i(TAG, "Camera data loop enabled by overlay control")
                     }
                     OverlayAction.STOP_OVERLAY -> {
-                        isCameraDataLoopEnabled = false
+                        isOverlayLoopEnabled = false
                         Log.i(TAG, "Camera data loop disabled by overlay control")
                     }
                     else -> {
@@ -119,6 +121,32 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing overlay control", e)
+                false
+            }
+        }
+    }
+    
+    private val cameraInfoOverlayControlHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val overlayControl = OverlayControl.parseFrom(payload)
+                when (overlayControl.action) {
+                    OverlayAction.START_CAMERA_INFO_OVERLAY -> {
+                        isCameraInfoOverlayEnabled = true
+                        Log.i(TAG, "Camera info overlay enabled by control")
+                    }
+                    OverlayAction.STOP_CAMERA_INFO_OVERLAY -> {
+                        isCameraInfoOverlayEnabled = false
+                        Log.i(TAG, "Camera info overlay disabled by control")
+                    }
+                    else -> {
+                        Log.w(TAG, "Unknown camera info overlay action: ${overlayControl.action}")
+                        return false
+                    }
+                }
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing camera info overlay control", e)
                 false
             }
         }
@@ -379,12 +407,14 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 }
 
                 // Send camera data via protobuf socket for cross-process communication
-                if (isCameraDataLoopEnabled) {
+                if (isOverlayLoopEnabled && isCameraInfoOverlayEnabled) {
                     try {
+                        Log.v(TAG, "Trying to get camera info protobuf")
                         val protobufData = getCameraInfoProtobuf()
                         if (protobufData.isNotEmpty()) {
                             val cameraData = CameraData.parseFrom(protobufData)
                             if (socketClient.isClientConnected()) {
+                                Log.v(TAG, "Sending camera data")
                                 val success = socketClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
                                 if (!success) {
                                     Log.w(TAG, "Failed to send camera data via socket")
@@ -405,7 +435,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private fun setupSocketClient() {
         // Register message handlers
         messageRouter.registerHandler(MessageType.CONFIG_UPDATE, configUpdateHandler)
-        messageRouter.registerHandler(MessageType.OVERLAY_CONTROL, overlayControlHandler)
+        messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_GENERAL, overlayControlHandler)
+        messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_CAMERA_INFO, cameraInfoOverlayControlHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_POSITION_SET_REQUEST, archivePositionSetHandler)
         

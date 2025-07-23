@@ -156,7 +156,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val overlayControl = OverlayControl.newBuilder()
                         .setAction(OverlayAction.START_OVERLAY)
                         .build()
-                    socketServer.sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+                    socketServer.sendMessage(MessageType.OVERLAY_CONTROL_GENERAL, overlayControl)
                 }
                 true
             } catch (e: Exception) {
