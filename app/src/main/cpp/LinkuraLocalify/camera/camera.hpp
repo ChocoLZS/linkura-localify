@@ -4,6 +4,7 @@
 
 namespace L4Camera {
     enum class CameraMode {
+        SYSTEM_CAMERA,
         FREE,
         FIRST_PERSON,
         FOLLOW

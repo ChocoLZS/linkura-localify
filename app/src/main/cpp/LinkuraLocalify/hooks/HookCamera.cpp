@@ -15,7 +15,11 @@ namespace LinkuraLocal::HookCamera {
     UnityResolve::UnityType::Vector3 cacheLookAt{};
 
     void registerMainFreeCamera(UnityResolve::UnityType::Camera* mainCamera) {
-        if (!Config::enableFreeCamera) return;
+        if (!Config::enableFreeCamera) {
+            L4Camera::SetCameraMode(L4Camera::CameraMode::SYSTEM_CAMERA);
+            return;
+        };
+        L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
         mainFreeCameraCache = mainCamera;
         if (mainFreeCameraCache) freeCameraTransformCache = mainFreeCameraCache->GetTransform();
     }
@@ -51,11 +55,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
-        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived) {
-            Log::DebugFmt("With Live ready to set play position");
-            return {};
-        }
-        if (!currentCameraRegistered || HookShare::Shareable::renderSceneIsNone()) {
+        if (!currentCameraRegistered && HookShare::Shareable::renderSceneIsNone()) {
             Log::DebugFmt("Camera Data return false");
             return {};
         }
@@ -231,7 +231,6 @@ namespace LinkuraLocal::HookCamera {
         IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
             // fes live will use the same fixed camera at all time
             if (HookShare::Shareable::renderSceneIsWithLive()) {
-                HookShare::Shareable::resetRenderScene();
                 unregisterMainFreeCamera();
                 unregisterCurrentCamera();
             }

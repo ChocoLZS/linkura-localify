@@ -266,9 +266,10 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
 
     private fun getModeString(mode: Int): String {
         return when (mode) {
-            0 -> "FREE"
-            1 -> "FIRST_PERSON"
-            2 -> "FOLLOW"
+            0 -> "SYSTEM_CAMERA"
+            1 -> "FREE"
+            2 -> "FIRST_PERSON"
+            3 -> "FOLLOW"
             else -> "UNKNOWN"
         }
     }
@@ -276,8 +277,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
     private fun getSceneString(sceneType: Int): String {
         return when (sceneType) {
             0 -> "NONE"
-            1 -> "WITH_LIVE"
-            2 -> "FES_LIVE"
+            1 -> "FES_LIVE"
+            2 -> "WITH_LIVE"
             3 -> "STORY"
             else -> "UNKNOWN"
         }

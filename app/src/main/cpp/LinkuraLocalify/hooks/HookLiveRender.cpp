@@ -47,7 +47,6 @@ namespace LinkuraLocal::HookLiveRender {
         }
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
             if (HookShare::Shareable::renderSceneIsWithLive()) {
-                HookShare::Shareable::resetRenderScene();
                 HookCamera::unregisterCurrentCamera();
                 HookCamera::unregisterMainFreeCamera(false);
             }
