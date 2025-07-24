@@ -32,6 +32,7 @@ message CameraData {
   float fov = 4;
   int32 mode = 5;
   int32 scene_type = 6;
+  optional bool is_connecting = 7; // indicates camera is in connecting state
 }
 
 // 3D Vector

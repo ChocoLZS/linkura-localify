@@ -67,6 +67,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private var isOverlayLoopEnabled = false
     private var isCameraInfoOverlayEnabled = false
     
+    // Loop control variables
+    private val loopControlFlags = mutableMapOf<String, Boolean>()
+    
     private val socketClientHandler = object : DuplexSocketClient.MessageHandler {
         override fun onMessageReceived(type: MessageType, payload: ByteArray) {
             messageRouter.routeMessage(type, payload)
@@ -372,63 +375,108 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 }
             })
 
-        startLoop()
+        // Start main loop at 30fps
+        startCustomLoop("MainLoop", 30) {
+            executeMainLoopTasks()
+        }
+
+        // Start camera data loop at 10fps
+        startCustomLoop("CameraDataLoop", 1) {
+            executeCameraDataTasks()
+        }
     }
 
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun startLoop() {
-        GlobalScope.launch {
-            val interval = 1000L / 30
-            var lastFrameStartInit = NativeInitProgress.startInit
-            val initProgressUI = InitProgressUI()
+    // Main loop tasks - runs at 30fps
+    private var lastFrameStartInit = NativeInitProgress.startInit
+    private val initProgressUI = InitProgressUI()
+    
+    private fun executeMainLoopTasks() {
+        val returnValue = pluginCallbackLooper()  // plugin main thread loop
+        if (returnValue == 9) {
+            NativeInitProgress.startInit = true
+        }
 
-            while (isActive) {
-                val timeTaken = measureTimeMillis {
-                    val returnValue = pluginCallbackLooper()  // plugin main thread loop
-                    if (returnValue == 9) {
-                        NativeInitProgress.startInit = true
-                    }
+        if (NativeInitProgress.startInit) {  // if init, update data
+            NativeInitProgress.pluginInitProgressLooper(NativeInitProgress)
+            gameActivity?.let { initProgressUI.updateData(it) }
+        }
 
-                    if (NativeInitProgress.startInit) {  // if init, update data
-                        NativeInitProgress.pluginInitProgressLooper(NativeInitProgress)
-                        gameActivity?.let { initProgressUI.updateData(it) }
-                    }
-
-                    if ((gameActivity != null) && (lastFrameStartInit != NativeInitProgress.startInit)) {  // change status
-                        if (NativeInitProgress.startInit) {
-                            initProgressUI.createView(gameActivity!!)
+        if ((gameActivity != null) && (lastFrameStartInit != NativeInitProgress.startInit)) {  // change status
+            if (NativeInitProgress.startInit) {
+                initProgressUI.createView(gameActivity!!)
+            }
+            else {
+                initProgressUI.finishLoad(gameActivity!!)
+            }
+        }
+        lastFrameStartInit = NativeInitProgress.startInit
+    }
+    
+    // Camera data tasks - runs at 30fps
+    private fun executeCameraDataTasks() {
+        if (isOverlayLoopEnabled && isCameraInfoOverlayEnabled) {
+            try {
+                Log.v(TAG, "Trying to get camera info protobuf")
+                val protobufData = getCameraInfoProtobuf()
+                if (protobufData.isNotEmpty()) {
+                    val cameraData = CameraData.parseFrom(protobufData)
+                    if (socketClient.isClientConnected()) {
+                        Log.v(TAG, "Sending camera data")
+                        val success = socketClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
+                        if (!success) {
+                            Log.w(TAG, "Failed to send camera data via socket")
                         }
-                        else {
-                            initProgressUI.finishLoad(gameActivity!!)
-                        }
                     }
-                    lastFrameStartInit = NativeInitProgress.startInit
                 }
-
-                // Send camera data via protobuf socket for cross-process communication
-                if (isOverlayLoopEnabled && isCameraInfoOverlayEnabled) {
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in camera data loop", e)
+            }
+        }
+    }
+    
+    // Generic loop starter with custom frequency and control
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun startCustomLoop(name: String, fps: Int, task: () -> Unit) {
+        // Initialize control flag
+        loopControlFlags[name] = true
+        
+        GlobalScope.launch {
+            val interval = 1000L / fps
+            Log.d(TAG, "Starting $name loop at ${fps}fps (interval: ${interval}ms)")
+            
+            var loopCounter = 0L
+            
+            while (isActive && (loopControlFlags[name] == true)) {
+                val timeTaken = measureTimeMillis {
                     try {
-                        Log.v(TAG, "Trying to get camera info protobuf")
-                        val protobufData = getCameraInfoProtobuf()
-                        if (protobufData.isNotEmpty()) {
-                            val cameraData = CameraData.parseFrom(protobufData)
-                            if (socketClient.isClientConnected()) {
-                                Log.v(TAG, "Sending camera data")
-                                val success = socketClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
-                                if (!success) {
-                                    Log.w(TAG, "Failed to send camera data via socket")
-                                }
+                        // Only execute task if loop is enabled
+                        if (loopControlFlags[name] == true) {
+                            task()
+                            loopCounter++
+                            
+                            // Log performance every 100 iterations for debugging
+                            if (loopCounter % 100 == 0L) {
+                                Log.v(TAG, "$name loop: ${loopCounter} iterations completed")
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error in camera data loop", e)
+                        Log.e(TAG, "Error in $name loop (iteration $loopCounter)", e)
                     }
                 }
-
-
-                delay(interval - timeTaken)
+                
+                // Ensure we don't have negative delay
+                val delayTime = maxOf(1L, interval - timeTaken)
+                
+                // Warn if loop is running too slow
+                if (timeTaken > interval && loopCounter % 10 == 0L) {
+                    Log.w(TAG, "$name loop is running slow: took ${timeTaken}ms, expected ${interval}ms")
+                }
+                
+                delay(delayTime)
             }
+            
+            Log.d(TAG, "$name loop terminated after $loopCounter iterations")
         }
     }
 

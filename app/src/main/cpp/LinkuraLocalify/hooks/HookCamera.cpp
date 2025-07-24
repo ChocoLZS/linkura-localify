@@ -55,12 +55,16 @@ namespace LinkuraLocal::HookCamera {
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
-        if (!currentCameraRegistered && HookShare::Shareable::renderSceneIsNone()) {
-            Log::DebugFmt("Camera Data return false");
-            return {};
-        }
         linkura::ipc::CameraData cameraData;
-        if (currentCameraRegistered && currentCameraCache && IsNativeObjectAlive(currentCameraCache)) {
+        if (HookShare::Shareable::renderSceneIsNone() || (HookShare::Shareable::renderSceneIsWithLive() && !currentCameraRegistered)) {
+            // connecting status
+            Log::DebugFmt("Camera Data return connecting");
+            cameraData.set_is_connecting(true);
+            cameraData.set_is_valid(false);
+        } else if (!currentCameraRegistered) {
+            Log::DebugFmt("Camera Data return false");
+            cameraData.set_is_valid(false);
+        } else if (currentCameraCache && IsNativeObjectAlive(currentCameraCache)) {
             try {
                 auto fov = currentCameraCache->GetFoV();
                 auto transform = currentCameraCache->GetTransform();

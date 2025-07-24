@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,10 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
     private var overlayView: View? = null
     private var cameraInfoState by mutableStateOf<CameraInfo?>(null)
     private var isVisible = false
+    
+    // State machine for toast notifications
+    private var hasShownToast = false
+    private var lastWasConnecting = false
     
     // Touch handling for dragging
     private var initialX = 0
@@ -67,7 +72,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
         val rotation: Quaternion,
         val fov: Float,
         val mode: Int,
-        val sceneType: Int
+        val sceneType: Int,
+        val isConnecting: Boolean = false
     )
 
     init {
@@ -174,6 +180,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
 
     private fun updateCameraInfoFromProtobuf(cameraData: CameraData) {
         try {
+            val isConnecting = cameraData.hasIsConnecting() && cameraData.isConnecting
+            
             val cameraInfo = CameraInfo(
                 isValid = cameraData.isValid,
                 position = Vector3(
@@ -189,13 +197,49 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
                 ),
                 fov = cameraData.fov,
                 mode = cameraData.mode,
-                sceneType = cameraData.sceneType
+                sceneType = cameraData.sceneType,
+                isConnecting = isConnecting
             )
+
+            // State machine logic for toast notifications
+            handleStateTransition(cameraInfo)
 
             cameraInfoState = cameraInfo
             Log.v(TAG, "Camera info state updated successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error updating camera info from protobuf", e)
+        }
+    }
+
+    private fun handleStateTransition(cameraInfo: CameraInfo) {
+        // Reset state when transitioning from connecting
+        if (lastWasConnecting && !cameraInfo.isConnecting) {
+            hasShownToast = false
+            Log.d(TAG, "Reset toast state: transitioning from connecting")
+        }
+        
+        // Check conditions for showing toast
+        if (!hasShownToast && 
+            cameraInfo.isValid && 
+            !cameraInfo.isConnecting &&
+            cameraInfo.sceneType == 2 && // WITH_LIVE = 2
+            cameraInfo.mode != 0) { // mode != SYSTEM_CAMERA (0)
+            
+            showWarningToast()
+            hasShownToast = true
+            Log.d(TAG, "Warning toast shown for WITH_LIVE with non-SYSTEM_CAMERA mode")
+        }
+        
+        lastWasConnecting = cameraInfo.isConnecting
+    }
+
+    private fun showWarningToast() {
+        parentService.getHandlerInstance().post {
+            Toast.makeText(
+                parentService,
+                "注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -220,7 +264,13 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 cameraInfoState?.let { info ->
-                    if (info.isValid) {
+                    if (info.isConnecting) {
+                        Text(
+                            text = "Connecting...",
+                            color = Color.Gray,
+                            fontSize = 10.sp
+                        )
+                    } else if (info.isValid) {
                         Text(
                             text = "Pos: (${String.format("%.2f", info.position.x)}, ${String.format("%.2f", info.position.y)}, ${String.format("%.2f", info.position.z)})",
                             color = Color.White,
