@@ -27,6 +27,8 @@ interface ConfigListener {
     fun onEnableFreeCameraChanged(value: Boolean)
     fun onTargetFpsChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun onDumpTextChanged(value: Boolean)
+    fun onRemoveRenderImageCoverChanged(value: Boolean)
+    fun onAvoidCharacterExitChanged(value: Boolean)
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -69,36 +71,14 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     fun saveProgramConfig()
     
     // Hot-reload configuration management using new duplex socket system
-    fun sendConfigUpdate(config: LinkuraConfig, isPartial: Boolean = false, changedFields: Set<String> = emptySet()) {
+    fun sendConfigUpdate(config: LinkuraConfig) {
         val configUpdateManager = ConfigUpdateManager.getInstance()
         
         try {
-            val success = if (isPartial && changedFields.isNotEmpty()) {
-                // Send partial update using the convenient helper method
-                val updates = changedFields.mapNotNull { field ->
-                    when (field) {
-                        "enabled" -> "enabled" to config.enabled
-                        "renderHighResolution" -> "renderHighResolution" to config.renderHighResolution
-                        "fesArchiveUnlockTicket" -> "fesArchiveUnlockTicket" to config.fesArchiveUnlockTicket
-                        "lazyInit" -> "lazyInit" to config.lazyInit
-                        "replaceFont" -> "replaceFont" to config.replaceFont
-                        "textTest" -> "textTest" to config.textTest
-                        "dumpText" -> "dumpText" to config.dumpText
-                        "enableFreeCamera" -> "enableFreeCamera" to config.enableFreeCamera
-                        "targetFrameRate" -> "targetFrameRate" to config.targetFrameRate
-                        "dbgMode" -> "dbgMode" to config.dbgMode
-                        else -> null
-                    }
-                }.toTypedArray()
-                
-                configUpdateManager.sendPartialConfigUpdate(*updates)
-            } else {
-                // Send full configuration update
-                configUpdateManager.sendConfigUpdate(config)
-            }
+            val success = configUpdateManager.sendConfigUpdate(config)
             
             if (success) {
-                Log.i(TAG, "Config hot-reload sent successfully via duplex socket: ${if (isPartial) "partial" else "full"} update")
+                Log.i(TAG, "Config hot-reload sent successfully via duplex socket: ${"full"} update")
             } else {
                 Log.w(TAG, "Failed to send config hot-reload via duplex socket")
             }
@@ -111,20 +91,20 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     override fun onEnabledChanged(value: Boolean) {
         config.enabled = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("enabled"))
+        sendConfigUpdate(config)
         pushKeyEvent(KeyEvent(1145, 29))
     }
 
     override fun onRenderHighResolutionChanged(value: Boolean) {
         config.renderHighResolution = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("renderHighResolution"))
+        sendConfigUpdate(config)
     }
 
     override fun onFesArchiveUnlockTicketChanged(value: Boolean) {
         config.fesArchiveUnlockTicket = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("fesArchiveUnlockTicket"))
+        sendConfigUpdate(config)
     }
 
     override fun onForceExportResourceChanged(value: Boolean) {
@@ -136,32 +116,32 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     override fun onReplaceFontChanged(value: Boolean) {
         config.replaceFont = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("replaceFont"))
+        sendConfigUpdate(config)
         pushKeyEvent(KeyEvent(1145, 30))
     }
 
     override fun onLazyInitChanged(value: Boolean) {
         config.lazyInit = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("lazyInit"))
+        sendConfigUpdate(config)
     }
 
     override fun onTextTestChanged(value: Boolean) {
         config.textTest = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("textTest"))
+        sendConfigUpdate(config)
     }
 
     override fun onDumpTextChanged(value: Boolean) {
         config.dumpText = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("dumpText"))
+        sendConfigUpdate(config)
     }
 
     override fun onEnableFreeCameraChanged(value: Boolean) {
         config.enableFreeCamera = value
         saveConfig()
-        sendConfigUpdate(config, isPartial = true, changedFields = setOf("enableFreeCamera"))
+        sendConfigUpdate(config)
     }
 
     override fun onTargetFpsChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -175,11 +155,23 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
             }
             config.targetFrameRate = value
             saveConfig()
-            sendConfigUpdate(config, isPartial = true, changedFields = setOf("targetFrameRate"))
+            sendConfigUpdate(config)
         }
         catch (e: Exception) {
             return
         }
+    }
+
+    override fun onRemoveRenderImageCoverChanged(value: Boolean) {
+        config.removeRenderImageCover = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onAvoidCharacterExitChanged(value: Boolean) {
+        config.avoidCharacterExit = value
+        saveConfig()
+        sendConfigUpdate(config)
     }
     override fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         programConfig.transRemoteZipUrl = s.toString()

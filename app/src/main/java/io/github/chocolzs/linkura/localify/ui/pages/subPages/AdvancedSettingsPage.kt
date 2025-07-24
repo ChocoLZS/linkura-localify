@@ -67,6 +67,12 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.enable_free_camera), checked = config.value.enableFreeCamera) {
                             v -> context?.onEnableFreeCameraChanged(v)
                     }
+                    GakuSwitch(modifier, "cover", checked = config.value.removeRenderImageCover) {
+                            v -> context?.onRemoveRenderImageCoverChanged(v)
+                    }
+                    GakuSwitch(modifier, "character", checked = config.value.avoidCharacterExit) {
+                            v -> context?.onAvoidCharacterExitChanged(v)
+                    }
                 }
             }
 

@@ -18,11 +18,13 @@ namespace LinkuraLocal::HookDebug {
     // 👀
     DEFINE_HOOK(void, CoverImageCommandReceiver_Awake, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("CoverImageCommandReceiver_Awake HOOKED");
+        if (Config::removeRenderImageCover) return;
         CoverImageCommandReceiver_Awake_Orig(self, method);
     }
     // 👀
     DEFINE_HOOK(void, CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self,void* character, void* method)) {
         Log::DebugFmt("CharacterVisibleReceiver_SetupExistCharacter HOOKED");
+        if (Config::avoidCharacterExit) return;
         CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
     }
 
@@ -32,8 +34,8 @@ namespace LinkuraLocal::HookDebug {
         ADD_HOOK(Internal_Log, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.DebugLogHandler::Internal_Log(UnityEngine.LogType,UnityEngine.LogOption,System.String,UnityEngine.Object)"));
         
-//        // 👀
-//        ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
-//        ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
+        // 👀
+        ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
+        ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
     }
 }

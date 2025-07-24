@@ -18,6 +18,8 @@ namespace LinkuraLocal::Config {
     bool dumpText = false;
     bool enableFreeCamera = false;
     int targetFrameRate = 0;
+    bool removeRenderImageCover = false;
+    bool avoidCharacterExit = false;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -35,6 +37,8 @@ namespace LinkuraLocal::Config {
             GetConfigItem(dumpText);
             GetConfigItem(targetFrameRate);
             GetConfigItem(enableFreeCamera);
+            GetConfigItem(removeRenderImageCover);
+            GetConfigItem(avoidCharacterExit);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -45,9 +49,8 @@ namespace LinkuraLocal::Config {
     void UpdateConfig(const linkura::ipc::ConfigUpdate& configUpdate) {
         try {
             Log::InfoFmt("Applying config update: type=%d", static_cast<int>(configUpdate.update_type()));
-            
+            // only allow hot reload config update
             if (configUpdate.update_type() == linkura::ipc::ConfigUpdateType::FULL_UPDATE) {
-                // Full configuration update - apply all provided fields
                 if (configUpdate.has_dbg_mode()) dbgMode = configUpdate.dbg_mode();
                 if (configUpdate.has_enabled()) enabled = configUpdate.enabled();
                 if (configUpdate.has_render_high_resolution()) renderHighResolution = configUpdate.render_high_resolution();
@@ -58,31 +61,9 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_dump_text()) dumpText = configUpdate.dump_text();
                 if (configUpdate.has_enable_free_camera()) enableFreeCamera = configUpdate.enable_free_camera();
                 if (configUpdate.has_target_frame_rate()) targetFrameRate = configUpdate.target_frame_rate();
-            } else if (configUpdate.update_type() == linkura::ipc::ConfigUpdateType::PARTIAL_UPDATE) {
-                // Partial update - only apply fields that are explicitly set
-                if (configUpdate.has_dbg_mode()) {
-                    dbgMode = configUpdate.dbg_mode();
-                    Log::InfoFmt("Updated dbgMode: %s", dbgMode ? "true" : "false");
-                }
-                if (configUpdate.has_enabled()) {
-                    enabled = configUpdate.enabled();
-                    Log::InfoFmt("Updated enabled: %s", enabled ? "true" : "false");
-                }
-                if (configUpdate.has_render_high_resolution()) {
-                    renderHighResolution = configUpdate.render_high_resolution();
-                    Log::InfoFmt("Updated renderHighResolution: %s", renderHighResolution ? "true" : "false");
-                }
-                if (configUpdate.has_enable_free_camera()) {
-                    enableFreeCamera = configUpdate.enable_free_camera();
-                    Log::InfoFmt("Updated enableFreeCamera: %s", enableFreeCamera ? "true" : "false");
-                }
-                if (configUpdate.has_target_frame_rate()) {
-                    targetFrameRate = configUpdate.target_frame_rate();
-                    Log::InfoFmt("Updated targetFrameRate: %d", targetFrameRate);
-                }
-                // Add more fields as needed for partial updates
+                if (configUpdate.has_remove_render_image_cover()) removeRenderImageCover = configUpdate.remove_render_image_cover();
+                if (configUpdate.has_avoid_character_exit()) avoidCharacterExit = configUpdate.avoid_character_exit();
             }
-            
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());
         }

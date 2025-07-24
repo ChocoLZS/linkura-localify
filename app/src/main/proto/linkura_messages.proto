@@ -71,6 +71,8 @@ message ConfigUpdate {
   optional bool dump_text = 9;
   optional bool enable_free_camera = 10;
   optional int32 target_frame_rate = 11;
+  optional bool remove_render_image_cover = 12;
+  optional bool avoid_character_exit = 13;
 }
 
 // Overlay control actions
