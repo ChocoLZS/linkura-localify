@@ -15,6 +15,8 @@ namespace LinkuraLocal::Config {
     extern bool dumpText;
     extern bool enableFreeCamera;
     extern int targetFrameRate;
+    extern bool removeRenderImageCover;
+    extern bool avoidCharacterExit;
 
     void LoadConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);

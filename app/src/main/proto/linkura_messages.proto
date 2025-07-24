@@ -16,10 +16,11 @@ enum MessageType {
   UNKNOWN = 0;
   CAMERA_DATA = 1;
   CONFIG_UPDATE = 2;
-  OVERLAY_CONTROL = 3;
+  OVERLAY_CONTROL_GENERAL = 3;
   CAMERA_OVERLAY_REQUEST = 4;
   ARCHIVE_INFO = 5;
   ARCHIVE_POSITION_SET_REQUEST = 6;
+  OVERLAY_CONTROL_CAMERA_INFO = 7;
   // Future message types can be added here
 }
 
@@ -31,6 +32,7 @@ message CameraData {
   float fov = 4;
   int32 mode = 5;
   int32 scene_type = 6;
+  optional bool is_connecting = 7; // indicates camera is in connecting state
 }
 
 // 3D Vector
@@ -69,12 +71,16 @@ message ConfigUpdate {
   optional bool dump_text = 9;
   optional bool enable_free_camera = 10;
   optional int32 target_frame_rate = 11;
+  optional bool remove_render_image_cover = 12;
+  optional bool avoid_character_exit = 13;
 }
 
 // Overlay control actions
 enum OverlayAction {
   START_OVERLAY = 0;    // Start camera overlay display
   STOP_OVERLAY = 1;     // Stop camera overlay display
+  START_CAMERA_INFO_OVERLAY = 2;    // Start camera info overlay display
+  STOP_CAMERA_INFO_OVERLAY = 3;     // Stop camera info overlay display
   // Future overlay actions can be added here
 }
 

@@ -15,6 +15,8 @@ data class LinkuraConfig (
     var forceExportResource: Boolean = false,
     var enableFreeCamera: Boolean = false,
     var targetFrameRate: Int = 0,
+    var removeRenderImageCover: Boolean = false,
+    var avoidCharacterExit: Boolean = false,
 
     var pf: Boolean = false
 )

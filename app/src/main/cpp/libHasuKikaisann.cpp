@@ -16,6 +16,7 @@
 JavaVM* g_javaVM = nullptr;
 jclass g_linkuraHookMainClass = nullptr;
 jmethodID showToastMethodId = nullptr;
+jmethodID pauseCameraInfoLoopMethodId = nullptr;
 
 bool UnityResolveProgress::startInit = false;
 UnityResolveProgress::Progress UnityResolveProgress::assembliesProgress{};
@@ -63,7 +64,8 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_initHook(JNIEnv *env, jclass clazz, jstring targetLibraryPath,
                                                                  jstring localizationFilesDir) {
-    g_linkuraHookMainClass = clazz;
+    // Store global reference to the class
+    g_linkuraHookMainClass = (jclass)env->NewGlobalRef(clazz);
     showToastMethodId = env->GetStaticMethodID(clazz, "showToast", "(Ljava/lang/String;)V");
 
     const auto targetLibraryPathChars = env->GetStringUTFChars(targetLibraryPath, nullptr);
@@ -247,5 +249,70 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_updateConfig(JNIEnv *en
         LinkuraLocal::Log::ErrorFmt("Error in updateConfig: %s", e.what());
     } catch (...) {
         LinkuraLocal::Log::Error("Unknown error in updateConfig");
+    }
+}
+
+// Function to be called from HookCamera.cpp with default delay
+void pauseCameraInfoLoopFromNative() {
+    pauseCameraInfoLoopFromNative(3000); // Default 3 seconds
+}
+
+// Function to be called from HookCamera.cpp with custom delay
+void pauseCameraInfoLoopFromNative(long delayMillis) {
+    if (g_javaVM == nullptr || g_linkuraHookMainClass == nullptr) {
+        LinkuraLocal::Log::Error("pauseCameraInfoLoopFromNative: JVM or class not initialized");
+        return;
+    }
+    
+    JNIEnv* env = nullptr;
+    bool needDetach = false;
+    
+    // Get JNI environment
+    int getEnvStat = g_javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    if (getEnvStat == JNI_EDETACHED) {
+        // Current thread is not attached to JVM, attach it
+        if (g_javaVM->AttachCurrentThread(&env, nullptr) != 0) {
+            LinkuraLocal::Log::Error("pauseCameraInfoLoopFromNative: Failed to attach thread");
+            return;
+        }
+        needDetach = true;
+    } else if (getEnvStat != JNI_OK) {
+        LinkuraLocal::Log::Error("pauseCameraInfoLoopFromNative: Failed to get JNI environment");
+        return;
+    }
+    
+    try {
+        // Cache the method ID if not already cached
+        // Note: method signature changed to accept long parameter
+        if (pauseCameraInfoLoopMethodId == nullptr) {
+            pauseCameraInfoLoopMethodId = env->GetStaticMethodID(g_linkuraHookMainClass, "pauseCameraInfoLoop", "(J)V");
+            if (pauseCameraInfoLoopMethodId == nullptr) {
+                LinkuraLocal::Log::Error("pauseCameraInfoLoopFromNative: Failed to find pauseCameraInfoLoop method");
+                if (needDetach) g_javaVM->DetachCurrentThread();
+                return;
+            }
+        }
+        
+        // Call the Java method with delay parameter
+        env->CallStaticVoidMethod(g_linkuraHookMainClass, pauseCameraInfoLoopMethodId, (jlong)delayMillis);
+        
+        // Check for exceptions
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            LinkuraLocal::Log::Error("pauseCameraInfoLoopFromNative: Exception occurred in Java method");
+        } else {
+            LinkuraLocal::Log::InfoFmt("pauseCameraInfoLoopFromNative: Successfully called pauseCameraInfoLoop with %ld ms delay", delayMillis);
+        }
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("pauseCameraInfoLoopFromNative: Exception: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("pauseCameraInfoLoopFromNative: Unknown exception");
+    }
+    
+    // Detach thread if we attached it
+    if (needDetach) {
+        g_javaVM->DetachCurrentThread();
     }
 }

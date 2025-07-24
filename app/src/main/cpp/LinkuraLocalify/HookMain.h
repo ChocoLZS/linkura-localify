@@ -9,6 +9,7 @@
 #include "Plugin.h"
 #include "UnityResolve/UnityResolve.hpp"
 #include "Il2cppUtils.hpp"
+#include "JniBridge.h"
 
 
 extern std::unordered_set<void*> hookedStubs;
@@ -25,6 +26,9 @@ namespace LinkuraLocal::HookDebug {
 namespace LinkuraLocal::HookCamera {
     void Install(HookInstaller* hookInstaller);
     std::vector<uint8_t> getCameraInfoProtobuf();
+
+    void unregisterMainFreeCamera(bool cleanup);
+    void unregisterCurrentCamera();
 }
 
 namespace LinkuraLocal::HookLiveRender {
@@ -45,9 +49,34 @@ namespace LinkuraLocal::HookShare {
             std::string id;
             long long duration;
         };
+        enum RenderScene {
+            None,
+            FesLive,
+            WithLive,
+            Story
+        };
+        enum SetPlayPosition_State {
+            Nothing,
+            UpdateReceived
+        };
         extern std::unordered_map<std::string, ArchiveData> archiveData;
         extern void* realtimeRenderingArchiveControllerCache;
         extern float realtimeRenderingArchivePositionSeconds;
         extern std::string currentArchiveId;
+        extern RenderScene renderScene;
+        extern SetPlayPosition_State setPlayPositionState;
+
+        // Function declarations (implementations in HookShare.cpp)
+        void resetRenderScene();
+        bool renderSceneIsNone();
+        bool renderSceneIsFesLive();
+        bool renderSceneIsWithLive();
+        bool renderSceneIsStory();
+        
+        // Template function for better type safety and performance
+        template<RenderScene scene>
+        constexpr bool isRenderScene() {
+            return renderScene == scene;
+        }
     }
 }

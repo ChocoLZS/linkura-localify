@@ -1,6 +1,8 @@
 #include "../HookMain.h"
 #include "../../deps/nlohmann/json.hpp"
 #include "../../build/linkura_messages.pb.h"
+#include <thread>
+#include <chrono>
 
 namespace LinkuraLocal::HookLiveRender {
     enum struct SchoolResolution_LiveAreaQuality {
@@ -12,13 +14,6 @@ namespace LinkuraLocal::HookLiveRender {
         Landscape,
         Portrait
     };
-
-    enum SetPlayPosition_State {
-        Nothing,
-        UpdateReceived
-    };
-
-    SetPlayPosition_State setPlayPositionState = SetPlayPosition_State::Nothing;
 
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
@@ -50,12 +45,17 @@ namespace LinkuraLocal::HookLiveRender {
             }
             result = (u_int64_t)(height << 32 | width);
         }
-        if (setPlayPositionState == SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
+        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
+            if (HookShare::Shareable::renderSceneIsWithLive()) {
+                HookShare::Shareable::resetRenderScene();
+                HookCamera::unregisterMainFreeCamera(false);
+                HookCamera::unregisterCurrentCamera();
+            }
             RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
                     HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                     HookShare::Shareable::realtimeRenderingArchivePositionSeconds
             );
-            setPlayPositionState = SetPlayPosition_State::Nothing;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         }
         return result;
     }
@@ -76,25 +76,6 @@ namespace LinkuraLocal::HookLiveRender {
                                                                     request,
                                                                     cancellation_token, method_info);
     }
-
-    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync HOOKED");
-        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-        HookShare::Shareable::currentArchiveId = json["archives_id"].get<std::string>();
-        return ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Orig(self,
-                                                                          request,
-                                                                          cancellation_token, method_info);
-    }
-    DEFINE_HOOK(void* , ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
-        auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-        HookShare::Shareable::currentArchiveId = json["archives_id"].get<std::string>();
-        return ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Orig(self,
-                                                                          request,
-                                                                          cancellation_token, method_info);
-    }
-
-
 
     /**
      * @brief set target frame rate for unity engine
@@ -177,7 +158,7 @@ namespace LinkuraLocal::HookLiveRender {
             }
 
             Log::DebugFmt("setArchivePosition: Setting position to %f seconds", seconds);
-            setPlayPositionState = SetPlayPosition_State::UpdateReceived;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::UpdateReceived;
             HookShare::Shareable::realtimeRenderingArchivePositionSeconds = seconds;
         } catch (const std::exception& e) {
             Log::ErrorFmt("Error in setArchivePosition: %s", e.what());
@@ -193,8 +174,6 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
-        ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
-        ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
 
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));

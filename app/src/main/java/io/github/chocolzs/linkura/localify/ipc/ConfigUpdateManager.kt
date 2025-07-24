@@ -41,6 +41,8 @@ class ConfigUpdateManager private constructor() {
                 if (config.dumpText != null) dumpText = config.dumpText
                 if (config.enableFreeCamera != null) enableFreeCamera = config.enableFreeCamera
                 if (config.targetFrameRate != null) targetFrameRate = config.targetFrameRate
+                if (config.removeRenderImageCover != null) removeRenderImageCover = config.removeRenderImageCover
+                if (config.avoidCharacterExit != null) avoidCharacterExit = config.avoidCharacterExit
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
@@ -52,46 +54,6 @@ class ConfigUpdateManager private constructor() {
             success
         } catch (e: Exception) {
             Log.e(TAG, "Error sending config update", e)
-            false
-        }
-    }
-
-    fun sendPartialConfigUpdate(vararg updates: Pair<String, Any>): Boolean {
-        if (!socketServer.isConnected()) {
-            Log.w(TAG, "Cannot send partial config update: no client connected")
-            return false
-        }
-
-        return try {
-            val configUpdate = ConfigUpdate.newBuilder().apply {
-                updateType = ConfigUpdateType.PARTIAL_UPDATE
-                
-                updates.forEach { (key, value) ->
-                    when (key) {
-                        "dbgMode" -> if (value is Boolean) dbgMode = value
-                        "enabled" -> if (value is Boolean) enabled = value
-                        "renderHighResolution" -> if (value is Boolean) renderHighResolution = value
-                        "fesArchiveUnlockTicket" -> if (value is Boolean) fesArchiveUnlockTicket = value
-                        "lazyInit" -> if (value is Boolean) lazyInit = value
-                        "replaceFont" -> if (value is Boolean) replaceFont = value
-                        "textTest" -> if (value is Boolean) textTest = value
-                        "dumpText" -> if (value is Boolean) dumpText = value
-                        "enableFreeCamera" -> if (value is Boolean) enableFreeCamera = value
-                        "targetFrameRate" -> if (value is Int) targetFrameRate = value
-                        else -> Log.w(TAG, "Unknown config key: $key")
-                    }
-                }
-            }.build()
-
-            val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
-            if (success) {
-                Log.i(TAG, "Partial config update sent successfully")
-            } else {
-                Log.e(TAG, "Failed to send partial config update")
-            }
-            success
-        } catch (e: Exception) {
-            Log.e(TAG, "Error sending partial config update", e)
             false
         }
     }

@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+import io.github.chocolzs.linkura.localify.R
 import kotlinx.serialization.Serializable
 
 class CameraDataOverlayService(private val parentService: OverlayService) {
@@ -32,6 +34,10 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
     private var overlayView: View? = null
     private var cameraInfoState by mutableStateOf<CameraInfo?>(null)
     private var isVisible = false
+    
+    // State machine for toast notifications
+    private var hasShownToast = false
+    private var lastWasConnecting = false
     
     // Touch handling for dragging
     private var initialX = 0
@@ -67,7 +73,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
         val rotation: Quaternion,
         val fov: Float,
         val mode: Int,
-        val sceneType: Int
+        val sceneType: Int,
+        val isConnecting: Boolean = false
     )
 
     init {
@@ -85,11 +92,11 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             createOverlay()
             isVisible = true
             
-            // Send start overlay command to enable camera data loop
+            // Send start camera info overlay command to enable camera data loop
             val overlayControl = OverlayControl.newBuilder()
-                .setAction(OverlayAction.START_OVERLAY)
+                .setAction(OverlayAction.START_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
         } catch (e: Exception) {
             Log.e(TAG, "Error showing camera overlay", e)
         }
@@ -99,11 +106,11 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
         if (!isVisible) return
         
         try {
-            // Send stop overlay command
+            // Send stop camera info overlay command
             val overlayControl = OverlayControl.newBuilder()
-                .setAction(OverlayAction.STOP_OVERLAY)
+                .setAction(OverlayAction.STOP_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL, overlayControl)
+            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
             
             overlayView?.let { view ->
                 parentService.getWindowManagerInstance()?.removeView(view)
@@ -174,6 +181,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
 
     private fun updateCameraInfoFromProtobuf(cameraData: CameraData) {
         try {
+            val isConnecting = cameraData.hasIsConnecting() && cameraData.isConnecting
+            
             val cameraInfo = CameraInfo(
                 isValid = cameraData.isValid,
                 position = Vector3(
@@ -189,13 +198,49 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
                 ),
                 fov = cameraData.fov,
                 mode = cameraData.mode,
-                sceneType = cameraData.sceneType
+                sceneType = cameraData.sceneType,
+                isConnecting = isConnecting
             )
+
+            // State machine logic for toast notifications
+            handleStateTransition(cameraInfo)
 
             cameraInfoState = cameraInfo
             Log.v(TAG, "Camera info state updated successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error updating camera info from protobuf", e)
+        }
+    }
+
+    private fun handleStateTransition(cameraInfo: CameraInfo) {
+        // Reset state when transitioning from connecting
+        if (lastWasConnecting && !cameraInfo.isConnecting) {
+            hasShownToast = false
+            Log.d(TAG, "Reset toast state: transitioning from connecting")
+        }
+        
+        // Check conditions for showing toast
+        if (!hasShownToast && 
+            cameraInfo.isValid && 
+            !cameraInfo.isConnecting &&
+            cameraInfo.sceneType == 2 && // WITH_LIVE = 2
+            cameraInfo.mode != 0) { // mode != SYSTEM_CAMERA (0)
+            
+            showWarningToast()
+            hasShownToast = true
+            Log.d(TAG, "Warning toast shown for WITH_LIVE with non-SYSTEM_CAMERA mode")
+        }
+        
+        lastWasConnecting = cameraInfo.isConnecting
+    }
+
+    private fun showWarningToast() {
+        parentService.getHandlerInstance().post {
+            Toast.makeText(
+                parentService,
+                parentService.getString(R.string.overlay_camera_info_crash_warning),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -220,7 +265,13 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 cameraInfoState?.let { info ->
-                    if (info.isValid) {
+                    if (info.isConnecting) {
+                        Text(
+                            text = "Connecting...",
+                            color = Color.Gray,
+                            fontSize = 10.sp
+                        )
+                    } else if (info.isValid) {
                         Text(
                             text = "Pos: (${String.format("%.2f", info.position.x)}, ${String.format("%.2f", info.position.y)}, ${String.format("%.2f", info.position.z)})",
                             color = Color.White,
@@ -266,9 +317,10 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
 
     private fun getModeString(mode: Int): String {
         return when (mode) {
-            0 -> "FREE"
-            1 -> "FIRST_PERSON"
-            2 -> "FOLLOW"
+            0 -> "SYSTEM_CAMERA"
+            1 -> "FREE"
+            2 -> "FIRST_PERSON"
+            3 -> "FOLLOW"
             else -> "UNKNOWN"
         }
     }
@@ -276,8 +328,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
     private fun getSceneString(sceneType: Int): String {
         return when (sceneType) {
             0 -> "NONE"
-            1 -> "WITH_LIVE"
-            2 -> "FES_LIVE"
+            1 -> "FES_LIVE"
+            2 -> "WITH_LIVE"
             3 -> "STORY"
             else -> "UNKNOWN"
         }
