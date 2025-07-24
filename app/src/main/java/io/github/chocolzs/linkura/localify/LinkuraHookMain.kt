@@ -381,7 +381,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         }
 
         // Start camera data loop at 10fps
-        startCustomLoop("CameraDataLoop", 1) {
+        startCustomLoop("CameraDataLoop", 10) {
             executeCameraDataTasks()
         }
     }
@@ -415,7 +415,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     
     // Camera data tasks - runs at 30fps
     private fun executeCameraDataTasks() {
-        if (isOverlayLoopEnabled && isCameraInfoOverlayEnabled) {
+        if (isOverlayLoopEnabled && isCameraInfoOverlayEnabled && !sharedIgnoreCameraInfoLoop) {
             try {
                 Log.v(TAG, "Trying to get camera info protobuf")
                 val protobufData = getCameraInfoProtobuf()
@@ -703,6 +703,15 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     }
 
     companion object {
+        // Camera info loop ignore flag - shared across instances
+        @Volatile
+        @JvmStatic
+        private var sharedIgnoreCameraInfoLoop = false
+        
+        // Debounce job for pauseCameraInfoLoop
+        @JvmStatic
+        private var debounceJob: kotlinx.coroutines.Job? = null
+        
         @JvmStatic
         external fun initHook(targetLibraryPath: String, localizationFilesDir: String)
         @JvmStatic
@@ -759,6 +768,23 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         @JvmStatic
         external fun setArchivePosition(seconds: Float)
+        
+        @OptIn(DelicateCoroutinesApi::class)
+        @JvmStatic
+        fun pauseCameraInfoLoop(delayMillis: Long = 3000) {
+            Log.i(TAG, "pauseCameraInfoLoop called from C++ with delay: ${delayMillis}ms")
+            sharedIgnoreCameraInfoLoop = true
+            
+            // Cancel previous job if exists (debounce)
+            debounceJob?.cancel()
+            
+            // Create new debounce job
+            debounceJob = GlobalScope.launch {
+                delay(delayMillis) // Wait for specified milliseconds
+                sharedIgnoreCameraInfoLoop = false
+                Log.i(TAG, "pauseCameraInfoLoop: flag reset to false after ${delayMillis}ms")
+            }
+        }
 
         fun getPref(path: String) : XSharedPreferences? {
             val pref = XSharedPreferences(BuildConfig.APPLICATION_ID, path)

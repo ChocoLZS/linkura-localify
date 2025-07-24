@@ -3,6 +3,8 @@
 #include "../camera/camera.hpp"
 #include "../Misc.hpp"
 #include "../../build/linkura_messages.pb.h"
+#include "thread"
+#include "chrono"
 
 namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera
@@ -58,6 +60,8 @@ namespace LinkuraLocal::HookCamera {
 
     void unregisterMainFreeCamera(bool cleanup = false) {
         if (!Config::enableFreeCamera) return;
+        pauseCameraInfoLoopFromNative();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (cleanup) {
             mainFreeCameraCache = nullptr;
             freeCameraTransformCache = nullptr;
@@ -271,6 +275,8 @@ namespace LinkuraLocal::HookCamera {
         IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
             // fes live will use the same fixed camera at all time
             if (HookShare::Shareable::renderSceneIsWithLive()) {
+                Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
+                HookShare::Shareable::resetRenderScene();
                 unregisterMainFreeCamera();
                 unregisterCurrentCamera();
             }

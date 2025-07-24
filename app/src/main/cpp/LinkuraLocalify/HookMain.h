@@ -9,6 +9,7 @@
 #include "Plugin.h"
 #include "UnityResolve/UnityResolve.hpp"
 #include "Il2cppUtils.hpp"
+#include "JniBridge.h"
 
 
 extern std::unordered_set<void*> hookedStubs;
