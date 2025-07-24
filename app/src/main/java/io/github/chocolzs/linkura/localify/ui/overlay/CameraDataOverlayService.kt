@@ -23,6 +23,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+import io.github.chocolzs.linkura.localify.R
 import kotlinx.serialization.Serializable
 
 class CameraDataOverlayService(private val parentService: OverlayService) {
@@ -237,7 +238,7 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
         parentService.getHandlerInstance().post {
             Toast.makeText(
                 parentService,
-                "注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。",
+                parentService.getString(R.string.overlay_camera_info_crash_warning),
                 Toast.LENGTH_LONG
             ).show()
         }

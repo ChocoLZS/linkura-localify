@@ -119,4 +119,5 @@
     <string name="overlay.camera_info.start">Start Overlay</string>
     <string name="overlay.camera_info.stop">Stop Overlay</string>
     <string name="overlay.camera_info.running_description">Camera overlay is running. The floating window shows real-time camera parameters including position, rotation, FOV, mode, and scene type.</string>
+    <string name="overlay.camera_info.crash_warning">Warning: When using free camera with camera info display enabled during With×MEETS playback, chapter jumps and custom time jumps may cause crashes.</string>
 </resources>
