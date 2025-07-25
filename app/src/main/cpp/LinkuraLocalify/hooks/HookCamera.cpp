@@ -50,9 +50,10 @@ namespace LinkuraLocal::HookCamera {
                 };
 
                 auto fov = camera->GetFoV();
-                L4Camera::baseCamera.setPos(position.x, position.y, position.z);
-                L4Camera::baseCamera.fov = 26.225;
-                L4Camera::baseCamera.lookAt = cacheLookAt;
+                L4Camera::originCamera.setPos(position.x, position.y, position.z);
+                L4Camera::originCamera.fov = 26.225;
+                L4Camera::originCamera.lookAt = cacheLookAt;
+                L4Camera::baseCamera.setCamera(&L4Camera::originCamera);
             }
         }
         initialCameraRendered = true;
@@ -82,9 +83,9 @@ namespace LinkuraLocal::HookCamera {
         currentCameraRegistered = false;
     }
 
-    void onRenderExit(bool cleanup = false) {
+    void onRenderExit() {
         HookShare::Shareable::resetRenderScene();
-        unregisterMainFreeCamera(cleanup);
+        unregisterMainFreeCamera(true);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
@@ -308,7 +309,7 @@ namespace LinkuraLocal::HookCamera {
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
-        onRenderExit(true);
+        onRenderExit();
         StoryScene_OnFinalize_Orig(self, method);
     }
 

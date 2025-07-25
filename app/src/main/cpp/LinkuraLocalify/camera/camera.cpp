@@ -14,6 +14,7 @@
 
 namespace L4Camera {
 	BaseCamera::Camera baseCamera{};
+    BaseCamera::Camera originCamera{};
     CameraMode cameraMode = CameraMode::FREE;
     FirstPersonRoll firstPersonRoll = FirstPersonRoll::ENABLE_ROLL;
     FollowModeY followModeY = FollowModeY::SMOOTH_Y;
@@ -54,6 +55,7 @@ namespace L4Camera {
         followPosOffset = {0, 0, 1.5};
         followLookAtOffset = {0, 0};
 		baseCamera.reset();
+        originCamera.reset();
 	}
 
 	void camera_forward() {  // 向前
@@ -493,6 +495,7 @@ namespace L4Camera {
 		bool right = false;
 		bool q = false;
 		bool e = false;
+        bool r = false;
 		bool i = false;
 		bool k = false;
 		bool j = false;
@@ -564,6 +567,7 @@ namespace L4Camera {
 				if (cameraMoveState.right) cameraLookat_right(moveAngel);
 				if (cameraMoveState.q) changeCameraFOV(0.5f);
 				if (cameraMoveState.e) changeCameraFOV(-0.5f);
+                if (cameraMoveState.r) L4Camera::baseCamera.setCamera(&L4Camera::originCamera);
 				if (cameraMoveState.i) ChangeLiveFollowCameraOffsetY(offsetMoveStep);
 				if (cameraMoveState.k) ChangeLiveFollowCameraOffsetY(-offsetMoveStep);
 				if (cameraMoveState.j) ChangeLiveFollowCameraOffsetX(0.8);
@@ -650,9 +654,8 @@ namespace L4Camera {
 				cameraMoveState.j = message == WM_KEYDOWN; break;
 			case KEY_L:
 				cameraMoveState.l = message == WM_KEYDOWN; break;
-			case KEY_R: {
-				if (message == WM_KEYDOWN) reset_camera();
-			} break;
+			case KEY_R:
+                cameraMoveState.r = message == WM_KEYDOWN; break;
             // case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
             case KEY_V: if (message == WM_KEYDOWN) SwitchCameraSubMode(); break;
                 // 手柄操作响应
