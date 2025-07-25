@@ -82,9 +82,9 @@ namespace LinkuraLocal::HookCamera {
         currentCameraRegistered = false;
     }
 
-    void onRenderExit(bool cleanup = false) {
+    void onRenderExit() {
         HookShare::Shareable::resetRenderScene();
-        unregisterMainFreeCamera(cleanup);
+        unregisterMainFreeCamera(true);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
@@ -308,7 +308,7 @@ namespace LinkuraLocal::HookCamera {
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
-        onRenderExit(true);
+        onRenderExit();
         StoryScene_OnFinalize_Orig(self, method);
     }
 
