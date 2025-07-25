@@ -52,6 +52,14 @@ namespace BaseCamera {
 		lookAt.z = z;
 	}
 
+    void Camera::setCamera(Camera* camera) {
+        this->setPos(camera->pos.x, camera->pos.y, camera->pos.z);
+        this->setLookAt(camera->lookAt.x, camera->lookAt.y, camera->lookAt.z);
+        this->fov = camera->fov;
+        this->verticalAngle = camera->verticalAngle;
+        this->horizontalAngle = camera->horizontalAngle;
+    }
+
 	void Camera::reset() {
 		setPos(0.5, 1.1, 1.3);
 		setLookAt(0.5, 1.1, -3.7);

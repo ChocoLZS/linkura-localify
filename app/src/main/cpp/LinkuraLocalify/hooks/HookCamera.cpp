@@ -50,9 +50,10 @@ namespace LinkuraLocal::HookCamera {
                 };
 
                 auto fov = camera->GetFoV();
-                L4Camera::baseCamera.setPos(position.x, position.y, position.z);
-                L4Camera::baseCamera.fov = 26.225;
-                L4Camera::baseCamera.lookAt = cacheLookAt;
+                L4Camera::originCamera.setPos(position.x, position.y, position.z);
+                L4Camera::originCamera.fov = 26.225;
+                L4Camera::originCamera.lookAt = cacheLookAt;
+                L4Camera::baseCamera.setCamera(&L4Camera::originCamera);
             }
         }
         initialCameraRendered = true;

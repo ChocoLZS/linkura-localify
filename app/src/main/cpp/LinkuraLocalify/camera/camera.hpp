@@ -26,6 +26,7 @@ namespace L4Camera {
     FirstPersonRoll GetFirstPersonRoll();
 
     extern BaseCamera::Camera baseCamera;
+    extern BaseCamera::Camera originCamera;
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;
     extern UnityResolve::UnityType::Vector3 followPosOffset;
     extern int followCharaIndex;

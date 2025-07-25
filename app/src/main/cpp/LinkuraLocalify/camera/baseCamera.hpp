@@ -29,6 +29,7 @@ namespace BaseCamera {
 		void reset();
 		void setPos(float x, float y, float z);
 		void setLookAt(float x, float y, float z);
+        void setCamera(Camera* camera);
 
 		void set_lon_move(float vertanglePlus, LonMoveHState moveState = LonMoveHState::LonMoveLeftAndRight, float multiplier = 1.0f);
 		void updateVertLook();
