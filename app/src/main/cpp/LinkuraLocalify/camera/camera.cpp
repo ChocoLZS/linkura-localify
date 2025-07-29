@@ -656,7 +656,7 @@ namespace L4Camera {
 				cameraMoveState.l = message == WM_KEYDOWN; break;
 			case KEY_R:
                 cameraMoveState.r = message == WM_KEYDOWN; break;
-            // case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
+            case KEY_F: if (message == WM_KEYDOWN) SwitchCameraMode(); break;
             case KEY_V: if (message == WM_KEYDOWN) SwitchCameraSubMode(); break;
                 // 手柄操作响应
                 case BTN_A:
