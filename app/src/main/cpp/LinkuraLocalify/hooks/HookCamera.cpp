@@ -33,9 +33,14 @@ namespace LinkuraLocal::HookCamera {
             auto transform = camera->GetTransform();
             if (transform) {
                 auto position = transform->GetPosition();
+                auto forward = transform->GetForward();
                 L4Camera::originCamera.setPos(position.x, position.y, position.z);
                 L4Camera::originCamera.fov = 26.225;
-                L4Camera::originCamera.lookAt = cacheLookAt;
+                L4Camera::originCamera.lookAt = UnityResolve::UnityType::Vector3{
+                        position.x + forward.x,
+                        position.y + forward.y,
+                        position.z + forward.z
+                };
                 L4Camera::baseCamera.setCamera(&L4Camera::originCamera);
             }
         }
@@ -137,16 +142,14 @@ namespace LinkuraLocal::HookCamera {
                             // maybe not working
                             Unity_set_rotation_Injected_Orig(freeCameraTransformCache, &cacheRotation);
                             return;
-                        }
-                        else {
+                        } else {
 //                            Log::DebugFmt("set rotation, cacheLookAt is at (%f, %f, %f)", cacheLookAt.x, cacheLookAt.y, cacheLookAt.z);
                             static LinkuraLocal::Misc::FixedSizeQueue<float> recordsY(60);
                             const auto newY = L4Camera::CheckNewY(cacheLookAt, true, recordsY);
                             UnityResolve::UnityType::Vector3 newCacheLookAt{cacheLookAt.x, newY, cacheLookAt.z};
                             lookat_injected(freeCameraTransformCache, &newCacheLookAt, &worldUp);
-                            return;
                         }
-                    }
+                   }
                 }
                 else if (cameraMode == L4Camera::CameraMode::FOLLOW) {
                     auto newLookAtPos = L4Camera::CalcFollowModeLookAt(cachePosition,
