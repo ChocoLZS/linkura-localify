@@ -3,6 +3,7 @@
 #include "../../build/linkura_messages.pb.h"
 #include <thread>
 #include <chrono>
+#include "../camera/camera.hpp"
 
 namespace LinkuraLocal::HookLiveRender {
     enum struct SchoolResolution_LiveAreaQuality {
@@ -46,6 +47,7 @@ namespace LinkuraLocal::HookLiveRender {
             result = (u_int64_t)(height << 32 | width);
         }
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
+            L4Camera::followCharaSet.clear();
             if (HookShare::Shareable::renderSceneIsWithLive()) {
                 HookShare::Shareable::resetRenderScene();
                 HookCamera::unregisterMainFreeCamera(false);

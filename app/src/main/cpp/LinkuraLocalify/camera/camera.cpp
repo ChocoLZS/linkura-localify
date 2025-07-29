@@ -25,11 +25,11 @@ namespace L4Camera {
     UnityResolve::UnityType::Vector3 followPosOffset{0, 0, 1.5};
     UnityResolve::UnityType::Vector2 followLookAtOffset{0, 0};
     float offsetMoveStep = 0.008;
-    int followCharaIndex = 0;
     float l_sensitivity = 0.5f;
     float r_sensitivity = 0.5f;
     bool showToast = true;
     LinkuraLocal::Misc::CSEnum bodyPartsEnum("Head", 0xa);
+    LinkuraLocal::Misc::IndexedSet<void*> followCharaSet;
 
 	// bool rMousePressFlg = false;
 
@@ -50,7 +50,6 @@ namespace L4Camera {
     }
 
     void reset_camera() {
-        followCharaIndex = 0;
         firstPersonPosOffset = {0, 0.064f, 0.000f};  // f3: 0.008f
         followPosOffset = {0, 0, 1.5};
         followLookAtOffset = {0, 0};
@@ -226,14 +225,12 @@ namespace L4Camera {
 
     void OnLeftDown() {
         if (cameraMode == CameraMode::FREE) return;
-        if (followCharaIndex >= 1) {
-            followCharaIndex--;
-        }
+        L4Camera::followCharaSet.prev();
     }
 
     void OnRightDown() {
         if (cameraMode == CameraMode::FREE) return;
-        followCharaIndex++;
+        L4Camera::followCharaSet.next();
     }
 
     void OnUpDown() {
@@ -333,9 +330,6 @@ namespace L4Camera {
     void JXKeyDown() {
         if (cameraMode == CameraMode::FOLLOW) {
             OnLeftDown();
-            if (showToast) {
-                LinkuraLocal::Log::ShowToastFmt("Look at position: %d", followCharaIndex);
-            }
         } else {
             l_sensitivity *= 0.8f;
         }
@@ -344,9 +338,6 @@ namespace L4Camera {
     void JYKeyDown() {
         if (cameraMode == CameraMode::FOLLOW) {
             OnRightDown();
-            if (showToast) {
-                LinkuraLocal::Log::ShowToastFmt("Look at position: %d", followCharaIndex);
-            }
         } else {
             l_sensitivity *= 1.2f;
         }

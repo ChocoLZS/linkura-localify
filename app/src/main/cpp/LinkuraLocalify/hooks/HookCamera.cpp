@@ -71,6 +71,7 @@ namespace LinkuraLocal::HookCamera {
         unregisterMainFreeCamera(true);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
+        L4Camera::followCharaSet.clear();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
         initialCameraRendered = false;
     }
@@ -138,7 +139,7 @@ namespace LinkuraLocal::HookCamera {
                             return;
                         }
                         else {
-                            Log::DebugFmt("set rotation, cacheLookAt is at (%f, %f, %f)", cacheLookAt.x, cacheLookAt.y, cacheLookAt.z);
+//                            Log::DebugFmt("set rotation, cacheLookAt is at (%f, %f, %f)", cacheLookAt.x, cacheLookAt.y, cacheLookAt.z);
                             static LinkuraLocal::Misc::FixedSizeQueue<float> recordsY(60);
                             const auto newY = L4Camera::CheckNewY(cacheLookAt, true, recordsY);
                             UnityResolve::UnityType::Vector3 newCacheLookAt{cacheLookAt.x, newY, cacheLookAt.z};
@@ -261,6 +262,7 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(void, LiveConnectChapterModel_NewChapterConfirmed, (Il2cppUtils::Il2CppObject* self, void* method)) {
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
+            L4Camera::followCharaSet.clear();
             // fes live will use the same fixed camera at all time
             if (HookShare::Shareable::renderSceneIsWithLive()) {
                 Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
@@ -338,30 +340,39 @@ namespace LinkuraLocal::HookCamera {
         return AvatarPool_AddIfAvatar_Orig(self, gameObject, method);
     }
 
-    // 大概率有用
-    DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (Il2cppUtils::Il2CppObject* self, void* mtd)) {
-//        Log::DebugFmt("FaceBonesCopier_LastUpdate HOOKED: object is at %p", self);
+    // ✅
+    // 由于无法像学马一样获取管理器与，只能记录出现过的地址，并判断
+    // 活动记录的无法及时清除退出渲染的FaceBonesCopier，但是问题不大
+    DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
+        if (!Config::enableFreeCamera || (L4Camera::GetCameraMode() == L4Camera::CameraMode::FREE)) {
+//            if (needRestoreHides) {
+//                needRestoreHides = false;
+//                HideHead(nullptr, false);
+//                HideHead(nullptr, true);
+//            }
+            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+        }
+
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
-        static auto origin_head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("originalHead");
-        static auto left_eye_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("leftEye");
-        auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(self, head_field);
-        auto originHeadTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(self, origin_head_field);
-        auto leftEyeTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(self, left_eye_field);
-        if (headTrans) {
-            if (cacheTrans == nullptr || (void*)self == cacheTrans)
-            cacheTrans = headTrans;
-            cacheRotation = cacheTrans->GetRotation();
-            cachePosition = cacheTrans->GetPosition();
-            cacheForward = cacheTrans->GetUp();
-            cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
-            Log::DebugFmt("headTrans: pos: %f %f %f, rot: %f %f %f %f, forward: %f %f %f, lookat: %f %f %f",
-                          cachePosition.x, cachePosition.y, cachePosition.z,
-                          cacheRotation.x, cacheRotation.y, cacheRotation.z, cacheRotation.w,
-                          cacheForward.x, cacheForward.y, cacheForward.z,
-                          cacheLookAt.x, cacheLookAt.y, cacheLookAt.z
-                          );
+//        static auto origin_head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("originalHead");
+//        static auto left_eye_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("leftEye");
+        if (!L4Camera::followCharaSet.contains(self)) {
+            L4Camera::followCharaSet.add(self);
         }
+        auto currentFace = L4Camera::followCharaSet.getCurrentValue();
+        auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+        cacheTrans = headTrans;
+        cacheRotation = cacheTrans->GetRotation();
+        cachePosition = cacheTrans->GetPosition();
+        cacheForward = cacheTrans->GetUp();
+        cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
+//            Log::DebugFmt("headTrans: pos: %f %f %f, rot: %f %f %f %f, forward: %f %f %f, lookat: %f %f %f",
+//                          cachePosition.x, cachePosition.y, cachePosition.z,
+//                          cacheRotation.x, cacheRotation.y, cacheRotation.z, cacheRotation.w,
+//                          cacheForward.x, cacheForward.y, cacheForward.z,
+//                          cacheLookAt.x, cacheLookAt.y, cacheLookAt.z
+//                          );
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
     }
 

@@ -29,7 +29,7 @@ namespace L4Camera {
     extern BaseCamera::Camera originCamera;
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;
     extern UnityResolve::UnityType::Vector3 followPosOffset;
-    extern int followCharaIndex;
+    extern LinkuraLocal::Misc::IndexedSet<void*> followCharaSet;
     extern LinkuraLocal::Misc::CSEnum bodyPartsEnum;
 
     float CheckNewY(const UnityResolve::UnityType::Vector3& targetPos, const bool recordY,
