@@ -29,7 +29,8 @@ namespace LinkuraLocal::HookStory {
         // ([^\\n]*runbg[^\n]*\n)
         content_str = regex_replace(content_str, "#?\\[?背景表示[^\\n]*\\n", "");
         content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", "");
-        content_str = regex_replace(content_str, "\\[?被写界深度開始[^\\n]*\\n", "[被写界深度開始 38.00 38.00 38.00]\n");
+//        content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "[被写界深度 38.00 38.00 38.00]\n");
+        content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "");
         content = Il2cppUtils::Il2CppString::New(content_str);
         return content;
     }
