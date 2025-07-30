@@ -138,6 +138,11 @@ namespace LinkuraLocal::HookCamera {
         return {serialized_data.begin(), serialized_data.end()};
     }
 
+    DEFINE_HOOK(void, Unity_camera_set_backgroundColor_Injected, (UnityResolve::UnityType::Camera* self, UnityResolve::UnityType::Color* value)) {
+        Log::DebugFmt("Unity_camera_set_backgroundColor_Injected HOOKED, color is rbga(%.2f, %.2f, %.2f, %.2f)", value->r, value->b, value->g, value->a);
+        Unity_camera_set_backgroundColor_Injected_Orig(self, value);
+    }
+
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
             if (IsNativeObjectAlive(freeCameraTransformCache)) {
@@ -301,9 +306,11 @@ namespace LinkuraLocal::HookCamera {
         StoryModelSpaceManager_Init_Orig(self, method);
         auto modelSpace = get_ModelSpace->Invoke<Il2cppUtils::Il2CppObject*>(self);
         auto storyCamera = get_StoryCamera->Invoke<UnityResolve::UnityType::Camera*>(modelSpace);
-        if (!initialCameraRendered) {
-            sanitizeFreeCamera(storyCamera);
-        }
+//        if (!initialCameraRendered) {
+//            sanitizeFreeCamera(storyCamera); // not working as expected
+//        }
+        auto color = UnityResolve::UnityType::Color{0.0f, 255.0f, 0.0f, 0.0f};
+        Unity_camera_set_backgroundColor_Injected_Orig(storyCamera, &color);
         registerMainFreeCamera(storyCamera);
         registerCurrentCamera(storyCamera);
     }
@@ -397,6 +404,7 @@ namespace LinkuraLocal::HookCamera {
                 "UnityEngine.Transform::set_position_Injected(UnityEngine.Vector3&)"));
         ADD_HOOK(Unity_set_rotation_Injected, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Transform::set_rotation_Injected(UnityEngine.Quaternion&)"));
+        ADD_HOOK(Unity_camera_set_backgroundColor_Injected, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Camera::set_backgroundColor_Injected(UnityEngine.Color&)"));
         ADD_HOOK(Unity_get_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
                                                                       "Camera", "get_fieldOfView"));
         ADD_HOOK(Unity_set_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
