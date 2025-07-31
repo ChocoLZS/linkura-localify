@@ -20,6 +20,7 @@ namespace L4Camera {
     FollowModeY followModeY = FollowModeY::SMOOTH_Y;
 
     CameraInfo currentCameraInfo;
+    UnityResolve::UnityType::Color backgroundColor{0.0f, 0.0f, 0.0f, 1.0f};
 
     UnityResolve::UnityType::Vector3 firstPersonPosOffset{0, 0.064f, 0.000f};
     UnityResolve::UnityType::Vector3 followPosOffset{0, 0, 1.5};

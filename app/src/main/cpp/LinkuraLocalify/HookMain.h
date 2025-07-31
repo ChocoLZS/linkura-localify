@@ -29,6 +29,7 @@ namespace LinkuraLocal::HookCamera {
 
     void unregisterMainFreeCamera(bool cleanup);
     void unregisterCurrentCamera();
+    void setCameraBackgroundColor(float red, float green, float blue, float alpha);
 }
 
 namespace LinkuraLocal::HookLiveRender {

@@ -18,19 +18,17 @@ namespace LinkuraLocal::HookStory {
 
     DEFINE_HOOK(Il2cppUtils::Il2CppString*, StoryScene_LoadStoryData, (Il2cppUtils::Il2CppString* fileName, void* mtd) ) {
         Log::DebugFmt("StoryScene_LoadStoryData HOOKED, %s", fileName->ToString().c_str());
-//        auto fileNameStr = fileName->ToString();
-//        if (fileNameStr == "story_main_10300101.txt") {
-//            fileName = Il2cppUtils::Il2CppString::New("story_main_10250101.txt");
-//        }
-//        Log::DebugFmt("StoryScene_LoadStoryData HOOKED Next, %s", fileName->ToString().c_str());
         auto content = StoryScene_LoadStoryData_Orig(fileName, mtd);
         auto content_str = content->ToString();
-        // // (#?\[?背景移動[^\n]*\n)
-        // ([^\\n]*runbg[^\n]*\n)
-        content_str = regex_replace(content_str, "#?\\[?背景表示[^\\n]*\\n", "");
-        content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", "");
-//        content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "[被写界深度 38.00 38.00 38.00]\n");
-        content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "");
+        content_str = regex_replace(content_str, "#?\\[?背景(表示|移動|回転)[^\\n]*\\n", ""); // 隐藏背景
+        content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", ""); // 隐藏各样背景
+
+        content_str = regex_replace(content_str, "[^\\n]*暗転_イン[^\\n]*\\n", ""); // 隐藏部分过渡
+        content_str = regex_replace(content_str, "[^\\n]*###[^\\n]*\\n", "");
+
+        content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");         // 隐藏非角色3d
+
+        content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", ""); // 隐藏景深
         content = Il2cppUtils::Il2CppString::New(content_str);
         return content;
     }

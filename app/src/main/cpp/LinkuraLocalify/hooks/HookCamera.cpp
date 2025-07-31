@@ -9,6 +9,7 @@
 namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera
     UnityResolve::UnityType::Camera* mainFreeCameraCache = nullptr;
+    UnityResolve::UnityType::Camera* backgroundColorCameraCache = nullptr;
     UnityResolve::UnityType::Transform* freeCameraTransformCache = nullptr;
     UnityResolve::UnityType::Transform* cacheTrans = nullptr;
     UnityResolve::UnityType::Quaternion cacheRotation{};
@@ -90,6 +91,7 @@ namespace LinkuraLocal::HookCamera {
         L4Camera::reset_camera();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
         initialCameraRendered = false;
+        backgroundColorCameraCache = nullptr;
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
@@ -139,8 +141,17 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, Unity_camera_set_backgroundColor_Injected, (UnityResolve::UnityType::Camera* self, UnityResolve::UnityType::Color* value)) {
-        Log::DebugFmt("Unity_camera_set_backgroundColor_Injected HOOKED, color is rbga(%.2f, %.2f, %.2f, %.2f)", value->r, value->b, value->g, value->a);
-        Unity_camera_set_backgroundColor_Injected_Orig(self, value);
+        backgroundColorCameraCache = self;
+        Unity_camera_set_backgroundColor_Injected_Orig(self, &L4Camera::backgroundColor);
+    }
+
+    void setCameraBackgroundColor(float red, float green, float blue, float alpha) {
+        UnityResolve::UnityType::Color color{red, green, blue, alpha};
+        auto storedColor = &L4Camera::backgroundColor;
+        *storedColor = color;
+        if (backgroundColorCameraCache && !HookShare::Shareable::renderSceneIsNone()) {
+            Unity_camera_set_backgroundColor_Injected_Orig(backgroundColorCameraCache, &color);
+        }
     }
 
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
@@ -309,10 +320,9 @@ namespace LinkuraLocal::HookCamera {
 //        if (!initialCameraRendered) {
 //            sanitizeFreeCamera(storyCamera); // not working as expected
 //        }
-        auto color = UnityResolve::UnityType::Color{0.0f, 255.0f, 0.0f, 0.0f};
-        Unity_camera_set_backgroundColor_Injected_Orig(storyCamera, &color);
         registerMainFreeCamera(storyCamera);
         registerCurrentCamera(storyCamera);
+        backgroundColorCameraCache = storyCamera;
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
