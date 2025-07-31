@@ -159,6 +159,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.animation)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation("androidx.compose.material:material-icons-extended")
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

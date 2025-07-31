@@ -13,17 +13,21 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -38,6 +42,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+import io.github.chocolzs.linkura.localify.ui.components.ColorPicker
 
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     companion object {
@@ -46,6 +51,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private var windowManager: WindowManager? = null
     private var toolbarView: View? = null
+    private var colorPickerView: View? = null
     private val handler = Handler(Looper.getMainLooper())
     
     // Child services
@@ -55,6 +61,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     // UI state
     private var isCameraOverlayVisible by mutableStateOf(false)
     private var isArchiveOverlayVisible by mutableStateOf(false)
+    private var isColorPickerVisible by mutableStateOf(false)
+    private var currentBackgroundColor by mutableStateOf(Color.Black)
     
     // Socket communication
     private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
@@ -127,6 +135,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
 
             toolbarView?.let {
+                windowManager?.removeView(it)
+            }
+            colorPickerView?.let {
                 windowManager?.removeView(it)
             }
         } catch (e: Exception) {
@@ -292,6 +303,41 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     )
                 }
                 
+                // Color picker button with color indicator
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            if (isColorPickerVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
+                            RoundedCornerShape(8.dp)
+                        )
+                ) {
+                    IconButton(
+                        onClick = {
+                            toggleColorPicker()
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = "Background Color",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    // Color indicator
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(12.dp)
+                            .offset(x = 2.dp, y = 2.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(currentBackgroundColor)
+                            .border(0.5.dp, Color.White, RoundedCornerShape(2.dp))
+                    )
+                }
+                
                 // Menu/Close button
                 IconButton(
                     onClick = {
@@ -325,6 +371,121 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             archiveOverlayService?.show()
         } else {
             archiveOverlayService?.hide()
+        }
+    }
+    
+    private fun toggleColorPicker() {
+        isColorPickerVisible = !isColorPickerVisible
+        if (isColorPickerVisible) {
+            createColorPickerOverlay()
+        } else {
+            removeColorPickerOverlay()
+        }
+    }
+    
+    private fun createColorPickerOverlay() {
+        try {
+            if (colorPickerView != null) {
+                return // Already created
+            }
+            
+            val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_PHONE
+            }
+
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                layoutFlag,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                PixelFormat.TRANSLUCENT
+            )
+
+            params.gravity = Gravity.CENTER
+            
+            colorPickerView = ComposeView(this).apply {
+                setViewTreeLifecycleOwner(this@OverlayService)
+                setViewTreeSavedStateRegistryOwner(this@OverlayService)
+                setContent {
+                    ColorPickerOverlay()
+                }
+            }
+            
+            windowManager?.addView(colorPickerView, params)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating color picker overlay", e)
+        }
+    }
+    
+    private fun removeColorPickerOverlay() {
+        try {
+            colorPickerView?.let {
+                windowManager?.removeView(it)
+                colorPickerView = null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing color picker overlay", e)
+        }
+    }
+    
+    @Composable
+    private fun ColorPickerOverlay() {
+        // Dimmed background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .clickable { 
+                    // Close on outside click
+                    isColorPickerVisible = false
+                    removeColorPickerOverlay()
+                }
+        ) {
+            // Color picker content
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .clickable(enabled = false) { /* Prevent click propagation */ }
+            ) {
+                ColorPicker(
+                    onColorSelected = { color ->
+                        currentBackgroundColor = color
+                        onColorChanged(color)
+                        isColorPickerVisible = false
+                        removeColorPickerOverlay()
+                    },
+                    onDismiss = {
+                        isColorPickerVisible = false
+                        removeColorPickerOverlay()
+                    },
+                    initialColor = currentBackgroundColor
+                )
+            }
+        }
+    }
+    
+    private fun onColorChanged(color: Color) {
+        // Send color change message via socket
+        try {
+            val colorMessage = CameraBackgroundColor.newBuilder()
+                .setRed(color.red)
+                .setGreen(color.green)
+                .setBlue(color.blue)
+                .setAlpha(color.alpha)
+                .build()
+            
+            if (socketServer.isConnected()) {
+                socketServer.sendMessage(MessageType.CAMERA_BACKGROUND_COLOR, colorMessage)
+                Log.d(TAG, "Sent background color: R=${color.red}, G=${color.green}, B=${color.blue}, A=${color.alpha}")
+            } else {
+                Log.w(TAG, "Socket server not connected, cannot send color change")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending color change", e)
         }
     }
 
