@@ -17,6 +17,10 @@ namespace LinkuraLocal::Config {
     extern int targetFrameRate;
     extern bool removeRenderImageCover;
     extern bool avoidCharacterExit;
+    extern bool storyHideBackground;
+    extern bool storyHideTransition;
+    extern bool storyHideNonCharacter3d;
+    extern bool storyHideDof;
 
     void LoadConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);

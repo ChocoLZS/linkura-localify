@@ -17,7 +17,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 12
-        versionName "v0.1.1"
+        versionName "v0.2.0"
         buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -159,6 +159,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.animation)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation("androidx.compose.material:material-icons-extended")
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

@@ -84,6 +84,27 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
             Spacer(Modifier.height(6.dp))
         }
 
+        item {
+            GakuGroupBox(modifier, stringResource(R.string.config_story_settings_title)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    GakuSwitch(modifier, stringResource(R.string.config_story_hide_background), checked = config.value.storyHideBackground) {
+                            v -> context?.onStoryHideBackgroundChanged(v)
+                    }
+                    GakuSwitch(modifier, stringResource(R.string.config_story_hide_transition), checked = config.value.storyHideTransition) {
+                            v -> context?.onStoryHideTransitionChanged(v)
+                    }
+                    GakuSwitch(modifier, stringResource(R.string.config_story_hide_non_character_3d), checked = config.value.storyHideNonCharacter3d) {
+                            v -> context?.onStoryHideNonCharacter3dChanged(v)
+                    }
+                    GakuSwitch(modifier, stringResource(R.string.config_story_hide_dof), checked = config.value.storyHideDof) {
+                            v -> context?.onStoryHideDofChanged(v)
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+        }
+
 //        item {
 //            GakuGroupBox(modifier, stringResource(R.string.debug_settings)) {
 //                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

@@ -20,6 +20,10 @@ namespace LinkuraLocal::Config {
     int targetFrameRate = 0;
     bool removeRenderImageCover = false;
     bool avoidCharacterExit = false;
+    bool storyHideBackground = false;
+    bool storyHideTransition = false;
+    bool storyHideNonCharacter3d = false;
+    bool storyHideDof = false;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -39,6 +43,10 @@ namespace LinkuraLocal::Config {
             GetConfigItem(enableFreeCamera);
             GetConfigItem(removeRenderImageCover);
             GetConfigItem(avoidCharacterExit);
+            GetConfigItem(storyHideBackground);
+            GetConfigItem(storyHideTransition);
+            GetConfigItem(storyHideNonCharacter3d);
+            GetConfigItem(storyHideDof);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -63,6 +71,10 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_target_frame_rate()) targetFrameRate = configUpdate.target_frame_rate();
                 if (configUpdate.has_remove_render_image_cover()) removeRenderImageCover = configUpdate.remove_render_image_cover();
                 if (configUpdate.has_avoid_character_exit()) avoidCharacterExit = configUpdate.avoid_character_exit();
+                if (configUpdate.has_story_hide_background()) storyHideBackground = configUpdate.story_hide_background();
+                if (configUpdate.has_story_hide_transition()) storyHideTransition = configUpdate.story_hide_transition();
+                if (configUpdate.has_story_hide_non_character_3d()) storyHideNonCharacter3d = configUpdate.story_hide_non_character_3d();
+                if (configUpdate.has_story_hide_dof()) storyHideDof = configUpdate.story_hide_dof();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

@@ -43,6 +43,10 @@ class ConfigUpdateManager private constructor() {
                 if (config.targetFrameRate != null) targetFrameRate = config.targetFrameRate
                 if (config.removeRenderImageCover != null) removeRenderImageCover = config.removeRenderImageCover
                 if (config.avoidCharacterExit != null) avoidCharacterExit = config.avoidCharacterExit
+                if (config.storyHideBackground != null) storyHideBackground = config.storyHideBackground
+                if (config.storyHideTransition != null) storyHideTransition = config.storyHideTransition
+                if (config.storyHideNonCharacter3d != null) storyHideNonCharacter3D = config.storyHideNonCharacter3d
+                if (config.storyHideDof != null) storyHideDof = config.storyHideDof
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

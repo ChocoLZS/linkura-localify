@@ -24,6 +24,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.R
+import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 import kotlinx.serialization.Serializable
 
 class CameraDataOverlayService(private val parentService: OverlayService) {
@@ -117,6 +118,7 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             }
             overlayView = null
             isVisible = false
+            parentService.resetCameraOverlayState()
         } catch (e: Exception) {
             Log.e(TAG, "Error hiding camera overlay", e)
         }
@@ -153,7 +155,9 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             setViewTreeLifecycleOwner(parentService.getLifecycleOwnerInstance())
             setViewTreeSavedStateRegistryOwner(parentService.getSavedStateRegistryOwnerInstance())
             setContent {
-                CameraInfoOverlay()
+                LocalifyTheme {
+                    CameraInfoOverlay()
+                }
             }
             
             // Add touch listener for dragging

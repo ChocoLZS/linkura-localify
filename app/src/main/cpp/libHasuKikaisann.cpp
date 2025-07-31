@@ -252,6 +252,27 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_updateConfig(JNIEnv *en
     }
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_setCameraBackgroundColor(JNIEnv *env, jclass clazz,
+                                                                                 jfloat red, jfloat green, 
+                                                                                 jfloat blue, jfloat alpha) {
+    try {
+        LinkuraLocal::Log::InfoFmt("setCameraBackgroundColor: Setting color to (%.2f, %.2f, %.2f, %.2f)", 
+                                   red, green, blue, alpha);
+        
+        // Call the HookCamera function to set background color
+        LinkuraLocal::HookCamera::setCameraBackgroundColor(red, green, blue, alpha);
+        
+        LinkuraLocal::Log::Info("Camera background color set successfully");
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("Error in setCameraBackgroundColor: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("Unknown error in setCameraBackgroundColor");
+    }
+}
+
 // Function to be called from HookCamera.cpp with default delay
 void pauseCameraInfoLoopFromNative() {
     pauseCameraInfoLoopFromNative(3000); // Default 3 seconds

@@ -21,6 +21,7 @@ enum MessageType {
   ARCHIVE_INFO = 5;
   ARCHIVE_POSITION_SET_REQUEST = 6;
   OVERLAY_CONTROL_CAMERA_INFO = 7;
+  CAMERA_BACKGROUND_COLOR = 8;
   // Future message types can be added here
 }
 
@@ -73,6 +74,10 @@ message ConfigUpdate {
   optional int32 target_frame_rate = 11;
   optional bool remove_render_image_cover = 12;
   optional bool avoid_character_exit = 13;
+  optional bool story_hide_background = 14;
+  optional bool story_hide_transition = 15;
+  optional bool story_hide_non_character_3d = 16;
+  optional bool story_hide_dof = 17;
 }
 
 // Overlay control actions
@@ -102,4 +107,12 @@ message ArchiveInfo {
 // Archive position control message
 message ArchivePositionSetRequest {
   optional float seconds = 1; // Position to seek to in seconds
+}
+
+// Camera background color message
+message CameraBackgroundColor {
+  float red = 1;    // Red component (0.0 - 1.0)
+  float green = 2;  // Green component (0.0 - 1.0)
+  float blue = 3;   // Blue component (0.0 - 1.0)
+  float alpha = 4;  // Alpha component (0.0 - 1.0)
 }

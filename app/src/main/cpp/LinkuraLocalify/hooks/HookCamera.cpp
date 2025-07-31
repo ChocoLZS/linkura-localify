@@ -9,6 +9,7 @@
 namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera
     UnityResolve::UnityType::Camera* mainFreeCameraCache = nullptr;
+    UnityResolve::UnityType::Camera* backgroundColorCameraCache = nullptr;
     UnityResolve::UnityType::Transform* freeCameraTransformCache = nullptr;
     UnityResolve::UnityType::Transform* cacheTrans = nullptr;
     UnityResolve::UnityType::Quaternion cacheRotation{};
@@ -90,6 +91,7 @@ namespace LinkuraLocal::HookCamera {
         L4Camera::reset_camera();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
         initialCameraRendered = false;
+        backgroundColorCameraCache = nullptr;
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
@@ -136,6 +138,20 @@ namespace LinkuraLocal::HookCamera {
         std::string serialized_data;
         cameraData.SerializeToString(&serialized_data);
         return {serialized_data.begin(), serialized_data.end()};
+    }
+
+    DEFINE_HOOK(void, Unity_camera_set_backgroundColor_Injected, (UnityResolve::UnityType::Camera* self, UnityResolve::UnityType::Color* value)) {
+        backgroundColorCameraCache = self;
+        Unity_camera_set_backgroundColor_Injected_Orig(self, &L4Camera::backgroundColor);
+    }
+
+    void setCameraBackgroundColor(float red, float green, float blue, float alpha) {
+        UnityResolve::UnityType::Color color{red, green, blue, alpha};
+        auto storedColor = &L4Camera::backgroundColor;
+        *storedColor = color;
+        if (backgroundColorCameraCache && !HookShare::Shareable::renderSceneIsNone()) {
+            Unity_camera_set_backgroundColor_Injected_Orig(backgroundColorCameraCache, &color);
+        }
     }
 
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
@@ -301,11 +317,12 @@ namespace LinkuraLocal::HookCamera {
         StoryModelSpaceManager_Init_Orig(self, method);
         auto modelSpace = get_ModelSpace->Invoke<Il2cppUtils::Il2CppObject*>(self);
         auto storyCamera = get_StoryCamera->Invoke<UnityResolve::UnityType::Camera*>(modelSpace);
-        if (!initialCameraRendered) {
-            sanitizeFreeCamera(storyCamera);
-        }
+//        if (!initialCameraRendered) {
+//            sanitizeFreeCamera(storyCamera); // not working as expected
+//        }
         registerMainFreeCamera(storyCamera);
         registerCurrentCamera(storyCamera);
+        backgroundColorCameraCache = storyCamera;
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
@@ -397,6 +414,7 @@ namespace LinkuraLocal::HookCamera {
                 "UnityEngine.Transform::set_position_Injected(UnityEngine.Vector3&)"));
         ADD_HOOK(Unity_set_rotation_Injected, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Transform::set_rotation_Injected(UnityEngine.Quaternion&)"));
+        ADD_HOOK(Unity_camera_set_backgroundColor_Injected, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Camera::set_backgroundColor_Injected(UnityEngine.Color&)"));
         ADD_HOOK(Unity_get_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",
                                                                       "Camera", "get_fieldOfView"));
         ADD_HOOK(Unity_set_fieldOfView, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine",

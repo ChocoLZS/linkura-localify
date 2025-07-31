@@ -34,6 +34,18 @@ set(protobuf_BUILD_PROTOC_BINARIES OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(protobuf)
 
+# Fetch RE2
+FetchContent_Declare(
+  re2
+  GIT_REPOSITORY https://github.com/google/re2.git
+  GIT_TAG        2025-07-22
+  GIT_SHALLOW    TRUE
+)
+
+set(RE2_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(re2)
+
 find_package(xdl REQUIRED CONFIG)
 find_package(shadowhook REQUIRED CONFIG)
 
@@ -68,7 +80,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         LinkuraLocalify/hooks/HookLiveRender.cpp
         LinkuraLocalify/hooks/HookCamera.cpp
         LinkuraLocalify/hooks/HookShare.cpp
-#        LinkuraLocalify/hooks/HookStory.cpp
+        LinkuraLocalify/hooks/HookStory.cpp
         # Generated protobuf files
         build/linkura_messages.pb.cc
         )
@@ -76,6 +88,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 target_link_libraries(${CMAKE_PROJECT_NAME} xdl::xdl)
 target_link_libraries(${CMAKE_PROJECT_NAME} shadowhook::shadowhook)
 target_link_libraries(${CMAKE_PROJECT_NAME} protobuf::libprotobuf-lite)
+target_link_libraries(${CMAKE_PROJECT_NAME} re2::re2)
 
 include_directories(LinkuraLocalify)
 include_directories(${CMAKE_SOURCE_DIR}/deps)

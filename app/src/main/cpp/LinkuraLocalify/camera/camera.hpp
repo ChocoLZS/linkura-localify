@@ -31,6 +31,7 @@ namespace L4Camera {
     extern UnityResolve::UnityType::Vector3 followPosOffset;
     extern int followCharaIndex;
     extern LinkuraLocal::Misc::CSEnum bodyPartsEnum;
+    extern UnityResolve::UnityType::Color backgroundColor;
 
     float CheckNewY(const UnityResolve::UnityType::Vector3& targetPos, const bool recordY,
                     LinkuraLocal::Misc::FixedSizeQueue<float>& recordsY);
