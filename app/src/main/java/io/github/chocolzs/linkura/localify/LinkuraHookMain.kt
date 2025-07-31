@@ -215,6 +215,23 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             }
         }
     }
+    
+    private val cameraBackgroundColorHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val colorMessage = CameraBackgroundColor.parseFrom(payload)
+                Log.i(TAG, "Received camera background color: R=${colorMessage.red}, G=${colorMessage.green}, B=${colorMessage.blue}, A=${colorMessage.alpha}")
+                
+                // Call native function to set camera background color
+                setCameraBackgroundColor(colorMessage.red, colorMessage.green, colorMessage.blue, colorMessage.alpha)
+                Log.i(TAG, "Camera background color updated successfully")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing camera background color", e)
+                false
+            }
+        }
+    }
 
     private fun onStartHandler() {
         socketClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
@@ -487,6 +504,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_CAMERA_INFO, cameraInfoOverlayControlHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_POSITION_SET_REQUEST, archivePositionSetHandler)
+        messageRouter.registerHandler(MessageType.CAMERA_BACKGROUND_COLOR, cameraBackgroundColorHandler)
         
         // Add client handler and start client
         socketClient.addMessageHandler(socketClientHandler)
@@ -768,6 +786,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         @JvmStatic
         external fun setArchivePosition(seconds: Float)
+        
+        @JvmStatic
+        external fun setCameraBackgroundColor(red: Float, green: Float, blue: Float, alpha: Float)
         
         @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic

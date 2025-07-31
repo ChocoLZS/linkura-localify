@@ -71,6 +71,7 @@ namespace LinkuraLocal::HookMain {
         HookLiveRender::Install(hookInstaller);
         HookCamera::Install(hookInstaller);
         HookShare::Install(hookInstaller);
+        HookStory::Install(hookInstaller);
     }
     // 77 2640 5000
 

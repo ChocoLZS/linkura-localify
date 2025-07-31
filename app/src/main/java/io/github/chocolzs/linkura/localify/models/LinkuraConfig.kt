@@ -18,5 +18,10 @@ data class LinkuraConfig (
     var removeRenderImageCover: Boolean = false,
     var avoidCharacterExit: Boolean = false,
 
+    var storyHideBackground: Boolean = false,
+    var storyHideTransition: Boolean = false,
+    var storyHideNonCharacter3d: Boolean = false,
+    var storyHideDof: Boolean = false,
+
     var pf: Boolean = false
 )
