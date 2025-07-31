@@ -74,6 +74,10 @@ message ConfigUpdate {
   optional int32 target_frame_rate = 11;
   optional bool remove_render_image_cover = 12;
   optional bool avoid_character_exit = 13;
+  optional bool story_hide_background = 14;
+  optional bool story_hide_transition = 15;
+  optional bool story_hide_non_character_3d = 16;
+  optional bool story_hide_dof = 17;
 }
 
 // Overlay control actions

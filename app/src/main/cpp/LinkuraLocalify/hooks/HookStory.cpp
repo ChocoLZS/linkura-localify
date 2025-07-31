@@ -1,4 +1,5 @@
 #include "../HookMain.h"
+#include "../config/Config.hpp"
 #include <re2/re2.h>
 #include <string>
 
@@ -20,15 +21,23 @@ namespace LinkuraLocal::HookStory {
         Log::DebugFmt("StoryScene_LoadStoryData HOOKED, %s", fileName->ToString().c_str());
         auto content = StoryScene_LoadStoryData_Orig(fileName, mtd);
         auto content_str = content->ToString();
-        content_str = regex_replace(content_str, "#?\\[?背景(表示|移動|回転)[^\\n]*\\n", ""); // 隐藏背景
-        content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", ""); // 隐藏各样背景
+        if (Config::storyHideBackground) {
+            content_str = regex_replace(content_str, "#?\\[?背景(表示|移動|回転)[^\\n]*\\n", ""); // 隐藏背景
+            content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", ""); // 隐藏背景
+        }
 
-        content_str = regex_replace(content_str, "[^\\n]*暗転_イン[^\\n]*\\n", ""); // 隐藏部分过渡
-        content_str = regex_replace(content_str, "[^\\n]*###[^\\n]*\\n", "");
+        if (Config::storyHideTransition) {
+            content_str = regex_replace(content_str, "[^\\n]*暗転_イン[^\\n]*\\n", ""); // 隐藏过渡
+            content_str = regex_replace(content_str, "[^\\n]*###[^\\n]*\\n", ""); // 隐藏过渡
+        }
 
-        content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");         // 隐藏非角色3d
+        if (Config::storyHideNonCharacter3d) {
+            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");         // 隐藏非角色3d
+        }
 
-        content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", ""); // 隐藏景深
+        if (Config::storyHideDof) {
+            content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", ""); // 隐藏景深
+        }
         content = Il2cppUtils::Il2CppString::New(content_str);
         return content;
     }

@@ -266,7 +266,7 @@ fun ColorPicker(
                             .fillMaxHeight()
                     ) {
                         Text(
-                            text = stringResource(R.string.color_picker_presets),
+                            text = stringResource(R.string.overlay_color_picker_presets),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 6.dp),
@@ -488,7 +488,7 @@ private fun ColorSelectionArea(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.color_picker_title),
+                    text = stringResource(R.string.overlay_color_picker_title),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -608,7 +608,7 @@ private fun PresetColorsArea(
 ) {
     Column {
         Text(
-            text = stringResource(R.string.color_picker_preset_colors),
+            text = stringResource(R.string.overlay_color_picker_preset_colors),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 6.dp)
@@ -645,7 +645,7 @@ private fun ButtonArea(
     ) {
         GakuButton(
             onClick = onCancel,
-            text = stringResource(R.string.color_picker_cancel),
+            text = stringResource(R.string.overlay_color_picker_cancel),
             modifier = Modifier
                 .weight(1f)
                 .height(48.dp),
@@ -655,7 +655,7 @@ private fun ButtonArea(
    
         GakuButton(
             onClick = onConfirm,
-            text = stringResource(R.string.color_picker_confirm),
+            text = stringResource(R.string.overlay_color_picker_confirm),
             modifier = Modifier
                 .weight(1f)
                 .height(48.dp),

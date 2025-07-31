@@ -29,6 +29,10 @@ interface ConfigListener {
     fun onDumpTextChanged(value: Boolean)
     fun onRemoveRenderImageCoverChanged(value: Boolean)
     fun onAvoidCharacterExitChanged(value: Boolean)
+    fun onStoryHideBackgroundChanged(value: Boolean)
+    fun onStoryHideTransitionChanged(value: Boolean)
+    fun onStoryHideNonCharacter3dChanged(value: Boolean)
+    fun onStoryHideDofChanged(value: Boolean)
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -170,6 +174,30 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onAvoidCharacterExitChanged(value: Boolean) {
         config.avoidCharacterExit = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onStoryHideBackgroundChanged(value: Boolean) {
+        config.storyHideBackground = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onStoryHideTransitionChanged(value: Boolean) {
+        config.storyHideTransition = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onStoryHideNonCharacter3dChanged(value: Boolean) {
+        config.storyHideNonCharacter3d = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onStoryHideDofChanged(value: Boolean) {
+        config.storyHideDof = value
         saveConfig()
         sendConfigUpdate(config)
     }

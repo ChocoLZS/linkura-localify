@@ -122,9 +122,15 @@
     <string name="overlay.camera_info.crash_warning">Warning: When using free camera with camera info display enabled during With×MEETS playback, chapter jumps and custom time jumps may cause crashes.</string>
     
     <!-- Color Picker -->
-    <string name="color_picker_title">Background Color</string>
-    <string name="color_picker_presets">Presets</string>
-    <string name="color_picker_confirm">Confirm</string>
-    <string name="color_picker_cancel">Cancel</string>
-    <string name="color_picker_preset_colors">Preset Colors</string>
+    <string name="overlay.color_picker.title">Background Color</string>
+    <string name="overlay.color_picker.presets">Presets</string>
+    <string name="overlay.color_picker.confirm">Confirm</string>
+    <string name="overlay.color_picker.cancel">Cancel</string>
+    <string name="overlay.color_picker.preset_colors">Preset Colors</string>
+
+    <string name="config.story.settings_title">Story Settings</string>
+    <string name="config.story.hide_background">Hide Background</string>
+    <string name="config.story.hide_transition">Hide Transition</string>
+    <string name="config.story.hide_non_character_3d">Hide Non-Character 3D</string>
+    <string name="config.story.hide_dof">Hide Depth of Field</string>
 </resources>
