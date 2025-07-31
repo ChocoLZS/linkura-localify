@@ -1,6 +1,7 @@
 package io.github.chocolzs.linkura.localify.ui.overlay
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -44,6 +46,8 @@ import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.ui.components.ColorPicker
 
+import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
+
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     companion object {
         private const val TAG = "OverlayService"
@@ -51,12 +55,12 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private var windowManager: WindowManager? = null
     private var toolbarView: View? = null
-    private var colorPickerView: View? = null
     private val handler = Handler(Looper.getMainLooper())
     
     // Child services
     private var cameraOverlayService: CameraDataOverlayService? = null
     private var archiveOverlayService: ArchiveOverlayService? = null
+    private var colorPickerOverlayService: ColorPickerOverlayService? = null
     
     // UI state
     private var isCameraOverlayVisible by mutableStateOf(false)
@@ -98,6 +102,10 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
 
+        val sharedPrefs = getSharedPreferences("overlay_settings", Context.MODE_PRIVATE)
+        val colorInt = sharedPrefs.getInt("background_color", Color.Black.toArgb())
+        currentBackgroundColor = Color(colorInt)
+
         try {
             createToolbarOverlay()
             setupSocketServer()
@@ -105,6 +113,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             // Create child services
             cameraOverlayService = CameraDataOverlayService(this)
             archiveOverlayService = ArchiveOverlayService(this)
+            colorPickerOverlayService = ColorPickerOverlayService(this)
             
             // Move to STARTED state after successful initialization
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -129,15 +138,13 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             // Clean up child services
             cameraOverlayService?.destroy()
             archiveOverlayService?.destroy()
+            colorPickerOverlayService?.destroy()
             
             // Clean up socket server
             socketServer.removeMessageHandler(socketServerHandler)
             messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
 
             toolbarView?.let {
-                windowManager?.removeView(it)
-            }
-            colorPickerView?.let {
                 windowManager?.removeView(it)
             }
         } catch (e: Exception) {
@@ -219,7 +226,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 setViewTreeLifecycleOwner(this@OverlayService)
                 setViewTreeSavedStateRegistryOwner(this@OverlayService)
                 setContent {
-                    OverlayToolbar()
+                    LocalifyTheme {
+                        OverlayToolbar()
+                    }
                 }
                 
                 // Add touch listener for dragging
@@ -314,7 +323,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 ) {
                     IconButton(
                         onClick = {
-                            toggleColorPicker()
+                            toggleColorPickerOverlay()
                         },
                         modifier = Modifier.fillMaxSize()
                     ) {
@@ -374,101 +383,23 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
     }
     
-    private fun toggleColorPicker() {
+    private fun toggleColorPickerOverlay() {
         isColorPickerVisible = !isColorPickerVisible
         if (isColorPickerVisible) {
-            createColorPickerOverlay()
+            colorPickerOverlayService?.show(currentBackgroundColor)
         } else {
-            removeColorPickerOverlay()
+            colorPickerOverlayService?.hide()
         }
     }
-    
-    private fun createColorPickerOverlay() {
-        try {
-            if (colorPickerView != null) {
-                return // Already created
-            }
-            
-            val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_PHONE
-            }
 
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                layoutFlag,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                PixelFormat.TRANSLUCENT
-            )
+    fun onColorChanged(color: Color) {
+        currentBackgroundColor = color
+        val sharedPrefs = getSharedPreferences("overlay_settings", Context.MODE_PRIVATE)
+        with(sharedPrefs.edit()) {
+            putInt("background_color", color.toArgb())
+            apply()
+        }
 
-            params.gravity = Gravity.CENTER
-            
-            colorPickerView = ComposeView(this).apply {
-                setViewTreeLifecycleOwner(this@OverlayService)
-                setViewTreeSavedStateRegistryOwner(this@OverlayService)
-                setContent {
-                    ColorPickerOverlay()
-                }
-            }
-            
-            windowManager?.addView(colorPickerView, params)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error creating color picker overlay", e)
-        }
-    }
-    
-    private fun removeColorPickerOverlay() {
-        try {
-            colorPickerView?.let {
-                windowManager?.removeView(it)
-                colorPickerView = null
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error removing color picker overlay", e)
-        }
-    }
-    
-    @Composable
-    private fun ColorPickerOverlay() {
-        // Dimmed background
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
-                .clickable { 
-                    // Close on outside click
-                    isColorPickerVisible = false
-                    removeColorPickerOverlay()
-                }
-        ) {
-            // Color picker content
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .clickable(enabled = false) { /* Prevent click propagation */ }
-            ) {
-                ColorPicker(
-                    onColorSelected = { color ->
-                        currentBackgroundColor = color
-                        onColorChanged(color)
-                        isColorPickerVisible = false
-                        removeColorPickerOverlay()
-                    },
-                    onDismiss = {
-                        isColorPickerVisible = false
-                        removeColorPickerOverlay()
-                    },
-                    initialColor = currentBackgroundColor
-                )
-            }
-        }
-    }
-    
-    private fun onColorChanged(color: Color) {
         // Send color change message via socket
         try {
             val colorMessage = CameraBackgroundColor.newBuilder()
@@ -498,6 +429,15 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     fun resetArchiveOverlayState() {
         isArchiveOverlayVisible = false
     }
+
+    fun resetColorPickerOverlayState() {
+        isColorPickerVisible = false
+    }
+
+    fun resetCameraOverlayState() {
+        isCameraOverlayVisible = false
+    }
+
     fun getLifecycleOwnerInstance(): LifecycleOwner = this
     fun getSavedStateRegistryOwnerInstance(): SavedStateRegistryOwner = this
 }

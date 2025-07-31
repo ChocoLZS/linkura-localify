@@ -24,11 +24,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.github.chocolzs.linkura.localify.R
+import io.github.chocolzs.linkura.localify.ui.theme.HasuBg
+import io.github.chocolzs.linkura.localify.ui.theme.HasuStrong
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectDragGestures
 import kotlin.math.*
@@ -38,6 +40,7 @@ import kotlin.math.roundToInt
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.style.TextOverflow
 import kotlin.math.abs
 
@@ -110,24 +113,41 @@ fun ColorPicker(
                             modifier = Modifier.weight(1f)
                         ) {
                             // Visual color picker for landscape
-                            ColorRectPicker(
-                                selectedColor = selectedColor,
-                                onColorChange = { color ->
-                                    selectedColor = color
-                                    redValue = (color.red * 255).roundToInt()
-                                    greenValue = (color.green * 255).roundToInt()
-                                    blueValue = (color.blue * 255).roundToInt()
-                                    alphaValue = (color.alpha * 255).roundToInt()
-                                    hexValue = colorToHex(color)
-                                    val hsl = colorToHSL(color)
-                                    hueValue = hsl.first
-                                    saturationValue = hsl.second
-                                    lightnessValue = hsl.third
-                                },
-                                modifier = Modifier
-                                    .height(120.dp)
-                                    .padding(bottom = 12.dp)
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().height(80.dp).padding(bottom = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SaturationLightnessPicker(
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    hue = hueValue,
+                                    selectedColor = selectedColor,
+                                    onSaturationValueChange = { saturation, value ->
+                                        val color = hsvToColor(hueValue, saturation, value, alphaValue / 255f)
+                                        selectedColor = color
+                                        redValue = (color.red * 255).roundToInt()
+                                        greenValue = (color.green * 255).roundToInt()
+                                        blueValue = (color.blue * 255).roundToInt()
+                                        hexValue = colorToHex(color)
+                                        val (_, newSaturation, newLightness) = colorToHSL(color)
+                                        saturationValue = newSaturation
+                                        lightnessValue = newLightness
+                                    }
+                                )
+                                HueRingPicker(
+                                    hue = hueValue,
+                                    selectedColor = selectedColor,
+                                    onHueChange = { hue ->
+                                        hueValue = hue
+                                        val color = hslToColor(hue, saturationValue, lightnessValue, alphaValue / 255f)
+                                        selectedColor = color
+                                        redValue = (color.red * 255).roundToInt()
+                                        greenValue = (color.green * 255).roundToInt()
+                                        blueValue = (color.blue * 255).roundToInt()
+                                        hexValue = colorToHex(color)
+                                    }
+                                )
+                            }
                             
                             // Color selection area with sliders
                             ColorSelectionArea(
@@ -629,171 +649,121 @@ private fun ButtonArea(
             modifier = Modifier
                 .weight(1f)
                 .height(48.dp),
-            bgColors = listOf(Color(0xFFF0F0F0), Color(0xFFE0E0E0)),
-            textColor = Color.Black
+            bgColors = listOf(Color(0xFFF9F9F9), Color(0xFFF0F0F0)),
+            textColor = Color(0xFF111111)
         )
-        
+   
         GakuButton(
             onClick = onConfirm,
             text = stringResource(R.string.color_picker_confirm),
             modifier = Modifier
                 .weight(1f)
-                .height(48.dp)
+                .height(48.dp),
         )
     }
 }
 
 @Composable
-private fun ColorRectPicker(
+private fun SaturationLightnessPicker(
+    hue: Float,
     selectedColor: Color,
-    onColorChange: (Color) -> Unit,
+    onSaturationValueChange: (Float, Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hsl = colorToHSL(selectedColor)
-    var currentHue by remember { mutableStateOf(hsl.first) }
-    var currentSaturation by remember { mutableStateOf(hsl.second) }
-    var currentLightness by remember { mutableStateOf(hsl.third) }
-    
-    // Update current values when selectedColor changes externally
-    LaunchedEffect(selectedColor) {
-        val newHsl = colorToHSL(selectedColor)
-        currentHue = newHsl.first
-        currentSaturation = newHsl.second
-        currentLightness = newHsl.third
-    }
-    
-    Column(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        // Saturation-Lightness picker (main color area)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f)
-                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                .clip(RoundedCornerShape(4.dp))
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                val newSaturation = (offset.x / size.width).coerceIn(0f, 1f)
-                                val newLightness = 1f - (offset.y / size.height).coerceIn(0f, 1f)
-                                currentSaturation = newSaturation
-                                currentLightness = newLightness
-                                val color = hslToColor(currentHue, currentSaturation, currentLightness, selectedColor.alpha)
-                                onColorChange(color)
-                            }
-                        ) { change, _ ->
-                            val newSaturation = (change.position.x / size.width).coerceIn(0f, 1f)
-                            val newLightness = 1f - (change.position.y / size.height).coerceIn(0f, 1f)
-                            currentSaturation = newSaturation
-                            currentLightness = newLightness
-                            val color = hslToColor(currentHue, currentSaturation, currentLightness, selectedColor.alpha)
-                            onColorChange(color)
-                        }
-                    }
-            ) {
-                val width = size.width
-                val height = size.height
-                val step = 4 // Pixel step to reduce rendering load
-                
-                // Draw saturation-lightness gradient
-                for (x in 0 until width.toInt() step step) {
-                    for (y in 0 until height.toInt() step step) {
-                        val saturation = x / width
-                        val lightness = 1f - (y / height)
-                        val color = hslToColor(currentHue, saturation, lightness, 1f)
-                        
-                        this.drawRect(
-                            color = color,
-                            topLeft = Offset(x.toFloat(), y.toFloat()),
-                            size = androidx.compose.ui.geometry.Size(step.toFloat(), step.toFloat())
-                        )
-                    }
-                }
-                
-                // Draw selection indicator
-                val indicatorX = currentSaturation * width
-                val indicatorY = (1f - currentLightness) * height
-                
-                // White circle outline
-                this.drawCircle(
-                    color = Color.White,
-                    radius = 8f,
-                    center = Offset(indicatorX, indicatorY)
-                )
-                // Black circle inside
-                this.drawCircle(
-                    color = Color.Black,
-                    radius = 6f,
-                    center = Offset(indicatorX, indicatorY)
-                )
+    BoxWithConstraints(modifier = modifier) {
+        val width = constraints.maxWidth.toFloat()
+        val height = constraints.maxHeight.toFloat()
+
+        val horizontalGradient = Brush.horizontalGradient(
+            colors = listOf(Color.White, hsvToColor(hue, 1f, 1f))
+        )
+        val verticalGradient = Brush.verticalGradient(
+            colors = listOf(Color.Transparent, Color.Black)
+        )
+
+        var (h, s, v) = colorToHSV(selectedColor)
+
+        Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+            detectDragGestures {
+                change, _ ->
+                val newSaturation = (change.position.x / width).coerceIn(0f, 1f)
+                val newValue = 1f - (change.position.y / height).coerceIn(0f, 1f)
+                onSaturationValueChange(newSaturation, newValue)
             }
+        }) {
+            drawRect(brush = horizontalGradient)
+            drawRect(brush = verticalGradient)
+
+            // Draw indicator
+            val indicatorX = s * width
+            val indicatorY = (1f - v) * height
+            drawCircle(
+                color = Color.White,
+                radius = 8f,
+                center = Offset(indicatorX, indicatorY),
+                style = Stroke(width = 2f)
+            )
+            drawCircle(
+                color = selectedColor,
+                radius = 6f,
+                center = Offset(indicatorX, indicatorY)
+            )
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Hue strip
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(20.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                .clip(RoundedCornerShape(4.dp))
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                val newHue = (offset.x / size.width * 360f).coerceIn(0f, 360f)
-                                currentHue = newHue
-                                val color = hslToColor(currentHue, currentSaturation, currentLightness, selectedColor.alpha)
-                                onColorChange(color)
-                            }
-                        ) { change, _ ->
-                            val newHue = (change.position.x / size.width * 360f).coerceIn(0f, 360f)
-                            currentHue = newHue
-                            val color = hslToColor(currentHue, currentSaturation, currentLightness, selectedColor.alpha)
-                            onColorChange(color)
-                        }
-                    }
-            ) {
-                val width = size.width
-                val height = size.height
-                val step = 2 // Smaller step for hue strip
-                
-                // Draw hue gradient
-                for (x in 0 until width.toInt() step step) {
-                    val hue = (x / width) * 360f
-                    val color = hslToColor(hue, 1f, 0.5f, 1f)
-                    
-                    this.drawRect(
-                        color = color,
-                        topLeft = Offset(x.toFloat(), 0f),
-                        size = androidx.compose.ui.geometry.Size(step.toFloat(), height)
-                    )
-                }
-                
-                // Draw hue indicator
-                val indicatorX = (currentHue / 360f) * width
-                this.drawLine(
-                    color = Color.White,
-                    start = Offset(indicatorX, 0f),
-                    end = Offset(indicatorX, height),
-                    strokeWidth = 3f
-                )
-                this.drawLine(
-                    color = Color.Black,
-                    start = Offset(indicatorX, 0f),
-                    end = Offset(indicatorX, height),
-                    strokeWidth = 1f
-                )
+    }
+}
+
+@Composable
+private fun HueRingPicker(
+    hue: Float,
+    selectedColor: Color,
+    onHueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val ringWidth = 20.dp
+    BoxWithConstraints(modifier = modifier.size(80.dp)) {
+        val diameter = min(constraints.maxWidth, constraints.maxHeight).toFloat()
+        val outerRadius = diameter / 2f
+        val center = Offset(outerRadius, outerRadius)
+
+        val hueColors = List(361) { i -> hslToColor(i.toFloat(), 1f, 0.5f) }
+        val sweepGradient = Brush.sweepGradient(colors = hueColors, center = center)
+
+        Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+            detectDragGestures {
+                change, _ ->
+                val dx = change.position.x - center.x
+                val dy = change.position.y - center.y
+                val newHue = (atan2(dy, dx) * (180f / PI.toFloat()) + 360f) % 360f
+                onHueChange(newHue)
             }
+        }) {
+            val ringWidthPx = ringWidth.toPx()
+            val ringCenterRadius = outerRadius - ringWidthPx / 2f
+
+            // Draw the ring
+            drawCircle(
+                brush = sweepGradient,
+                radius = ringCenterRadius, // Draw at the center of the ring
+                style = Stroke(width = ringWidthPx)
+            )
+
+            // Draw indicator
+            val angle = hue * (PI.toFloat() / 180f)
+            val indicatorX = center.x + cos(angle.toDouble()).toFloat() * ringCenterRadius // Position on the center of the ring
+            val indicatorY = center.y + sin(angle.toDouble()).toFloat() * ringCenterRadius
+
+            // The indicator itself
+            drawCircle(
+                color = Color.White,
+                radius = ringWidthPx / 2f,
+                center = Offset(indicatorX, indicatorY),
+                style = Stroke(width = 4f)
+            )
+            drawCircle(
+                color = selectedColor,
+                radius = ringWidthPx / 2f - 2f,
+                center = Offset(indicatorX, indicatorY)
+            )
         }
     }
 }
@@ -906,6 +876,50 @@ private fun hslToColor(h: Float, s: Float, l: Float, a: Float = 1f): Color {
         (r * 255).toInt().coerceIn(0, 255),
         (g * 255).toInt().coerceIn(0, 255),
         (b * 255).toInt().coerceIn(0, 255),
+        (a * 255).toInt().coerceIn(0, 255)
+    )
+}
+
+private fun colorToHSV(color: Color): Triple<Float, Float, Float> {
+    val r = color.red
+    val g = color.green
+    val b = color.blue
+
+    val max = maxOf(r, g, b)
+    val min = minOf(r, g, b)
+    val delta = max - min
+
+    val hue = when {
+        delta == 0f -> 0f
+        max == r -> 60 * (((g - b) / delta) % 6)
+        max == g -> 60 * (((b - r) / delta) + 2)
+        else -> 60 * (((r - g) / delta) + 4)
+    }
+
+    val saturation = if (max == 0f) 0f else delta / max
+    val value = max
+
+    return Triple(hue, saturation, value)
+}
+
+private fun hsvToColor(h: Float, s: Float, v: Float, a: Float = 1f): Color {
+    val c = v * s
+    val x = c * (1 - abs((h / 60) % 2 - 1))
+    val m = v - c
+
+    val (r, g, b) = when {
+        h < 60 -> Triple(c, x, 0f)
+        h < 120 -> Triple(x, c, 0f)
+        h < 180 -> Triple(0f, c, x)
+        h < 240 -> Triple(0f, x, c)
+        h < 300 -> Triple(x, 0f, c)
+        else -> Triple(c, 0f, x)
+    }
+
+    return Color(
+        ((r + m) * 255).toInt().coerceIn(0, 255),
+        ((g + m) * 255).toInt().coerceIn(0, 255),
+        ((b + m) * 255).toInt().coerceIn(0, 255),
         (a * 255).toInt().coerceIn(0, 255)
     )
 }

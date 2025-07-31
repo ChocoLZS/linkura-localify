@@ -122,7 +122,7 @@
     <string name="overlay.camera_info.crash_warning">Warning: When using free camera with camera info display enabled during With×MEETS playback, chapter jumps and custom time jumps may cause crashes.</string>
     
     <!-- Color Picker -->
-    <string name="color_picker_title">Color Selection</string>
+    <string name="color_picker_title">Background Color</string>
     <string name="color_picker_presets">Presets</string>
     <string name="color_picker_confirm">Confirm</string>
     <string name="color_picker_cancel">Cancel</string>

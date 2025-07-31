@@ -369,7 +369,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="overlay.camera_info.crash_warning">注意：With×MEETS再生中にフリーカメラを使用し、カメラ情報表示を有効にしている場合、チャプタージャンプやカスタム時間ジャンプでクラッシュする可能性があります。</string>
     
     <!-- Color Picker -->
-    <string name="color_picker_title">色選択</string>
+    <string name="color_picker_title">背景色選択</string>
     <string name="color_picker_presets">プリセット</string>
     <string name="color_picker_confirm">確認</string>
     <string name="color_picker_cancel">キャンセル</string>

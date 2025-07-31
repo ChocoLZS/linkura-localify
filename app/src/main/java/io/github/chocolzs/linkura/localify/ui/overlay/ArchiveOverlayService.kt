@@ -25,6 +25,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
+import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 import kotlin.math.max
 import kotlin.math.min
 
@@ -157,7 +158,9 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
             setViewTreeLifecycleOwner(parentService.getLifecycleOwnerInstance())
             setViewTreeSavedStateRegistryOwner(parentService.getSavedStateRegistryOwnerInstance())
             setContent {
-                ArchiveProgressOverlay()
+                LocalifyTheme {
+                    ArchiveProgressOverlay()
+                }
             }
             
             // Add touch listener for window dragging (avoid progress bar area)

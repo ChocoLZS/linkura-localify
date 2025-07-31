@@ -122,7 +122,7 @@
     <string name="overlay.camera_info.crash_warning">注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。</string>
     
     <!-- Color Picker -->
-    <string name="color_picker_title">颜色选择</string>
+    <string name="color_picker_title">背景颜色选择</string>
     <string name="color_picker_presets">预设</string>
     <string name="color_picker_confirm">确认</string>
     <string name="color_picker_cancel">取消</string>
