@@ -5,6 +5,8 @@
 #include <deque>
 #include <numeric>
 #include <vector>
+#include <set>
+#include <unordered_set>
 
 #include "../platformDefine.hpp"
 
@@ -85,6 +87,77 @@ namespace LinkuraLocal {
             T sum;
         };
 
+        template <typename T>
+        class IndexedSet {
+        private:
+            std::vector<T> data;                    // 存储所有值，支持下标访问
+            std::unordered_set<T> lookup;           // 快速查找是否存在
+            size_t currentIndex = 0;                // 当前索引
+
+        public:
+            void initialize(const std::vector<T>& items) {
+                data = items;
+                lookup.clear();
+                lookup.insert(items.begin(), items.end());
+                currentIndex = 0;
+            }
+
+            bool contains(const T& value) const {
+                return lookup.find(value) != lookup.end();
+            }
+
+            void add(const T& value) {
+                if (!contains(value)) {
+                    data.push_back(value);
+                    lookup.insert(value);
+                }
+            }
+
+            const T& operator[](size_t index) const {
+                return data[index];
+            }
+
+            T& operator[](size_t index) {
+                return data[index];
+            }
+
+            const T& getCurrentValue() const {
+                return data[currentIndex];
+            }
+
+            void next() {
+                currentIndex = (currentIndex + 1) % data.size();
+            }
+
+            void prev() {
+                currentIndex = (currentIndex == 0) ? data.size() - 1 : currentIndex - 1;
+            }
+
+            void setCurrentIndex(size_t index) {
+                if (index < data.size()) {
+                    currentIndex = index;
+                }
+            }
+
+            [[nodiscard]] size_t getCurrentIndex() const {
+                return currentIndex;
+            }
+
+            [[nodiscard]] size_t size() const {
+                return data.size();
+            }
+
+            void clear() {
+                data.clear();
+                lookup.clear();
+                currentIndex = 0;
+            }
+
+            void finalize() {
+                this->clear();
+            }
+        };
+
         namespace StringFormat {
             std::string stringFormatString(const std::string& fmt, const std::vector<std::string>& vec);
             std::vector<std::string> split(const std::string& str, char delimiter);
@@ -94,5 +167,7 @@ namespace LinkuraLocal {
         namespace Time {
             long long parseISOTime(const std::string& isoTime);
         }
+
+
     }
 }
