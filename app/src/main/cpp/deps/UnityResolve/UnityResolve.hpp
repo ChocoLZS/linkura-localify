@@ -868,6 +868,8 @@ public:
 		struct Animator;
 		struct CapsuleCollider;
 		struct BoxCollider;
+		template <typename... TItems>
+		struct ValueTuple;
 
 		struct Vector3 {
 			float x, y, z;
@@ -2660,6 +2662,221 @@ public:
 				return nullptr;
 			}
 		};
+
+		// ValueTuple 基础模板 - 不继承 Object，直接作为值类型
+		template <typename... TItems>
+		struct ValueTuple {
+			static_assert(sizeof...(TItems) >= 1 && sizeof...(TItems) <= 8, "ValueTuple supports 1 to 8 items");
+		};
+
+		// ValueTuple 特化版本 - 匹配 IL2CPP 的实际内存布局
+		template <typename T1>
+		struct ValueTuple<T1> {
+			T1 Item1;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1) : Item1(item1) {}
+			
+			// 安全的字段访问
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+		};
+
+		template <typename T1, typename T2>
+		struct ValueTuple<T1, T2> {
+			T1 Item1;
+			T2 Item2;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2) : Item1(item1), Item2(item2) {}
+			
+			// 安全的字段访问
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+		};
+
+		template <typename T1, typename T2, typename T3>
+		struct ValueTuple<T1, T2, T3> {
+			T1 Item1;
+			T2 Item2;
+			T3 Item3;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2, T3 item3) : Item1(item1), Item2(item2), Item3(item3) {}
+			
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+			auto GetItem3() -> T3& { return Item3; }
+			auto GetItem3() const -> const T3& { return Item3; }
+		};
+
+		template <typename T1, typename T2, typename T3, typename T4>
+		struct ValueTuple<T1, T2, T3, T4> {
+			T1 Item1;
+			T2 Item2;
+			T3 Item3;
+			T4 Item4;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4) : Item1(item1), Item2(item2), Item3(item3), Item4(item4) {}
+			
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+			auto GetItem3() -> T3& { return Item3; }
+			auto GetItem3() const -> const T3& { return Item3; }
+			auto GetItem4() -> T4& { return Item4; }
+			auto GetItem4() const -> const T4& { return Item4; }
+		};
+
+		template <typename T1, typename T2, typename T3, typename T4, typename T5>
+		struct ValueTuple<T1, T2, T3, T4, T5> {
+			T1 Item1;
+			T2 Item2;
+			T3 Item3;
+			T4 Item4;
+			T5 Item5;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) : Item1(item1), Item2(item2), Item3(item3), Item4(item4), Item5(item5) {}
+			
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+			auto GetItem3() -> T3& { return Item3; }
+			auto GetItem3() const -> const T3& { return Item3; }
+			auto GetItem4() -> T4& { return Item4; }
+			auto GetItem4() const -> const T4& { return Item4; }
+			auto GetItem5() -> T5& { return Item5; }
+			auto GetItem5() const -> const T5& { return Item5; }
+		};
+
+		template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+		struct ValueTuple<T1, T2, T3, T4, T5, T6> {
+			T1 Item1;
+			T2 Item2;
+			T3 Item3;
+			T4 Item4;
+			T5 Item5;
+			T6 Item6;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) : Item1(item1), Item2(item2), Item3(item3), Item4(item4), Item5(item5), Item6(item6) {}
+			
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+			auto GetItem3() -> T3& { return Item3; }
+			auto GetItem3() const -> const T3& { return Item3; }
+			auto GetItem4() -> T4& { return Item4; }
+			auto GetItem4() const -> const T4& { return Item4; }
+			auto GetItem5() -> T5& { return Item5; }
+			auto GetItem5() const -> const T5& { return Item5; }
+			auto GetItem6() -> T6& { return Item6; }
+			auto GetItem6() const -> const T6& { return Item6; }
+		};
+
+		template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+		struct ValueTuple<T1, T2, T3, T4, T5, T6, T7> {
+			T1 Item1;
+			T2 Item2;
+			T3 Item3;
+			T4 Item4;
+			T5 Item5;
+			T6 Item6;
+			T7 Item7;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) : Item1(item1), Item2(item2), Item3(item3), Item4(item4), Item5(item5), Item6(item6), Item7(item7) {}
+			
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+			auto GetItem3() -> T3& { return Item3; }
+			auto GetItem3() const -> const T3& { return Item3; }
+			auto GetItem4() -> T4& { return Item4; }
+			auto GetItem4() const -> const T4& { return Item4; }
+			auto GetItem5() -> T5& { return Item5; }
+			auto GetItem5() const -> const T5& { return Item5; }
+			auto GetItem6() -> T6& { return Item6; }
+			auto GetItem6() const -> const T6& { return Item6; }
+			auto GetItem7() -> T7& { return Item7; }
+			auto GetItem7() const -> const T7& { return Item7; }
+		};
+
+		template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename TRest>
+		struct ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> {
+			T1 Item1;
+			T2 Item2;
+			T3 Item3;
+			T4 Item4;
+			T5 Item5;
+			T6 Item6;
+			T7 Item7;
+			TRest Rest;
+			
+			ValueTuple() = default;
+			ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) : Item1(item1), Item2(item2), Item3(item3), Item4(item4), Item5(item5), Item6(item6), Item7(item7), Rest(rest) {}
+			
+			auto GetItem1() -> T1& { return Item1; }
+			auto GetItem1() const -> const T1& { return Item1; }
+			auto GetItem2() -> T2& { return Item2; }
+			auto GetItem2() const -> const T2& { return Item2; }
+			auto GetItem3() -> T3& { return Item3; }
+			auto GetItem3() const -> const T3& { return Item3; }
+			auto GetItem4() -> T4& { return Item4; }
+			auto GetItem4() const -> const T4& { return Item4; }
+			auto GetItem5() -> T5& { return Item5; }
+			auto GetItem5() const -> const T5& { return Item5; }
+			auto GetItem6() -> T6& { return Item6; }
+			auto GetItem6() const -> const T6& { return Item6; }
+			auto GetItem7() -> T7& { return Item7; }
+			auto GetItem7() const -> const T7& { return Item7; }
+			auto GetRest() -> TRest& { return Rest; }
+			auto GetRest() const -> const TRest& { return Rest; }
+		};
+
+		// 辅助函数：安全地从内存指针创建 ValueTuple 引用
+		template<typename T1, typename T2>
+		static auto CastToValueTuple(void* ptr) -> ValueTuple<T1, T2>* {
+			return reinterpret_cast<ValueTuple<T1, T2>*>(ptr);
+		}
+
+		// 专门为 string 和数组组合优化的访问函数
+		static auto GetStringFromValueTuple(void* valueTuplePtr) -> String* {
+			if (!valueTuplePtr) return nullptr;
+#if WINDOWS_MODE
+			if (IsBadReadPtr(valueTuplePtr, sizeof(void*))) return nullptr;
+#endif
+			try {
+				return *reinterpret_cast<String**>(valueTuplePtr);
+			} catch (...) {
+				return nullptr;
+			}
+		}
+
+		template<typename ArrayType>
+		static auto GetArrayFromValueTuple(void* valueTuplePtr) -> ArrayType* {
+			if (!valueTuplePtr) return nullptr;
+#if WINDOWS_MODE
+			if (IsBadReadPtr(valueTuplePtr, sizeof(void*) * 2)) return nullptr;
+#endif
+			try {
+				return *reinterpret_cast<ArrayType**>(
+					reinterpret_cast<uintptr_t>(valueTuplePtr) + sizeof(void*)
+				);
+			} catch (...) {
+				return nullptr;
+			}
+		}
 
 		template <typename Return, typename... Args>
 		static auto Invoke(const void* address, Args... args) -> Return {

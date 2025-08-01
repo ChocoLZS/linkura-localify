@@ -133,4 +133,6 @@
     <string name="config.story.hide_transition">隐藏过渡</string>
     <string name="config.story.hide_non_character_3d">隐藏非角色3d</string>
     <string name="config.story.hide_dof">隐藏景深</string>
+    <string name="config.story.vocal_text_duration_rate">小说声音文本持续倍率</string>
+    <string name="config.story.non_vocal_text_duration_rate">小说旁白文本持续倍率</string>
 </resources>

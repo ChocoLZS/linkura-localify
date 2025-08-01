@@ -33,6 +33,8 @@ interface ConfigListener {
     fun onStoryHideTransitionChanged(value: Boolean)
     fun onStoryHideNonCharacter3dChanged(value: Boolean)
     fun onStoryHideDofChanged(value: Boolean)
+    fun onStoryNovelVocalTextDurationRateChanged(value: Float)
+    fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -201,6 +203,17 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         saveConfig()
         sendConfigUpdate(config)
     }
+    override fun onStoryNovelVocalTextDurationRateChanged(value: Float) {
+        config.storyNovelVocalTextDurationRate = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+    override fun onStoryNovelNonVocalTextDurationRateChanged(value: Float) {
+        config.storyNovelNonVocalTextDurationRate = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
     override fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         programConfig.transRemoteZipUrl = s.toString()
         saveProgramConfig()
