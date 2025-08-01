@@ -5,6 +5,8 @@
 #include "../../build/linkura_messages.pb.h"
 #include "thread"
 #include "chrono"
+#include "functional"
+#include "vector"
 
 namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera
@@ -360,6 +362,106 @@ namespace LinkuraLocal::HookCamera {
         return AvatarPool_AddIfAvatar_Orig(self, gameObject, method);
     }
 
+    void HideHead(UnityResolve::UnityType::GameObject* obj, const bool isFace) {
+        static UnityResolve::UnityType::GameObject* lastFaceObj = nullptr;
+        static UnityResolve::UnityType::GameObject* lastHairObj = nullptr;
+
+#define lastHidedObj (isFace ? lastFaceObj : lastHairObj)
+
+        static auto get_activeInHierarchy = reinterpret_cast<bool (*)(void*)>(
+                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::get_activeInHierarchy()"));
+
+        const auto isFirstPerson = L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON;
+
+//        if (isFirstPerson && obj) {
+        if (obj) {
+            if (obj == lastHidedObj) return;
+            if (lastHidedObj && IsNativeObjectAlive(lastHidedObj) && get_activeInHierarchy(lastHidedObj)) {
+                lastHidedObj->SetActive(true);
+            }
+            if (IsNativeObjectAlive(obj)) {
+                obj->SetActive(false);
+                lastHidedObj = obj;
+            }
+        }
+        else {
+            if (lastHidedObj && IsNativeObjectAlive(lastHidedObj)) {
+                lastHidedObj->SetActive(true);
+                lastHidedObj = nullptr;
+            }
+        }
+    }
+
+    void printChildren(UnityResolve::UnityType::Transform* obj, const std::string& obj_name) {
+        const auto childCount = obj->GetChildCount();
+        for (int i = 0;i < childCount; i++) {
+            auto child = obj->GetChild(i);
+            const auto childName = child->GetName();
+            Log::DebugFmt("%s child: %s", obj_name.c_str(), childName.c_str());
+        }
+    }
+    
+    void BreakSetActiveProtection(UnityResolve::UnityType::GameObject* gameObject, const std::string& obj_name) {
+        if (!gameObject || !IsNativeObjectAlive(gameObject)) return;
+        
+        Log::DebugFmt("🔓 Attempting to break SetActive protection on: %s", obj_name.c_str());
+        
+        // 方法1: 尝试直接调用Unity内部方法
+        static auto Unity_GameObject_SetActive_Injected = reinterpret_cast<void (*)(void*, bool)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::SetActive(System.Boolean)"));
+        
+        if (Unity_GameObject_SetActive_Injected) {
+            Log::DebugFmt("🔧 Trying direct Unity SetActive call...");
+            Unity_GameObject_SetActive_Injected(gameObject, false);
+            
+            // 验证是否成功
+            bool newState = gameObject->GetActiveSelf();
+            Log::DebugFmt("📊 After direct call: %s", newState ? "still active" : "SUCCESS - inactive");
+            
+            if (!newState) return; // 成功了就返回
+        }
+        
+        // 方法2: 尝试销毁对象
+        Log::DebugFmt("🔧 Trying to destroy object...");
+        static auto Unity_Object_Destroy = reinterpret_cast<void (*)(void*)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Object::Destroy(UnityEngine.Object)"));
+        
+        if (Unity_Object_Destroy) {
+            Unity_Object_Destroy(gameObject);
+            Log::DebugFmt("💥 Destroy called on: %s", obj_name.c_str());
+            return;
+        }
+        
+        // 方法3: 尝试修改Transform的scale为0
+        Log::DebugFmt("🔧 Trying to set scale to zero...");
+        auto transform = gameObject->GetTransform();
+        if (transform) {
+            UnityResolve::UnityType::Vector3 zeroScale{0.0f, 0.0f, 0.0f};
+            transform->SetLocalScale(zeroScale);
+            Log::DebugFmt("📏 Set scale to zero on: %s", obj_name.c_str());
+        }
+    }
+    
+    void AttemptMultipleHideMethods(UnityResolve::UnityType::Transform* transform, const std::string& level_name) {
+        if (!transform) return;
+        
+        auto gameObject = transform->GetGameObject();
+        if (!gameObject) return;
+        
+        Log::DebugFmt("🎯 Attempting multiple hide methods on: %s (%s)", transform->GetName().c_str(), level_name.c_str());
+        
+        // 方法1: 破解SetActive保护
+        BreakSetActiveProtection(gameObject, transform->GetName());
+
+//        // 方法2: 禁用渲染器（递归所有子对象）
+//        ForceHideAllRenderers(transform, level_name);
+//
+//        // 方法3: 移动到很远的位置
+//        UnityResolve::UnityType::Vector3 farAway{-999999.0f, -999999.0f, -999999.0f};
+//        transform->SetPosition(farAway);
+//        Log::DebugFmt("📍 Moved %s far away", transform->GetName().c_str());
+    }
+
     // ✅
     // 由于无法像学马一样获取管理器与，只能记录出现过的地址，并判断
     // 活动记录的无法及时清除退出渲染的FaceBonesCopier，但是问题不大
@@ -375,25 +477,141 @@ namespace LinkuraLocal::HookCamera {
 
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
-//        static auto origin_head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("originalHead");
-//        static auto left_eye_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("leftEye");
+        static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
+        static auto Unity_GameObject_SetActive_Injected = reinterpret_cast<void (*)(UnityResolve::UnityType::GameObject*, bool)>(
+                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::SetActive(System.Boolean)"));
+
+        static auto getChildByMultiLayerLambda = [&](UnityResolve::UnityType::Transform* parent, 
+                                                    const std::vector<std::function<bool(const std::string&)>>& predicates) -> std::vector<UnityResolve::UnityType::Transform*> {
+            std::vector<UnityResolve::UnityType::Transform*> currentLevel;
+            if (parent) {
+                currentLevel.push_back(parent);
+            }
+
+            for (const auto& predicate : predicates) {
+                std::vector<UnityResolve::UnityType::Transform*> nextLevel;
+                
+                for (auto* transform : currentLevel) {
+                    if (!transform) continue;
+                    
+                    for (int i = 0; i < transform->GetChildCount(); i++) {
+                        auto child = transform->GetChild(i);
+                        if (!child) continue;
+                        
+                        const auto childName = child->GetName();
+                        if (predicate(childName)) {
+                            nextLevel.push_back(child);
+                        }
+                    }
+                }
+                
+                currentLevel = std::move(nextLevel);
+                
+                // 如果某一层没有找到任何匹配的子对象，提前退出
+                if (currentLevel.empty()) {
+                    break;
+                }
+            }
+            
+            return currentLevel;
+        };
         if (!L4Camera::followCharaSet.contains(self)) {
             L4Camera::followCharaSet.add(self);
         }
         auto currentFace = L4Camera::followCharaSet.getCurrentValue();
         auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+        auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
         cacheTrans = headTrans;
         cacheRotation = cacheTrans->GetRotation();
         cachePosition = cacheTrans->GetPosition();
         cacheForward = cacheTrans->GetUp();
         cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
-//            Log::DebugFmt("headTrans: pos: %f %f %f, rot: %f %f %f %f, forward: %f %f %f, lookat: %f %f %f",
-//                          cachePosition.x, cachePosition.y, cachePosition.z,
-//                          cacheRotation.x, cacheRotation.y, cacheRotation.z, cacheRotation.w,
-//                          cacheForward.x, cacheForward.y, cacheForward.z,
-//                          cacheLookAt.x, cacheLookAt.y, cacheLookAt.z
-//                          );
+        auto modelParent = spineTrans->GetParent();
+        auto faceMeshes = getChildByMultiLayerLambda(modelParent, {
+                [](const std::string& childName) {
+                    return childName == "Mesh";
+                }
+        });
+        for (auto faceMesh : faceMeshes) {
+            Unity_GameObject_SetActive_Injected(faceMesh->GetGameObject(), false);
+        }
+        // model -> face_normal -> 3d_face -> 3d_costume
+        auto costume = modelParent->GetParent()->GetParent()->GetParent();
+        // 使用多层查找：costume -> SCSch* -> Model -> Mesh
+        auto hairResult = getChildByMultiLayerLambda(costume, {
+            [](const std::string& name) { return name.starts_with("SCSch"); },  // 第一层：查找SCSch开头的
+            [](const std::string& name) { return name == "Model"; },            // 第二层：查找Model
+            [](const std::string& name) { return name == "Mesh"; },
+            [](const std::string& name) { return name.starts_with("Hair"); }
+
+        });
+        for (auto hair : hairResult) {
+            Unity_GameObject_SetActive_Injected(hair->GetGameObject(), false);
+        }
+
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+    }
+
+    // not hooked
+    DEFINE_HOOK(void, CharacterEyeController_LastUpdate, (void* self, void* mtd)) {
+        Log::DebugFmt("CharacterEyeController_LastUpdate HOOKED, %p", self);
+        return CharacterEyeController_LastUpdate_Orig(self, mtd);
+    }
+
+    // story
+    DEFINE_HOOK(void, SubBoneController_LateUpdate, (void* self, void* mtd)) {
+//        Log::DebugFmt("SubBoneController_LateUpdate HOOKED, %p", self);
+        return SubBoneController_LateUpdate_Orig(self, mtd);
+    }
+
+    // not hooked
+    DEFINE_HOOK(void, ItemSyncTransform_SyncTransform, (void* self, UnityResolve::UnityType::Transform* bindBone, void* method)) {
+        Log::DebugFmt("ItemSyncTransform_SyncTransform HOOKED, %p", self);
+        return ItemSyncTransform_SyncTransform_Orig(self, bindBone, method);
+    }
+
+    //  not hooked
+    DEFINE_HOOK(void, ItemSyncTransform_SetupSyncTransform, (void* self,uint32_t c_id, UnityResolve::UnityType::Transform* bindBone, void* mtd)) {
+        Log::DebugFmt("ItemSyncTransform_SetupSyncTransform HOOKED, %p", self);
+        return ItemSyncTransform_SetupSyncTransform_Orig(self, c_id, bindBone, mtd);
+    }
+
+    DEFINE_HOOK(void*, SubBoneController_GetAllChildren, (Il2cppUtils::Il2CppObject* self,UnityResolve::UnityType::Transform* target,void* candidates , void* method)) {
+//        Log::DebugFmt("SubBoneController_GetAllChildren HOOKED, %p", self);
+//        Log::DebugFmt("Target transform name is %s", target->GetName().c_str());
+//        auto root = target->GetRoot();
+//        Log::DebugFmt("root transform name is %s", root->GetName().c_str());
+//        auto childCount = root->GetChildCount();
+//        Log::DebugFmt("root child count is %d", childCount);
+//        for (int i = 0;i < childCount; i++) {
+//            auto child = root->GetChild(i);
+//            Log::DebugFmt("root child %d is %s", i, child->GetName().c_str());
+//            if (child->GetName() == "Item_starflower") {
+//                child->GetGameObject()->SetActive(false);
+//            }
+//        }
+        return SubBoneController_GetAllChildren_Orig(self,target,candidates, method);
+    }
+
+    DEFINE_HOOK(void, FaceBonesCopier_Start, (void* self, void* mtd)) {
+        Log::DebugFmt("FaceBonesCopier_Start HOOKED");
+        return FaceBonesCopier_Start_Orig(self, mtd);
+    }
+
+    DEFINE_HOOK(void, ModelHandler_SetRendererEnable, (Il2cppUtils::Il2CppObject* self, bool enable, void* method)) {
+//        Log::DebugFmt("ModelHandler_SetRendererEnable HOOKED, %p, %s",self , enable ? "enable" : "disable");
+        return ModelHandler_SetRendererEnable_Orig(self, enable, method);
+    }
+
+    // not work
+    DEFINE_HOOK(void, CategorizedMeshRenderer_ctor, (Il2cppUtils::Il2CppObject* self, int32_t category, void* method)) {
+        Log::DebugFmt("CategorizedMeshRenderer_ctor HOOKED, category is %d", category);
+        return CategorizedMeshRenderer_ctor_Orig(self, category, method);
+    }
+
+    DEFINE_HOOK(UnityResolve::UnityType::Transform*, AvatarSettings_GetBoneTransform, (Il2cppUtils::Il2CppObject* self, int32_t humanBodyBones, void* method)) {
+        Log::DebugFmt("AvatarSettings_GetBoneTransform HOOKED, humanBodyBones is %d", humanBodyBones);
+        return AvatarSettings_GetBoneTransform_Orig(self, humanBodyBones, method);
     }
 
 #pragma endregion
@@ -416,8 +634,6 @@ namespace LinkuraLocal::HookCamera {
 //  useless ADD_HOOK(SwipeCamera_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "SwipeCamera", ".ctor"));
 
 #pragma endregion
-        ADD_HOOK(AvatarPool_AddIfAvatar, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "AvatarPool", "AddIfAvatar"));
-        ADD_HOOK(FaceBonesCopier_LastUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FaceBonesCopier", "LateUpdate"));
 #pragma region FreeCamera_ADD_HOOK
         ADD_HOOK(FesLiveFixedCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveFixedCamera", "GetCamera"));
         ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
@@ -442,8 +658,19 @@ namespace LinkuraLocal::HookCamera {
 //        ADD_HOOK(LiveContentsLoader_LoadLiveContentsAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveContentsLoader", "LoadLiveContentsAsync"));
 //        ADD_HOOK(CameraManager_RemoveCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "RemoveCamera"));
 #pragma region FirstPersonCamera
+        ADD_HOOK(AvatarPool_AddIfAvatar, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "AvatarPool", "AddIfAvatar"));
+        ADD_HOOK(CharacterEyeController_LastUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.CharacterAttention", "CharacterEyeController", "LateUpdate"));
+        ADD_HOOK(FaceBonesCopier_LastUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FaceBonesCopier", "LateUpdate"));
+        ADD_HOOK(SubBoneController_LateUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "SubBoneController", "LateUpdate"));
 
+        ADD_HOOK(ItemSyncTransform_SyncTransform, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemSyncTransform", "SyncTransform"));
+        ADD_HOOK(ItemSyncTransform_SetupSyncTransform, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemSyncTransform", "SetupSyncTransform"));
 
+        ADD_HOOK(SubBoneController_GetAllChildren, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "SubBoneController", "GetAllChildren"));
+        ADD_HOOK(FaceBonesCopier_Start, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FaceBonesCopier", "Start"));
+        ADD_HOOK(ModelHandler_SetRendererEnable, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "ModelHandler", "SetRendererEnable"));
+        ADD_HOOK(CategorizedMeshRenderer_ctor, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CategorizedMeshRenderer", ".ctor"));
+        ADD_HOOK(AvatarSettings_GetBoneTransform, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "AvatarSettings", "GetBoneTransform"));
 #pragma endregion
         ADD_HOOK(LiveConnectChapterModel_NewChapterConfirmed, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterModel", "NewChapterConfirmed"));
         ADD_HOOK(LiveSceneController_FinalizeSceneAsync, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "LiveSceneController", "FinalizeSceneAsync"));
