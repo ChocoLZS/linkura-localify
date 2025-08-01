@@ -58,10 +58,9 @@ namespace LinkuraLocal::HookStory {
     // works
     DEFINE_HOOK(float, AddNovelTextCommand_GetDisplayTime, (void* mnemonic, void* mtd)) {
         static auto AddNovelTextCommand_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Tecotec", "AddNovelTextCommand");
-        static auto AddNovelTextCommand_GetText = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Tecotec", "AddNovelTextCommand", "GetText");
+        static auto AddNovelTextCommand_GetText = AddNovelTextCommand_klass->Get<UnityResolve::Method>("GetText");
+        static auto AddNovelTextCommand_HasVoice = AddNovelTextCommand_klass->Get<UnityResolve::Method>("HasVoice");
         auto durationSec = AddNovelTextCommand_GetDisplayTime_Orig(mnemonic, mtd);
-
-        // 获取 ValueTuple<string, Rubi[]>
         auto textTuple = AddNovelTextCommand_GetText->Invoke<UnityResolve::UnityType::ValueTuple<Il2cppUtils::Il2CppString *, void*>>(mnemonic);
 
         auto text = textTuple.Item1;
@@ -69,8 +68,8 @@ namespace LinkuraLocal::HookStory {
         if (text) {
             auto originDurationSec = durationSec;
             auto text_str = text->ToString();
-            RE2 match("(^『[^』].*』$)|(^「[^」].*」$)|(^（[^）].*）$)");
-            if (RE2::FullMatch(text_str, match)) {
+            bool hasVoice = AddNovelTextCommand_HasVoice->Invoke<bool>(mnemonic);
+            if (hasVoice) {
                 Log::VerboseFmt("Vocal text is %s", text_str.c_str());
                 durationSec = durationSec * Config::storyNovelVocalTextDurationRate;
             } else {
