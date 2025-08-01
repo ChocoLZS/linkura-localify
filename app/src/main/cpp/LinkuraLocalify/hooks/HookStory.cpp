@@ -22,21 +22,21 @@ namespace LinkuraLocal::HookStory {
         auto content = StoryScene_LoadStoryData_Orig(fileName, mtd);
         auto content_str = content->ToString();
         if (Config::storyHideBackground) {
-            content_str = regex_replace(content_str, "#?\\[?背景(表示|移動|回転)[^\\n]*\\n", ""); // 隐藏背景
-            content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", ""); // 隐藏背景
+            content_str = regex_replace(content_str, "#?\\[?背景(表示|移動|回転)[^\\n]*\\n", "");
+            content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", "");
         }
 
         if (Config::storyHideTransition) {
-            content_str = regex_replace(content_str, "[^\\n]*暗転_イン[^\\n]*\\n", ""); // 隐藏过渡
-            content_str = regex_replace(content_str, "[^\\n]*###[^\\n]*\\n", ""); // 隐藏过渡
+            content_str = regex_replace(content_str, "[^\\n]*暗転_イン[^\\n]*\\n", "");
+            content_str = regex_replace(content_str, "[^\\n]*###[^\\n]*\\n", "");
         }
 
         if (Config::storyHideNonCharacter3d) {
-            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");         // 隐藏非角色3d
+            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");
         }
 
         if (Config::storyHideDof) {
-            content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", ""); // 隐藏景深
+            content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "");
         }
         content = Il2cppUtils::Il2CppString::New(content_str);
         return content;
@@ -46,6 +46,43 @@ namespace LinkuraLocal::HookStory {
         Log::DebugFmt("StoryScene_SetStory HOOKED");
         StoryScene_SetStory_Orig(self, story, mtd);
     }
+
+    DEFINE_HOOK(void*, StoryNovelView_AddTextAsync, (void* self, Il2cppUtils::Il2CppString* text, void* rubis, float durationSec, bool shouldTapWait, bool addNewLine, void* mtd)) {
+        return StoryNovelView_AddTextAsync_Orig(self, text, rubis, durationSec, shouldTapWait, addNewLine, mtd);
+    }
+
+    DEFINE_HOOK(int32_t, AddNovelTextCommand_DoExecute, (void* self,void* mnemonic, bool isFirstClock, bool skip, float commandPlayedTime, bool seekbar, void* mtd)) {
+        return AddNovelTextCommand_DoExecute_Orig(self, mnemonic, isFirstClock, skip, commandPlayedTime, seekbar, mtd);
+    }
+
+    // works
+    DEFINE_HOOK(float, AddNovelTextCommand_GetDisplayTime, (void* mnemonic, void* mtd)) {
+        static auto AddNovelTextCommand_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "Tecotec", "AddNovelTextCommand");
+        static auto AddNovelTextCommand_GetText = Il2cppUtils::GetMethod("Assembly-CSharp.dll", "Tecotec", "AddNovelTextCommand", "GetText");
+        auto durationSec = AddNovelTextCommand_GetDisplayTime_Orig(mnemonic, mtd);
+
+        // 获取 ValueTuple<string, Rubi[]>
+        auto textTuple = AddNovelTextCommand_GetText->Invoke<UnityResolve::UnityType::ValueTuple<Il2cppUtils::Il2CppString *, void*>>(mnemonic);
+
+        auto text = textTuple.Item1;
+
+        if (text) {
+            auto originDurationSec = durationSec;
+            auto text_str = text->ToString();
+            RE2 match("(^『[^』].*』$)|(^「[^」].*」$)|(^（[^）].*）$)");
+            if (RE2::FullMatch(text_str, match)) {
+                Log::VerboseFmt("Vocal text is %s", text_str.c_str());
+                durationSec = durationSec * Config::storyNovelVocalTextDurationRate;
+            } else {
+                Log::VerboseFmt("Text is %s", text_str.c_str());
+                durationSec = durationSec * Config::storyNovelNonVocalTextDurationRate;
+            }
+            Log::DebugFmt("GetDisplayTime: text = %s, origin duration = %f, duration = %f", text->ToString().c_str(), originDurationSec, durationSec);
+        }
+        
+        return durationSec;
+    }
+
 
     void Install(HookInstaller* hookInstaller) {
 #pragma region Story
@@ -57,6 +94,19 @@ namespace LinkuraLocal::HookStory {
 //        ADD_HOOK(StorySystem_OnInitialize, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StorySystem", "OnInitialize"));
 //        ADD_HOOK(StoryScene_SetCameraColor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StoryScene", "SetCameraColor"));
 //        ADD_HOOK(StoryModelSpaceManager_get_modelSpace, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StoryModelSpaceManager", "get_modelSpace"));
+//        ADD_HOOK(StoryNovelView_ChangeSpeed, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.Story", "NovelView", "ChangeSpeed"));
+//        ADD_HOOK(StoryNovelText_SetText, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School", "NovelText", "SetText", {"System.String", "School.Ruby[]"}));
+//        ADD_HOOK(StoryNovelView_ShowAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.Story", "NovelView", "ShowAsync"));
+//        ADD_HOOK(StoryNovelView_SetNextTimeScale, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.Story", "NovelView", "SetNextTimeScale"));
+//        ADD_HOOK(AnimatableText_set_Text, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School", "AnimatableText", "set_Text"));
+//        ADD_HOOK(StoryNovelView_PauseTextAnimation, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.Story", "NovelView", "PauseTextAnimation"));
+//        ADD_HOOK(StoryNovelView_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.Story", "NovelView", ".ctor"));
+        ADD_HOOK(StoryNovelView_AddTextAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.Story", "NovelView", "AddTextAsync"));
+        ADD_HOOK(AddNovelTextCommand_DoExecute, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "AddNovelTextCommand", "DoExecute"));
+        ADD_HOOK(AddNovelTextCommand_GetDisplayTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "AddNovelTextCommand", "GetDisplayTime"));
+//        ADD_HOOK(Tween_UpdateDelay, Il2cppUtils::GetMethodPointer("DOTween.dll", "DG.Tweening", "Tween", "UpdateDelay"));
+//        ADD_HOOK(TweeningDOTween_To, Il2cppUtils::GetMethodPointer("DOTween.dll", "DG.Tweening", "DOTween", "To", {"DG.Tweening.Core.DOGetter", "DG.Tweening.Core.DOSetter", "System.Single", "System.Single"}));
+//        ADD_HOOK(StorySystem_Pause, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StorySystem", "Pause"));
 #pragma endregion
     }
 }

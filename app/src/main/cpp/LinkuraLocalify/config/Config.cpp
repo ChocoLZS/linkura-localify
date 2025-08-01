@@ -24,6 +24,8 @@ namespace LinkuraLocal::Config {
     bool storyHideTransition = false;
     bool storyHideNonCharacter3d = false;
     bool storyHideDof = false;
+    float storyNovelVocalTextDurationRate = 1.0f;
+    float storyNovelNonVocalTextDurationRate = 1.0f;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -47,6 +49,8 @@ namespace LinkuraLocal::Config {
             GetConfigItem(storyHideTransition);
             GetConfigItem(storyHideNonCharacter3d);
             GetConfigItem(storyHideDof);
+            GetConfigItem(storyNovelVocalTextDurationRate);
+            GetConfigItem(storyNovelNonVocalTextDurationRate);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -75,6 +79,8 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_story_hide_transition()) storyHideTransition = configUpdate.story_hide_transition();
                 if (configUpdate.has_story_hide_non_character_3d()) storyHideNonCharacter3d = configUpdate.story_hide_non_character_3d();
                 if (configUpdate.has_story_hide_dof()) storyHideDof = configUpdate.story_hide_dof();
+                if (configUpdate.has_story_novel_vocal_text_duration_rate()) storyNovelVocalTextDurationRate = configUpdate.story_novel_vocal_text_duration_rate();
+                if (configUpdate.has_story_novel_non_vocal_text_duration_rate()) storyNovelNonVocalTextDurationRate = configUpdate.story_novel_non_vocal_text_duration_rate();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

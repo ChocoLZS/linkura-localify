@@ -21,6 +21,8 @@ namespace LinkuraLocal::Config {
     extern bool storyHideTransition;
     extern bool storyHideNonCharacter3d;
     extern bool storyHideDof;
+    extern float storyNovelVocalTextDurationRate;
+    extern float storyNovelNonVocalTextDurationRate;
 
     void LoadConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);

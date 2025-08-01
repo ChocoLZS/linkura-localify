@@ -36,6 +36,7 @@ import io.github.chocolzs.linkura.localify.ui.components.base.CollapsibleBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
+import io.github.chocolzs.linkura.localify.ui.components.GakuSlider
 import io.github.chocolzs.linkura.localify.ui.components.CameraControl
 
 
@@ -99,6 +100,27 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.config_story_hide_dof), checked = config.value.storyHideDof) {
                             v -> context?.onStoryHideDofChanged(v)
                     }
+                    
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    )
+                    
+                    GakuSlider(
+                        modifier = modifier,
+                        text = stringResource(R.string.config_story_vocal_text_duration_rate),
+                        value = config.value.storyNovelVocalTextDurationRate,
+                        valueRange = 0.5f..10.0f,
+                        onValueChange = { v -> context?.onStoryNovelVocalTextDurationRateChanged(v) }
+                    )
+                    
+                    GakuSlider(
+                        modifier = modifier,
+                        text = stringResource(R.string.config_story_non_vocal_text_duration_rate),
+                        value = config.value.storyNovelNonVocalTextDurationRate,
+                        valueRange = 0.5f..10.0f,
+                        onValueChange = { v -> context?.onStoryNovelNonVocalTextDurationRateChanged(v) }
+                    )
                 }
             }
 

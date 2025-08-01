@@ -78,6 +78,8 @@ message ConfigUpdate {
   optional bool story_hide_transition = 15;
   optional bool story_hide_non_character_3d = 16;
   optional bool story_hide_dof = 17;
+  optional float story_novel_vocal_text_duration_rate = 18;
+  optional float story_novel_non_vocal_text_duration_rate = 19;
 }
 
 // Overlay control actions

@@ -22,6 +22,8 @@ data class LinkuraConfig (
     var storyHideTransition: Boolean = false,
     var storyHideNonCharacter3d: Boolean = false,
     var storyHideDof: Boolean = false,
+    var storyNovelVocalTextDurationRate: Float = 1.0f,
+    var storyNovelNonVocalTextDurationRate: Float = 1.0f,
 
     var pf: Boolean = false
 )
