@@ -120,6 +120,7 @@
     <string name="overlay.camera_info.stop">停止悬浮窗</string>
     <string name="overlay.camera_info.running_description">摄像机悬浮窗正在运行。悬浮窗显示实时摄像机参数，包括位置、旋转、视野角、模式和场景类型。</string>
     <string name="overlay.camera_info.crash_warning">注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。</string>
+    <string name="overlay.archive.no_rendering_running">当前没有正在运行的渲染</string>
     
     <!-- Color Picker -->
     <string name="overlay.color_picker.title">背景颜色选择</string>
@@ -135,4 +136,10 @@
     <string name="config.story.hide_dof">隐藏景深</string>
     <string name="config.story.vocal_text_duration_rate">小说声音文本持续倍率</string>
     <string name="config.story.non_vocal_text_duration_rate">小说旁白文本持续倍率</string>
+
+    <!-- First Person Camera Settings -->
+    <string name="config.first_person_camera.hide_head">第一人称隐藏头部</string>
+    <string name="config.first_person_camera.hide_hair">隐藏头发</string>
+    <string name="config.first_person_camera.hide_face">隐藏面部</string>
+
 </resources>

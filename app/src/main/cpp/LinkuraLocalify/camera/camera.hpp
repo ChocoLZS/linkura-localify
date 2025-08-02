@@ -3,6 +3,7 @@
 #include "../../deps/Joystick/JoystickEvent.h"
 #include "map"
 #include "../Il2cppUtils.hpp"
+#include "../config/Config.hpp"
 
 namespace L4Camera {
     enum class CameraMode {
@@ -47,7 +48,6 @@ namespace L4Camera {
             if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
                 restoreCurrentCharaMeshes();
                 LinkuraLocal::Misc::IndexedSet<T>::next();
-                hideCurrentCharaMeshes();
             } else {
                 LinkuraLocal::Misc::IndexedSet<T>::next();
             }
@@ -57,7 +57,6 @@ namespace L4Camera {
             if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
                 restoreCurrentCharaMeshes();
                 LinkuraLocal::Misc::IndexedSet<T>::prev();
-                hideCurrentCharaMeshes();
             } else {
                 LinkuraLocal::Misc::IndexedSet<T>::prev();
             }
@@ -165,34 +164,41 @@ namespace L4Camera {
 
         void hideCurrentCharaMeshes() {
             if (LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex() < charaMeshes.size()) {
+                if (!LinkuraLocal::Config::firstPersonCameraHideHead) return;
 //                LinkuraLocal::Log::DebugFmt("Hide current chara meshes using Renderer.enabled");
                 std::map<std::string, UnityResolve::UnityType::Transform*>& meshMap = charaMeshes[LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex()];
                 auto currentIsRendered = currentHairIsRendered();
                 setSnapshotRenderState(currentIsRendered);
-//                LinkuraLocal::Log::DebugFmt("Current hair is rendered: %s", currentIsRendered ? "true" : "false");
+                // LinkuraLocal::Log::DebugFmt("Current hair is rendered: %s", currentIsRendered ? "true" : "false");
                 if (!currentIsRendered) return; // if current hair is not rendered, do not hide
                 for (auto& pair : meshMap) {
                     auto transform = pair.second;
                     setMeshRenderActive(transform, false, pair.first);
                 }
-                auto hair = getCurrentHair();
-                setMeshRenderActive(hair, false, "hair");
+                if (LinkuraLocal::Config::firstPersonCameraHideHair) {
+                    auto hair = getCurrentHair();
+                    setMeshRenderActive(hair, false, "hair");
+                }
             }
         }
 
         void restoreCurrentCharaMeshes() {
             if (LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex() < charaMeshes.size()) {
+                if (!LinkuraLocal::Config::firstPersonCameraHideHead) return;
 //                LinkuraLocal::Log::DebugFmt("Restore current chara meshes using Renderer.enabled");
                 std::map<std::string, UnityResolve::UnityType::Transform*>& meshMap = charaMeshes[LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex()];
                 auto snapshotRendered = getSnapshotRenderState();
+                // LinkuraLocal::Log::DebugFmt("Snapshot rendered: %s", snapshotRendered ? "true" : "false");
                 if (!snapshotRendered) return; // if rendered, means it been hidden.
                 for (auto& pair : meshMap) {
 //                    LinkuraLocal::Log::DebugFmt("Trying to restore renderer for %s", pair.first.c_str());
                     auto transform = pair.second;
                     setMeshRenderActive(transform, true, pair.first);
                 }
-                auto hair = getCurrentHair();
-                setMeshRenderActive(hair, true, "hair");
+                if (LinkuraLocal::Config::firstPersonCameraHideHair) {
+                    auto hair = getCurrentHair();
+                    setMeshRenderActive(hair, true, "hair");
+                }
             }
         }
     };

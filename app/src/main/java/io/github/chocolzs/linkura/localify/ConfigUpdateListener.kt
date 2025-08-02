@@ -35,6 +35,8 @@ interface ConfigListener {
     fun onStoryHideDofChanged(value: Boolean)
     fun onStoryNovelVocalTextDurationRateChanged(value: Float)
     fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
+    fun onFirstPersonCameraHideHeadChanged(value: Boolean)
+    fun onFirstPersonCameraHideHairChanged(value: Boolean)
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -210,6 +212,17 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     }
     override fun onStoryNovelNonVocalTextDurationRateChanged(value: Float) {
         config.storyNovelNonVocalTextDurationRate = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onFirstPersonCameraHideHairChanged(value: Boolean) {
+        config.firstPersonCameraHideHair = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+    override fun onFirstPersonCameraHideHeadChanged(value: Boolean) {
+        config.firstPersonCameraHideHead = value
         saveConfig()
         sendConfigUpdate(config)
     }

@@ -357,38 +357,7 @@ namespace LinkuraLocal::HookCamera {
 #pragma region FirstPersonCamera
 
     DEFINE_HOOK(void, AvatarPool_AddIfAvatar, (Il2cppUtils::Il2CppObject* self, UnityResolve::UnityType::Object* gameObject, void* method)) {
-        Log::DebugFmt("AvatarPool_AddIfAvatar HOOKED");
         return AvatarPool_AddIfAvatar_Orig(self, gameObject, method);
-    }
-
-    void HideHead(UnityResolve::UnityType::GameObject* obj, const bool isFace) {
-        static UnityResolve::UnityType::GameObject* lastFaceObj = nullptr;
-        static UnityResolve::UnityType::GameObject* lastHairObj = nullptr;
-
-#define lastHidedObj (isFace ? lastFaceObj : lastHairObj)
-
-        static auto get_activeInHierarchy = reinterpret_cast<bool (*)(void*)>(
-                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::get_activeInHierarchy()"));
-
-        const auto isFirstPerson = L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON;
-
-//        if (isFirstPerson && obj) {
-        if (obj) {
-            if (obj == lastHidedObj) return;
-            if (lastHidedObj && Il2cppUtils::IsNativeObjectAlive(lastHidedObj) && get_activeInHierarchy(lastHidedObj)) {
-                lastHidedObj->SetActive(true);
-            }
-            if (Il2cppUtils::IsNativeObjectAlive(obj)) {
-                obj->SetActive(false);
-                lastHidedObj = obj;
-            }
-        }
-        else {
-            if (lastHidedObj && Il2cppUtils::IsNativeObjectAlive(lastHidedObj)) {
-                lastHidedObj->SetActive(true);
-                lastHidedObj = nullptr;
-            }
-        }
     }
 
     void printChildren(UnityResolve::UnityType::Transform* obj, const std::string& obj_name) {
@@ -406,12 +375,12 @@ namespace LinkuraLocal::HookCamera {
         for (int i = 0; i < childCount; i++) {
             auto child = transform->GetChild(i);
             const auto childName = child->GetName();
-            Log::DebugFmt("child: %s", childName.c_str());
+//            Log::DebugFmt("child: %s", childName.c_str());
             if (childName == "Head") {
                 recursiveAddFaceMesh(child, followCharaSet);
             } else {
-                if (!L4Camera::followCharaSet.containsCharaMesh(childName)) {
-                    L4Camera::followCharaSet.addCharaMesh(childName, child);
+                if (!followCharaSet.containsCharaMesh(childName)) {
+                    followCharaSet.addCharaMesh(childName, child);
                 }
             }
         }
@@ -428,13 +397,17 @@ namespace LinkuraLocal::HookCamera {
             L4Camera::followCharaSet.add(self);
         }
         auto currentFace = L4Camera::followCharaSet.getCurrentValue();
-        auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+
+        {
+            auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+            cacheTrans = headTrans;
+            cacheRotation = cacheTrans->GetRotation();
+            cachePosition = cacheTrans->GetPosition();
+            cacheForward = cacheTrans->GetUp();
+            cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
+        }
+
         auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
-        cacheTrans = headTrans;
-        cacheRotation = cacheTrans->GetRotation();
-        cachePosition = cacheTrans->GetPosition();
-        cacheForward = cacheTrans->GetUp();
-        cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
         auto modelParent = spineTrans->GetParent();
         auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
                 [](const std::string& childName) {
@@ -449,15 +422,13 @@ namespace LinkuraLocal::HookCamera {
         auto costume = modelParent->GetParent()->GetParent()->GetParent();
         // 使用多层查找：costume -> SCSch* -> Model -> Mesh
         auto hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
-            [](const std::string& name) { return name.starts_with("SCSch"); },  // 第一层：查找SCSch开头的
-            [](const std::string& name) { return name == "Model"; },
-            [](const std::string& name) { return name == "Mesh"; },
-            [](const std::string& name) { return name.starts_with("Hair"); }
+                [](const std::string& name) { return name.starts_with("SCSch"); },  // 第一层：查找SCSch开头的
+                [](const std::string& name) { return name == "Model"; },
+                [](const std::string& name) { return name == "Mesh"; },
+                [](const std::string& name) { return name.starts_with("Hair"); }
         });
         if (!hairResult.empty()) {
-            if (!L4Camera::followCharaSet.containsCharaMesh("Hair")) {
-                L4Camera::followCharaSet.addCharaMesh("Hair", hairResult[0]);
-            }
+            L4Camera::followCharaSet.addCharaHair(hairResult[0]);
         }
         if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
             if (L4Camera::followCharaSet.currentHairIsRendered()) {

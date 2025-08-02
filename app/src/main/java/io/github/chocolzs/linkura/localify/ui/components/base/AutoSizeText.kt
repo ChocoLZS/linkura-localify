@@ -25,7 +25,9 @@ fun AutoSizeText(
     textStyle: TextStyle? = null,
     minSize: TextUnit = 8.sp
 ) {
-    var scaledTextStyle by remember { mutableStateOf(textStyle ?: TextStyle(color = color, fontSize = fontSize)) }
+    var scaledTextStyle by remember(color, fontSize, textStyle) { 
+        mutableStateOf(textStyle ?: TextStyle(color = color, fontSize = fontSize)) 
+    }
     var readyToDraw by remember { mutableStateOf(false) }
 
     if (LocalInspectionMode.current) {

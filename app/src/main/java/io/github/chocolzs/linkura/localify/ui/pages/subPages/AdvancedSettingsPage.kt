@@ -31,6 +31,8 @@ import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.getConfigState
 import io.github.chocolzs.linkura.localify.models.BreastCollapsibleBoxViewModel
 import io.github.chocolzs.linkura.localify.models.BreastCollapsibleBoxViewModelFactory
+import io.github.chocolzs.linkura.localify.models.FirstPersonCameraCollapsibleBoxViewModel
+import io.github.chocolzs.linkura.localify.models.FirstPersonCameraCollapsibleBoxViewModelFactory
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.base.CollapsibleBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
@@ -51,6 +53,8 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
 
     val breastParamViewModel: BreastCollapsibleBoxViewModel =
         viewModel(factory = BreastCollapsibleBoxViewModelFactory(initiallyExpanded = false))
+    val firstPersonCameraViewModel: FirstPersonCameraCollapsibleBoxViewModel =
+        viewModel(factory = FirstPersonCameraCollapsibleBoxViewModelFactory(initiallyExpanded = config.value.firstPersonCameraHideHead))
     val keyBoardOptionsDecimal = remember {
         KeyboardOptions(keyboardType = KeyboardType.Decimal)
     }
@@ -73,6 +77,47 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     }
                     GakuSwitch(modifier, "character", checked = config.value.avoidCharacterExit) {
                             v -> context?.onAvoidCharacterExitChanged(v)
+                    }
+                    
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    )
+                    
+                    // First Person Camera Settings
+                    GakuSwitch(
+                        modifier, 
+                        stringResource(R.string.config_first_person_camera_hide_head), 
+                        checked = config.value.firstPersonCameraHideHead
+                    ) { v -> 
+                        context?.onFirstPersonCameraHideHeadChanged(v)
+                        firstPersonCameraViewModel.expanded = v
+                    }
+                    
+                    // Sub-panel that expands when main switch is on
+                    CollapsibleBox(
+                        modifier = modifier,
+                        expandState = config.value.firstPersonCameraHideHead,
+                        collapsedHeight = 0.dp,
+                        showExpand = false
+                    ) {
+                        Column(
+                            modifier = modifier.padding(start = 16.dp, top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            GakuSwitch(
+                                modifier, 
+                                stringResource(R.string.config_first_person_camera_hide_hair), 
+                                checked = config.value.firstPersonCameraHideHair
+                            ) { v -> context?.onFirstPersonCameraHideHairChanged(v) }
+                            
+                            GakuSwitch(
+                                modifier, 
+                                stringResource(R.string.config_first_person_camera_hide_face), 
+                                checked = true,
+                                enabled = false
+                            ) { _ -> /* No-op since this is disabled */ }
+                        }
                     }
                 }
             }

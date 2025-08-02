@@ -26,6 +26,8 @@ namespace LinkuraLocal::Config {
     bool storyHideDof = false;
     float storyNovelVocalTextDurationRate = 1.0f;
     float storyNovelNonVocalTextDurationRate = 1.0f;
+    bool firstPersonCameraHideHead = true;
+    bool firstPersonCameraHideHair = true;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -51,6 +53,8 @@ namespace LinkuraLocal::Config {
             GetConfigItem(storyHideDof);
             GetConfigItem(storyNovelVocalTextDurationRate);
             GetConfigItem(storyNovelNonVocalTextDurationRate);
+            GetConfigItem(firstPersonCameraHideHead);
+            GetConfigItem(firstPersonCameraHideHair);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -81,6 +85,8 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_story_hide_dof()) storyHideDof = configUpdate.story_hide_dof();
                 if (configUpdate.has_story_novel_vocal_text_duration_rate()) storyNovelVocalTextDurationRate = configUpdate.story_novel_vocal_text_duration_rate();
                 if (configUpdate.has_story_novel_non_vocal_text_duration_rate()) storyNovelNonVocalTextDurationRate = configUpdate.story_novel_non_vocal_text_duration_rate();
+                if (configUpdate.has_first_person_camera_hide_head()) firstPersonCameraHideHead = configUpdate.first_person_camera_hide_head();
+                if (configUpdate.has_first_person_camera_hide_hair()) firstPersonCameraHideHair = configUpdate.first_person_camera_hide_hair();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

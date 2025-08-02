@@ -25,5 +25,8 @@ data class LinkuraConfig (
     var storyNovelVocalTextDurationRate: Float = 1.0f,
     var storyNovelNonVocalTextDurationRate: Float = 1.0f,
 
+    var firstPersonCameraHideHead: Boolean = true,
+    var firstPersonCameraHideHair: Boolean = true,
+
     var pf: Boolean = false
 )
