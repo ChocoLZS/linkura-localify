@@ -141,4 +141,5 @@
     <string name="config.first_person_camera.hide_head">Hide Head in First Person</string>
     <string name="config.first_person_camera.hide_hair">Hide Hair</string>
     <string name="config.first_person_camera.hide_face">Hide Face</string>
+    <string name="config.first_person_camera.head_accessories_note">Note: Head accessories are part of the costume and cannot be hidden separately</string>
 </resources>

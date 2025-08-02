@@ -141,5 +141,6 @@
     <string name="config.first_person_camera.hide_head">第一人称隐藏头部</string>
     <string name="config.first_person_camera.hide_hair">隐藏头发</string>
     <string name="config.first_person_camera.hide_face">隐藏面部</string>
+    <string name="config.first_person_camera.head_accessories_note">注意：头部饰品属于服装的一部分，无法单独隐藏</string>
 
 </resources>

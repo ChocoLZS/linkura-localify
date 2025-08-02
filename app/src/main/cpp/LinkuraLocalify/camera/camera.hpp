@@ -106,7 +106,7 @@ namespace L4Camera {
         }
         UnityResolve::UnityType::Transform* getCurrentHair() {
             auto& current = LinkuraLocal::Misc::IndexedSet<T>::getCurrentValue();
-            LinkuraLocal::Log::DebugFmt("getCurrentHair of index: %d", LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex());
+//            LinkuraLocal::Log::DebugFmt("getCurrentHair of index: %d", LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex());
             if (current) {
                 return charaHairMeshes[current];
             }

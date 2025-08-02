@@ -388,5 +388,6 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.first_person_camera.hide_head">一人称で頭を隠す</string>
     <string name="config.first_person_camera.hide_hair">髪を隠す</string>
     <string name="config.first_person_camera.hide_face">顔を隠す</string>
+    <string name="config.first_person_camera.head_accessories_note">注意：頭部アクセサリーは衣装の一部であり、個別に非表示にできません</string>
 
 </resources>

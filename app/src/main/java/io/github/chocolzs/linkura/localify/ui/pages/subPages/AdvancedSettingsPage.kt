@@ -86,13 +86,21 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     
                     // First Person Camera Settings
                     GakuSwitch(
-                        modifier, 
+                        modifier,
                         stringResource(R.string.config_first_person_camera_hide_head), 
                         checked = config.value.firstPersonCameraHideHead
                     ) { v -> 
                         context?.onFirstPersonCameraHideHeadChanged(v)
                         firstPersonCameraViewModel.expanded = v
                     }
+                    
+                    // Note text for head accessories
+                    Text(
+                        text = stringResource(R.string.config_first_person_camera_head_accessories_note),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = modifier.padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
                     
                     // Sub-panel that expands when main switch is on
                     CollapsibleBox(

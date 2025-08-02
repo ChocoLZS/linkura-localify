@@ -75,10 +75,10 @@ namespace LinkuraLocal::HookCamera {
 
     void onRenderExit() {
         HookShare::Shareable::resetRenderScene();
+        L4Camera::followCharaSet.clear();
         unregisterMainFreeCamera(true);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
-        L4Camera::followCharaSet.clear();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
         initialCameraRendered = false;
         backgroundColorCameraCache = nullptr;
@@ -286,6 +286,12 @@ namespace LinkuraLocal::HookCamera {
             // fes live will use the same fixed camera at all time
             if (HookShare::Shareable::renderSceneIsWithLive()) {
                 Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
+                auto cameraMode = L4Camera::GetCameraMode();
+                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+                    // Log::DebugFmt("set camera mode to FREE");
+                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
                 HookShare::Shareable::resetRenderScene();
                 unregisterMainFreeCamera();
                 unregisterCurrentCamera();
@@ -420,16 +426,27 @@ namespace LinkuraLocal::HookCamera {
         }
 
         auto costume = modelParent->GetParent()->GetParent()->GetParent();
-        // 使用多层查找：costume -> SCSch* -> Model -> Mesh
+        // costume -> SCSch* -> Model -> Mesh
         auto hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
-                [](const std::string& name) { return name.starts_with("SCSch"); },  // 第一层：查找SCSch开头的
+                [](const std::string& name) { return name.starts_with("SCSch"); },
                 [](const std::string& name) { return name == "Model"; },
                 [](const std::string& name) { return name == "Mesh"; },
                 [](const std::string& name) { return name.starts_with("Hair"); }
         });
+        if (hairResult.empty()) {
+            hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
+                    [](const std::string &name) { return name.starts_with("SCSch"); },
+                    [](const std::string &name) { return name == "Model"; },
+                    [](const std::string& name) { return name == "Mesh"; },
+                    [](const std::string& name) { return name == "Body"; },
+                    [](const std::string& name) { return name.starts_with("Hair"); }
+            });
+        }
+
         if (!hairResult.empty()) {
             L4Camera::followCharaSet.addCharaHair(hairResult[0]);
         }
+
         if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
             if (L4Camera::followCharaSet.currentHairIsRendered()) {
                 L4Camera::followCharaSet.hideCurrentCharaMeshes();
