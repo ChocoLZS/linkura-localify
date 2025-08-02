@@ -400,19 +400,27 @@ namespace LinkuraLocal::HookCamera {
         }
     }
 
-    // ✅
-    // 由于无法像学马一样获取管理器与，只能记录出现过的地址，并判断
-    // 活动记录的无法及时清除退出渲染的FaceBonesCopier，但是问题不大
+    static void recursiveAddFaceMesh(UnityResolve::UnityType::Transform* transform,
+                                     L4Camera::CharacterMeshManager<void*>& followCharaSet) {
+        auto childCount = transform->GetChildCount();
+        for (int i = 0; i < childCount; i++) {
+            auto child = transform->GetChild(i);
+            const auto childName = child->GetName();
+            Log::DebugFmt("child: %s", childName.c_str());
+            if (childName == "Head") {
+                recursiveAddFaceMesh(child, followCharaSet);
+            } else {
+                if (!L4Camera::followCharaSet.containsCharaMesh(childName)) {
+                    L4Camera::followCharaSet.addCharaMesh(childName, child);
+                }
+            }
+        }
+    }
+
     DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
         if (!Config::enableFreeCamera || (L4Camera::GetCameraMode() == L4Camera::CameraMode::FREE)) {
-//            if (needRestoreHides) {
-//                needRestoreHides = false;
-//                HideHead(nullptr, false);
-//                HideHead(nullptr, true);
-//            }
             return FaceBonesCopier_LastUpdate_Orig(self, mtd);
         }
-
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
         static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
@@ -434,9 +442,8 @@ namespace LinkuraLocal::HookCamera {
                 }
         });
         if (!faceMeshes.empty()) {
-            if (!L4Camera::followCharaSet.containsCharaMesh("Face")) {
-                L4Camera::followCharaSet.addCharaMesh("Face", faceMeshes[0]);
-            }
+            auto faceHolder = faceMeshes[0];
+            recursiveAddFaceMesh(faceHolder, L4Camera::followCharaSet);
         }
 
         auto costume = modelParent->GetParent()->GetParent()->GetParent();
@@ -452,16 +459,17 @@ namespace LinkuraLocal::HookCamera {
                 L4Camera::followCharaSet.addCharaMesh("Hair", hairResult[0]);
             }
         }
-//        if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
-//            L4Camera::followCharaSet.hideCurrentCharaMeshes();
-//        }
+        if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
+            if (L4Camera::followCharaSet.currentHairIsRendered()) {
+                L4Camera::followCharaSet.hideCurrentCharaMeshes();
+            }
+        }
 
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
     }
 
-    // not hooked
+    // hooked  in fes live
     DEFINE_HOOK(void, CharacterEyeController_LastUpdate, (void* self, void* mtd)) {
-        Log::DebugFmt("CharacterEyeController_LastUpdate HOOKED, %p", self);
         return CharacterEyeController_LastUpdate_Orig(self, mtd);
     }
 
@@ -471,9 +479,8 @@ namespace LinkuraLocal::HookCamera {
         return SubBoneController_LateUpdate_Orig(self, mtd);
     }
 
-    // not hooked
+    // hooked in fes live
     DEFINE_HOOK(void, ItemSyncTransform_SyncTransform, (void* self, UnityResolve::UnityType::Transform* bindBone, void* method)) {
-        Log::DebugFmt("ItemSyncTransform_SyncTransform HOOKED, %p", self);
         return ItemSyncTransform_SyncTransform_Orig(self, bindBone, method);
     }
 
@@ -484,24 +491,10 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void*, SubBoneController_GetAllChildren, (Il2cppUtils::Il2CppObject* self,UnityResolve::UnityType::Transform* target,void* candidates , void* method)) {
-//        Log::DebugFmt("SubBoneController_GetAllChildren HOOKED, %p", self);
-//        Log::DebugFmt("Target transform name is %s", target->GetName().c_str());
-//        auto root = target->GetRoot();
-//        Log::DebugFmt("root transform name is %s", root->GetName().c_str());
-//        auto childCount = root->GetChildCount();
-//        Log::DebugFmt("root child count is %d", childCount);
-//        for (int i = 0;i < childCount; i++) {
-//            auto child = root->GetChild(i);
-//            Log::DebugFmt("root child %d is %s", i, child->GetName().c_str());
-//            if (child->GetName() == "Item_starflower") {
-//                child->GetGameObject()->SetActive(false);
-//            }
-//        }
         return SubBoneController_GetAllChildren_Orig(self,target,candidates, method);
     }
 
     DEFINE_HOOK(void, FaceBonesCopier_Start, (void* self, void* mtd)) {
-        Log::DebugFmt("FaceBonesCopier_Start HOOKED");
         return FaceBonesCopier_Start_Orig(self, mtd);
     }
 
