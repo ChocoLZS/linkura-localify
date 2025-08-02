@@ -5,7 +5,6 @@
 #include "../../build/linkura_messages.pb.h"
 #include "thread"
 #include "chrono"
-#include "functional"
 #include "vector"
 
 namespace LinkuraLocal::HookCamera {
@@ -95,7 +94,7 @@ namespace LinkuraLocal::HookCamera {
         } else if (!currentCameraRegistered) {
             Log::DebugFmt("Camera Data return false");
             cameraData.set_is_valid(false);
-        } else if (currentCameraCache && IsNativeObjectAlive(currentCameraCache)) {
+        } else if (currentCameraCache && Il2cppUtils::IsNativeObjectAlive(currentCameraCache)) {
             try {
                 auto fov = currentCameraCache->GetFoV();
                 auto transform = currentCameraCache->GetTransform();
@@ -147,7 +146,7 @@ namespace LinkuraLocal::HookCamera {
 
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(freeCameraTransformCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(freeCameraTransformCache)) {
                 static auto lookat_injected = reinterpret_cast<void (*)(void*freeCameraTransformCache,
                                                                         UnityResolve::UnityType::Vector3* worldPosition, UnityResolve::UnityType::Vector3* worldUp)>(
                         Il2cppUtils::il2cpp_resolve_icall(
@@ -155,7 +154,7 @@ namespace LinkuraLocal::HookCamera {
                 static auto worldUp = UnityResolve::UnityType::Vector3(0, 1, 0);
                 const auto cameraMode = L4Camera::GetCameraMode();
                 if (cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
+                    if (cacheTrans && Il2cppUtils::IsNativeObjectAlive(cacheTrans)) {
                         if (L4Camera::GetFirstPersonRoll() == L4Camera::FirstPersonRoll::ENABLE_ROLL) {
                             // maybe not working
                             Unity_set_rotation_Injected_Orig(freeCameraTransformCache, &cacheRotation);
@@ -186,10 +185,10 @@ namespace LinkuraLocal::HookCamera {
 
     DEFINE_HOOK(void, Unity_set_position_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Vector3* data)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(freeCameraTransformCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(freeCameraTransformCache)) {
                 const auto cameraMode = L4Camera::GetCameraMode();
                 if (cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
+                    if (cacheTrans && Il2cppUtils::IsNativeObjectAlive(cacheTrans)) {
                         auto pos = L4Camera::CalcFirstPersonPosition(cachePosition, cacheForward, L4Camera::firstPersonPosOffset);
                         Unity_set_position_Injected_Orig(freeCameraTransformCache, &pos);
                     }
@@ -214,7 +213,7 @@ namespace LinkuraLocal::HookCamera {
 
     DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(mainFreeCameraCache) && self == mainFreeCameraCache) {
+            if (Il2cppUtils::IsNativeObjectAlive(mainFreeCameraCache) && self == mainFreeCameraCache) {
                 value = L4Camera::baseCamera.fov;
             }
         }
@@ -222,7 +221,7 @@ namespace LinkuraLocal::HookCamera {
     }
     DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(mainFreeCameraCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(mainFreeCameraCache)) {
                 for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
                     Unity_set_fieldOfView_Orig(i, L4Camera::baseCamera.fov);
                 }
@@ -236,7 +235,7 @@ namespace LinkuraLocal::HookCamera {
     }
     DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(mainFreeCameraCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(mainFreeCameraCache)) {
                 // prevent crash for with live and fes live & remain the free fov for story
                 if (HookShare::Shareable::renderSceneIsStory()) Unity_set_fieldOfView_Orig(mainFreeCameraCache, L4Camera::baseCamera.fov);
                 if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
@@ -376,16 +375,16 @@ namespace LinkuraLocal::HookCamera {
 //        if (isFirstPerson && obj) {
         if (obj) {
             if (obj == lastHidedObj) return;
-            if (lastHidedObj && IsNativeObjectAlive(lastHidedObj) && get_activeInHierarchy(lastHidedObj)) {
+            if (lastHidedObj && Il2cppUtils::IsNativeObjectAlive(lastHidedObj) && get_activeInHierarchy(lastHidedObj)) {
                 lastHidedObj->SetActive(true);
             }
-            if (IsNativeObjectAlive(obj)) {
+            if (Il2cppUtils::IsNativeObjectAlive(obj)) {
                 obj->SetActive(false);
                 lastHidedObj = obj;
             }
         }
         else {
-            if (lastHidedObj && IsNativeObjectAlive(lastHidedObj)) {
+            if (lastHidedObj && Il2cppUtils::IsNativeObjectAlive(lastHidedObj)) {
                 lastHidedObj->SetActive(true);
                 lastHidedObj = nullptr;
             }
@@ -399,67 +398,6 @@ namespace LinkuraLocal::HookCamera {
             const auto childName = child->GetName();
             Log::DebugFmt("%s child: %s", obj_name.c_str(), childName.c_str());
         }
-    }
-    
-    void BreakSetActiveProtection(UnityResolve::UnityType::GameObject* gameObject, const std::string& obj_name) {
-        if (!gameObject || !IsNativeObjectAlive(gameObject)) return;
-        
-        Log::DebugFmt("🔓 Attempting to break SetActive protection on: %s", obj_name.c_str());
-        
-        // 方法1: 尝试直接调用Unity内部方法
-        static auto Unity_GameObject_SetActive_Injected = reinterpret_cast<void (*)(void*, bool)>(
-            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::SetActive(System.Boolean)"));
-        
-        if (Unity_GameObject_SetActive_Injected) {
-            Log::DebugFmt("🔧 Trying direct Unity SetActive call...");
-            Unity_GameObject_SetActive_Injected(gameObject, false);
-            
-            // 验证是否成功
-            bool newState = gameObject->GetActiveSelf();
-            Log::DebugFmt("📊 After direct call: %s", newState ? "still active" : "SUCCESS - inactive");
-            
-            if (!newState) return; // 成功了就返回
-        }
-        
-        // 方法2: 尝试销毁对象
-        Log::DebugFmt("🔧 Trying to destroy object...");
-        static auto Unity_Object_Destroy = reinterpret_cast<void (*)(void*)>(
-            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Object::Destroy(UnityEngine.Object)"));
-        
-        if (Unity_Object_Destroy) {
-            Unity_Object_Destroy(gameObject);
-            Log::DebugFmt("💥 Destroy called on: %s", obj_name.c_str());
-            return;
-        }
-        
-        // 方法3: 尝试修改Transform的scale为0
-        Log::DebugFmt("🔧 Trying to set scale to zero...");
-        auto transform = gameObject->GetTransform();
-        if (transform) {
-            UnityResolve::UnityType::Vector3 zeroScale{0.0f, 0.0f, 0.0f};
-            transform->SetLocalScale(zeroScale);
-            Log::DebugFmt("📏 Set scale to zero on: %s", obj_name.c_str());
-        }
-    }
-    
-    void AttemptMultipleHideMethods(UnityResolve::UnityType::Transform* transform, const std::string& level_name) {
-        if (!transform) return;
-        
-        auto gameObject = transform->GetGameObject();
-        if (!gameObject) return;
-        
-        Log::DebugFmt("🎯 Attempting multiple hide methods on: %s (%s)", transform->GetName().c_str(), level_name.c_str());
-        
-        // 方法1: 破解SetActive保护
-        BreakSetActiveProtection(gameObject, transform->GetName());
-
-//        // 方法2: 禁用渲染器（递归所有子对象）
-//        ForceHideAllRenderers(transform, level_name);
-//
-//        // 方法3: 移动到很远的位置
-//        UnityResolve::UnityType::Vector3 farAway{-999999.0f, -999999.0f, -999999.0f};
-//        transform->SetPosition(farAway);
-//        Log::DebugFmt("📍 Moved %s far away", transform->GetName().c_str());
     }
 
     // ✅
@@ -478,43 +416,6 @@ namespace LinkuraLocal::HookCamera {
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
         static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
-        static auto Unity_GameObject_SetActive_Injected = reinterpret_cast<void (*)(UnityResolve::UnityType::GameObject*, bool)>(
-                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::SetActive(System.Boolean)"));
-
-        static auto getChildByMultiLayerLambda = [&](UnityResolve::UnityType::Transform* parent, 
-                                                    const std::vector<std::function<bool(const std::string&)>>& predicates) -> std::vector<UnityResolve::UnityType::Transform*> {
-            std::vector<UnityResolve::UnityType::Transform*> currentLevel;
-            if (parent) {
-                currentLevel.push_back(parent);
-            }
-
-            for (const auto& predicate : predicates) {
-                std::vector<UnityResolve::UnityType::Transform*> nextLevel;
-                
-                for (auto* transform : currentLevel) {
-                    if (!transform) continue;
-                    
-                    for (int i = 0; i < transform->GetChildCount(); i++) {
-                        auto child = transform->GetChild(i);
-                        if (!child) continue;
-                        
-                        const auto childName = child->GetName();
-                        if (predicate(childName)) {
-                            nextLevel.push_back(child);
-                        }
-                    }
-                }
-                
-                currentLevel = std::move(nextLevel);
-                
-                // 如果某一层没有找到任何匹配的子对象，提前退出
-                if (currentLevel.empty()) {
-                    break;
-                }
-            }
-            
-            return currentLevel;
-        };
         if (!L4Camera::followCharaSet.contains(self)) {
             L4Camera::followCharaSet.add(self);
         }
@@ -527,27 +428,33 @@ namespace LinkuraLocal::HookCamera {
         cacheForward = cacheTrans->GetUp();
         cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
         auto modelParent = spineTrans->GetParent();
-        auto faceMeshes = getChildByMultiLayerLambda(modelParent, {
+        auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
                 [](const std::string& childName) {
                     return childName == "Mesh";
                 }
         });
-        for (auto faceMesh : faceMeshes) {
-            Unity_GameObject_SetActive_Injected(faceMesh->GetGameObject(), false);
+        if (!faceMeshes.empty()) {
+            if (!L4Camera::followCharaSet.containsCharaMesh("Face")) {
+                L4Camera::followCharaSet.addCharaMesh("Face", faceMeshes[0]);
+            }
         }
-        // model -> face_normal -> 3d_face -> 3d_costume
+
         auto costume = modelParent->GetParent()->GetParent()->GetParent();
         // 使用多层查找：costume -> SCSch* -> Model -> Mesh
-        auto hairResult = getChildByMultiLayerLambda(costume, {
+        auto hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
             [](const std::string& name) { return name.starts_with("SCSch"); },  // 第一层：查找SCSch开头的
-            [](const std::string& name) { return name == "Model"; },            // 第二层：查找Model
+            [](const std::string& name) { return name == "Model"; },
             [](const std::string& name) { return name == "Mesh"; },
             [](const std::string& name) { return name.starts_with("Hair"); }
-
         });
-        for (auto hair : hairResult) {
-            Unity_GameObject_SetActive_Injected(hair->GetGameObject(), false);
+        if (!hairResult.empty()) {
+            if (!L4Camera::followCharaSet.containsCharaMesh("Hair")) {
+                L4Camera::followCharaSet.addCharaMesh("Hair", hairResult[0]);
+            }
         }
+//        if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
+//            L4Camera::followCharaSet.hideCurrentCharaMeshes();
+//        }
 
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
     }
