@@ -18,14 +18,6 @@
 std::unordered_set<void*> hookedStubs{};
 extern std::filesystem::path linkuraLocalPath;
 
-bool IsNativeObjectAlive(void* obj) {
-    if (!obj) return false;
-    static UnityResolve::Method* IsNativeObjectAliveMtd = nullptr;
-    if (!IsNativeObjectAliveMtd) IsNativeObjectAliveMtd = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
-                                                                                 "Object", "IsNativeObjectAlive");
-    return IsNativeObjectAliveMtd->Invoke<bool>(obj);
-}
-
 /*
 void UnHookAll() {
     for (const auto i: hookedStubs) {

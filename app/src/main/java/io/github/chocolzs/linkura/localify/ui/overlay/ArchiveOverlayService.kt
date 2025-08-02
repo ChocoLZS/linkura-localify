@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
@@ -207,7 +208,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "当前没有正在运行的直播",
+                    text = parentService.getString(R.string.overlay_archive_no_rendering_running),
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium

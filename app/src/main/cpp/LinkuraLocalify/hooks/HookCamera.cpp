@@ -5,6 +5,7 @@
 #include "../../build/linkura_messages.pb.h"
 #include "thread"
 #include "chrono"
+#include "vector"
 
 namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera
@@ -74,10 +75,10 @@ namespace LinkuraLocal::HookCamera {
 
     void onRenderExit() {
         HookShare::Shareable::resetRenderScene();
+        L4Camera::followCharaSet.clear();
         unregisterMainFreeCamera(true);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
-        L4Camera::followCharaSet.clear();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
         initialCameraRendered = false;
         backgroundColorCameraCache = nullptr;
@@ -93,7 +94,7 @@ namespace LinkuraLocal::HookCamera {
         } else if (!currentCameraRegistered) {
             Log::DebugFmt("Camera Data return false");
             cameraData.set_is_valid(false);
-        } else if (currentCameraCache && IsNativeObjectAlive(currentCameraCache)) {
+        } else if (currentCameraCache && Il2cppUtils::IsNativeObjectAlive(currentCameraCache)) {
             try {
                 auto fov = currentCameraCache->GetFoV();
                 auto transform = currentCameraCache->GetTransform();
@@ -145,7 +146,7 @@ namespace LinkuraLocal::HookCamera {
 
     DEFINE_HOOK(void, Unity_set_rotation_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Quaternion* value)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(freeCameraTransformCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(freeCameraTransformCache)) {
                 static auto lookat_injected = reinterpret_cast<void (*)(void*freeCameraTransformCache,
                                                                         UnityResolve::UnityType::Vector3* worldPosition, UnityResolve::UnityType::Vector3* worldUp)>(
                         Il2cppUtils::il2cpp_resolve_icall(
@@ -153,7 +154,7 @@ namespace LinkuraLocal::HookCamera {
                 static auto worldUp = UnityResolve::UnityType::Vector3(0, 1, 0);
                 const auto cameraMode = L4Camera::GetCameraMode();
                 if (cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
+                    if (cacheTrans && Il2cppUtils::IsNativeObjectAlive(cacheTrans)) {
                         if (L4Camera::GetFirstPersonRoll() == L4Camera::FirstPersonRoll::ENABLE_ROLL) {
                             // maybe not working
                             Unity_set_rotation_Injected_Orig(freeCameraTransformCache, &cacheRotation);
@@ -184,10 +185,10 @@ namespace LinkuraLocal::HookCamera {
 
     DEFINE_HOOK(void, Unity_set_position_Injected, (UnityResolve::UnityType::Transform* self, UnityResolve::UnityType::Vector3* data)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(freeCameraTransformCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(freeCameraTransformCache)) {
                 const auto cameraMode = L4Camera::GetCameraMode();
                 if (cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    if (cacheTrans && IsNativeObjectAlive(cacheTrans)) {
+                    if (cacheTrans && Il2cppUtils::IsNativeObjectAlive(cacheTrans)) {
                         auto pos = L4Camera::CalcFirstPersonPosition(cachePosition, cacheForward, L4Camera::firstPersonPosOffset);
                         Unity_set_position_Injected_Orig(freeCameraTransformCache, &pos);
                     }
@@ -212,7 +213,7 @@ namespace LinkuraLocal::HookCamera {
 
     DEFINE_HOOK(void, Unity_set_fieldOfView, (UnityResolve::UnityType::Camera* self, float value)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(mainFreeCameraCache) && self == mainFreeCameraCache) {
+            if (Il2cppUtils::IsNativeObjectAlive(mainFreeCameraCache) && self == mainFreeCameraCache) {
                 value = L4Camera::baseCamera.fov;
             }
         }
@@ -220,7 +221,7 @@ namespace LinkuraLocal::HookCamera {
     }
     DEFINE_HOOK(float, Unity_get_fieldOfView, (UnityResolve::UnityType::Camera* self)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(mainFreeCameraCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(mainFreeCameraCache)) {
                 for (const auto& i : UnityResolve::UnityType::Camera::GetAllCamera()) {
                     Unity_set_fieldOfView_Orig(i, L4Camera::baseCamera.fov);
                 }
@@ -234,7 +235,7 @@ namespace LinkuraLocal::HookCamera {
     }
     DEFINE_HOOK(void, EndCameraRendering, (void* ctx, void* camera, void* method)) {
         if (Config::enableFreeCamera && !HookShare::Shareable::renderSceneIsNone()) {
-            if (IsNativeObjectAlive(mainFreeCameraCache)) {
+            if (Il2cppUtils::IsNativeObjectAlive(mainFreeCameraCache)) {
                 // prevent crash for with live and fes live & remain the free fov for story
                 if (HookShare::Shareable::renderSceneIsStory()) Unity_set_fieldOfView_Orig(mainFreeCameraCache, L4Camera::baseCamera.fov);
                 if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
@@ -285,6 +286,12 @@ namespace LinkuraLocal::HookCamera {
             // fes live will use the same fixed camera at all time
             if (HookShare::Shareable::renderSceneIsWithLive()) {
                 Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
+                auto cameraMode = L4Camera::GetCameraMode();
+                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+                    // Log::DebugFmt("set camera mode to FREE");
+                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
                 HookShare::Shareable::resetRenderScene();
                 unregisterMainFreeCamera();
                 unregisterCurrentCamera();
@@ -356,44 +363,143 @@ namespace LinkuraLocal::HookCamera {
 #pragma region FirstPersonCamera
 
     DEFINE_HOOK(void, AvatarPool_AddIfAvatar, (Il2cppUtils::Il2CppObject* self, UnityResolve::UnityType::Object* gameObject, void* method)) {
-        Log::DebugFmt("AvatarPool_AddIfAvatar HOOKED");
         return AvatarPool_AddIfAvatar_Orig(self, gameObject, method);
     }
 
-    // ✅
-    // 由于无法像学马一样获取管理器与，只能记录出现过的地址，并判断
-    // 活动记录的无法及时清除退出渲染的FaceBonesCopier，但是问题不大
+    void printChildren(UnityResolve::UnityType::Transform* obj, const std::string& obj_name) {
+        const auto childCount = obj->GetChildCount();
+        for (int i = 0;i < childCount; i++) {
+            auto child = obj->GetChild(i);
+            const auto childName = child->GetName();
+            Log::DebugFmt("%s child: %s", obj_name.c_str(), childName.c_str());
+        }
+    }
+
+    static void recursiveAddFaceMesh(UnityResolve::UnityType::Transform* transform,
+                                     L4Camera::CharacterMeshManager<void*>& followCharaSet) {
+        auto childCount = transform->GetChildCount();
+        for (int i = 0; i < childCount; i++) {
+            auto child = transform->GetChild(i);
+            const auto childName = child->GetName();
+//            Log::DebugFmt("child: %s", childName.c_str());
+            if (childName == "Head") {
+                recursiveAddFaceMesh(child, followCharaSet);
+            } else {
+                if (!followCharaSet.containsCharaMesh(childName)) {
+                    followCharaSet.addCharaMesh(childName, child);
+                }
+            }
+        }
+    }
+
     DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
         if (!Config::enableFreeCamera || (L4Camera::GetCameraMode() == L4Camera::CameraMode::FREE)) {
-//            if (needRestoreHides) {
-//                needRestoreHides = false;
-//                HideHead(nullptr, false);
-//                HideHead(nullptr, true);
-//            }
             return FaceBonesCopier_LastUpdate_Orig(self, mtd);
         }
-
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
-//        static auto origin_head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("originalHead");
-//        static auto left_eye_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("leftEye");
+        static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
         if (!L4Camera::followCharaSet.contains(self)) {
             L4Camera::followCharaSet.add(self);
         }
         auto currentFace = L4Camera::followCharaSet.getCurrentValue();
-        auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
-        cacheTrans = headTrans;
-        cacheRotation = cacheTrans->GetRotation();
-        cachePosition = cacheTrans->GetPosition();
-        cacheForward = cacheTrans->GetUp();
-        cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
-//            Log::DebugFmt("headTrans: pos: %f %f %f, rot: %f %f %f %f, forward: %f %f %f, lookat: %f %f %f",
-//                          cachePosition.x, cachePosition.y, cachePosition.z,
-//                          cacheRotation.x, cacheRotation.y, cacheRotation.z, cacheRotation.w,
-//                          cacheForward.x, cacheForward.y, cacheForward.z,
-//                          cacheLookAt.x, cacheLookAt.y, cacheLookAt.z
-//                          );
+
+        {
+            auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+            cacheTrans = headTrans;
+            cacheRotation = cacheTrans->GetRotation();
+            cachePosition = cacheTrans->GetPosition();
+            cacheForward = cacheTrans->GetUp();
+            cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
+        }
+
+        auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
+        auto modelParent = spineTrans->GetParent();
+        auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
+                [](const std::string& childName) {
+                    return childName == "Mesh";
+                }
+        });
+        if (!faceMeshes.empty()) {
+            auto faceHolder = faceMeshes[0];
+            recursiveAddFaceMesh(faceHolder, L4Camera::followCharaSet);
+        }
+
+        auto costume = modelParent->GetParent()->GetParent()->GetParent();
+        // costume -> SCSch* -> Model -> Mesh
+        auto hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
+                [](const std::string& name) { return name.starts_with("SCSch"); },
+                [](const std::string& name) { return name == "Model"; },
+                [](const std::string& name) { return name == "Mesh"; },
+                [](const std::string& name) { return name.starts_with("Hair"); }
+        });
+        if (hairResult.empty()) {
+            hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
+                    [](const std::string &name) { return name.starts_with("SCSch"); },
+                    [](const std::string &name) { return name == "Model"; },
+                    [](const std::string& name) { return name == "Mesh"; },
+                    [](const std::string& name) { return name == "Body"; },
+                    [](const std::string& name) { return name.starts_with("Hair"); }
+            });
+        }
+
+        if (!hairResult.empty()) {
+            L4Camera::followCharaSet.addCharaHair(hairResult[0]);
+        }
+
+        if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
+            if (L4Camera::followCharaSet.currentHairIsRendered()) {
+                L4Camera::followCharaSet.hideCurrentCharaMeshes();
+            }
+        }
+
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+    }
+
+    // hooked  in fes live
+    DEFINE_HOOK(void, CharacterEyeController_LastUpdate, (void* self, void* mtd)) {
+        return CharacterEyeController_LastUpdate_Orig(self, mtd);
+    }
+
+    // story
+    DEFINE_HOOK(void, SubBoneController_LateUpdate, (void* self, void* mtd)) {
+//        Log::DebugFmt("SubBoneController_LateUpdate HOOKED, %p", self);
+        return SubBoneController_LateUpdate_Orig(self, mtd);
+    }
+
+    // hooked in fes live
+    DEFINE_HOOK(void, ItemSyncTransform_SyncTransform, (void* self, UnityResolve::UnityType::Transform* bindBone, void* method)) {
+        return ItemSyncTransform_SyncTransform_Orig(self, bindBone, method);
+    }
+
+    //  not hooked
+    DEFINE_HOOK(void, ItemSyncTransform_SetupSyncTransform, (void* self,uint32_t c_id, UnityResolve::UnityType::Transform* bindBone, void* mtd)) {
+        Log::DebugFmt("ItemSyncTransform_SetupSyncTransform HOOKED, %p", self);
+        return ItemSyncTransform_SetupSyncTransform_Orig(self, c_id, bindBone, mtd);
+    }
+
+    DEFINE_HOOK(void*, SubBoneController_GetAllChildren, (Il2cppUtils::Il2CppObject* self,UnityResolve::UnityType::Transform* target,void* candidates , void* method)) {
+        return SubBoneController_GetAllChildren_Orig(self,target,candidates, method);
+    }
+
+    DEFINE_HOOK(void, FaceBonesCopier_Start, (void* self, void* mtd)) {
+        return FaceBonesCopier_Start_Orig(self, mtd);
+    }
+
+    DEFINE_HOOK(void, ModelHandler_SetRendererEnable, (Il2cppUtils::Il2CppObject* self, bool enable, void* method)) {
+//        Log::DebugFmt("ModelHandler_SetRendererEnable HOOKED, %p, %s",self , enable ? "enable" : "disable");
+        return ModelHandler_SetRendererEnable_Orig(self, enable, method);
+    }
+
+    // not work
+    DEFINE_HOOK(void, CategorizedMeshRenderer_ctor, (Il2cppUtils::Il2CppObject* self, int32_t category, void* method)) {
+        Log::DebugFmt("CategorizedMeshRenderer_ctor HOOKED, category is %d", category);
+        return CategorizedMeshRenderer_ctor_Orig(self, category, method);
+    }
+
+    DEFINE_HOOK(UnityResolve::UnityType::Transform*, AvatarSettings_GetBoneTransform, (Il2cppUtils::Il2CppObject* self, int32_t humanBodyBones, void* method)) {
+        Log::DebugFmt("AvatarSettings_GetBoneTransform HOOKED, humanBodyBones is %d", humanBodyBones);
+        return AvatarSettings_GetBoneTransform_Orig(self, humanBodyBones, method);
     }
 
 #pragma endregion
@@ -416,8 +522,6 @@ namespace LinkuraLocal::HookCamera {
 //  useless ADD_HOOK(SwipeCamera_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "SwipeCamera", ".ctor"));
 
 #pragma endregion
-        ADD_HOOK(AvatarPool_AddIfAvatar, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "AvatarPool", "AddIfAvatar"));
-        ADD_HOOK(FaceBonesCopier_LastUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FaceBonesCopier", "LateUpdate"));
 #pragma region FreeCamera_ADD_HOOK
         ADD_HOOK(FesLiveFixedCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveFixedCamera", "GetCamera"));
         ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
@@ -442,8 +546,19 @@ namespace LinkuraLocal::HookCamera {
 //        ADD_HOOK(LiveContentsLoader_LoadLiveContentsAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveContentsLoader", "LoadLiveContentsAsync"));
 //        ADD_HOOK(CameraManager_RemoveCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "RemoveCamera"));
 #pragma region FirstPersonCamera
+        ADD_HOOK(AvatarPool_AddIfAvatar, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "AvatarPool", "AddIfAvatar"));
+        ADD_HOOK(CharacterEyeController_LastUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.CharacterAttention", "CharacterEyeController", "LateUpdate"));
+        ADD_HOOK(FaceBonesCopier_LastUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FaceBonesCopier", "LateUpdate"));
+        ADD_HOOK(SubBoneController_LateUpdate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "SubBoneController", "LateUpdate"));
 
+        ADD_HOOK(ItemSyncTransform_SyncTransform, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemSyncTransform", "SyncTransform"));
+        ADD_HOOK(ItemSyncTransform_SetupSyncTransform, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemSyncTransform", "SetupSyncTransform"));
 
+        ADD_HOOK(SubBoneController_GetAllChildren, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "SubBoneController", "GetAllChildren"));
+        ADD_HOOK(FaceBonesCopier_Start, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FaceBonesCopier", "Start"));
+        ADD_HOOK(ModelHandler_SetRendererEnable, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "ModelHandler", "SetRendererEnable"));
+        ADD_HOOK(CategorizedMeshRenderer_ctor, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CategorizedMeshRenderer", ".ctor"));
+        ADD_HOOK(AvatarSettings_GetBoneTransform, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "AvatarSettings", "GetBoneTransform"));
 #pragma endregion
         ADD_HOOK(LiveConnectChapterModel_NewChapterConfirmed, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterModel", "NewChapterConfirmed"));
         ADD_HOOK(LiveSceneController_FinalizeSceneAsync, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "LiveSceneController", "FinalizeSceneAsync"));

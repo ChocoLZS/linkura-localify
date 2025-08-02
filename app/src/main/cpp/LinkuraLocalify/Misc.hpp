@@ -95,6 +95,8 @@ namespace LinkuraLocal {
             size_t currentIndex = 0;                // 当前索引
 
         public:
+            virtual ~IndexedSet() = default;
+
             void initialize(const std::vector<T>& items) {
                 data = items;
                 lookup.clear();
@@ -125,11 +127,11 @@ namespace LinkuraLocal {
                 return data[currentIndex];
             }
 
-            void next() {
+            virtual void next() {
                 currentIndex = (currentIndex + 1) % data.size();
             }
 
-            void prev() {
+            virtual void prev() {
                 currentIndex = (currentIndex == 0) ? data.size() - 1 : currentIndex - 1;
             }
 
@@ -147,7 +149,7 @@ namespace LinkuraLocal {
                 return data.size();
             }
 
-            void clear() {
+            virtual void clear() {
                 data.clear();
                 lookup.clear();
                 currentIndex = 0;

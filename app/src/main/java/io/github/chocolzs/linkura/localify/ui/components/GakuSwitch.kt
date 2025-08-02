@@ -20,16 +20,22 @@ import io.github.chocolzs.linkura.localify.ui.components.base.AutoSizeText
 fun GakuSwitch(modifier: Modifier = Modifier,
                text: String = "",
                checked: Boolean = false,
+               enabled: Boolean = true,
                leftPart: @Composable (() -> Unit)? = null,
                onCheckedChange: (Boolean) -> Unit = {}) {
     Row(modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         if (text.isNotEmpty()) {
-            AutoSizeText(text = text, fontSize = 16.sp)
+            AutoSizeText(
+                text = text, 
+                fontSize = 16.sp,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
         }
         leftPart?.invoke()
         Switch(checked = checked,
+            enabled = enabled,
             onCheckedChange = { value -> onCheckedChange(value) },
             modifier = Modifier,
             colors = SwitchDefaults.colors(
@@ -39,6 +45,11 @@ fun GakuSwitch(modifier: Modifier = Modifier,
                 uncheckedThumbColor = Color(0xFFFFFFFF),
                 uncheckedTrackColor = Color(0xFFCFD8DC),
                 uncheckedBorderColor = Color(0xFFCFD8DC),
+                
+                disabledCheckedThumbColor = Color(0xFFBDBDBD),
+                disabledCheckedTrackColor = Color(0xFFE0E0E0),
+                disabledUncheckedThumbColor = Color(0xFFBDBDBD),
+                disabledUncheckedTrackColor = Color(0xFFE0E0E0),
             ))
     }
 }

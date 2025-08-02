@@ -23,6 +23,8 @@ namespace LinkuraLocal::Config {
     extern bool storyHideDof;
     extern float storyNovelVocalTextDurationRate;
     extern float storyNovelNonVocalTextDurationRate;
+    extern bool firstPersonCameraHideHead;
+    extern bool firstPersonCameraHideHair;
 
     void LoadConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);

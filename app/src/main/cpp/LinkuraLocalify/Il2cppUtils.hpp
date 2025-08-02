@@ -2,6 +2,7 @@
 #include "../deps/UnityResolve/UnityResolve.hpp"
 #include "Log.h"
 #include <memory>
+#include "functional"
 
 namespace Il2cppUtils {
     using namespace LinkuraLocal;
@@ -461,6 +462,80 @@ namespace Il2cppUtils {
     static void* FromJsonStr(const std::string& jsonString, void* targetType) {
         auto il2cppJsonString = Il2CppString::New(jsonString);
         return FromJsonStr(il2cppJsonString, targetType);
+    }
+
+    static std::vector<UnityResolve::UnityType::Transform*> GetNestedTransformChildren(
+            UnityResolve::UnityType::Transform* parent,
+            const std::vector<std::function<bool(const std::string&)>>& predicates
+            ) {
+        std::vector<UnityResolve::UnityType::Transform*> currentLevel;
+
+        if (parent) {
+            currentLevel.push_back(parent);
+        }
+
+        for (const auto& predicate : predicates) {
+            std::vector<UnityResolve::UnityType::Transform*> nextLevel;
+
+            for (auto* transform : currentLevel) {
+                if (!transform) continue;
+
+                for (int i = 0; i < transform->GetChildCount(); i++) {
+                    auto child = transform->GetChild(i);
+                    if (!child) continue;
+
+                    const auto childName = child->GetName();
+                    if (predicate(childName)) {
+                        nextLevel.push_back(child);
+                    }
+                }
+            }
+
+            currentLevel = std::move(nextLevel);
+
+            // 如果某一层没有找到任何匹配的子对象，提前退出
+            if (currentLevel.empty()) {
+                break;
+            }
+        }
+
+        return currentLevel;
+    }
+
+    static void il2cpp_SetGameObjectActive(UnityResolve::UnityType::GameObject* gameObject, bool active) {
+        static auto il2cpp_GameObject_SetActive_Injected = reinterpret_cast<void (*)(UnityResolve::UnityType::GameObject*, bool)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::SetActive(System.Boolean)"));
+        
+        if (il2cpp_GameObject_SetActive_Injected && gameObject) {
+            il2cpp_GameObject_SetActive_Injected(gameObject, active);
+        }
+    }
+
+    static bool il2cpp_Renderer_get_enabled(UnityResolve::UnityType::Renderer* renderer) {
+        static auto il2cpp_Renderer_get_enabled_Injected = reinterpret_cast<bool (*)(UnityResolve::UnityType::Renderer*)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
+
+        if (il2cpp_Renderer_get_enabled_Injected && renderer) {
+            return il2cpp_Renderer_get_enabled_Injected(renderer);
+        }
+        return false;
+    }
+
+    static void il2cpp_Renderer_set_enabled(UnityResolve::UnityType::Renderer* renderer, bool enabled) {
+        static auto il2cpp_Renderer_set_enabled_Injected = reinterpret_cast<void (*)(UnityResolve::UnityType::Renderer*, bool)>(
+            Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::set_enabled(System.Boolean)"));
+
+        if (il2cpp_Renderer_set_enabled_Injected && renderer) {
+            il2cpp_Renderer_set_enabled_Injected(renderer, enabled);
+        }
+    }
+
+    static bool IsNativeObjectAlive(void* obj) {
+        if (!obj) return false;
+        static UnityResolve::Method* IsNativeObjectAliveMtd = nullptr;
+        if (!IsNativeObjectAliveMtd) IsNativeObjectAliveMtd = Il2cppUtils::GetMethod("UnityEngine.CoreModule.dll", "UnityEngine",
+                                                                                     "Object", "IsNativeObjectAlive");
+        return IsNativeObjectAliveMtd->Invoke<bool>(obj);
     }
 
     namespace Tools {

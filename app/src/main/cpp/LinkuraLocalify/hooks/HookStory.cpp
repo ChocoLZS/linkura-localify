@@ -2,6 +2,7 @@
 #include "../config/Config.hpp"
 #include <re2/re2.h>
 #include <string>
+#include "../camera/camera.hpp"
 
 namespace LinkuraLocal::HookStory {
     // 简洁的 RE2 替换函数
@@ -44,6 +45,7 @@ namespace LinkuraLocal::HookStory {
 
     DEFINE_HOOK(void, StoryScene_SetStory, (void* self, void* story, void* mtd)) {
         Log::DebugFmt("StoryScene_SetStory HOOKED");
+        L4Camera::followCharaSet.clear();
         StoryScene_SetStory_Orig(self, story, mtd);
     }
 

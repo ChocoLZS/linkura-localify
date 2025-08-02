@@ -120,6 +120,7 @@
     <string name="overlay.camera_info.stop">Stop Overlay</string>
     <string name="overlay.camera_info.running_description">Camera overlay is running. The floating window shows real-time camera parameters including position, rotation, FOV, mode, and scene type.</string>
     <string name="overlay.camera_info.crash_warning">Warning: When using free camera with camera info display enabled during With×MEETS playback, chapter jumps and custom time jumps may cause crashes.</string>
+    <string name="overlay.archive.no_rendering_running">No live stream is currently running</string>
     
     <!-- Color Picker -->
     <string name="overlay.color_picker.title">Background Color</string>
@@ -135,4 +136,10 @@
     <string name="config.story.hide_dof">Hide Depth of Field</string>
     <string name="config.story.vocal_text_duration_rate">Novel Vocal Text Duration Rate</string>
     <string name="config.story.non_vocal_text_duration_rate">Novel Narration Text Duration Rate</string>
+
+    <!-- First Person Camera Settings -->
+    <string name="config.first_person_camera.hide_head">Hide Head in First Person</string>
+    <string name="config.first_person_camera.hide_hair">Hide Hair</string>
+    <string name="config.first_person_camera.hide_face">Hide Face</string>
+    <string name="config.first_person_camera.head_accessories_note">Note: Head accessories are part of the costume and cannot be hidden separately</string>
 </resources>

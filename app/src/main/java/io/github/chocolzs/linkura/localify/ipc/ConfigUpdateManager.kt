@@ -49,6 +49,8 @@ class ConfigUpdateManager private constructor() {
                 if (config.storyHideDof != null) storyHideDof = config.storyHideDof
                 if (config.storyNovelVocalTextDurationRate != null) storyNovelVocalTextDurationRate = config.storyNovelVocalTextDurationRate
                 if (config.storyNovelNonVocalTextDurationRate != null) storyNovelNonVocalTextDurationRate = config.storyNovelNonVocalTextDurationRate
+                if (config.firstPersonCameraHideHead != null) firstPersonCameraHideHead = config.firstPersonCameraHideHead
+                if (config.firstPersonCameraHideHair != null) firstPersonCameraHideHair = config.firstPersonCameraHideHair
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

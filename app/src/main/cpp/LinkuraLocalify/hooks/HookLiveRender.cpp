@@ -19,6 +19,7 @@ namespace LinkuraLocal::HookLiveRender {
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
+//        L4Camera::followCharaSet.clear();
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
 
@@ -49,6 +50,12 @@ namespace LinkuraLocal::HookLiveRender {
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
             L4Camera::followCharaSet.clear();
             if (HookShare::Shareable::renderSceneIsWithLive()) {
+                auto cameraMode = L4Camera::GetCameraMode();
+                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+                    // Log::DebugFmt("set camera mode to FREE");
+                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
                 HookShare::Shareable::resetRenderScene();
                 HookCamera::unregisterMainFreeCamera(false);
                 HookCamera::unregisterCurrentCamera();

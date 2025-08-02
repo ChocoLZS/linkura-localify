@@ -367,7 +367,8 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="overlay.camera_info.stop">オーバーレイ停止</string>
     <string name="overlay.camera_info.running_description">カメラオーバーレイが実行中です。フローティングウィンドウは位置、回転、FOV、モード、シーンタイプを含むリアルタイムカメラパラメータを表示します。</string>
     <string name="overlay.camera_info.crash_warning">注意：With×MEETS再生中にフリーカメラを使用し、カメラ情報表示を有効にしている場合、チャプタージャンプやカスタム時間ジャンプでクラッシュする可能性があります。</string>
-    
+    <string name="overlay.archive.no_rendering_running">現在実行中のレンダリングはありません</string>
+
     <!-- Color Picker -->
     <string name="overlay.color_picker.title">背景色選択</string>
     <string name="overlay.color_picker.presets">プリセット</string>
@@ -382,4 +383,11 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.story.hide_dof">深度を隠す</string>
     <string name="config.story.vocal_text_duration_rate">小説音声テキスト持続倍率</string>
     <string name="config.story.non_vocal_text_duration_rate">小説ナレーションテキスト持続倍率</string>
+
+    <!-- First Person Camera Settings -->
+    <string name="config.first_person_camera.hide_head">一人称で頭を隠す</string>
+    <string name="config.first_person_camera.hide_hair">髪を隠す</string>
+    <string name="config.first_person_camera.hide_face">顔を隠す</string>
+    <string name="config.first_person_camera.head_accessories_note">注意：頭部アクセサリーは衣装の一部であり、個別に非表示にできません</string>
+
 </resources>

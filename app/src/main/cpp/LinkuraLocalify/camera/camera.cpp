@@ -30,7 +30,7 @@ namespace L4Camera {
     float r_sensitivity = 0.5f;
     bool showToast = true;
     LinkuraLocal::Misc::CSEnum bodyPartsEnum("Head", 0xa);
-    LinkuraLocal::Misc::IndexedSet<void*> followCharaSet;
+    CharacterMeshManager<void*> followCharaSet;
 
 	// bool rMousePressFlg = false;
 
@@ -194,6 +194,7 @@ namespace L4Camera {
 
             } break;
         }
+        L4Camera::followCharaSet.onCameraModeChange(cameraMode);
     }
 
     void SwitchCameraSubMode() {

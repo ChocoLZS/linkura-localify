@@ -80,6 +80,8 @@ message ConfigUpdate {
   optional bool story_hide_dof = 17;
   optional float story_novel_vocal_text_duration_rate = 18;
   optional float story_novel_non_vocal_text_duration_rate = 19;
+  optional bool first_person_camera_hide_head = 20;
+  optional bool first_person_camera_hide_hair = 21;
 }
 
 // Overlay control actions
