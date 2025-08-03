@@ -38,6 +38,7 @@ import java.util.Locale
 import kotlin.system.measureTimeMillis
 import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker.localizationFilesDir
+import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.json
 import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
@@ -77,16 +78,19 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         override fun onConnected() {
             Log.i(TAG, "Socket client connected to server")
+            LogExporter.addLogEntry(TAG, "I", "Socket client connected to server")
         }
         
         override fun onDisconnected() {
             Log.i(TAG, "Socket client disconnected from server")
+            LogExporter.addLogEntry(TAG, "I", "Socket client disconnected from server")
             isOverlayLoopEnabled = false
             isCameraInfoOverlayEnabled = false
         }
         
         override fun onConnectionFailed() {
             Log.w(TAG, "Socket client failed to connect to server")
+            LogExporter.addLogEntry(TAG, "W", "Socket client failed to connect to server")
         }
     }
     
@@ -358,17 +362,21 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     super.afterHookedMethod(param)
 
                     Log.i(TAG, "UnityPlayer.loadNative")
+                    LogExporter.addLogEntry(TAG, "I", "UnityPlayer.loadNative called")
 
                     if (alreadyInitialized) {
+                        LogExporter.addLogEntry(TAG, "W", "Already initialized, skipping")
                         return
                     }
 
                     val app = AndroidAppHelper.currentApplication()
                     if (nativeLibLoadSuccess) {
                         showToast("lib$nativeLibName.so loaded.")
+                        LogExporter.addLogEntry(TAG, "I", "Native library lib$nativeLibName.so loaded successfully")
                     }
                     else {
                         showToast("Load native library lib$nativeLibName.so failed.")
+                        LogExporter.addLogEntry(TAG, "E", "Failed to load native library lib$nativeLibName.so")
                         return
                     }
 
@@ -386,6 +394,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     )
 
                     alreadyInitialized = true
+                    LogExporter.addLogEntry(TAG, "I", "Hook initialization completed successfully")
                     
                     // Setup socket client for duplex communication
                     setupSocketClient()
@@ -510,8 +519,10 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         socketClient.addMessageHandler(socketClientHandler)
         if (socketClient.startClient()) {
             Log.i(TAG, "Duplex socket client started successfully")
+            LogExporter.addLogEntry(TAG, "I", "Duplex socket client started successfully")
         } else {
             Log.w(TAG, "Failed to start duplex socket client")
+            LogExporter.addLogEntry(TAG, "W", "Failed to start duplex socket client")
         }
     }
 

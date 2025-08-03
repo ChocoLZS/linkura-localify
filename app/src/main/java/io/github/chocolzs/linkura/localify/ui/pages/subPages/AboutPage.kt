@@ -85,11 +85,16 @@ fun AboutPage(modifier: Modifier = Modifier,
                 .fillMaxWidth()
                 .padding(
                     start = 8.dp, end = 8.dp, top = 8.dp, bottom = 0.dp
-                )) {
+                ), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 GakuButton(text = "Github", modifier = modifier
                     .weight(1f)
                     .sizeIn(maxWidth = 600.dp), onClick = {
                     context?.openUrl(contributorInfo.plugin_repo)
+                })
+                GakuButton(text = stringResource(R.string.log_export_button), modifier = modifier
+                    .weight(1f)
+                    .sizeIn(maxWidth = 600.dp), onClick = {
+                    context?.exportLogs()
                 })
             }
         }

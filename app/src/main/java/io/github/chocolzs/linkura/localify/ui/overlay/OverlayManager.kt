@@ -101,4 +101,10 @@ object OverlayManager {
     fun toggleCameraOverlay(context: Context): Boolean = toggleOverlay(context)
     
     fun isOverlayRunning(): Boolean = isServiceRunning
+    
+    fun markOverlayAsHidden() {
+        // This method is called when the overlay is hidden but service is still running
+        // We don't change isServiceRunning state as the service is still active
+        Log.d(TAG, "Overlay marked as hidden (but service still running)")
+    }
 }

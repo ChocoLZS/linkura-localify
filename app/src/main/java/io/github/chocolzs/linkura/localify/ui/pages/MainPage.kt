@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +39,7 @@ import io.github.chocolzs.linkura.localify.getMainUIConfirmState
 import io.github.chocolzs.linkura.localify.getProgramConfigState
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupConfirm
+import io.github.chocolzs.linkura.localify.ui.components.ConnectionStatusIndicator
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 
 
@@ -51,6 +53,7 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
     // val config = getConfigState(context, previewData)
     val confirmState by getMainUIConfirmState(context, null)
     val programConfig by getProgramConfigState(context)
+    var showConnectionDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(programConfig) {
         versionInfo = context?.getVersion() ?: listOf("", "Unknown")
@@ -74,8 +77,25 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
                 .padding(10.dp, 10.dp, 10.dp, 0.dp),
             verticalArrangement = Arrangement.Top
         ) {
-            Text(text = "Linkura Localify ${versionInfo[0]}", fontSize = 18.sp)
-            Text(text = "Assets version: ${versionInfo[1]}", fontSize = 13.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Text(text = "Linkura Localify ${versionInfo[0]}", fontSize = 18.sp)
+                    Text(text = "Assets version: ${versionInfo[1]}", fontSize = 13.sp)
+                }
+                
+                // Connection status indicator in top right
+                ConnectionStatusIndicator(
+                    modifier = Modifier.padding(top = 4.dp),
+                    size = 20f,
+                    showDialog = showConnectionDialog,
+                    onDismissDialog = { showConnectionDialog = false },
+                    onShowDialog = { showConnectionDialog = true }
+                )
+            }
 
             SettingsTabs(modifier, listOf(stringResource(R.string.about), stringResource(R.string.home),
                 stringResource(R.string.advanced_settings)
