@@ -158,7 +158,5 @@
     <string name="overlay.toolbar.title">Toolbar Floating Window</string>
     <string name="overlay.toolbar.description">Allows real-time viewing of camera parameters, adjusting rendering playback progress, green screen functionality</string>
     <string name="overlay.toolbar.crash_warning">Note: In With×MEETS scenes, using free camera mode with camera info display enabled may cause crashes. If you need to perform time jumps, try disabling camera info display.</string>
-    <string name="overlay.toolbar.expand">Expand Toolbar</string>
-    <string name="overlay.toolbar.collapse">Collapse Toolbar</string>
-    <string name="overlay.toolbar.hide">Hide Toolbar</string>
+
 </resources>

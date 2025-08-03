@@ -15,9 +15,7 @@ class DuplexSocketClient private constructor() {
     companion object {
         private const val TAG = "DuplexSocketClient"
         private const val SOCKET_ADDRESS = "linkura_duplex_socket"
-        private const val SOCKET_ADDRESS_FALLBACK = "@linkura_duplex_socket_abs"
         private const val RECONNECT_INTERVAL_MS = 2000L
-        private const val CONNECTION_TIMEOUT_MS = 5000L
         
         @Volatile
         private var INSTANCE: DuplexSocketClient? = null
@@ -84,43 +82,24 @@ class DuplexSocketClient private constructor() {
     }
 
     private fun connectToServer(): Boolean {
-        // Try to connect with filesystem namespace first
-        var success = tryConnectToServer(SOCKET_ADDRESS, false)
-        
-        // If failed, try with abstract namespace as fallback
-        if (!success) {
-            Log.w(TAG, "Failed to connect with filesystem namespace, trying abstract namespace")
-            success = tryConnectToServer(SOCKET_ADDRESS_FALLBACK, true)
-        }
-        
-        return success
-    }
-    
-    private fun tryConnectToServer(address: String, abstractNamespace: Boolean): Boolean {
         try {
             disconnect()
             
-            Log.d(TAG, "Connecting to server at $address (abstract: $abstractNamespace)...")
+            Log.d(TAG, "Connecting to server at $SOCKET_ADDRESS...")
             clientSocket = LocalSocket().apply {
-                // Set connection timeout
-                soTimeout = CONNECTION_TIMEOUT_MS.toInt()
-                connect(LocalSocketAddress(address))
+                connect(LocalSocketAddress(SOCKET_ADDRESS))
             }
             outputStream = BufferedOutputStream(clientSocket?.outputStream)
             
             isConnected.set(true)
-            Log.i(TAG, "Successfully connected to duplex server at $address")
+            Log.i(TAG, "Successfully connected to duplex server")
             
             // Notify handlers about successful connection
             messageHandlers.forEach { it.onConnected() }
             return true
             
         } catch (e: IOException) {
-            Log.w(TAG, "Failed to connect to server at $address (abstract: $abstractNamespace): ${e.message}")
-            disconnect()
-            return false
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected error connecting to server at $address", e)
+            Log.w(TAG, "Failed to connect to server: ${e.message}")
             disconnect()
             return false
         }
