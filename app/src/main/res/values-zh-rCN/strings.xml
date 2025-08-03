@@ -169,5 +169,13 @@
     <string name="overlay.toolbar.expand">展开工具栏</string>
     <string name="overlay.toolbar.collapse">收缩工具栏</string>
     <string name="overlay.toolbar.hide">隐藏工具栏</string>
+    
+    <!-- Log Export -->
+    <string name="log.export.title">导出日志</string>
+    <string name="log.export.description">将系统和应用日志导出到下载文件夹</string>
+    <string name="log.export.button">导出日志</string>
+    <string name="log.export.success">日志已成功导出到下载文件夹</string>
+    <string name="log.export.failed">导出日志失败</string>
+    <string name="log.export.permission_required">需要存储权限才能导出日志</string>
 
 </resources>

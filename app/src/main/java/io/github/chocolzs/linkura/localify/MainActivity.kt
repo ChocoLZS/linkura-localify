@@ -17,6 +17,7 @@ import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.hookUtils.MainKeyEventDispatcher
 import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
+import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
 import io.github.chocolzs.linkura.localify.mainUtils.json
@@ -107,6 +108,18 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         startActivity(intent)
     }
 
+    fun exportLogs() {
+        LogExporter.addLogEntry("MainActivity", "I", "Export logs requested by user")
+        val logFile = LogExporter.exportLogs(this)
+        if (logFile != null) {
+            showToast(getString(R.string.log_export_success))
+            LogExporter.addLogEntry("MainActivity", "I", "Log export successful: ${logFile.name}")
+        } else {
+            showToast(getString(R.string.log_export_failed))
+            LogExporter.addLogEntry("MainActivity", "E", "Log export failed")
+        }
+    }
+
     override fun pushKeyEvent(event: KeyEvent): Boolean {
         return dispatchKeyEvent(event)
     }
@@ -127,6 +140,7 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        LogExporter.addLogEntry("MainActivity", "I", "MainActivity onCreate called")
         loadConfig()
 
         factory = UserConfigViewModelFactory(config)
