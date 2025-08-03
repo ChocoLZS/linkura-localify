@@ -66,6 +66,12 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
         .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Floating Window Section (moved to top)
+        item {
+            CameraControl(modifier = modifier)
+            Spacer(Modifier.height(6.dp))
+        }
+
         item {
             GakuGroupBox(modifier, stringResource(R.string.camera_settings)) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -130,11 +136,6 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                 }
             }
 
-            Spacer(Modifier.height(6.dp))
-        }
-
-        item {
-            CameraControl(modifier = modifier)
             Spacer(Modifier.height(6.dp))
         }
 

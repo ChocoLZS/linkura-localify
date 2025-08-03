@@ -389,5 +389,24 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.first_person_camera.hide_hair">髪を隠す</string>
     <string name="config.first_person_camera.hide_face">顔を隠す</string>
     <string name="config.first_person_camera.head_accessories_note">注意：頭部アクセサリーは衣装の一部であり、個別に非表示にできません</string>
+    
+    <!-- Connection Status -->
+    <string name="connection_status_dialog_title">リアルタイムデータインタラクション状態</string>
+    <string name="connection_status_connected">接続済み</string>
+    <string name="connection_status_disconnected">未接続</string>
+    <string name="connection_status_dialog_description">このアイコンは、プラグインアプリとゲームアプリ間のリアルタイムデータインタラクション機能が正常に動作しているかどうかを示します。</string>
+    <string name="connection_status_features_title">リアルタイムデータインタラクション：</string>
+    <string name="connection_status_feature_1">1. ほとんどの設定変更後、右下の ＞ ボタンをクリックして設定をホットリロードでき、ゲームを再起動する必要がありません</string>
+    <string name="connection_status_feature_2">2. フローティングウィンドウ機能はこのデータインタラクションに大きく依存しています</string>
+    <string name="connection_status_feature_3">3. リアルタイムデータインタラクション機能はプラグインによって自動的に有効になります</string>
+    <string name="connection_status_troubleshooting">アイコンの状態が未接続を示している場合、この機能が正常に動作していないことを意味します。この問題をGitHubに報告できます。</string>
+    
+    <!-- Toolbar Overlay -->
+    <string name="overlay.toolbar_title">ツールバーフローティングウィンドウ</string>
+    <string name="overlay.toolbar_description">カメラパラメータのリアルタイム表示、レンダリング再生の進行状況調整、グリーンスクリーン機能を可能にします</string>
+    <string name="overlay.toolbar_crash_warning">注意：With×MEETSシーンで、フリーカメラモードを使用してカメラ情報表示をオンにすると、クラッシュが発生する可能性があります。時間ジャンプを実行する必要がある場合は、カメラ情報表示をオフにしてみてください。</string>
+    <string name="overlay.toolbar.expand">ツールバーを展開</string>
+    <string name="overlay.toolbar.collapse">ツールバーを収縮</string>
+    <string name="overlay.toolbar.hide">ツールバーを隠す</string>
 
 </resources>

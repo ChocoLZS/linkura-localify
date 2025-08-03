@@ -15,6 +15,8 @@ class DuplexSocketServer private constructor() {
     companion object {
         private const val TAG = "DuplexSocketServer"
         private const val SOCKET_ADDRESS = "linkura_duplex_socket"
+        private const val SOCKET_ADDRESS_FALLBACK = "@linkura_duplex_socket_abs"
+        private const val CONNECTION_TIMEOUT_MS = 5000L
         
         @Volatile
         private var INSTANCE: DuplexSocketServer? = null
@@ -33,6 +35,7 @@ class DuplexSocketServer private constructor() {
     private val isClientConnected = AtomicBoolean(false)
     private val messageHandlers = CopyOnWriteArrayList<MessageHandler>()
     private var serverJob: Job? = null
+    private var useAbstractNamespace = false
 
     interface MessageHandler {
         fun onMessageReceived(type: MessageType, payload: ByteArray)
@@ -47,18 +50,32 @@ class DuplexSocketServer private constructor() {
             return true
         }
 
+        // Try to start server with filesystem namespace first
+        var success = tryStartServer(SOCKET_ADDRESS, false)
+        
+        // If failed, try with abstract namespace as fallback
+        if (!success) {
+            Log.w(TAG, "Failed to start server with filesystem namespace, trying abstract namespace")
+            success = tryStartServer(SOCKET_ADDRESS_FALLBACK, true)
+        }
+        
+        return success
+    }
+    
+    private fun tryStartServer(address: String, abstractNamespace: Boolean): Boolean {
         return try {
-            serverSocket = LocalServerSocket(SOCKET_ADDRESS)
+            serverSocket = LocalServerSocket(address)
+            useAbstractNamespace = abstractNamespace
             isRunning.set(true)
             
             serverJob = GlobalScope.launch(Dispatchers.IO) {
                 runServerLoop()
             }
             
-            Log.i(TAG, "Duplex socket server started at $SOCKET_ADDRESS")
+            Log.i(TAG, "Duplex socket server started at $address (abstract: $abstractNamespace)")
             true
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to start server", e)
+            Log.e(TAG, "Failed to start server at $address (abstract: $abstractNamespace)", e)
             cleanup()
             false
         }
@@ -230,6 +247,11 @@ class DuplexSocketServer private constructor() {
         
         serverSocket = null
         serverJob = null
+        useAbstractNamespace = false
+    }
+    
+    fun getSocketAddress(): String {
+        return if (useAbstractNamespace) SOCKET_ADDRESS_FALLBACK else SOCKET_ADDRESS
     }
 
     fun addMessageHandler(handler: MessageHandler) {

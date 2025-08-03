@@ -28,7 +28,7 @@ fun CameraControl(
     }
 
     GakuGroupBox(
-        title = stringResource(R.string.overlay_camera_info_title),
+        title = stringResource(R.string.overlay_toolbar_title),
         modifier = modifier
     ) {
         Column(
@@ -38,7 +38,7 @@ fun CameraControl(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = stringResource(R.string.overlay_camera_info_description),
+                text = stringResource(R.string.overlay_toolbar_description),
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -113,12 +113,21 @@ fun CameraControl(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     ) {
-                        Text(
-                            text = stringResource(R.string.overlay_camera_info_running_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        Column(
                             modifier = Modifier.padding(12.dp)
-                        )
+                        ) {
+                            Text(
+                                text = stringResource(R.string.overlay_camera_info_running_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.overlay_toolbar_crash_warning),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
             }

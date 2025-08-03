@@ -142,5 +142,24 @@
     <string name="config.first_person_camera.hide_hair">隐藏头发</string>
     <string name="config.first_person_camera.hide_face">隐藏面部</string>
     <string name="config.first_person_camera.head_accessories_note">注意：头部饰品属于服装的一部分，无法单独隐藏</string>
+    
+    <!-- Connection Status -->
+    <string name="connection_status_dialog_title">实时数据交互状态</string>
+    <string name="connection_status_connected">已连接</string>
+    <string name="connection_status_disconnected">未连接</string>
+    <string name="connection_status_dialog_description">此图标显示插件应用与游戏应用之间的实时数据交互功能是否正常运行。</string>
+    <string name="connection_status_features_title">实时数据交互：</string>
+    <string name="connection_status_feature_1">1. 大部分配置修改后，点击右下角的 ＞ 按钮，可以热更新配置，无需关闭游戏再打开</string>
+    <string name="connection_status_feature_2">2. 悬浮窗的功能严重依赖于此数据交互</string>
+    <string name="connection_status_feature_3">3. 实时数据交互功能插件会自动开启</string>
+    <string name="connection_status_troubleshooting">如果图标状态显示未连接，那么代表此功能未正常开启，可以将此问题反馈至 GitHub。</string>
+    
+    <!-- Toolbar Overlay -->
+    <string name="overlay_toolbar_title">工具栏悬浮窗</string>
+    <string name="overlay_toolbar_description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能</string>
+    <string name="overlay_toolbar_crash_warning">注意：在With×MEETS场景中，使用自由相机模式并打开相机信息显示，有概率造成崩溃。如果要进行时间跳转，可以尝试关闭相机信息显示。</string>
+    <string name="overlay_toolbar_expand">展开工具栏</string>
+    <string name="overlay_toolbar_collapse">收缩工具栏</string>
+    <string name="overlay_toolbar_hide">隐藏工具栏</string>
 
 </resources>

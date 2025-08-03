@@ -142,4 +142,23 @@
     <string name="config.first_person_camera.hide_hair">Hide Hair</string>
     <string name="config.first_person_camera.hide_face">Hide Face</string>
     <string name="config.first_person_camera.head_accessories_note">Note: Head accessories are part of the costume and cannot be hidden separately</string>
+    
+    <!-- Connection Status -->
+    <string name="connection_status_dialog_title">Real-time Data Interaction Status</string>
+    <string name="connection_status_connected">Connected</string>
+    <string name="connection_status_disconnected">Disconnected</string>
+    <string name="connection_status_dialog_description">This icon shows whether real-time data interaction between the plugin app and game app is working properly.</string>
+    <string name="connection_status_features_title">Real-time Data Interaction:</string>
+    <string name="connection_status_feature_1">1. Most configuration changes can be hot-reloaded by clicking the ＞ button in the bottom right, without restarting the game</string>
+    <string name="connection_status_feature_2">2. Floating window features heavily depend on this data interaction</string>
+    <string name="connection_status_feature_3">3. Real-time data interaction is automatically enabled by the plugin</string>
+    <string name="connection_status_troubleshooting">If the icon shows disconnected, this feature is not working properly. You can report this issue to GitHub.</string>
+    
+    <!-- Floating Toolbar -->
+    <string name="overlay.toolbar.title">Toolbar Floating Window</string>
+    <string name="overlay.toolbar.description">Allows real-time viewing of camera parameters, adjusting rendering playback progress, green screen functionality</string>
+    <string name="overlay.toolbar.crash_warning">Note: In With×MEETS scenes, using free camera mode with camera info display enabled may cause crashes. If you need to perform time jumps, try disabling camera info display.</string>
+    <string name="overlay.toolbar.expand">Expand Toolbar</string>
+    <string name="overlay.toolbar.collapse">Collapse Toolbar</string>
+    <string name="overlay.toolbar.hide">Hide Toolbar</string>
 </resources>

@@ -24,6 +24,9 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,6 +48,7 @@ import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.ui.components.ColorPicker
+import io.github.chocolzs.linkura.localify.ui.components.ConnectionStatusIndicator
 
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 
@@ -67,6 +71,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var isArchiveOverlayVisible by mutableStateOf(false)
     private var isColorPickerVisible by mutableStateOf(false)
     private var currentBackgroundColor by mutableStateOf(Color.Black)
+    private var isToolbarCollapsed by mutableStateOf(false)
+    private var isToolbarVisible by mutableStateOf(true)
     
     // Socket communication
     private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
@@ -77,6 +83,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var initialY = 0
     private var initialTouchX = 0f
     private var initialTouchY = 0f
+    private var toolbarParams: WindowManager.LayoutParams? = null
     
     // Lifecycle components
     private lateinit var lifecycleRegistry: LifecycleRegistry
@@ -218,9 +225,12 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 PixelFormat.TRANSLUCENT
             )
 
+            // Start in center, will adjust position based on collapsed state
             params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
             params.x = 0
             params.y = 100
+            
+            toolbarParams = params
             
             toolbarView = ComposeView(this).apply {
                 setViewTreeLifecycleOwner(this@OverlayService)
@@ -260,106 +270,175 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     @Composable
     private fun OverlayToolbar() {
-        Box(
-            modifier = Modifier
-                .background(
-                    Color.Black.copy(alpha = 0.8f),
-                    RoundedCornerShape(20.dp)
-                )
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+        if (!isToolbarVisible) return
+        
+        if (isToolbarCollapsed) {
+            // Collapsed state - show only expand button on the right side
+            Box(
+                modifier = Modifier
+                    .background(
+                        Color.Black.copy(alpha = 0.8f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(8.dp)
             ) {
-                // Camera info button
                 IconButton(
                     onClick = {
-                        toggleCameraOverlay()
+                        isToolbarCollapsed = false
+                        updateToolbarPosition()
                     },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            if (isCameraOverlayVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
-                            RoundedCornerShape(8.dp)
-                        )
+                    modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "Camera Info",
+                        imageVector = Icons.Default.KeyboardArrowLeft,
+                        contentDescription = "Expand Toolbar",
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-                
-                // Archive progress button
-                IconButton(
-                    onClick = {
-                        toggleArchiveOverlay()
-                    },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            if (isArchiveOverlayVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
-                            RoundedCornerShape(8.dp)
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Archive Progress",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                
-                // Color picker button with color indicator
+            }
+        } else {
+            // Expanded state - show full toolbar
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Hide button (smaller, centered at top)
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
                         .background(
-                            if (isColorPickerVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
-                            RoundedCornerShape(8.dp)
+                            Color.Black.copy(alpha = 0.8f),
+                            RoundedCornerShape(12.dp)
                         )
+                        .padding(4.dp)
                 ) {
                     IconButton(
                         onClick = {
-                            toggleColorPickerOverlay()
+                            isToolbarVisible = false
+                            // Update plugin side overlay state
+                            OverlayManager.markOverlayAsHidden()
                         },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Palette,
-                            contentDescription = "Background Color",
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Hide Toolbar",
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                     }
-                    
-                    // Color indicator
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(12.dp)
-                            .offset(x = 2.dp, y = 2.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(currentBackgroundColor)
-                            .border(0.5.dp, Color.White, RoundedCornerShape(2.dp))
-                    )
                 }
                 
-                // Menu/Close button
-                IconButton(
-                    onClick = {
-                        stopSelf()
-                    },
-                    modifier = Modifier.size(40.dp)
+                // Main toolbar content
+                Box(
+                    modifier = Modifier
+                        .background(
+                            Color.Black.copy(alpha = 0.8f),
+                            RoundedCornerShape(20.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Close",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Connection status indicator (left side)
+                        ConnectionStatusIndicator(
+                            size = 12f,
+                            showDialog = false
+                        )
+                        
+                        // Camera info button
+                        IconButton(
+                            onClick = {
+                                toggleCameraOverlay()
+                            },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    if (isCameraOverlayVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Camera Info",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        
+                        // Archive progress button
+                        IconButton(
+                            onClick = {
+                                toggleArchiveOverlay()
+                            },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    if (isArchiveOverlayVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Archive Progress",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        
+                        // Color picker button with color indicator
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    if (isColorPickerVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                )
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    toggleColorPickerOverlay()
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Palette,
+                                    contentDescription = "Background Color",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            
+                            // Color indicator
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .size(12.dp)
+                                    .offset(x = 2.dp, y = 2.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(currentBackgroundColor)
+                                    .border(0.5.dp, Color.White, RoundedCornerShape(2.dp))
+                            )
+                        }
+                        
+                        // Collapse button (rightmost)
+                        IconButton(
+                            onClick = {
+                                isToolbarCollapsed = true
+                                updateToolbarPosition()
+                            },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowRight,
+                                contentDescription = "Collapse Toolbar",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -436,6 +515,30 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     fun resetCameraOverlayState() {
         isCameraOverlayVisible = false
+    }
+    
+    private fun updateToolbarPosition() {
+        toolbarParams?.let { params ->
+            if (isToolbarCollapsed) {
+                // Position collapsed toolbar on the right side
+                params.gravity = Gravity.TOP or Gravity.END
+                params.x = 0
+                params.y = 200
+            } else {
+                // Position expanded toolbar in center
+                params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                params.x = 0
+                params.y = 100
+            }
+            
+            toolbarView?.let { view ->
+                try {
+                    windowManager?.updateViewLayout(view, params)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error updating toolbar position", e)
+                }
+            }
+        }
     }
 
     fun getLifecycleOwnerInstance(): LifecycleOwner = this
