@@ -154,21 +154,10 @@
     <string name="connection_status_feature_3">3. 实时数据交互功能插件会自动开启</string>
     <string name="connection_status_troubleshooting">如果图标状态显示未连接，那么代表此功能未正常开启，可以将此问题反馈至 GitHub。</string>
     
-    <!-- Toolbar Overlay -->
-    <string name="overlay_toolbar_title">工具栏悬浮窗</string>
-    <string name="overlay_toolbar_description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能</string>
-    <string name="overlay_toolbar_crash_warning">注意：在With×MEETS场景中，使用自由相机模式并打开相机信息显示，有概率造成崩溃。如果要进行时间跳转，可以尝试关闭相机信息显示。</string>
-    <string name="overlay_toolbar_expand">展开工具栏</string>
-    <string name="overlay_toolbar_collapse">收缩工具栏</string>
-    <string name="overlay_toolbar_hide">隐藏工具栏</string>
-    
-    <!-- Floating Toolbar (dotted notation compatibility) -->
+    <!-- Floating Toolbar -->
     <string name="overlay.toolbar.title">工具栏悬浮窗</string>
     <string name="overlay.toolbar.description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能</string>
     <string name="overlay.toolbar.crash_warning">注意：在With×MEETS场景中，使用自由相机模式并打开相机信息显示，有概率造成崩溃。如果要进行时间跳转，可以尝试关闭相机信息显示。</string>
-    <string name="overlay.toolbar.expand">展开工具栏</string>
-    <string name="overlay.toolbar.collapse">收缩工具栏</string>
-    <string name="overlay.toolbar.hide">隐藏工具栏</string>
     
     <!-- Log Export -->
     <string name="log.export.title">导出日志</string>
