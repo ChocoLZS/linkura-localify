@@ -219,6 +219,23 @@ namespace LinkuraLocal::HookShare {
                                                              cancellation_token, method_info);
     }
 
+    DEFINE_HOOK(Il2cppUtils::Il2CppString* , AlstArchiveDirectory_GetLocalFullPathFromFileName, (Il2cppUtils::Il2CppObject* self, Il2cppUtils::Il2CppString* fileName)) {
+        auto result = AlstArchiveDirectory_GetLocalFullPathFromFileName_Orig(self, fileName);
+        auto result_str = result->ToString();
+        if (Config::enableMotionCaptureReplay) {
+            auto archive_id = Shareable::currentArchiveId;
+            auto it = Config::archiveConfigMap.find(archive_id);
+            if (it == Config::archiveConfigMap.end()) return result;
+            auto archive_config = it->second;
+            auto replay_type = archive_config["replay_type"].get<uint>();
+            if (replay_type == 1) { // replay
+                auto new_result_str = replaceExternalLinkUrl(result_str, Config::motionCaptureResourceUrl);
+                result = Il2cppUtils::Il2CppString::New(new_result_str);
+            }
+        }
+        return result;
+    }
+
 #pragma endregion
 
     void Install(HookInstaller* hookInstaller) {
@@ -247,6 +264,7 @@ namespace LinkuraLocal::HookShare {
                 ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = method->methodPointer;
             }
         }
+        ADD_HOOK(AlstArchiveDirectory_GetLocalFullPathFromFileName, Il2cppUtils::GetMethodPointer("Core.dll", "Alstromeria", "AlstArchiveDirectory", "GetRemoteUriFromFileName"));
 #pragma region RenderScene
 
         ADD_HOOK(FesliveApi_FesliveEnterWithHttpInfoAsync , Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "FesliveApi", "FesliveEnterWithHttpInfoAsync"));
