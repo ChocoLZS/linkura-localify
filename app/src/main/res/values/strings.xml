@@ -188,5 +188,11 @@
     <string name="archive.empty">No archive data available</string>
     <string name="archive.video_replay">Video Replay</string>
     <string name="archive.motion_capture_replay">Motion Capture Replay</string>
+    
+    <!-- Archive Icon Legend -->
+    <string name="archive.icon_legend_title">Replay Guide 👇</string>
+    <string name="archive.motion_capture_official">Official Motion Capture Replay (Green)</string>
+    <string name="archive.motion_capture_reconstructed">Reconstructed Motion Capture Replay (Purple)</string>
+    <string name="archive.icon_legend_note">Click icons to toggle replay modes. Semi-transparent badges indicate limited replay mode availability.</string>
 
 </resources>

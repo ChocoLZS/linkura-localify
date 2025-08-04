@@ -2,7 +2,9 @@ package io.github.chocolzs.linkura.localify.ui.pages.subPages
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,7 +27,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiPeople
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -182,6 +186,9 @@ private fun ReplayTabPage(
 
     val replaySettingsViewModel: ReplaySettingsCollapsibleBoxViewModel =
         viewModel(factory = ReplaySettingsCollapsibleBoxViewModelFactory(initiallyExpanded = false))
+    
+    // Separate state for icon legend collapsible
+    var isIconLegendExpanded by remember { mutableStateOf(false) }
 
     // Archive data state
     var archiveList by remember { mutableStateOf<List<ArchiveItem>>(emptyList()) }
@@ -368,7 +375,7 @@ private fun ReplayTabPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Archive waterfall grid
@@ -434,6 +441,98 @@ private fun ReplayTabPage(
                     }
 
                     else -> {
+                        // Collapsible icon legend explanation
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            // Clickable header
+                            Text(
+                                text = stringResource(R.string.archive_icon_legend_title),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isIconLegendExpanded = !isIconLegendExpanded
+                                    }
+                            )
+                            
+                            // Collapsible content with animation
+                            AnimatedVisibility(visible = isIconLegendExpanded) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.EmojiPeople,
+                                            contentDescription = null,
+                                            tint = Color(0xFF58D68E),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.archive_motion_capture_official),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                        )
+                                    }
+                                    
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.EmojiPeople,
+                                            contentDescription = null,
+                                            tint = Color(0xFF816CC6), // Purple
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.archive_motion_capture_reconstructed),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                        )
+                                    }
+                                    
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.VideoFile,
+                                            contentDescription = null,
+                                            tint = Color(0xFF58D68E),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.archive_video_replay),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                        )
+                                    }
+                                    
+                                    Text(
+                                        text = stringResource(R.string.archive_icon_legend_note),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Spacer(Modifier.height(4.dp))
+                        
                         ArchiveWaterfallGrid(
                             archiveList = archiveList,
                             replayTypes = replayTypes,

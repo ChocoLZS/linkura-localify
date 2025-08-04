@@ -435,5 +435,11 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="archive.empty">利用可能なアーカイブデータがありません</string>
     <string name="archive.video_replay">ビデオ再生</string>
     <string name="archive.motion_capture_replay">モーションキャプチャ再生</string>
+    
+    <!-- Archive Icon Legend -->
+    <string name="archive.icon_legend_title">再生説明👇</string>
+    <string name="archive.motion_capture_official">公式モーションキャプチャ再生（緑色）</string>
+    <string name="archive.motion_capture_reconstructed">復元モーションキャプチャ再生（紫色）</string>
+    <string name="archive.icon_legend_note">アイコンをクリックして再生モードを切り替えます。半透明のバッジは対応モードの再生のみ利用可能であることを示します。</string>
 
 </resources>
