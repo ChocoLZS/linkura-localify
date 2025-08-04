@@ -181,4 +181,12 @@
     <string name="replay.settings.reset_url">复原</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
 
+    <!-- Archive Grid -->
+    <string name="archive.loading">正在加载存档数据...</string>
+    <string name="archive.error">加载存档数据失败</string>
+    <string name="archive.retry">重试</string>
+    <string name="archive.empty">没有可用的存档数据</string>
+    <string name="archive.video_replay">视频回放</string>
+    <string name="archive.motion_capture_replay">动捕回放</string>
+
 </resources>

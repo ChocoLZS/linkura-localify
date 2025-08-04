@@ -181,4 +181,12 @@
     <string name="replay.settings.reset_url">Reset to Default</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
 
+    <!-- Archive Grid -->
+    <string name="archive.loading">Loading archive data...</string>
+    <string name="archive.error">Failed to load archive data</string>
+    <string name="archive.retry">Retry</string>
+    <string name="archive.empty">No archive data available</string>
+    <string name="archive.video_replay">Video Replay</string>
+    <string name="archive.motion_capture_replay">Motion Capture Replay</string>
+
 </resources>
