@@ -12,8 +12,57 @@ on:
         default: true
 
 jobs:
-  build-and-release:
+  create-release:
+    if: inputs.create_release == true
     runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      release_id: ${{ steps.create_release.outputs.id }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get tag name
+        id: get_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag_name=v$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare Release Body
+        id: prepare_release_body
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+          
+          # Read the template and replace placeholders
+          template_content=$(cat .github/release_template.md)
+          release_body="${template_content//VERSION/$tag_name}"
+          
+          # Save to output
+          echo "release_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$release_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag_name }}
+          name: Release ${{ steps.get_tag.outputs.tag_name }}
+          body: ${{ steps.prepare_release_body.outputs.release_body }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-apk:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      apk_path: ${{ steps.rename_apk.outputs.apk_path }}
+      apk_name: ${{ steps.rename_apk.outputs.apk_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,34 +124,26 @@ jobs:
           echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
           echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
 
-      - name: Prepare Release Body
-        id: prepare_release_body
-        run: |
-          tag_name="${{ steps.get_tag.outputs.tag_name }}"
-          
-          # Read the template and replace placeholders
-          template_content=$(cat .github/release_template.md)
-          release_body="${template_content//VERSION/$tag_name}"
-          
-          # Save to output
-          echo "release_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$release_body" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        if: inputs.create_release == true
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.get_tag.outputs.tag_name }}
-          name: Release ${{ steps.get_tag.outputs.tag_name }}
-          body: ${{ steps.prepare_release_body.outputs.release_body }}
-          files: ${{ steps.rename_apk.outputs.apk_path }}
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.rename_apk.outputs.apk_name }}
           path: ${{ steps.rename_apk.outputs.apk_path }}
+
+  upload-to-release:
+    needs: [create-release, build-apk]
+    if: inputs.create_release == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-apk.outputs.apk_name }}
+
+      - name: Upload APK to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag_name }}
+          files: ${{ needs.build-apk.outputs.apk_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

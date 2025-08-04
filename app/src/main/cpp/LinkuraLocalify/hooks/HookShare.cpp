@@ -103,10 +103,6 @@ namespace LinkuraLocal::HookShare {
                 auto assets_url = Config::motionCaptureResourceUrl;
                 if (replay_type == 0) {
                     json.erase("archive_url");
-                    if (!video_url.empty()) {
-                        auto new_video_url = replaceExternalLinkUrl(video_url, assets_url);
-                        json["video_url"] = new_video_url;
-                    }
                 }
                 if (replay_type == 1) {
                     json.erase("video_url");
@@ -130,10 +126,7 @@ namespace LinkuraLocal::HookShare {
                 auto assets_url = Config::motionCaptureResourceUrl;
                 if (replay_type == 0) {
                     json.erase("archive_url");
-                    if (!video_url.empty()) {
-                        auto new_video_url = replaceExternalLinkUrl(video_url, assets_url);
-                        json["video_url"] = new_video_url;
-                    }
+                    // do nothing
                 }
                 if (replay_type == 1) {
                     json.erase("video_url");
