@@ -58,6 +58,15 @@ fun <T> T.getProgramConfigContent(
     }
 }
 
+fun <T> T.getArchiveConfigContent(): String where T : Activity {
+    val configFile = File(filesDir, "archive-config.json")
+    return if (configFile.exists()) {
+        configFile.readText()
+    } else {
+        "[]"
+    }
+}
+
 fun <T> T.loadConfig() where T : Activity, T : IHasConfigItems {
     val configStr = getConfigContent()
     config = try {
@@ -107,6 +116,7 @@ fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
             getProgramConfigContent(listOf("transRemoteZipUrl", "useAPIAssetsURL",
                 "localAPIAssetsVersion", "p"), programConfig)
         )
+        putExtra("archiveData", getArchiveConfigContent())
         putExtra("lVerName", version)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }

@@ -33,6 +33,7 @@ import io.github.chocolzs.linkura.localify.ui.components.icons.AutoFixHigh
 import io.github.chocolzs.linkura.localify.ui.pages.subPages.AboutPage
 import io.github.chocolzs.linkura.localify.ui.pages.subPages.AdvanceSettingsPage
 import io.github.chocolzs.linkura.localify.ui.pages.subPages.HomePage
+import io.github.chocolzs.linkura.localify.ui.pages.subPages.ResourceManagementPage
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -61,6 +62,12 @@ fun SettingsTabs(modifier: Modifier = Modifier,
                     0 -> AboutPage(modifier, context = context, previewData = previewData, screenH = screenH)
                     1 -> HomePage(modifier, context = context, previewData = previewData, screenH = screenH)
                     2 -> AdvanceSettingsPage(modifier, context = context, previewData = previewData, screenH = screenH)
+                    3 -> ResourceManagementPage(
+                        modifier,
+                        context = context,
+                        previewData = previewData,
+                        screenH = screenH
+                    )
                 }
             }
         }

@@ -167,4 +167,32 @@
     <string name="log.export.failed">导出日志失败</string>
     <string name="log.export.permission_required">需要存储权限才能导出日志</string>
 
+    <!-- Resource Management -->
+    <string name="resource_management">资源管理</string>
+    <string name="resource_management_replay">回放</string>
+    
+    <!-- Replay Settings -->
+    <string name="replay.settings.title">回放设置</string>
+    <string name="replay.settings.enable_motion_capture">允许动捕回放</string>
+    <string name="replay.settings.enable_in_game_display">游戏内回放显示</string>
+    <string name="replay.settings.description">✅为官方动捕回放，☑️为复原动捕回放，📺为视频回放</string>
+    <string name="replay.settings.metadata_url">回放元信息链接</string>
+    <string name="replay.settings.metadata_url_placeholder">回放元信息链接</string>
+    <string name="replay.settings.reset_url">复原</string>
+    <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+
+    <!-- Archive Grid -->
+    <string name="archive.loading">正在加载存档数据...</string>
+    <string name="archive.error">加载存档数据失败</string>
+    <string name="archive.retry">重试</string>
+    <string name="archive.empty">没有可用的存档数据</string>
+    <string name="archive.video_replay">视频回放</string>
+    <string name="archive.motion_capture_replay">动捕回放</string>
+    
+    <!-- Archive Icon Legend -->
+    <string name="archive.icon_legend_title">回放说明👇</string>
+    <string name="archive.motion_capture_official">官方动捕回放（绿色）</string>
+    <string name="archive.motion_capture_reconstructed">复原动捕回放（紫色）</string>
+    <string name="archive.icon_legend_note">点击图标可切换回放模式。半透明标签表示仅支持对应模式的回放。切换回放模式后需要重新启动游戏才会生效。\n注意：2025年5月29日使用了新的动捕数据格式。在此之前的动捕回放，暂时无法在最新版本的リンクラ上播放。</string>
+
 </resources>

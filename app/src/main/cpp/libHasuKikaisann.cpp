@@ -122,6 +122,27 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_loadConfig(JNIEnv *env,
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_loadArchiveConfig(JNIEnv *env, jclass clazz,
+                                                                          jstring config_json_str) {
+    try {
+        const auto configJsonStrChars = env->GetStringUTFChars(config_json_str, nullptr);
+        const std::string configJson = configJsonStrChars;
+        
+        LinkuraLocal::Log::InfoFmt("Loading archive config");
+        LinkuraLocal::Config::LoadArchiveConfig(configJson);
+        
+        env->ReleaseStringUTFChars(config_json_str, configJsonStrChars);
+        LinkuraLocal::Log::Info("Archive config loaded successfully");
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("Error loading archive config: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("Unknown error loading archive config");
+    }
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_pluginCallbackLooper(JNIEnv *env,
                                                                              jclass clazz) {

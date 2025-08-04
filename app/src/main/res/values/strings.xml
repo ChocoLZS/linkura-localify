@@ -167,4 +167,32 @@
     <string name="log.export.failed">Failed to export log</string>
     <string name="log.export.permission_required">Storage permission required to export logs</string>
 
+    <!-- Resource Management -->
+    <string name="resource_management">Resource Management</string>
+    <string name="resource_management_replay">Replay</string>
+    
+    <!-- Replay Settings -->
+    <string name="replay.settings.title">Replay Settings</string>
+    <string name="replay.settings.enable_motion_capture">Enable Motion Capture Replay</string>
+    <string name="replay.settings.enable_in_game_display">In-Game Replay Display</string>
+    <string name="replay.settings.description">✅Official Motion Capture Replay, ☑️Restored Motion Capture Replay, 📺Video Replay</string>
+    <string name="replay.settings.metadata_url">Replay Metadata URL</string>
+    <string name="replay.settings.metadata_url_placeholder">Replay metadata link</string>
+    <string name="replay.settings.reset_url">Reset to Default</string>
+    <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+
+    <!-- Archive Grid -->
+    <string name="archive.loading">Loading archive data...</string>
+    <string name="archive.error">Failed to load archive data</string>
+    <string name="archive.retry">Retry</string>
+    <string name="archive.empty">No archive data available</string>
+    <string name="archive.video_replay">Video Replay</string>
+    <string name="archive.motion_capture_replay">Motion Capture Replay</string>
+    
+    <!-- Archive Icon Legend -->
+    <string name="archive.icon_legend_title">Replay Guide 👇</string>
+    <string name="archive.motion_capture_official">Official Motion Capture Replay (Green)</string>
+    <string name="archive.motion_capture_reconstructed">Reconstructed Motion Capture Replay (Purple)</string>
+    <string name="archive.icon_legend_note">Click icons to toggle replay modes. Semi-transparent badges indicate limited replay mode availability. Restart the game after changing replay modes to take effect.\nNote: A new motion capture data format was introduced on May 29, 2025. Motion capture replays from before this date temporarily cannot be played on the latest version of Linkura.</string>
+
 </resources>

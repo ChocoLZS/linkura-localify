@@ -37,6 +37,9 @@ interface ConfigListener {
     fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
     fun onFirstPersonCameraHideHeadChanged(value: Boolean)
     fun onFirstPersonCameraHideHairChanged(value: Boolean)
+    fun onEnableMotionCaptureReplayChanged(value: Boolean)
+    fun onEnableInGameReplayDisplayChanged(value: Boolean)
+    fun onMotionCaptureResourceUrlChanged(value: String)
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -223,6 +226,24 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     }
     override fun onFirstPersonCameraHideHeadChanged(value: Boolean) {
         config.firstPersonCameraHideHead = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onEnableMotionCaptureReplayChanged(value: Boolean) {
+        config.enableMotionCaptureReplay = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onEnableInGameReplayDisplayChanged(value: Boolean) {
+        config.enableInGameReplayDisplay = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onMotionCaptureResourceUrlChanged(value: String) {
+        config.motionCaptureResourceUrl = value
         saveConfig()
         sendConfigUpdate(config)
     }

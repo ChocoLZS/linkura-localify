@@ -414,4 +414,32 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="log.export.failed">ログのエクスポートに失敗しました</string>
     <string name="log.export.permission_required">ログをエクスポートするためのストレージ権限が必要です</string>
 
+    <!-- Resource Management -->
+    <string name="resource_management">リソース管理</string>
+    <string name="resource_management_replay">再生</string>
+    
+    <!-- Replay Settings -->
+    <string name="replay.settings.title">再生設定</string>
+    <string name="replay.settings.enable_motion_capture">モーションキャプチャ再生を有効にする</string>
+    <string name="replay.settings.enable_in_game_display">ゲーム内再生表示</string>
+    <string name="replay.settings.description">✅公式モーションキャプチャ再生、☑️復元モーションキャプチャ再生、📺ビデオ再生</string>
+    <string name="replay.settings.metadata_url">再生メタデータURL</string>
+    <string name="replay.settings.metadata_url_placeholder">再生メタデータリンク</string>
+    <string name="replay.settings.reset_url">リセット</string>
+    <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+
+    <!-- Archive Grid -->
+    <string name="archive.loading">アーカイブデータを読み込み中...</string>
+    <string name="archive.error">アーカイブデータの読み込みに失敗しました</string>
+    <string name="archive.retry">再試行</string>
+    <string name="archive.empty">利用可能なアーカイブデータがありません</string>
+    <string name="archive.video_replay">ビデオ再生</string>
+    <string name="archive.motion_capture_replay">モーションキャプチャ再生</string>
+    
+    <!-- Archive Icon Legend -->
+    <string name="archive.icon_legend_title">再生説明👇</string>
+    <string name="archive.motion_capture_official">公式モーションキャプチャ再生（緑色）</string>
+    <string name="archive.motion_capture_reconstructed">復元モーションキャプチャ再生（紫色）</string>
+    <string name="archive.icon_legend_note">アイコンをクリックして再生モードを切り替えます。半透明のバッジは対応モードの再生のみ利用可能であることを示します。再生モードを変更した後、ゲームを再起動する必要があります。\n注意：2025年5月29日に新しいモーションキャプチャデータ形式が導入されました。この日以前のモーションキャプチャリプレイは、暫定的に最新バージョンのリンクラでは再生できません。</string>
+
 </resources>
