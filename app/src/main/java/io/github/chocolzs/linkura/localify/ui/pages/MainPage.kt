@@ -98,7 +98,7 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
             }
 
             SettingsTabs(modifier, listOf(stringResource(R.string.about), stringResource(R.string.home),
-                stringResource(R.string.advanced_settings)
+                stringResource(R.string.advanced_settings), stringResource(R.string.resource_management)
                 ),
                 context = context, previewData = previewData, screenH = screenH)
         }
