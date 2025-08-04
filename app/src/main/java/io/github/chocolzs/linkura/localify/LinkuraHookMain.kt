@@ -759,6 +759,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         )
         @JvmStatic
         external fun loadConfig(configJsonStr: String)
+        
+        @JvmStatic
+        external fun loadArchiveConfig(configJsonStr: String)
 
         // Toast快速切换内容
         private var toast: Toast? = null

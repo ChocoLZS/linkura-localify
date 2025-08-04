@@ -82,6 +82,9 @@ message ConfigUpdate {
   optional float story_novel_non_vocal_text_duration_rate = 19;
   optional bool first_person_camera_hide_head = 20;
   optional bool first_person_camera_hide_hair = 21;
+  optional bool enable_motion_capture_replay = 22;
+  optional bool enable_in_game_replay_display = 23;
+  optional string motion_capture_resource_url = 24;
 }
 
 // Overlay control actions

@@ -167,4 +167,18 @@
     <string name="log.export.failed">Failed to export log</string>
     <string name="log.export.permission_required">Storage permission required to export logs</string>
 
+    <!-- Resource Management -->
+    <string name="resource_management">Resource Management</string>
+    <string name="resource_management_replay">Replay</string>
+    
+    <!-- Replay Settings -->
+    <string name="replay.settings.title">Replay Settings</string>
+    <string name="replay.settings.enable_motion_capture">Enable Motion Capture Replay</string>
+    <string name="replay.settings.enable_in_game_display">In-Game Replay Display</string>
+    <string name="replay.settings.description">✅Official Motion Capture Replay, ☑️Restored Motion Capture Replay, 📺Video Replay</string>
+    <string name="replay.settings.metadata_url">Replay Metadata URL</string>
+    <string name="replay.settings.metadata_url_placeholder">Replay metadata link</string>
+    <string name="replay.settings.reset_url">Reset to Default</string>
+    <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+
 </resources>

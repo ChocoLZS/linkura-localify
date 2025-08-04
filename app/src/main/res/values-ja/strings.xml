@@ -414,4 +414,18 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="log.export.failed">ログのエクスポートに失敗しました</string>
     <string name="log.export.permission_required">ログをエクスポートするためのストレージ権限が必要です</string>
 
+    <!-- Resource Management -->
+    <string name="resource_management">リソース管理</string>
+    <string name="resource_management_replay">再生</string>
+    
+    <!-- Replay Settings -->
+    <string name="replay.settings.title">再生設定</string>
+    <string name="replay.settings.enable_motion_capture">モーションキャプチャ再生を有効にする</string>
+    <string name="replay.settings.enable_in_game_display">ゲーム内再生表示</string>
+    <string name="replay.settings.description">✅公式モーションキャプチャ再生、☑️復元モーションキャプチャ再生、📺ビデオ再生</string>
+    <string name="replay.settings.metadata_url">再生メタデータURL</string>
+    <string name="replay.settings.metadata_url_placeholder">再生メタデータリンク</string>
+    <string name="replay.settings.reset_url">リセット</string>
+    <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+
 </resources>

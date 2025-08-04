@@ -167,4 +167,18 @@
     <string name="log.export.failed">导出日志失败</string>
     <string name="log.export.permission_required">需要存储权限才能导出日志</string>
 
+    <!-- Resource Management -->
+    <string name="resource_management">资源管理</string>
+    <string name="resource_management_replay">回放</string>
+    
+    <!-- Replay Settings -->
+    <string name="replay.settings.title">回放设置</string>
+    <string name="replay.settings.enable_motion_capture">允许动捕回放</string>
+    <string name="replay.settings.enable_in_game_display">游戏内回放显示</string>
+    <string name="replay.settings.description">✅为官方动捕回放，☑️为复原动捕回放，📺为视频回放</string>
+    <string name="replay.settings.metadata_url">回放元信息链接</string>
+    <string name="replay.settings.metadata_url_placeholder">回放元信息链接</string>
+    <string name="replay.settings.reset_url">复原</string>
+    <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+
 </resources>
