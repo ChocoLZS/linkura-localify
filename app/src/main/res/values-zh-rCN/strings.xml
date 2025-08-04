@@ -193,6 +193,6 @@
     <string name="archive.icon_legend_title">回放说明👇</string>
     <string name="archive.motion_capture_official">官方动捕回放（绿色）</string>
     <string name="archive.motion_capture_reconstructed">复原动捕回放（紫色）</string>
-    <string name="archive.icon_legend_note">点击图标可切换回放模式。半透明标签表示仅支持对应模式的回放。</string>
+    <string name="archive.icon_legend_note">点击图标可切换回放模式。半透明标签表示仅支持对应模式的回放。切换回放模式后需要重新启动游戏才会生效。</string>
 
 </resources>

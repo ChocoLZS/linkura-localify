@@ -303,17 +303,48 @@ private fun ReplayTabPage(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
 
-                    // Motion Capture Resource URL Input
-                    GakuTextInput(
-                        value = config.value.motionCaptureResourceUrl,
-                        onValueChange = { value ->
-                            context?.onMotionCaptureResourceUrlChanged(value)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = {
-                            Text(text = stringResource(R.string.resource_url))
+                    // Motion Capture Resource URL Input with Reset Button
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            GakuTextInput(
+                                value = config.value.motionCaptureResourceUrl,
+                                onValueChange = { value ->
+                                    context?.onMotionCaptureResourceUrlChanged(value)
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = {
+                                    Text(text = stringResource(R.string.resource_url))
+                                }
+                            )
+
+                            IconButton(
+                                onClick = { 
+                                    context?.onMotionCaptureResourceUrlChanged("https://assets.chocoie.com")
+                                },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = stringResource(R.string.replay_settings_reset_url),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
-                    )
+
+                        // Display current effective URL
+                        Text(
+                            text = config.value.motionCaptureResourceUrl,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
 
                     // Replay Metadata URL Input with Reset Button
                     Column(

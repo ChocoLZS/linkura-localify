@@ -1,5 +1,8 @@
 #pragma once
 
+#include "nlohmann/json.hpp"
+#include <unordered_map>
+
 namespace linkura { namespace ipc { class ConfigUpdate; } }
 
 namespace LinkuraLocal::Config {
@@ -25,8 +28,14 @@ namespace LinkuraLocal::Config {
     extern float storyNovelNonVocalTextDurationRate;
     extern bool firstPersonCameraHideHead;
     extern bool firstPersonCameraHideHair;
+    extern bool enableMotionCaptureReplay;
+    extern bool enableInGameReplayDisplay;
+    extern std::string motionCaptureResourceUrl;
+
+    extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
 
     void LoadConfig(const std::string& configStr);
+    void LoadArchiveConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);
     void UpdateConfig(const linkura::ipc::ConfigUpdate& configUpdate);
 }

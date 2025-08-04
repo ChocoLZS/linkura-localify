@@ -3,6 +3,7 @@
 #include "../Log.h"
 #include <thread>
 #include <fstream>
+#include <unordered_map>
 #include "../build/linkura_messages.pb.h"
 
 namespace LinkuraLocal::Config {
@@ -28,6 +29,12 @@ namespace LinkuraLocal::Config {
     float storyNovelNonVocalTextDurationRate = 1.0f;
     bool firstPersonCameraHideHead = true;
     bool firstPersonCameraHideHair = true;
+    bool enableMotionCaptureReplay = true;
+    bool enableInGameReplayDisplay = true;
+    std::string motionCaptureResourceUrl = "https://assets.chocoie.com";
+    
+    // Archive configuration mapping: archives_id -> item data
+    std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -55,11 +62,43 @@ namespace LinkuraLocal::Config {
             GetConfigItem(storyNovelNonVocalTextDurationRate);
             GetConfigItem(firstPersonCameraHideHead);
             GetConfigItem(firstPersonCameraHideHair);
+            GetConfigItem(enableMotionCaptureReplay);
+            GetConfigItem(enableInGameReplayDisplay);
+            GetConfigItem(motionCaptureResourceUrl);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
         }
         isConfigInit = true;
+    }
+    
+    void LoadArchiveConfig(const std::string& configStr) {
+        try {
+            Log::VerboseFmt("Parsing archive config JSON: %s", configStr.c_str());
+            
+            const auto config = nlohmann::json::parse(configStr);
+            
+            // Clear existing archive config map
+            archiveConfigMap.clear();
+            
+            // Check if config is an array of archive items
+            if (config.is_array()) {
+                for (const auto& item : config) {
+                    if (item.contains("archives_id")) {
+                        std::string archivesId = item["archives_id"];
+                        archiveConfigMap[archivesId] = item;
+//                        Log::VerboseFmt("Loaded archive config for ID: %s", archivesId.c_str());
+                    }
+                }
+            } else {
+                Log::Error("Invalid archive config format. Expected an array of archive items.");
+                return;
+            }
+            
+            Log::InfoFmt("Archive config loaded successfully. Total items: %zu", archiveConfigMap.size());
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("LoadArchiveConfig error: %s", e.what());
+        }
     }
     
     void UpdateConfig(const linkura::ipc::ConfigUpdate& configUpdate) {
@@ -87,6 +126,9 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_story_novel_non_vocal_text_duration_rate()) storyNovelNonVocalTextDurationRate = configUpdate.story_novel_non_vocal_text_duration_rate();
                 if (configUpdate.has_first_person_camera_hide_head()) firstPersonCameraHideHead = configUpdate.first_person_camera_hide_head();
                 if (configUpdate.has_first_person_camera_hide_hair()) firstPersonCameraHideHair = configUpdate.first_person_camera_hide_hair();
+                if (configUpdate.has_enable_motion_capture_replay()) enableMotionCaptureReplay = configUpdate.enable_motion_capture_replay();
+                if (configUpdate.has_enable_in_game_replay_display()) enableInGameReplayDisplay = configUpdate.enable_in_game_replay_display();
+                if (configUpdate.has_motion_capture_resource_url()) motionCaptureResourceUrl = configUpdate.motion_capture_resource_url();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

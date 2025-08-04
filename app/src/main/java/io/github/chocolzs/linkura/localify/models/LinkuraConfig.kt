@@ -28,8 +28,8 @@ data class LinkuraConfig (
     var firstPersonCameraHideHead: Boolean = true,
     var firstPersonCameraHideHair: Boolean = true,
 
-    var enableMotionCaptureReplay: Boolean = false,
-    var enableInGameReplayDisplay: Boolean = false,
+    var enableMotionCaptureReplay: Boolean = true,
+    var enableInGameReplayDisplay: Boolean = true,
     var motionCaptureResourceUrl: String = "https://assets.chocoie.com",
 
     var pf: Boolean = false

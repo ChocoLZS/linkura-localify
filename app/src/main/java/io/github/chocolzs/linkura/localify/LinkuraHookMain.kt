@@ -530,6 +530,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         val intent = activity.intent
         val l4Data = intent.getStringExtra("l4Data")
         val programData = intent.getStringExtra("localData")
+        val archiveData = intent.getStringExtra("archiveData")
         if (l4Data != null) {
             val readVersion = intent.getStringExtra("lVerName")
             checkPluginVersion(activity, readVersion)
@@ -596,6 +597,11 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
 
             loadConfig(l4Data)
             Log.d(TAG, "l4Data: $l4Data")
+            // Load archive configuration if available
+        }
+        if (archiveData != null) {
+            loadArchiveConfig(archiveData)
+            Log.d(TAG, "archiveData loaded")
         }
     }
 
