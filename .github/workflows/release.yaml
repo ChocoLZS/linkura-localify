@@ -144,6 +144,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.create-release.outputs.tag_name }}
-          files: ${{ needs.build-apk.outputs.apk_path }}
+          files: ${{ needs.build-apk.outputs.apk_name }}/${{ needs.build-apk.outputs.apk_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
