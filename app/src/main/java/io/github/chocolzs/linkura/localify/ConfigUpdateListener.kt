@@ -43,6 +43,7 @@ interface ConfigListener {
     fun onWithliveOrientationChanged(value: Int)
     fun onLockRenderTextureResolutionChanged(value: Boolean)
     fun onRenderTextureResolutionChanged(longSide: Int, shortSide: Int)
+    fun onHideCharacterBodyChanged(value: Boolean)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -266,6 +267,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     override fun onRenderTextureResolutionChanged(longSide: Int, shortSide: Int) {
         config.renderTextureLongSide = longSide
         config.renderTextureShortSide = shortSide
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onHideCharacterBodyChanged(value: Boolean) {
+        config.hideCharacterBody = value
         saveConfig()
         sendConfigUpdate(config)
     }

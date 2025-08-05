@@ -57,6 +57,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.lockRenderTextureResolution != null) lockRenderTextureResolution = config.lockRenderTextureResolution
                 if (config.renderTextureLongSide != null) renderTextureLongSide = config.renderTextureLongSide
                 if (config.renderTextureShortSide != null) renderTextureShortSide = config.renderTextureShortSide
+                if (config.hideCharacterBody != null) hideCharacterBody = config.hideCharacterBody
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

@@ -207,4 +207,8 @@
     <string name="config.render_texture_preset_custom">自定义</string>
     <string name="config.render_texture_description">此功能可以更改活动记录以及动捕的渲染分辨率</string>
 
+    <!-- Character Rendering Settings -->
+    <string name="config.character_render.head_only_title">仅保留角色头部渲染</string>
+    <string name="config.character_render.head_only_description">隐藏角色身体，仅渲染头部和头发部分</string>
+
 </resources>

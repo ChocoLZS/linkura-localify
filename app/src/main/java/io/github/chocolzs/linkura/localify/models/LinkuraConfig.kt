@@ -35,6 +35,7 @@ data class LinkuraConfig (
     var lockRenderTextureResolution: Boolean = false,
     var renderTextureLongSide: Int = 3840,
     var renderTextureShortSide: Int = 2160,
+    var hideCharacterBody: Boolean = false,
 
     var pf: Boolean = false,
 

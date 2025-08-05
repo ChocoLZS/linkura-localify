@@ -207,4 +207,8 @@
     <string name="config.render_texture_preset_custom">Custom</string>
     <string name="config.render_texture_description">This feature can change the rendering resolution for story records and motion capture</string>
 
+    <!-- Character Rendering Settings -->
+    <string name="config.character_render.head_only_title">Render Character Head Only</string>
+    <string name="config.character_render.head_only_description">Hide character body, only render head and hair parts</string>
+
 </resources>

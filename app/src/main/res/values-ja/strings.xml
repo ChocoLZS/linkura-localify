@@ -454,4 +454,8 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.render_texture_preset_custom">カスタム</string>
     <string name="config.render_texture_description">この機能は活動記録とモーションキャプチャのレンダリング解像度を変更できます</string>
 
+    <!-- Character Rendering Settings -->
+    <string name="config.character_render.head_only_title">キャラクターヘッドのみレンダリング</string>
+    <string name="config.character_render.head_only_description">キャラクターの体を隠し、頭部と髪の部分のみをレンダリングします</string>
+
 </resources>

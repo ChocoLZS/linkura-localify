@@ -85,6 +85,23 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                             v -> context?.onAvoidCharacterExitChanged(v)
                     }
                     
+                    GakuSwitch(modifier, stringResource(R.string.config_character_render_head_only_title), checked = config.value.hideCharacterBody) {
+                            v -> context?.onHideCharacterBodyChanged(v)
+                    }
+                    CollapsibleBox(
+                        modifier = modifier,
+                        expandState = config.value.hideCharacterBody,
+                        collapsedHeight = 0.dp,
+                        showExpand = false
+                    ) {
+                        Text(
+                            text = stringResource(R.string.config_character_render_head_only_description),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = modifier.padding(start = 16.dp, top = 4.dp, bottom = 8.dp)
+                        )
+                    }
+                    
                     HorizontalDivider(
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
