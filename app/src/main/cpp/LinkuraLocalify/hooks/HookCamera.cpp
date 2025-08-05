@@ -75,7 +75,7 @@ namespace LinkuraLocal::HookCamera {
 
     void onRenderExit() {
         HookShare::Shareable::resetRenderScene();
-        L4Camera::followCharaSet.clear();
+        L4Camera::clearRenderSet();
         unregisterMainFreeCamera(true);
         unregisterCurrentCamera();
         L4Camera::reset_camera();
@@ -282,7 +282,7 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(void, LiveConnectChapterModel_NewChapterConfirmed, (Il2cppUtils::Il2CppObject* self, void* method)) {
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
-            L4Camera::followCharaSet.clear();
+            L4Camera::clearRenderSet();
             // fes live will use the same fixed camera at all time
             if (HookShare::Shareable::renderSceneIsWithLive()) {
                 Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");

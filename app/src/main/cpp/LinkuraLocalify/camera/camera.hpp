@@ -31,41 +31,14 @@ namespace L4Camera {
 
     template <typename T>
     class CharacterMeshManager : public LinkuraLocal::Misc::IndexedSet<T> {
-    private:
+    protected:
         std::vector<std::map<std::string, UnityResolve::UnityType::Transform*>> charaMeshes;
         std::map<T, UnityResolve::UnityType::Transform*> charaHairMeshes; // trick for judgement
-        std::map<T, bool> snapshotRenderedState; // record when trying to hide
 
     public:
-        void onCameraModeChange(L4Camera::CameraMode cameraMode) {
-            if (cameraMode != L4Camera::CameraMode::FIRST_PERSON) {
-                LinkuraLocal::Log::DebugFmt("Trying to restore the meshes due to camera mode is not first_person");
-                restoreCurrentCharaMeshes();
-            }
-        }
-
-        void next() override {
-            if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
-                restoreCurrentCharaMeshes();
-                LinkuraLocal::Misc::IndexedSet<T>::next();
-            } else {
-                LinkuraLocal::Misc::IndexedSet<T>::next();
-            }
-        }
-
-        void prev() override {
-            if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
-                restoreCurrentCharaMeshes();
-                LinkuraLocal::Misc::IndexedSet<T>::prev();
-            } else {
-                LinkuraLocal::Misc::IndexedSet<T>::prev();
-            }
-        }
-
         void clear() override {
             charaMeshes.clear();
             charaHairMeshes.clear();
-            snapshotRenderedState.clear();
             LinkuraLocal::Misc::IndexedSet<T>::clear();
         }
 
@@ -87,23 +60,6 @@ namespace L4Camera {
                 charaHairMeshes.insert_or_assign(current, hairMesh);
             }
         }
-
-        void setSnapshotRenderState(bool state) {
-            auto& current = LinkuraLocal::Misc::IndexedSet<T>::getCurrentValue();
-            if (current) {
-                snapshotRenderedState.insert_or_assign(current, state);
-            }
-        }
-        bool getSnapshotRenderState() {
-            auto& current = LinkuraLocal::Misc::IndexedSet<T>::getCurrentValue();
-            if (current) {
-                auto it = snapshotRenderedState.find(current);
-                if (it != snapshotRenderedState.end()) {
-                    return it->second;
-                }
-            }
-            return false;
-        }
         UnityResolve::UnityType::Transform* getCurrentHair() {
             auto& current = LinkuraLocal::Misc::IndexedSet<T>::getCurrentValue();
 //            LinkuraLocal::Log::DebugFmt("getCurrentHair of index: %d", LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex());
@@ -112,29 +68,6 @@ namespace L4Camera {
             }
             return nullptr;
         }
-
-        bool currentHairIsRendered() {
-            static auto get_component = reinterpret_cast<UnityResolve::UnityType::Component* (*)(UnityResolve::UnityType::GameObject*, void*)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)"));
-            static auto get_enabled = reinterpret_cast<bool (*)(UnityResolve::UnityType::Component*)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
-            static auto rendererType = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer");
-            auto& current = LinkuraLocal::Misc::IndexedSet<T>::getCurrentValue();
-            auto it = charaHairMeshes.find(current);
-            if (it == charaHairMeshes.end()) {
-                return false;
-            }
-            UnityResolve::UnityType::Transform* currentHair = it->second;
-            if (!(currentHair && Il2cppUtils::IsNativeObjectAlive(currentHair))) return false;
-            auto gameObject = currentHair->GetGameObject();
-            if (!(gameObject && Il2cppUtils::IsNativeObjectAlive(gameObject))) return false;
-            auto renderer = gameObject->GetComponent<UnityResolve::UnityType::Component*>(rendererType);
-            if (renderer && Il2cppUtils::IsNativeObjectAlive(renderer)) {
-                return get_enabled(renderer);
-            }
-            return false;
-        }
-
         bool containsCharaMesh(const std::string& key) {
             if (LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex() < charaMeshes.size()) {
                 auto &currentMeshMap = charaMeshes[LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex()];
@@ -161,53 +94,125 @@ namespace L4Camera {
                 LinkuraLocal::Log::DebugFmt("No renderer found for %s", str.c_str());
             }
         }
+    };
 
+    template <typename T>
+    class CharacterMeshFirstPersonManager : public CharacterMeshManager<T> {
+        std::map<T, bool> snapshotRenderedState;
+    public:
+        bool currentHairIsRendered() {
+            static auto get_component = reinterpret_cast<UnityResolve::UnityType::Component* (*)(UnityResolve::UnityType::GameObject*, void*)>(
+                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)"));
+            static auto get_enabled = reinterpret_cast<bool (*)(UnityResolve::UnityType::Component*)>(
+                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
+            static auto rendererType = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer");
+            auto& current = LinkuraLocal::Misc::IndexedSet<T>::getCurrentValue();
+            auto it = CharacterMeshManager<T>::charaHairMeshes.find(current);
+            if (it == CharacterMeshManager<T>::charaHairMeshes.end()) {
+                return false;
+            }
+            UnityResolve::UnityType::Transform* currentHair = it->second;
+            if (!(currentHair && Il2cppUtils::IsNativeObjectAlive(currentHair))) return false;
+            auto gameObject = currentHair->GetGameObject();
+            if (!(gameObject && Il2cppUtils::IsNativeObjectAlive(gameObject))) return false;
+            auto renderer = gameObject->GetComponent<UnityResolve::UnityType::Component*>(rendererType);
+            if (renderer && Il2cppUtils::IsNativeObjectAlive(renderer)) {
+                return get_enabled(renderer);
+            }
+            return false;
+        }
+        void setSnapshotRenderState(bool state) {
+            auto& current = CharacterMeshManager<T>::getCurrentValue();
+            if (current) {
+                snapshotRenderedState.insert_or_assign(current, state);
+            }
+        }
+        bool getSnapshotRenderState() {
+            auto& current = CharacterMeshManager<T>::getCurrentValue();
+            if (current) {
+                auto it = snapshotRenderedState.find(current);
+                if (it != snapshotRenderedState.end()) {
+                    return it->second;
+                }
+            }
+            return false;
+        }
+        void restoreCurrentCharaMeshes() {
+            if (CharacterMeshManager<T>::getCurrentIndex() <
+                CharacterMeshManager<T>::charaMeshes.size()) {
+                if (!LinkuraLocal::Config::firstPersonCameraHideHead) return;
+//                LinkuraLocal::Log::DebugFmt("Restore current chara meshes using Renderer.enabled");
+                std::map<std::string, UnityResolve::UnityType::Transform *> &meshMap = CharacterMeshManager<T>::charaMeshes[CharacterMeshManager<T>::getCurrentIndex()];
+                auto snapshotRendered = getSnapshotRenderState();
+                // LinkuraLocal::Log::DebugFmt("Snapshot rendered: %s", snapshotRendered ? "true" : "false");
+                if (!snapshotRendered) return; // if rendered, means it been hidden.
+                for (auto &pair: meshMap) {
+//                    LinkuraLocal::Log::DebugFmt("Trying to restore renderer for %s", pair.first.c_str());
+                    auto transform = pair.second;
+                    CharacterMeshManager<T>::setMeshRenderActive(transform, true, pair.first);
+                }
+                if (LinkuraLocal::Config::firstPersonCameraHideHair) {
+                    auto hair = CharacterMeshManager<T>::getCurrentHair();
+                    CharacterMeshManager<T>::setMeshRenderActive(hair, true, "hair");
+                }
+            }
+        }
         void hideCurrentCharaMeshes() {
-            if (LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex() < charaMeshes.size()) {
+            if (LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex() < CharacterMeshManager<T>::charaMeshes.size()) {
                 if (!LinkuraLocal::Config::firstPersonCameraHideHead) return;
 //                LinkuraLocal::Log::DebugFmt("Hide current chara meshes using Renderer.enabled");
-                std::map<std::string, UnityResolve::UnityType::Transform*>& meshMap = charaMeshes[LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex()];
+                std::map<std::string, UnityResolve::UnityType::Transform*>& meshMap = CharacterMeshManager<T>::charaMeshes[LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex()];
                 auto currentIsRendered = currentHairIsRendered();
                 setSnapshotRenderState(currentIsRendered);
                 // LinkuraLocal::Log::DebugFmt("Current hair is rendered: %s", currentIsRendered ? "true" : "false");
                 if (!currentIsRendered) return; // if current hair is not rendered, do not hide
                 for (auto& pair : meshMap) {
                     auto transform = pair.second;
-                    setMeshRenderActive(transform, false, pair.first);
+                    CharacterMeshManager<T>::setMeshRenderActive(transform, false, pair.first);
                 }
                 if (LinkuraLocal::Config::firstPersonCameraHideHair) {
-                    auto hair = getCurrentHair();
-                    setMeshRenderActive(hair, false, "hair");
+                    auto hair = CharacterMeshManager<T>::getCurrentHair();
+                    CharacterMeshManager<T>::setMeshRenderActive(hair, false, "hair");
                 }
+            }
+        }
+        void onCameraModeChange(L4Camera::CameraMode cameraMode) {
+            if (cameraMode != L4Camera::CameraMode::FIRST_PERSON) {
+                LinkuraLocal::Log::DebugFmt("Trying to restore the meshes due to camera mode is not first_person");
+                restoreCurrentCharaMeshes();
+            }
+        }
+        void clear() override {
+            snapshotRenderedState.clear();
+            CharacterMeshManager<T>::clear();
+        }
+        void next() override {
+            if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
+                restoreCurrentCharaMeshes();
+                LinkuraLocal::Misc::IndexedSet<T>::next();
+            } else {
+                LinkuraLocal::Misc::IndexedSet<T>::next();
             }
         }
 
-        void restoreCurrentCharaMeshes() {
-            if (LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex() < charaMeshes.size()) {
-                if (!LinkuraLocal::Config::firstPersonCameraHideHead) return;
-//                LinkuraLocal::Log::DebugFmt("Restore current chara meshes using Renderer.enabled");
-                std::map<std::string, UnityResolve::UnityType::Transform*>& meshMap = charaMeshes[LinkuraLocal::Misc::IndexedSet<T>::getCurrentIndex()];
-                auto snapshotRendered = getSnapshotRenderState();
-                // LinkuraLocal::Log::DebugFmt("Snapshot rendered: %s", snapshotRendered ? "true" : "false");
-                if (!snapshotRendered) return; // if rendered, means it been hidden.
-                for (auto& pair : meshMap) {
-//                    LinkuraLocal::Log::DebugFmt("Trying to restore renderer for %s", pair.first.c_str());
-                    auto transform = pair.second;
-                    setMeshRenderActive(transform, true, pair.first);
-                }
-                if (LinkuraLocal::Config::firstPersonCameraHideHair) {
-                    auto hair = getCurrentHair();
-                    setMeshRenderActive(hair, true, "hair");
-                }
+        void prev() override {
+            if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
+                restoreCurrentCharaMeshes();
+                LinkuraLocal::Misc::IndexedSet<T>::prev();
+            } else {
+                LinkuraLocal::Misc::IndexedSet<T>::prev();
             }
         }
+
     };
 
     extern BaseCamera::Camera baseCamera;
     extern BaseCamera::Camera originCamera;
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;
     extern UnityResolve::UnityType::Vector3 followPosOffset;
-    extern CharacterMeshManager<void*> followCharaSet;
+    extern CharacterMeshFirstPersonManager<void*> followCharaSet;
+    extern CharacterMeshManager<void*> charaRenderSet;
+
     extern LinkuraLocal::Misc::CSEnum bodyPartsEnum;
     extern UnityResolve::UnityType::Color backgroundColor;
 
@@ -228,6 +233,7 @@ namespace L4Camera {
     void on_cam_rawinput_keyboard(int message, int key);
     void on_cam_rawinput_joystick(JoystickEvent event);
 	void initCameraSettings();
+    void clearRenderSet();
 
     struct CameraInfo {
         UnityResolve::UnityType::Vector3 position{0, 0, 0};
