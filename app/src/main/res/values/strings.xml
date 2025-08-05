@@ -29,7 +29,7 @@
     <string name="orientation_orig">Original</string>
     <string name="orientation_portrait">Portrait</string>
     <string name="orientation_landscape">Landscape</string>
-    <string name="orientation_lock">Orientation Lock</string>
+    <string name="orientation_lock">WithxMeets Orientation Lock</string>
     <string name="enable_breast_param">Enable Breast Param</string>
     <string name="damping">Damping</string>
     <string name="stiffness">Stiffness</string>

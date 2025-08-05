@@ -51,6 +51,9 @@ class ConfigUpdateManager private constructor() {
                 if (config.storyNovelNonVocalTextDurationRate != null) storyNovelNonVocalTextDurationRate = config.storyNovelNonVocalTextDurationRate
                 if (config.firstPersonCameraHideHead != null) firstPersonCameraHideHead = config.firstPersonCameraHideHead
                 if (config.firstPersonCameraHideHair != null) firstPersonCameraHideHair = config.firstPersonCameraHideHair
+                if (config.enableMotionCaptureReplay != null) enableMotionCaptureReplay = config.enableMotionCaptureReplay
+                if (config.enableInGameReplayDisplay != null) enableInGameReplayDisplay = config.enableInGameReplayDisplay
+                if (config.withliveOrientation != null) withliveOrientation = config.withliveOrientation
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

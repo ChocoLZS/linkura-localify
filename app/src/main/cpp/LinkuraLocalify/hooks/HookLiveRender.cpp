@@ -11,16 +11,19 @@ namespace LinkuraLocal::HookLiveRender {
         Middle,
         High
     };
-    enum struct LiveScreenOrientation {
-        Landscape,
-        Portrait
-    };
 
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
 //        L4Camera::followCharaSet.clear();
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
+    }
+
+    DEFINE_HOOK(void, LiveScreenOrientationModel_ctor, (void* self, int32_t liveOrientation, int32_t deviceOrientation)) {
+
+//        Log::DebugFmt("LiveScreenOrientationModel_ctor_HOOKED, %d %d", liveOrientation, deviceOrientation);
+//        LiveScreenOrientationModel_ctor_Orig(self, 0, 0);
+        LiveScreenOrientationModel_ctor_Orig(self, liveOrientation, deviceOrientation);
     }
 
     DEFINE_HOOK(u_int64_t, SchoolResolution_GetResolution, (SchoolResolution_LiveAreaQuality quality, LiveScreenOrientation orientation)) {
@@ -177,6 +180,7 @@ namespace LinkuraLocal::HookLiveRender {
     void Install(HookInstaller* hookInstaller) {
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                                       "SchoolResolution", "GetResolution"));
+//        ADD_HOOK(LiveScreenOrientationModel_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveScreenOrientationModel", ".ctor"));
         
         // Fes live camera unlock
         ADD_HOOK(ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveSetFesCameraWithHttpInfoAsync"));

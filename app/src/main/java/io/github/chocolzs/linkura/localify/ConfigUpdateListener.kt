@@ -40,6 +40,7 @@ interface ConfigListener {
     fun onEnableMotionCaptureReplayChanged(value: Boolean)
     fun onEnableInGameReplayDisplayChanged(value: Boolean)
     fun onMotionCaptureResourceUrlChanged(value: String)
+    fun onWithliveOrientationChanged(value: Int)
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -244,6 +245,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onMotionCaptureResourceUrlChanged(value: String) {
         config.motionCaptureResourceUrl = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onWithliveOrientationChanged(value: Int) {
+        config.withliveOrientation = value
         saveConfig()
         sendConfigUpdate(config)
     }

@@ -85,6 +85,7 @@ message ConfigUpdate {
   optional bool enable_motion_capture_replay = 22;
   optional bool enable_in_game_replay_display = 23;
   optional string motion_capture_resource_url = 24;
+  optional int32 withlive_orientation = 25;
 }
 
 // Overlay control actions

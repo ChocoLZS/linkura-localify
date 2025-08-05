@@ -80,6 +80,7 @@ namespace LinkuraLocal::HookShare {
     uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = 0;
+    uintptr_t WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
     // http response modify
     DEFINE_HOOK(void* , ApiClient_Deserialize, (void* self, void* response, void* type, void* method_info)) {
         auto result = ApiClient_Deserialize_Orig(self, response, type, method_info);
@@ -111,8 +112,8 @@ namespace LinkuraLocal::HookShare {
                         if (new_external_link.ends_with(".iarc")) Log::ShowToast("The motion replay before 2025.05.29 can't be replayed for now!");
                     }
                 }
-                result = Il2cppUtils::FromJsonStr(json.dump(), type);
             }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_with_archive_data response
             if (Config::enableMotionCaptureReplay) {
@@ -135,8 +136,23 @@ namespace LinkuraLocal::HookShare {
                         if (new_external_link.ends_with(".iarc")) Log::ShowToast("The motion replay before 2025.05.29 can't be replayed for now!");
                     }
                 }
-                result = Il2cppUtils::FromJsonStr(json.dump(), type);
             }
+            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
+                json["is_horizontal"] = "true";
+            }
+            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
+                json["is_horizontal"] = "false";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
+                json["is_horizontal"] = "true";
+            }
+            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
+                json["is_horizontal"] = "false";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
             for (auto& archive : json["archive_list"]) {
@@ -257,6 +273,17 @@ namespace LinkuraLocal::HookShare {
                 ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = method->methodPointer;
             }
         }
+        auto WithliveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "WithliveApi");
+        method = (Il2cppUtils::MethodInfo*) nullptr;
+        if (WithliveApi_klass) {
+            // hook /v1/withlive/enter response
+            auto WithliveEnterWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(WithliveApi_klass, "<WithliveEnterWithHttpInfoAsync>d__30");
+            method = Il2cppUtils::GetMethodIl2cpp(WithliveEnterWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
+        }
+
         ADD_HOOK(AlstArchiveDirectory_GetLocalFullPathFromFileName, Il2cppUtils::GetMethodPointer("Core.dll", "Alstromeria", "AlstArchiveDirectory", "GetRemoteUriFromFileName"));
 #pragma region RenderScene
 

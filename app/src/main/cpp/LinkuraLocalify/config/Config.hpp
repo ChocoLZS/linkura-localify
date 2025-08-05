@@ -31,6 +31,7 @@ namespace LinkuraLocal::Config {
     extern bool enableMotionCaptureReplay;
     extern bool enableInGameReplayDisplay;
     extern std::string motionCaptureResourceUrl;
+    extern int withliveOrientation;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
 

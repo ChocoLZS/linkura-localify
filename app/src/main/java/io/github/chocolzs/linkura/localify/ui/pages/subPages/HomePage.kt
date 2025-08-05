@@ -247,10 +247,6 @@ fun HomePage(modifier: Modifier = Modifier,
         item {
             GakuGroupBox(modifier = modifier, "Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    GakuSwitch(modifier, stringResource(R.string.hook_render_highResolution_title), checked = config.value.renderHighResolution) {
-                            v -> context?.onRenderHighResolutionChanged(v)
-                    }
-
                     GakuSwitch(modifier, stringResource(R.string.hook_fesArchive_unlockTicket_title), checked = config.value.fesArchiveUnlockTicket) {
                             v -> context?.onFesArchiveUnlockTicketChanged(v)
                     }
@@ -496,6 +492,11 @@ fun HomePage(modifier: Modifier = Modifier,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
+                        GakuSwitch(modifier, stringResource(R.string.hook_render_highResolution_title), checked = config.value.renderHighResolution) {
+                                v -> context?.onRenderHighResolutionChanged(v)
+                        }
+                    }
+                    item {
                         Spacer(modifier = Modifier.height(8.dp))
                         GakuTextInput(modifier = modifier
                             .padding(start = 4.dp, end = 4.dp)
@@ -508,32 +509,31 @@ fun HomePage(modifier: Modifier = Modifier,
                             keyboardOptions = keyboardOptionsNumber)
                     }
 
-//                    item {
-//                        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-//                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
-//                            Text(stringResource(R.string.orientation_lock))
-//                            Row(modifier = modifier.fillMaxWidth(),
-//                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-//                                val radioModifier = remember {
-//                                    modifier
-//                                        .height(40.dp)
-//                                        .weight(1f)
-//                                }
-//
-//                                GakuRadio(modifier = radioModifier,
-//                                    text = stringResource(R.string.orientation_orig), selected = config.value.gameOrientation == 0,
-//                                    onClick = { context?.onGameOrientationChanged(0) })
-//
-//                                GakuRadio(modifier = radioModifier,
-//                                    text = stringResource(R.string.orientation_portrait), selected = config.value.gameOrientation == 1,
-//                                    onClick = { context?.onGameOrientationChanged(1) })
-//
-//                                GakuRadio(modifier = radioModifier,
-//                                    text = stringResource(R.string.orientation_landscape), selected = config.value.gameOrientation == 2,
-//                                    onClick = { context?.onGameOrientationChanged(2) })
-//                            }
-//                        }
-//                    }
+                    item {
+                        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(R.string.orientation_lock))
+                            Row(modifier = modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                val radioModifier = remember {
+                                    modifier
+                                        .height(40.dp)
+                                        .weight(1f)
+                                }
+
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.orientation_orig), selected = config.value.withliveOrientation == 2,
+                                    onClick = { context?.onWithliveOrientationChanged(2) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.orientation_landscape), selected = config.value.withliveOrientation == 0,
+                                    onClick = { context?.onWithliveOrientationChanged(0) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.orientation_portrait), selected = config.value.withliveOrientation == 1,
+                                    onClick = { context?.onWithliveOrientationChanged(1) })
+
+                            }
+                        }
+                    }
 
 //                    item {
 //                        HorizontalDivider(

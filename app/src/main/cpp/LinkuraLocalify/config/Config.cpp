@@ -32,6 +32,7 @@ namespace LinkuraLocal::Config {
     bool enableMotionCaptureReplay = true;
     bool enableInGameReplayDisplay = true;
     std::string motionCaptureResourceUrl = "https://assets.chocoie.com";
+    int withliveOrientation = 2;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -65,6 +66,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(enableMotionCaptureReplay);
             GetConfigItem(enableInGameReplayDisplay);
             GetConfigItem(motionCaptureResourceUrl);
+            GetConfigItem(withliveOrientation);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -129,6 +131,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_enable_motion_capture_replay()) enableMotionCaptureReplay = configUpdate.enable_motion_capture_replay();
                 if (configUpdate.has_enable_in_game_replay_display()) enableInGameReplayDisplay = configUpdate.enable_in_game_replay_display();
                 if (configUpdate.has_motion_capture_resource_url()) motionCaptureResourceUrl = configUpdate.motion_capture_resource_url();
+                if (configUpdate.has_withlive_orientation()) withliveOrientation = configUpdate.withlive_orientation();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

@@ -33,6 +33,10 @@ namespace LinkuraLocal::HookCamera {
 }
 
 namespace LinkuraLocal::HookLiveRender {
+    enum struct LiveScreenOrientation {
+        Landscape,
+        Portrait
+    };
     void Install(HookInstaller* hookInstaller);
     std::vector<uint8_t> getCurrentArchiveInfo();
     void setArchivePosition(float seconds);

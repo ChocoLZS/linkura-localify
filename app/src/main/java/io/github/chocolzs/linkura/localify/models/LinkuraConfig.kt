@@ -31,6 +31,7 @@ data class LinkuraConfig (
     var enableMotionCaptureReplay: Boolean = true,
     var enableInGameReplayDisplay: Boolean = true,
     var motionCaptureResourceUrl: String = "https://assets.chocoie.com",
+    var withliveOrientation: Int = 2,
 
     var pf: Boolean = false
 )
