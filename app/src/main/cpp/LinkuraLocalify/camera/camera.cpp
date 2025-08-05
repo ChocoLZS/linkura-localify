@@ -31,7 +31,7 @@ namespace L4Camera {
     bool showToast = true;
     LinkuraLocal::Misc::CSEnum bodyPartsEnum("Head", 0xa);
     CharacterMeshFirstPersonManager<void*> followCharaSet;
-    CharacterMeshManager<void*> charaRenderSet;
+    CharacterMeshRenderManager<void*> charaRenderSet;
 
 	// bool rMousePressFlg = false;
 
@@ -745,7 +745,7 @@ namespace L4Camera {
     }
 
     void UpdateCameraInfo(const UnityResolve::UnityType::Vector3& pos, 
-                         const UnityResolve::UnityType::Quaternion& rot, 
+                         const UnityResolve::UnityType::Quaternion& rot,
                          float fieldOfView) {
         currentCameraInfo.position = pos;
         currentCameraInfo.rotation = rot;

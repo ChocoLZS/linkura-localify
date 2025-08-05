@@ -377,33 +377,24 @@ namespace LinkuraLocal::HookCamera {
         }
     }
 
-    static void recursiveAddFaceMesh(UnityResolve::UnityType::Transform* transform,
-                                     L4Camera::CharacterMeshManager<void*>& followCharaSet) {
-        auto childCount = transform->GetChildCount();
-        for (int i = 0; i < childCount; i++) {
-            auto child = transform->GetChild(i);
-            const auto childName = child->GetName();
-//            Log::DebugFmt("child: %s", childName.c_str());
-            if (childName == "Head") {
-                recursiveAddFaceMesh(child, followCharaSet);
-            } else {
-                if (!followCharaSet.containsCharaMesh(childName)) {
-                    followCharaSet.addCharaMesh(childName, child);
-                }
-            }
-        }
-    }
-
     DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
-        if (!Config::enableFreeCamera || (L4Camera::GetCameraMode() == L4Camera::CameraMode::FREE)) {
-            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        }
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
         static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
+        if (!L4Camera::charaRenderSet.contains(self)) {
+            L4Camera::charaRenderSet.add(self);
+        }
+        if (Config::hideCharacterBody) {
+            L4Camera::charaRenderSet.hide(self);
+        }
+        if (!Config::enableFreeCamera || (L4Camera::GetCameraMode() == L4Camera::CameraMode::FREE)) {
+            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+        }
+
         if (!L4Camera::followCharaSet.contains(self)) {
             L4Camera::followCharaSet.add(self);
         }
+
         auto currentFace = L4Camera::followCharaSet.getCurrentValue();
 
         {
@@ -456,6 +447,15 @@ namespace LinkuraLocal::HookCamera {
         }
 
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+    }
+
+    DEFINE_HOOK(void, Unity_Renderer_set_enabled, (void* renderer, bool enabled, void* method)) {
+        if (Config::hideCharacterBody) {
+            if (L4Camera::charaRenderSet.containsRender(renderer)) {
+                enabled = false;
+            }
+        }
+        return Unity_Renderer_set_enabled_Orig(renderer, enabled, method);
     }
 
     // hooked  in fes live
@@ -578,6 +578,8 @@ namespace LinkuraLocal::HookCamera {
                                                                       "Camera", "set_fieldOfView"));
         ADD_HOOK(EndCameraRendering, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine.Rendering",
                                                                    "RenderPipeline", "EndCameraRendering"));
+
+        ADD_HOOK(Unity_Renderer_set_enabled, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::set_enabled(System.Boolean)"));
 #pragma endregion
     }
 }

@@ -42,7 +42,7 @@ namespace L4Camera {
             LinkuraLocal::Misc::IndexedSet<T>::clear();
         }
 
-        void add(void* value)  {
+        virtual void add(void* value)  {
             LinkuraLocal::Misc::IndexedSet<T>::add(value);
             std::map<std::string, UnityResolve::UnityType::Transform*> newMeshMap;
             charaMeshes.push_back(newMeshMap);
@@ -77,22 +77,26 @@ namespace L4Camera {
         }
 
         void setMeshRenderActive(UnityResolve::UnityType::Transform* transform, bool active, std::string str = "") {
-            static auto get_component = reinterpret_cast<UnityResolve::UnityType::Component* (*)(UnityResolve::UnityType::GameObject*, void*)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)"));
-            static auto get_enabled = reinterpret_cast<bool (*)(UnityResolve::UnityType::Component*)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
             static auto set_enabled = reinterpret_cast<void (*)(UnityResolve::UnityType::Component*, bool)>(
                     Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::set_enabled(System.Boolean)"));
-            static auto rendererType = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer");
-            if (!(transform && Il2cppUtils::IsNativeObjectAlive(transform))) return;
-            auto gameObject = transform->GetGameObject();
-            if (!(gameObject && Il2cppUtils::IsNativeObjectAlive(gameObject))) return;
-            auto renderer = gameObject->GetComponent<UnityResolve::UnityType::Component*>(rendererType);
+            auto renderer = getRenderer(transform);
             if (renderer && Il2cppUtils::IsNativeObjectAlive(renderer)) {
                 set_enabled(renderer, active);
             } else {
                 LinkuraLocal::Log::DebugFmt("No renderer found for %s", str.c_str());
             }
+        }
+
+        UnityResolve::UnityType::Component* getRenderer(UnityResolve::UnityType::Transform* transform) {
+            static auto get_component = reinterpret_cast<UnityResolve::UnityType::Component* (*)(UnityResolve::UnityType::GameObject*, void*)>(
+                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)"));
+            static auto get_enabled = reinterpret_cast<bool (*)(UnityResolve::UnityType::Component*)>(
+                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
+            static auto rendererType = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer");
+            if (!(transform && Il2cppUtils::IsNativeObjectAlive(transform))) return nullptr;
+            auto gameObject = transform->GetGameObject();
+            if (!(gameObject && Il2cppUtils::IsNativeObjectAlive(gameObject))) return nullptr;
+            return gameObject->GetComponent<UnityResolve::UnityType::Component*>(rendererType);
         }
     };
 
@@ -194,7 +198,6 @@ namespace L4Camera {
                 LinkuraLocal::Misc::IndexedSet<T>::next();
             }
         }
-
         void prev() override {
             if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
                 restoreCurrentCharaMeshes();
@@ -203,7 +206,74 @@ namespace L4Camera {
                 LinkuraLocal::Misc::IndexedSet<T>::prev();
             }
         }
+    };
+    template <typename T>
+    class CharacterMeshRenderManager : public CharacterMeshManager<T> {
+        std::map<T, bool> hidden;
+        std::set<void*> renderSet;
+    public:
+        void add(void* value) override {
+            CharacterMeshManager<T>::add(value);
+            hidden.insert_or_assign(value, false);
+        }
+        void printChildren(UnityResolve::UnityType::Transform* obj, const std::string& obj_name) {
+            const auto childCount = obj->GetChildCount();
+            for (int i = 0;i < childCount; i++) {
+                auto child = obj->GetChild(i);
+                const auto childName = child->GetName();
+                LinkuraLocal::Log::DebugFmt("%s child: %s", obj_name.c_str(), childName.c_str());
+            }
+        }
+        void hide(void* value) {
+            static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
+            static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
+            static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
+            if (!value || hidden[value]) return;
+            LinkuraLocal::Log::DebugFmt("Trying to hide the meshes for %p", value);
+            auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(value, spine03_field);
+            auto costume = spineTrans->GetParent()->GetParent()->GetParent()->GetParent();
+            auto meshResult = Il2cppUtils::GetNestedTransformChildren(costume, {
+                    [](const std::string& name) { return name.starts_with("SCSch"); },
+                    [](const std::string& name) { return name == "Model"; },
+                    [](const std::string& name) { return name == "Mesh"; },
+                    });
+            UnityResolve::UnityType::Transform* meshRoot = nullptr;
+            if (!meshResult.empty()) {
+                meshRoot = meshResult[0];
+            }
+            auto bodyResult = Il2cppUtils::GetNestedTransformChildren(costume, {
+                    [](const std::string &name) { return name.starts_with("SCSch"); },
+                    [](const std::string &name) { return name == "Model"; },
+                    [](const std::string& name) { return name == "Mesh"; },
+                    [](const std::string& name) { return name == "Body"; }
+            });
+            if (!bodyResult.empty()) {
+                meshRoot = bodyResult[0];
+            }
+            if (meshRoot) {
+                auto childCount = meshRoot->GetChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    auto child = meshRoot->GetChild(i);
+                    const auto childName = child->GetName();
+                    if (childName.starts_with("Hair")) {
+                        continue;
+                    }
+                    CharacterMeshManager<T>::setMeshRenderActive(child, false, childName);
+                    auto renderer = CharacterMeshManager<T>::getRenderer(child);
+                    renderSet.insert(renderer);
+                }
+            }
+            hidden.insert_or_assign(value, true);
+        }
+        void clear() override {
+            CharacterMeshManager<T>::clear();
+            hidden.clear();
+            renderSet.clear();
+        }
 
+        bool containsRender(void* render) {
+            return renderSet.contains(render);
+        }
     };
 
     extern BaseCamera::Camera baseCamera;
@@ -211,7 +281,7 @@ namespace L4Camera {
     extern UnityResolve::UnityType::Vector3 firstPersonPosOffset;
     extern UnityResolve::UnityType::Vector3 followPosOffset;
     extern CharacterMeshFirstPersonManager<void*> followCharaSet;
-    extern CharacterMeshManager<void*> charaRenderSet;
+    extern CharacterMeshRenderManager<void*> charaRenderSet;
 
     extern LinkuraLocal::Misc::CSEnum bodyPartsEnum;
     extern UnityResolve::UnityType::Color backgroundColor;
@@ -234,6 +304,22 @@ namespace L4Camera {
     void on_cam_rawinput_joystick(JoystickEvent event);
 	void initCameraSettings();
     void clearRenderSet();
+    static void recursiveAddFaceMesh(UnityResolve::UnityType::Transform* transform,
+                                     L4Camera::CharacterMeshManager<void*>& set) {
+        auto childCount = transform->GetChildCount();
+        for (int i = 0; i < childCount; i++) {
+            auto child = transform->GetChild(i);
+            const auto childName = child->GetName();
+//            Log::DebugFmt("child: %s", childName.c_str());
+            if (childName == "Head") {
+                recursiveAddFaceMesh(child, set);
+            } else {
+                if (!set.containsCharaMesh(childName)) {
+                    set.addCharaMesh(childName, child);
+                }
+            }
+        }
+    }
 
     struct CameraInfo {
         UnityResolve::UnityType::Vector3 position{0, 0, 0};

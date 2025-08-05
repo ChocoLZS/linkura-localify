@@ -89,6 +89,7 @@ message ConfigUpdate {
   optional bool lock_render_texture_resolution = 26;
   optional int32 render_texture_long_side = 27;
   optional int32 render_texture_short_side = 28;
+  optional bool hide_character_body = 29;
 }
 
 // Overlay control actions

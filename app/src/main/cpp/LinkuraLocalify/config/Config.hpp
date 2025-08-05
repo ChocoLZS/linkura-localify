@@ -35,6 +35,7 @@ namespace LinkuraLocal::Config {
     extern bool lockRenderTextureResolution;
     extern int renderTextureLongSide;
     extern int renderTextureShortSide;
+    extern bool hideCharacterBody;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
 
