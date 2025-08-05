@@ -442,4 +442,16 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="archive.motion_capture_reconstructed">復元モーションキャプチャ再生（紫色）</string>
     <string name="archive.icon_legend_note">アイコンをクリックして再生モードを切り替えます。半透明のバッジは対応モードの再生のみ利用可能であることを示します。再生モードを変更した後、ゲームを再起動する必要があります。\n注意：2025年5月29日に新しいモーションキャプチャデータ形式が導入されました。この日以前のモーションキャプチャリプレイは、暫定的に最新バージョンのリンクラでは再生できません。</string>
 
+    <!-- Render Texture Resolution Settings -->
+    <string name="config.render_texture_lock_resolution_title">レンダーテクスチャ解像度のロック</string>
+    <string name="config.render_texture_resolution_label">解像度</string>
+    <string name="config.render_texture_preset_8k">8K</string>
+    <string name="config.render_texture_preset_4k">4K</string>
+    <string name="config.render_texture_preset_2k">2K</string>
+    <string name="config.render_texture_preset_1080p">1080p</string>
+    <string name="config.render_texture_preset_720p">720p</string>
+    <string name="config.render_texture_preset_360p">360p</string>
+    <string name="config.render_texture_preset_custom">カスタム</string>
+    <string name="config.render_texture_description">この機能は活動記録とモーションキャプチャのレンダリング解像度を変更できます</string>
+
 </resources>

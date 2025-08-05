@@ -6,6 +6,40 @@
 #include "../camera/camera.hpp"
 
 namespace LinkuraLocal::HookLiveRender {
+
+    /**
+     * @brief apply graphic settings for camera,
+     * but will crash for with live camera,
+     * work for story camera.
+     * @param mainCamera
+     */
+    void applyCameraGraphicSettings(UnityResolve::UnityType::Camera* mainCamera) {
+        auto static Camera_klass = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Camera");
+        auto static get_targetTexture = Camera_klass->Get<UnityResolve::Method>("get_targetTexture");
+        if (!mainCamera) return;
+        // crash for with live camera
+        auto targetTexture = get_targetTexture->Invoke<Il2cppUtils::Il2CppObject*>(mainCamera);
+        applyRenderTextureGraphicSettings(targetTexture);
+    }
+
+    void applyRenderTextureGraphicSettings(void* targetTexture){
+        auto static RenderTexture_klass = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture");
+        auto static get_width = RenderTexture_klass->Get<UnityResolve::Method>("get_width");
+        auto static get_height = RenderTexture_klass->Get<UnityResolve::Method>("get_height");
+        auto static set_width = RenderTexture_klass->Get<UnityResolve::Method>("set_width");
+        auto static set_height = RenderTexture_klass->Get<UnityResolve::Method>("set_height");
+        if (!targetTexture) return;
+        if (Config::lockRenderTextureResolution) {
+            auto width = get_width->Invoke<int>(targetTexture);
+            auto height = get_height->Invoke<int>(targetTexture);
+            bool isWidthLongSide = width > height;
+            auto newWidth = isWidthLongSide ? Config::renderTextureLongSide : Config::renderTextureShortSide;
+            auto newHeight = isWidthLongSide ? Config::renderTextureShortSide : Config::renderTextureLongSide;
+            set_width->Invoke<void>(targetTexture, newWidth);
+            set_height->Invoke<void>(targetTexture, newHeight);
+        }
+    }
+
     enum struct SchoolResolution_LiveAreaQuality {
         Low,
         Middle,
@@ -177,6 +211,22 @@ namespace LinkuraLocal::HookLiveRender {
         }
     }
 
+    DEFINE_HOOK(void, Screen_SetResolution, (int width, int height, int fullScreenMode, int refreshRate)) {
+        Log::VerboseFmt("Screen_SetResolution HOOKED: width=%d, height=%d, fullScreenMode=%d, refreshRate=%d", width, height, fullScreenMode, refreshRate);
+//        width = 3840;
+//        height = 2160;
+//        fullScreenMode = 1;
+//        refreshRate = 60;
+        Screen_SetResolution_Orig(width, height, fullScreenMode, refreshRate);
+    }
+
+    // 直播分辨率
+    DEFINE_HOOK(void, Camera_set_targetTexture, (void* camera,void* targetTexture)) {
+        Log::DebugFmt("Camera_set_targetTexture HOOKED");
+        applyRenderTextureGraphicSettings(targetTexture);
+        Camera_set_targetTexture_Orig(camera, targetTexture);
+    }
+
     void Install(HookInstaller* hookInstaller) {
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                                       "SchoolResolution", "GetResolution"));
@@ -199,6 +249,9 @@ namespace LinkuraLocal::HookLiveRender {
 //        }
 //        ADD_HOOK(FesConnectArchivePlayer_JumpTimeAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "JumpTimeAsync"));
 //        ADD_HOOK(M3U8Live_get_TotalSegmentsDuration, Il2cppUtils::GetMethodPointer("Alstromeria.dll", "Alst.Archive", "M3U8Live", "get_TotalSegmentsDuration"));
+
+        ADD_HOOK(Screen_SetResolution,Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)"));
+        ADD_HOOK(Camera_set_targetTexture, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Camera::set_targetTexture(UnityEngine.RenderTexture)"));
 
     }
 

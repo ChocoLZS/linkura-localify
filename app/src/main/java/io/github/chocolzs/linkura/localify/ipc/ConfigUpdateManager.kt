@@ -54,6 +54,9 @@ class ConfigUpdateManager private constructor() {
                 if (config.enableMotionCaptureReplay != null) enableMotionCaptureReplay = config.enableMotionCaptureReplay
                 if (config.enableInGameReplayDisplay != null) enableInGameReplayDisplay = config.enableInGameReplayDisplay
                 if (config.withliveOrientation != null) withliveOrientation = config.withliveOrientation
+                if (config.lockRenderTextureResolution != null) lockRenderTextureResolution = config.lockRenderTextureResolution
+                if (config.renderTextureLongSide != null) renderTextureLongSide = config.renderTextureLongSide
+                if (config.renderTextureShortSide != null) renderTextureShortSide = config.renderTextureShortSide
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

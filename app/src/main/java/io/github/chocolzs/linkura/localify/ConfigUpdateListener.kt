@@ -41,6 +41,9 @@ interface ConfigListener {
     fun onEnableInGameReplayDisplayChanged(value: Boolean)
     fun onMotionCaptureResourceUrlChanged(value: String)
     fun onWithliveOrientationChanged(value: Int)
+    fun onLockRenderTextureResolutionChanged(value: Boolean)
+    fun onRenderTextureResolutionChanged(longSide: Int, shortSide: Int)
+
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
@@ -251,6 +254,18 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onWithliveOrientationChanged(value: Int) {
         config.withliveOrientation = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onLockRenderTextureResolutionChanged(value: Boolean) {
+        config.lockRenderTextureResolution = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+    override fun onRenderTextureResolutionChanged(longSide: Int, shortSide: Int) {
+        config.renderTextureLongSide = longSide
+        config.renderTextureShortSide = shortSide
         saveConfig()
         sendConfigUpdate(config)
     }

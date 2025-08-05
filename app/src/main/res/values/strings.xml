@@ -195,4 +195,16 @@
     <string name="archive.motion_capture_reconstructed">Reconstructed Motion Capture Replay (Purple)</string>
     <string name="archive.icon_legend_note">Click icons to toggle replay modes. Semi-transparent badges indicate limited replay mode availability. Restart the game after changing replay modes to take effect.\nNote: A new motion capture data format was introduced on May 29, 2025. Motion capture replays from before this date temporarily cannot be played on the latest version of Linkura.</string>
 
+    <!-- Render Texture Resolution Settings -->
+    <string name="config.render_texture_lock_resolution_title">Lock Render Texture Resolution</string>
+    <string name="config.render_texture_resolution_label">Resolution</string>
+    <string name="config.render_texture_preset_8k">8K</string>
+    <string name="config.render_texture_preset_4k">4K</string>
+    <string name="config.render_texture_preset_2k">2K</string>
+    <string name="config.render_texture_preset_1080p">1080p</string>
+    <string name="config.render_texture_preset_720p">720p</string>
+    <string name="config.render_texture_preset_360p">360p</string>
+    <string name="config.render_texture_preset_custom">Custom</string>
+    <string name="config.render_texture_description">This feature can change the rendering resolution for story records and motion capture</string>
+
 </resources>

@@ -316,11 +316,13 @@ namespace LinkuraLocal::HookCamera {
         StoryModelSpaceManager_Init_Orig(self, method);
         auto modelSpace = get_ModelSpace->Invoke<Il2cppUtils::Il2CppObject*>(self);
         auto storyCamera = get_StoryCamera->Invoke<UnityResolve::UnityType::Camera*>(modelSpace);
+
 //        if (!initialCameraRendered) {
 //            sanitizeFreeCamera(storyCamera); // not working as expected
 //        }
         registerMainFreeCamera(storyCamera);
         registerCurrentCamera(storyCamera);
+        HookLiveRender::applyCameraGraphicSettings(storyCamera);
         backgroundColorCameraCache = storyCamera;
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
