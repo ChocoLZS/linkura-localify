@@ -86,6 +86,10 @@ message ConfigUpdate {
   optional bool enable_in_game_replay_display = 23;
   optional string motion_capture_resource_url = 24;
   optional int32 withlive_orientation = 25;
+  optional bool lock_render_texture_resolution = 26;
+  optional int32 render_texture_long_side = 27;
+  optional int32 render_texture_short_side = 28;
+  optional bool hide_character_body = 29;
 }
 
 // Overlay control actions

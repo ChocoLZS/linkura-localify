@@ -40,6 +40,8 @@ namespace LinkuraLocal::HookLiveRender {
     void Install(HookInstaller* hookInstaller);
     std::vector<uint8_t> getCurrentArchiveInfo();
     void setArchivePosition(float seconds);
+    void applyCameraGraphicSettings(UnityResolve::UnityType::Camera* mainCamera);
+    void applyRenderTextureGraphicSettings(void* renderTexture);
 }
 
 namespace LinkuraLocal::HookStory {

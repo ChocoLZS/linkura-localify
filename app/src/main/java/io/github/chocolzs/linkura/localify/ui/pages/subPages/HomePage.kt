@@ -12,11 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +31,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -531,6 +541,173 @@ fun HomePage(modifier: Modifier = Modifier,
                                     text = stringResource(R.string.orientation_portrait), selected = config.value.withliveOrientation == 1,
                                     onClick = { context?.onWithliveOrientationChanged(1) })
 
+                            }
+                        }
+                    }
+
+                    item {
+                        GakuSwitch(modifier.padding(start = 8.dp, end = 8.dp),
+                            stringResource(R.string.config_render_texture_lock_resolution_title),
+                            checked = config.value.lockRenderTextureResolution) {
+                                v -> context?.onLockRenderTextureResolutionChanged(v)
+                        }
+
+                        CollapsibleBox(modifier = modifier,
+                            expandState = config.value.lockRenderTextureResolution,
+                            collapsedHeight = 0.dp,
+                            showExpand = false
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                
+                                // Preset selector and resolution inputs
+                                var selectedPreset by remember { mutableStateOf("custom") }
+                                var longSideText by remember { mutableStateOf(config.value.renderTextureLongSide.toString()) }
+                                var shortSideText by remember { mutableStateOf(config.value.renderTextureShortSide.toString()) }
+                                var isDropdownExpanded by remember { mutableStateOf(false) }
+                                
+                                // Arrow rotation animation
+                                val arrowRotation by animateFloatAsState(
+                                    targetValue = if (isDropdownExpanded) 180f else 0f,
+                                    animationSpec = tween(durationMillis = 300),
+                                    label = "arrow_rotation"
+                                )
+
+                                // Update selectedPreset when config changes
+                                LaunchedEffect(config.value.renderTextureLongSide, config.value.renderTextureShortSide) {
+                                    val currentLong = config.value.renderTextureLongSide
+                                    val currentShort = config.value.renderTextureShortSide
+                                    selectedPreset = when {
+                                        currentLong == 7680 && currentShort == 4320 -> "8k"
+                                        currentLong == 3840 && currentShort == 2160 -> "4k"
+                                        currentLong == 2560 && currentShort == 1440 -> "2k"
+                                        currentLong == 1920 && currentShort == 1080 -> "1080p"
+                                        currentLong == 1280 && currentShort == 720 -> "720p"
+                                        currentLong == 640 && currentShort == 360 -> "360p"
+                                        else -> "custom"
+                                    }
+                                    longSideText = currentLong.toString()
+                                    shortSideText = currentShort.toString()
+                                }
+
+                                Text(stringResource(R.string.config_render_texture_resolution_label))
+                                
+                                Row(modifier = modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                    
+                                    // Preset dropdown
+                                    OutlinedButton(
+                                        modifier = Modifier.weight(1.2f).height(32.dp),
+                                        onClick = { isDropdownExpanded = true }
+                                    ) {
+                                        Text(
+                                            fontSize = 12.sp,
+                                            text = when(selectedPreset) {
+                                                "8k" -> stringResource(R.string.config_render_texture_preset_8k)
+                                                "4k" -> stringResource(R.string.config_render_texture_preset_4k)
+                                                "2k" -> stringResource(R.string.config_render_texture_preset_2k)
+                                                "1080p" -> stringResource(R.string.config_render_texture_preset_1080p)
+                                                "720p" -> stringResource(R.string.config_render_texture_preset_720p)
+                                                "360p" -> stringResource(R.string.config_render_texture_preset_360p)
+                                                else -> stringResource(R.string.config_render_texture_preset_custom)
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            color = MaterialTheme.colorScheme.onPrimary,
+
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Filled.ArrowDropDown,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .padding(start = 4.dp)
+                                                .rotate(arrowRotation),
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    }
+                                    
+                                    DropdownMenu(
+                                        expanded = isDropdownExpanded,
+                                        onDismissRequest = { isDropdownExpanded = false }
+                                    ) {
+                                        listOf("8k", "4k", "2k", "1080p", "720p", "360p", "custom").forEach { preset ->
+                                            DropdownMenuItem(
+                                                text = { Text(when(preset) {
+                                                    "8k" -> stringResource(R.string.config_render_texture_preset_8k)
+                                                    "4k" -> stringResource(R.string.config_render_texture_preset_4k)
+                                                    "2k" -> stringResource(R.string.config_render_texture_preset_2k)
+                                                    "1080p" -> stringResource(R.string.config_render_texture_preset_1080p)
+                                                    "720p" -> stringResource(R.string.config_render_texture_preset_720p)
+                                                    "360p" -> stringResource(R.string.config_render_texture_preset_360p)
+                                                    else -> stringResource(R.string.config_render_texture_preset_custom)
+                                                }) },
+                                                onClick = {
+                                                    selectedPreset = preset
+                                                    isDropdownExpanded = false
+                                                    
+                                                    // Update resolution based on preset
+                                                    val (newLong, newShort) = when(preset) {
+                                                        "8k" -> Pair(7680, 4320)
+                                                        "4k" -> Pair(3840, 2160)
+                                                        "2k" -> Pair(2560, 1440)
+                                                        "1080p" -> Pair(1920, 1080)
+                                                        "720p" -> Pair(1280, 720)
+                                                        "360p" -> Pair(640, 360)
+                                                        else -> Pair(longSideText.toIntOrNull() ?: 3840, shortSideText.toIntOrNull() ?: 2160)
+                                                    }
+                                                    
+                                                    if (preset != "custom") {
+                                                        longSideText = newLong.toString()
+                                                        shortSideText = newShort.toString()
+                                                        context?.onRenderTextureResolutionChanged(newLong, newShort)
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+
+                                    // Resolution inputs: longSide x shortSide
+                                    GakuTextInput(modifier = Modifier
+                                        .height(32.dp)
+                                        .weight(.8f),
+                                        fontSize = 12f,
+                                        value = longSideText,
+                                        onValueChange = { newValue ->
+                                            longSideText = newValue
+                                            val longSide = newValue.toIntOrNull()
+                                            if (longSide != null && longSide > 0) {
+                                                val shortSide = (longSide * 9 / 16).coerceAtLeast(1)
+                                                shortSideText = shortSide.toString()
+                                                context?.onRenderTextureResolutionChanged(longSide, shortSide)
+                                            }
+                                        },
+                                        keyboardOptions = keyboardOptionsNumber)
+
+                                    Text("×", modifier = Modifier.padding(horizontal = 4.dp))
+
+                                    GakuTextInput(modifier = Modifier
+                                        .height(32.dp)
+                                        .weight(.8f),
+                                        fontSize = 12f,
+                                        value = shortSideText,
+                                        onValueChange = { newValue ->  
+                                            shortSideText = newValue
+                                            val shortSide = newValue.toIntOrNull()
+                                            if (shortSide != null && shortSide > 0) {
+                                                val longSide = (shortSide * 16 / 9).coerceAtLeast(1)
+                                                longSideText = longSide.toString()
+                                                context?.onRenderTextureResolutionChanged(longSide, shortSide)
+                                            }
+                                        },
+                                        keyboardOptions = keyboardOptionsNumber)
+                                }
+
+                                // Description text
+                                Text(
+                                    text = stringResource(R.string.config_render_texture_description),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }

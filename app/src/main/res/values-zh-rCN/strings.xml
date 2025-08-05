@@ -195,4 +195,20 @@
     <string name="archive.motion_capture_reconstructed">复原动捕回放（紫色）</string>
     <string name="archive.icon_legend_note">点击图标可切换回放模式。半透明标签表示仅支持对应模式的回放。切换回放模式后需要重新启动游戏才会生效。\n注意：2025年5月29日使用了新的动捕数据格式。在此之前的动捕回放，暂时无法在最新版本的リンクラ上播放。</string>
 
+    <!-- Render Texture Resolution Settings -->
+    <string name="config.render_texture_lock_resolution_title">锁定材质渲染分辨率</string>
+    <string name="config.render_texture_resolution_label">分辨率</string>
+    <string name="config.render_texture_preset_8k">8K</string>
+    <string name="config.render_texture_preset_4k">4K</string>
+    <string name="config.render_texture_preset_2k">2K</string>
+    <string name="config.render_texture_preset_1080p">1080p</string>
+    <string name="config.render_texture_preset_720p">720p</string>
+    <string name="config.render_texture_preset_360p">360p</string>
+    <string name="config.render_texture_preset_custom">自定义</string>
+    <string name="config.render_texture_description">此功能可以更改活动记录以及动捕的渲染分辨率</string>
+
+    <!-- Character Rendering Settings -->
+    <string name="config.character_render.head_only_title">仅保留角色头部渲染</string>
+    <string name="config.character_render.head_only_description">隐藏角色身体，仅渲染头部和头发部分</string>
+
 </resources>

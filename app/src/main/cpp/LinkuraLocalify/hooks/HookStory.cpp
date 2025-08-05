@@ -45,7 +45,7 @@ namespace LinkuraLocal::HookStory {
 
     DEFINE_HOOK(void, StoryScene_SetStory, (void* self, void* story, void* mtd)) {
         Log::DebugFmt("StoryScene_SetStory HOOKED");
-        L4Camera::followCharaSet.clear();
+        L4Camera::clearRenderSet();
         StoryScene_SetStory_Orig(self, story, mtd);
     }
 

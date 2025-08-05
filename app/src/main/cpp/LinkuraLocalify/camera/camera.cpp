@@ -16,7 +16,7 @@ namespace L4Camera {
 	BaseCamera::Camera baseCamera{};
     BaseCamera::Camera originCamera{};
     CameraMode cameraMode = CameraMode::FREE;
-    FirstPersonRoll firstPersonRoll = FirstPersonRoll::ENABLE_ROLL;
+    FirstPersonRoll firstPersonRoll = FirstPersonRoll::DISABLE_ROLL;
     FollowModeY followModeY = FollowModeY::SMOOTH_Y;
 
     CameraInfo currentCameraInfo;
@@ -30,7 +30,8 @@ namespace L4Camera {
     float r_sensitivity = 0.5f;
     bool showToast = true;
     LinkuraLocal::Misc::CSEnum bodyPartsEnum("Head", 0xa);
-    CharacterMeshManager<void*> followCharaSet;
+    CharacterMeshFirstPersonManager<void*> followCharaSet;
+    CharacterMeshRenderManager<void*> charaRenderSet;
 
 	// bool rMousePressFlg = false;
 
@@ -738,8 +739,13 @@ namespace L4Camera {
 		cameraRawInputThread();
 	}
 
+    void clearRenderSet() {
+        followCharaSet.clear();
+        charaRenderSet.clear();
+    }
+
     void UpdateCameraInfo(const UnityResolve::UnityType::Vector3& pos, 
-                         const UnityResolve::UnityType::Quaternion& rot, 
+                         const UnityResolve::UnityType::Quaternion& rot,
                          float fieldOfView) {
         currentCameraInfo.position = pos;
         currentCameraInfo.rotation = rot;

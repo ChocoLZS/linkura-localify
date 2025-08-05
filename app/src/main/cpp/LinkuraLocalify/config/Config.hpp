@@ -32,6 +32,10 @@ namespace LinkuraLocal::Config {
     extern bool enableInGameReplayDisplay;
     extern std::string motionCaptureResourceUrl;
     extern int withliveOrientation;
+    extern bool lockRenderTextureResolution;
+    extern int renderTextureLongSide;
+    extern int renderTextureShortSide;
+    extern bool hideCharacterBody;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
 
