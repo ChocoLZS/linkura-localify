@@ -37,6 +37,7 @@ namespace LinkuraLocal::Config {
     int renderTextureLongSide = 3840;
     int renderTextureShortSide = 2160;
     bool hideCharacterBody = false;
+    int renderTextureAntiAliasing = 0;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -75,6 +76,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(renderTextureLongSide);
             GetConfigItem(renderTextureShortSide);
             GetConfigItem(hideCharacterBody);
+            GetConfigItem(renderTextureAntiAliasing);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -144,6 +146,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_render_texture_long_side()) renderTextureLongSide = configUpdate.render_texture_long_side();
                 if (configUpdate.has_render_texture_short_side()) renderTextureShortSide = configUpdate.render_texture_short_side();
                 if (configUpdate.has_hide_character_body()) hideCharacterBody = configUpdate.hide_character_body();
+                if (configUpdate.has_render_texture_anti_aliasing()) renderTextureAntiAliasing = configUpdate.render_texture_anti_aliasing();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

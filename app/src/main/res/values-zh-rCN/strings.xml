@@ -210,5 +210,14 @@
     <!-- Character Rendering Settings -->
     <string name="config.character_render.head_only_title">仅保留角色头部渲染</string>
     <string name="config.character_render.head_only_description">隐藏角色身体，仅渲染头部和头发部分</string>
+    
+    <!-- Anti-Aliasing Settings -->
+    <string name="config.anti_aliasing.title">锁定抗锯齿</string>
+    <string name="config.anti_aliasing.follow_game">默认</string>
+    <string name="config.anti_aliasing.1x">1x</string>
+    <string name="config.anti_aliasing.2x">2x</string>
+    <string name="config.anti_aliasing.4x">4x</string>
+    <string name="config.anti_aliasing.8x">8x</string>
+    <string name="config.anti_aliasing.description">活动记录通常是1x 动捕渲染是2x，此设置可能会造成卡顿，请选择最合适的进行设置</string>
 
 </resources>

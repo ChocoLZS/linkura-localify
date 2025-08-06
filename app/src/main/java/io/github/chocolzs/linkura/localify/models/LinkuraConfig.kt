@@ -36,6 +36,7 @@ data class LinkuraConfig (
     var renderTextureLongSide: Int = 3840,
     var renderTextureShortSide: Int = 2160,
     var hideCharacterBody: Boolean = false,
+    var renderTextureAntiAliasing: Int = 0,
 
     var pf: Boolean = false,
 

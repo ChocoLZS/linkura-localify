@@ -210,5 +210,14 @@
     <!-- Character Rendering Settings -->
     <string name="config.character_render.head_only_title">Render Character Head Only</string>
     <string name="config.character_render.head_only_description">Hide character body, only render head and hair parts</string>
+    
+    <!-- Anti-Aliasing Settings -->
+    <string name="config.anti_aliasing.title">Lock Anti-Aliasing</string>
+    <string name="config.anti_aliasing.follow_game">Default</string>
+    <string name="config.anti_aliasing.1x">1x</string>
+    <string name="config.anti_aliasing.2x">2x</string>
+    <string name="config.anti_aliasing.4x">4x</string>
+    <string name="config.anti_aliasing.8x">8x</string>
+    <string name="config.anti_aliasing.description">Story records are usually 1x, motion capture rendering is 2x. This setting may cause lag, please choose the most appropriate one</string>
 
 </resources>

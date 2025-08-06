@@ -28,7 +28,29 @@ namespace LinkuraLocal::HookLiveRender {
         auto static get_height = RenderTexture_klass->Get<UnityResolve::Method>("get_height");
         auto static set_width = RenderTexture_klass->Get<UnityResolve::Method>("set_width");
         auto static set_height = RenderTexture_klass->Get<UnityResolve::Method>("set_height");
+        auto static get_antiAliasing = RenderTexture_klass->Get<UnityResolve::Method>("get_antiAliasing");
+        auto static set_antiAliasing = RenderTexture_klass->Get<UnityResolve::Method>("set_antiAliasing");
         if (!targetTexture) return;
+        if (Config::renderTextureAntiAliasing != 0) {
+            auto antiAliasing = 1;
+            switch (Config::renderTextureAntiAliasing) {
+                case 1:
+                    antiAliasing = 1;
+                    break;
+                case 2:
+                    antiAliasing = 2;
+                    break;
+                case 4:
+                    antiAliasing = 4;
+                    break;
+                case 8:
+                    antiAliasing = 8;
+                    break;
+                default:
+                    break;
+            }
+            set_antiAliasing->Invoke<void>(targetTexture, antiAliasing);
+        }
         if (Config::lockRenderTextureResolution) {
             auto width = get_width->Invoke<int>(targetTexture);
             auto height = get_height->Invoke<int>(targetTexture);
@@ -211,6 +233,11 @@ namespace LinkuraLocal::HookLiveRender {
         }
     }
 
+    DEFINE_HOOK(void, QualitySettings_set_antiAliasing, (int32_t value)) {
+        Log::DebugFmt("QualitySettings_set_antiAliasing HOOKED: value=%d", value);
+        return QualitySettings_set_antiAliasing_Orig(value);
+    }
+
     DEFINE_HOOK(void, Screen_SetResolution, (int width, int height, int fullScreenMode, int refreshRate)) {
         Log::VerboseFmt("Screen_SetResolution HOOKED: width=%d, height=%d, fullScreenMode=%d, refreshRate=%d", width, height, fullScreenMode, refreshRate);
 //        width = 3840;
@@ -252,6 +279,7 @@ namespace LinkuraLocal::HookLiveRender {
 
         ADD_HOOK(Screen_SetResolution,Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)"));
         ADD_HOOK(Camera_set_targetTexture, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Camera::set_targetTexture(UnityEngine.RenderTexture)"));
+//        ADD_HOOK(QualitySettings_set_antiAliasing, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)"));
 
     }
 

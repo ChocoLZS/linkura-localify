@@ -44,6 +44,7 @@ interface ConfigListener {
     fun onLockRenderTextureResolutionChanged(value: Boolean)
     fun onRenderTextureResolutionChanged(longSide: Int, shortSide: Int)
     fun onHideCharacterBodyChanged(value: Boolean)
+    fun onRenderTextureAntiAliasingChanged(value: Int)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -273,6 +274,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onHideCharacterBodyChanged(value: Boolean) {
         config.hideCharacterBody = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onRenderTextureAntiAliasingChanged(value: Int) {
+        config.renderTextureAntiAliasing = value
         saveConfig()
         sendConfigUpdate(config)
     }

@@ -90,6 +90,7 @@ message ConfigUpdate {
   optional int32 render_texture_long_side = 27;
   optional int32 render_texture_short_side = 28;
   optional bool hide_character_body = 29;
+  optional int32 render_texture_anti_aliasing = 30;
 }
 
 // Overlay control actions

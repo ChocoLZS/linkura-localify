@@ -712,6 +712,55 @@ fun HomePage(modifier: Modifier = Modifier,
                         }
                     }
 
+                    item {
+                        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = stringResource(R.string.config_anti_aliasing_title))
+                            Row(modifier = modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                val radioModifier = remember {
+                                    modifier
+                                        .height(32.dp)
+                                        .weight(1f)
+                                }
+
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_anti_aliasing_follow_game), selected = config.value.renderTextureAntiAliasing == 0,
+                                    onClick = { context?.onRenderTextureAntiAliasingChanged(0) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_anti_aliasing_1x), selected = config.value.renderTextureAntiAliasing == 1,
+                                    onClick = { context?.onRenderTextureAntiAliasingChanged(1) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_anti_aliasing_2x), selected = config.value.renderTextureAntiAliasing == 2,
+                                    onClick = { context?.onRenderTextureAntiAliasingChanged(2) })
+                            }
+                            Row(modifier = modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                val radioModifier = remember {
+                                    modifier
+                                        .height(32.dp)
+                                        .weight(1f)
+                                }
+
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_anti_aliasing_4x), selected = config.value.renderTextureAntiAliasing == 4,
+                                    onClick = { context?.onRenderTextureAntiAliasingChanged(4) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_anti_aliasing_8x), selected = config.value.renderTextureAntiAliasing == 8,
+                                    onClick = { context?.onRenderTextureAntiAliasingChanged(8) })
+                                Spacer(modifier = modifier.weight(1f))
+                            }
+                            
+                            Text(
+                                text = stringResource(R.string.config_anti_aliasing_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
 //                    item {
 //                        HorizontalDivider(
 //                            thickness = 1.dp,

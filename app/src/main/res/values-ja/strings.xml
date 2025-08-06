@@ -457,5 +457,14 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <!-- Character Rendering Settings -->
     <string name="config.character_render.head_only_title">キャラクターヘッドのみレンダリング</string>
     <string name="config.character_render.head_only_description">キャラクターの体を隠し、頭部と髪の部分のみをレンダリングします</string>
+    
+    <!-- Anti-Aliasing Settings -->
+    <string name="config.anti_aliasing.title">アンチエイリアシングロック</string>
+    <string name="config.anti_aliasing.follow_game">デフォルト</string>
+    <string name="config.anti_aliasing.1x">1x</string>
+    <string name="config.anti_aliasing.2x">2x</string>
+    <string name="config.anti_aliasing.4x">4x</string>
+    <string name="config.anti_aliasing.8x">8x</string>
+    <string name="config.anti_aliasing.description">活動記録は通常1x、モーションキャプチャレンダリングは2xです。この設定はラグを引き起こす可能性があるため、最適なものを選択してください</string>
 
 </resources>
