@@ -9,12 +9,12 @@ namespace LinkuraLocal::HookStory {
     auto regex_replace = [](std::string input, const char* pattern, const char* replacement) -> std::string {
         RE2 re(pattern);
         if (!re.ok()) {
-            LinkuraLocal::Log::DebugFmt("RE2 compile failed for pattern: %s, error: %s", pattern, re.error().c_str());
+            LinkuraLocal::Log::ErrorFmt("RE2 compile failed for pattern: %s, error: %s", pattern, re.error().c_str());
             return input;
         }
         
         int count = RE2::GlobalReplace(&input, re, replacement);
-        LinkuraLocal::Log::DebugFmt("RE2 replace success for pattern: %s, replacements: %d", pattern, count);
+        LinkuraLocal::Log::VerboseFmt("RE2 replace success for pattern: %s, replacements: %d", pattern, count);
         return input;
     };
 

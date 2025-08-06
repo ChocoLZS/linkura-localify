@@ -324,6 +324,7 @@ namespace LinkuraLocal::HookCamera {
         registerCurrentCamera(storyCamera);
         HookLiveRender::applyCameraGraphicSettings(storyCamera);
         backgroundColorCameraCache = storyCamera;
+        Unity_camera_set_backgroundColor_Injected_Orig(backgroundColorCameraCache, &L4Camera::backgroundColor);
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
