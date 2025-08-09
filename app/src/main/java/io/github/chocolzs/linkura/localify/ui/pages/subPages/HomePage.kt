@@ -260,8 +260,9 @@ fun HomePage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.hook_fesArchive_unlockTicket_title), checked = config.value.fesArchiveUnlockTicket) {
                             v -> context?.onFesArchiveUnlockTicketChanged(v)
                     }
-
-
+                    GakuSwitch(modifier, "unlock after", checked = config.value.unlockAfter) {
+                            v -> context?.onUnlockAfterChanged(v)
+                    }
                 }
             }
             Spacer(Modifier.height(6.dp))

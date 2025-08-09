@@ -81,16 +81,24 @@ namespace LinkuraLocal::HookShare {
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = 0;
     uintptr_t WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
+    uintptr_t FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
+
+    uintptr_t WebviewLiveApi_WebviewLiveLiveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
+    uintptr_t WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
+    uintptr_t FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
+    uintptr_t ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
     // http response modify
     DEFINE_HOOK(void* , ApiClient_Deserialize, (void* self, void* response, void* type, void* method_info)) {
         auto result = ApiClient_Deserialize_Orig(self, response, type, method_info);
         auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(result)->ToString());
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_fes_archive_data response
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
             if (Config::fesArchiveUnlockTicket) {
                 json["selectable_camera_types"] = {1,2,3,4};
                 json["ticket_rank"] = 6;
-                json["has_extra_admission"] = "true";
                 result = Il2cppUtils::FromJsonStr(json.dump(), type);
             }
             if (Config::enableMotionCaptureReplay) {
@@ -116,6 +124,15 @@ namespace LinkuraLocal::HookShare {
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_with_archive_data response
+            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
+                json["is_horizontal"] = "true";
+            }
+            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
+                json["is_horizontal"] = "false";
+            }
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
             if (Config::enableMotionCaptureReplay) {
                 auto archive_id = Shareable::currentArchiveId;
                 auto it = Config::archiveConfigMap.find(archive_id);
@@ -137,12 +154,6 @@ namespace LinkuraLocal::HookShare {
                     }
                 }
             }
-            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
-                json["is_horizontal"] = "true";
-            }
-            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
-                json["is_horizontal"] = "false";
-            }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
@@ -152,11 +163,23 @@ namespace LinkuraLocal::HookShare {
             if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
                 json["is_horizontal"] = "false";
             }
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
             for (auto& archive : json["archive_list"]) {
                 auto archive_id = archive["archives_id"].get<std::string>();
+                if (Config::unlockAfter) {
+                    archive["has_extra_admission"] = "true";
+                }
                 if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
                     auto live_start_time = archive["live_start_time"].get<std::string>();
                     auto live_end_time = archive["live_end_time"].get<std::string>();
@@ -192,6 +215,31 @@ namespace LinkuraLocal::HookShare {
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
 
+        // live info
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(WebviewLiveApi_WebviewLiveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
         return result;
     }
 
@@ -251,6 +299,7 @@ namespace LinkuraLocal::HookShare {
 
         // GetHttpAsyncAddr
         ADD_HOOK(ApiClient_Deserialize, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client","ApiClient", "Deserialize"));
+#pragma region ArchiveApi
         auto ArchiveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi");
         auto method = (Il2cppUtils::MethodInfo*) nullptr;
         if (ArchiveApi_klass) {
@@ -272,26 +321,77 @@ namespace LinkuraLocal::HookShare {
             if (method) {
                 ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = method->methodPointer;
             }
+            // hook /v1/archive/withlive_info
+            auto ArchiveWithliveInfoWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveWithliveInfoWithHttpInfoAsync>d__70");
+            method = Il2cppUtils::GetMethodIl2cpp(ArchiveWithliveInfoWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
         }
+#pragma endregion
+
+#pragma region WithliveApi
         auto WithliveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "WithliveApi");
         method = (Il2cppUtils::MethodInfo*) nullptr;
         if (WithliveApi_klass) {
             // hook /v1/withlive/enter response
-            auto WithliveEnterWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(WithliveApi_klass, "<WithliveEnterWithHttpInfoAsync>d__30");
-            method = Il2cppUtils::GetMethodIl2cpp(WithliveEnterWithHttpInfoAsync_klass, "MoveNext", 0);
+            auto WithliveEnterWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(
+                    WithliveApi_klass, "<WithliveEnterWithHttpInfoAsync>d__30");
+            method = Il2cppUtils::GetMethodIl2cpp(WithliveEnterWithHttpInfoAsync_klass, "MoveNext",
+                                                  0);
             if (method) {
                 WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
             }
+            // hook /v1/withlive/live_info response
+            auto WithliveLiveInfoWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(
+                    WithliveApi_klass, "<WithliveLiveInfoWithHttpInfoAsync>d__50");
+            method = Il2cppUtils::GetMethodIl2cpp(WithliveLiveInfoWithHttpInfoAsync_klass, "MoveNext",
+                                                  0);
+            if (method) {
+                WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
         }
+#pragma endregion
 
-        ADD_HOOK(AlstArchiveDirectory_GetLocalFullPathFromFileName, Il2cppUtils::GetMethodPointer("Core.dll", "Alstromeria", "AlstArchiveDirectory", "GetRemoteUriFromFileName"));
+#pragma region FesliveApi
+        auto FesliveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "FesliveApi");
+        if (FesliveApi_klass) {
+            // hook /v1/withlive/enter response
+            auto FesliveEnterWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(
+                    FesliveApi_klass, "<FesliveEnterWithHttpInfoAsync>d__38");
+            method = Il2cppUtils::GetMethodIl2cpp(FesliveEnterWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
+            // hook /v1/feslive/live_info response
+            auto FesliveLiveInfoWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(
+                    FesliveApi_klass, "<FesliveLiveInfoWithHttpInfoAsync>d__66");
+            method = Il2cppUtils::GetMethodIl2cpp(FesliveLiveInfoWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
+        }
+#pragma endregion
+
+#pragma region WebviewLiveApi
+        auto WebviewLiveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "WebviewLiveApi");
+        if (WebviewLiveApi_klass) {
+            // hook /v1/webview/live/live_info
+            auto WebviewLiveLiveInfoWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(
+                    WebviewLiveApi_klass, "<WebviewLiveLiveInfoWithHttpInfoAsync>d__22");
+            method = Il2cppUtils::GetMethodIl2cpp(WebviewLiveLiveInfoWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                WebviewLiveApi_WebviewLiveLiveInfoWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
+        }
+#pragma endregion
+
 #pragma region RenderScene
-
+        ADD_HOOK(AlstArchiveDirectory_GetLocalFullPathFromFileName, Il2cppUtils::GetMethodPointer("Core.dll", "Alstromeria", "AlstArchiveDirectory", "GetRemoteUriFromFileName"));
         ADD_HOOK(FesliveApi_FesliveEnterWithHttpInfoAsync , Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "FesliveApi", "FesliveEnterWithHttpInfoAsync"));
         ADD_HOOK(WithliveApi_WithliveEnterWithHttpInfoAsync , Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "WithliveApi", "WithliveEnterWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
-
 
 #pragma endregion
     }
