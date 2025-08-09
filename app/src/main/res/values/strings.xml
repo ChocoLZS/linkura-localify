@@ -2,6 +2,7 @@
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
     <string name="hook.fesArchive.unlockTicket.title">Unlock Fes×LIVE Archive S Ticket</string>
+    <string name="hook.after.unlock.title">Unlock After</string>
     <string name="hook.render.highResolution.title">1080p/2k/4k Resolution</string>
     <string name="enable_plugin">Enable Plugin (Not Hot Reloadable)</string>
     <string name="replace_font">Replace Font</string>
@@ -166,6 +167,10 @@
     <string name="log.export.success">Log exported successfully to Downloads folder</string>
     <string name="log.export.failed">Failed to export log</string>
     <string name="log.export.permission_required">Storage permission required to export logs</string>
+    <string name="log.export.xposed_success">Xposed side logs exported successfully</string>
+    <string name="log.export.xposed_failed">Failed to export Xposed side logs</string>
+    <string name="log.export.broadcast_sent">Log export notification sent to game process</string>
+    <string name="log.export.broadcast_failed">Failed to send log export notification</string>
 
     <!-- Resource Management -->
     <string name="resource_management">Resource Management</string>

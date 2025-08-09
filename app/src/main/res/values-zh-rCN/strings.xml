@@ -2,6 +2,7 @@
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
     <string name="hook.fesArchive.unlockTicket.title">解锁Fes×LIVE回放S等级门票</string>
+    <string name="hook.after.unlock.title">解锁After</string>
     <string name="hook.render.highResolution.title">1080p/2k/4k 分辨率</string>
     <string name="enable_plugin">启用插件 (不可热重载)</string>
     <string name="replace_font">替换字体</string>
@@ -166,6 +167,10 @@
     <string name="log.export.success">日志已成功导出到下载文件夹</string>
     <string name="log.export.failed">导出日志失败</string>
     <string name="log.export.permission_required">需要存储权限才能导出日志</string>
+    <string name="log.export.xposed_success">Xposed 端日志导出成功</string>
+    <string name="log.export.xposed_failed">Xposed 端日志导出失败</string>
+    <string name="log.export.broadcast_sent">已发送日志导出通知至游戏进程</string>
+    <string name="log.export.broadcast_failed">发送日志导出通知失败</string>
 
     <!-- Resource Management -->
     <string name="resource_management">资源管理</string>

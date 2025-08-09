@@ -60,6 +60,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.hideCharacterBody != null) hideCharacterBody = config.hideCharacterBody
 //                if (config.motionCaptureResourceUrl != null) motionCaptureResourceUrl = config.motionCaptureResourceUrl
                 if (config.renderTextureAntiAliasing != null) renderTextureAntiAliasing = config.renderTextureAntiAliasing
+                if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
             val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

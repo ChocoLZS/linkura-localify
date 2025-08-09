@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.AndroidAppHelper
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -70,6 +72,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     
     // Loop control variables
     private val loopControlFlags = mutableMapOf<String, Boolean>()
+    
+    // Broadcast receiver for log export requests
+    private var logExportReceiver: BroadcastReceiver? = null
     
     private val socketClientHandler = object : DuplexSocketClient.MessageHandler {
         override fun onMessageReceived(type: MessageType, payload: ByteArray) {
@@ -240,6 +245,146 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private fun onStartHandler() {
         socketClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
     }
+    
+    /**
+     * Setup broadcast receiver for log export requests
+     */
+    private fun setupLogExportBroadcastReceiver(context: Context) {
+        try {
+            if (logExportReceiver == null) {
+                logExportReceiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context?, intent: Intent?) {
+                        if (intent?.action == LogExporter.ACTION_LOG_EXPORT_REQUEST) {
+                            val exportPath = intent.getStringExtra("export_path")
+                            Log.i(TAG, "Received log export broadcast from Java side, export path: $exportPath")
+                            LogExporter.addLogEntry(TAG, "I", "Received log export broadcast from Java side")
+                            
+                            try {
+                                // Export Xposed side logs
+                                val xposedLogFile = exportXposedLogs(context)
+                                if (xposedLogFile != null) {
+                                    Log.i(TAG, "Xposed logs exported successfully to: ${xposedLogFile.absolutePath}")
+                                    LogExporter.addLogEntry(TAG, "I", "Xposed logs exported to: ${xposedLogFile.name}")
+                                } else {
+                                    Log.e(TAG, "Failed to export Xposed logs")
+                                    LogExporter.addLogEntry(TAG, "E", "Failed to export Xposed logs")
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error exporting Xposed logs", e)
+                                LogExporter.addLogEntry(TAG, "E", "Error exporting Xposed logs: ${e.message}")
+                            }
+                        }
+                    }
+                }
+                
+                val intentFilter = IntentFilter(LogExporter.ACTION_LOG_EXPORT_REQUEST)
+                context.registerReceiver(logExportReceiver, intentFilter)
+                Log.i(TAG, "Log export broadcast receiver registered")
+                LogExporter.addLogEntry(TAG, "I", "Log export broadcast receiver registered")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to setup log export broadcast receiver", e)
+            LogExporter.addLogEntry(TAG, "E", "Failed to setup log export broadcast receiver: ${e.message}")
+        }
+    }
+    
+    /**
+     * Export Xposed side logs
+     */
+    private fun exportXposedLogs(context: Context?): java.io.File? {
+        return try {
+            val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
+            val fileName = "linkura-localify-xposed-log-$timestamp.txt"
+            
+            val downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+            val logFile = java.io.File(downloadsDir, fileName)
+            
+            // Collect Xposed side log information
+            val sb = StringBuilder()
+            sb.appendLine("Linkura Localify Xposed Side Log Export")
+            sb.appendLine("Generated: ${java.text.SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}")
+            sb.appendLine("=".repeat(50))
+            sb.appendLine()
+            
+            // Native library status
+            sb.appendLine("=== Native Library Status ===")
+            sb.appendLine("Native Lib Load Success: $nativeLibLoadSuccess")
+            sb.appendLine("Already Initialized: $alreadyInitialized")
+            sb.appendLine("L4 Data Initialized: $l4DataInited")
+            sb.appendLine("External Files Checked: $externalFilesChecked")
+            sb.appendLine()
+            
+            // Socket client status
+            sb.appendLine("=== Socket Client Status ===")
+            sb.appendLine("Socket Client Connected: ${socketClient.isClientConnected()}")
+            sb.appendLine("Overlay Loop Enabled: $isOverlayLoopEnabled")
+            sb.appendLine("Camera Info Overlay Enabled: $isCameraInfoOverlayEnabled")
+            sb.appendLine()
+            
+            // Loop control flags
+            sb.appendLine("=== Loop Control Status ===")
+            loopControlFlags.forEach { (name, enabled) ->
+                sb.appendLine("$name: $enabled")
+            }
+            sb.appendLine()
+            
+            // Game activity status
+            sb.appendLine("=== Game Activity Status ===")
+            sb.appendLine("Game Activity Available: ${gameActivity != null}")
+            sb.appendLine("Game Activity Class: ${gameActivity?.javaClass?.name ?: "null"}")
+            sb.appendLine()
+            
+            // Module path and target info
+            sb.appendLine("=== Module Information ===")
+            sb.appendLine("Module Path: $modulePath")
+            sb.appendLine("Target Package: $targetPackageName")
+            sb.appendLine("Native Library Name: $nativeLibName")
+            sb.appendLine()
+            
+            // Config error status
+            sb.appendLine("=== Configuration Status ===")
+            if (getConfigError != null) {
+                sb.appendLine("Config Error: ${getConfigError.toString()}")
+            } else {
+                sb.appendLine("Config Error: None")
+            }
+            sb.appendLine()
+            
+            // Add LogExporter buffer content from Xposed side
+            sb.appendLine("=== Xposed Side LogExporter Buffer ===")
+            try {
+                // Use reflection to access LogExporter's private logBuffer
+                val logExporterClass = LogExporter::class.java
+                val logBufferField = logExporterClass.getDeclaredField("logBuffer")
+                logBufferField.isAccessible = true
+                @Suppress("UNCHECKED_CAST")
+                val logBuffer = logBufferField.get(null) as MutableList<String>
+                
+                synchronized(logBuffer) {
+                    if (logBuffer.isNotEmpty()) {
+                        sb.appendLine("LogExporter Buffer (${logBuffer.size} entries):")
+                        logBuffer.forEach { logEntry ->
+                            sb.appendLine(logEntry)
+                        }
+                    } else {
+                        sb.appendLine("LogExporter Buffer is empty")
+                    }
+                }
+            } catch (e: Exception) {
+                sb.appendLine("Failed to access LogExporter buffer: ${e.message}")
+                Log.w(TAG, "Failed to access LogExporter buffer", e)
+            }
+            sb.appendLine()
+            
+            sb.appendLine("=== End of Xposed Side Log ===")
+            
+            logFile.writeText(sb.toString())
+            logFile
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to export Xposed logs", e)
+            null
+        }
+    }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 //        if (lpparam.packageName == "io.github.chocolzs.linkura.localify") {
@@ -334,6 +479,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     initLinkuraConfig(currActivity)
                 }
                 onStartHandler()
+                
+                // Setup log export broadcast receiver
+                setupLogExportBroadcastReceiver(currActivity)
             }
         })
 
