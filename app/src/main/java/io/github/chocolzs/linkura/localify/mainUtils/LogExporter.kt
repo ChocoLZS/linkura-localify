@@ -2,6 +2,7 @@ package io.github.chocolzs.linkura.localify.mainUtils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
@@ -15,6 +16,9 @@ import java.util.*
 
 object LogExporter {
     private const val TAG = "LogExporter"
+    
+    // Broadcast action for log export notification
+    const val ACTION_LOG_EXPORT_REQUEST = "io.github.chocolzs.linkura.localify.LOG_EXPORT_REQUEST"
     
     // In-memory log buffer for runtime logs
     private val logBuffer = mutableListOf<String>()
@@ -57,11 +61,35 @@ object LogExporter {
             
             logFile.writeText(combinedContent)
             Log.i(TAG, "Log exported successfully to: ${logFile.absolutePath}")
+            
+            // Send broadcast to notify Xposed side to export logs
+            try {
+                sendLogExportBroadcast(context, logFile.absolutePath)
+                addLogEntry(TAG, "I", "Log export broadcast sent to Xposed side")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to send log export broadcast", e)
+                addLogEntry(TAG, "W", "Failed to send log export broadcast: ${e.message}")
+            }
+            
             logFile
         } catch (e: Exception) {
             Log.e(TAG, "Failed to export log", e)
             null
         }
+    }
+    
+    /**
+     * Send broadcast to notify Xposed side to export logs
+     * @param context Android context
+     * @param exportPath Path where the log was exported
+     */
+    private fun sendLogExportBroadcast(context: Context, exportPath: String) {
+        val intent = Intent(ACTION_LOG_EXPORT_REQUEST)
+        intent.putExtra("export_path", exportPath)
+        // Use explicit package name to ensure broadcast reaches the target package
+        intent.setPackage("com.oddno.lovelive")
+        context.sendBroadcast(intent)
+        Log.i(TAG, "Log export broadcast sent with path: $exportPath")
     }
     
     @SuppressLint("HardwareIds")

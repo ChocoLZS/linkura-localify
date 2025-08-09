@@ -413,6 +413,10 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="log.export.success">ログがダウンロードフォルダに正常にエクスポートされました</string>
     <string name="log.export.failed">ログのエクスポートに失敗しました</string>
     <string name="log.export.permission_required">ログをエクスポートするためのストレージ権限が必要です</string>
+    <string name="log.export.xposed_success">Xposed側ログが正常にエクスポートされました</string>
+    <string name="log.export.xposed_failed">Xposed側ログのエクスポートに失敗しました</string>
+    <string name="log.export.broadcast_sent">ゲームプロセスにログエクスポート通知を送信しました</string>
+    <string name="log.export.broadcast_failed">ログエクスポート通知の送信に失敗しました</string>
 
     <!-- Resource Management -->
     <string name="resource_management">リソース管理</string>

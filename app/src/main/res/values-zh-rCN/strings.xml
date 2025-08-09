@@ -166,6 +166,10 @@
     <string name="log.export.success">日志已成功导出到下载文件夹</string>
     <string name="log.export.failed">导出日志失败</string>
     <string name="log.export.permission_required">需要存储权限才能导出日志</string>
+    <string name="log.export.xposed_success">Xposed 端日志导出成功</string>
+    <string name="log.export.xposed_failed">Xposed 端日志导出失败</string>
+    <string name="log.export.broadcast_sent">已发送日志导出通知至游戏进程</string>
+    <string name="log.export.broadcast_failed">发送日志导出通知失败</string>
 
     <!-- Resource Management -->
     <string name="resource_management">资源管理</string>

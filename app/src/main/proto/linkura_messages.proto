@@ -22,6 +22,7 @@ enum MessageType {
   ARCHIVE_POSITION_SET_REQUEST = 6;
   OVERLAY_CONTROL_CAMERA_INFO = 7;
   CAMERA_BACKGROUND_COLOR = 8;
+  LOG_EXPORT_REQUEST = 9;
   // Future message types can be added here
 }
 
@@ -129,4 +130,9 @@ message CameraBackgroundColor {
   float green = 2;  // Green component (0.0 - 1.0)
   float blue = 3;   // Blue component (0.0 - 1.0)
   float alpha = 4;  // Alpha component (0.0 - 1.0)
+}
+
+// Log export request message
+message LogExportRequest {
+  optional string export_path = 1; // Optional path for log export
 }
