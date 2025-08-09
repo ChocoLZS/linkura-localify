@@ -29,6 +29,18 @@ class ReplaySettingsCollapsibleBoxViewModel(initiallyExpanded: Boolean = true) :
     override var expanded by mutableStateOf(initiallyExpanded)
 }
 
+class CameraSensitivityCollapsibleBoxViewModel(initiallyExpanded: Boolean = false) : CollapsibleBoxViewModel(initiallyExpanded) {
+    override var expanded by mutableStateOf(initiallyExpanded)
+}
+
+class StorySettingsCollapsibleBoxViewModel(initiallyExpanded: Boolean = false) : CollapsibleBoxViewModel(initiallyExpanded) {
+    override var expanded by mutableStateOf(initiallyExpanded)
+}
+
+class CameraSettingsCollapsibleBoxViewModel(initiallyExpanded: Boolean = false) : CollapsibleBoxViewModel(initiallyExpanded) {
+    override var expanded by mutableStateOf(initiallyExpanded)
+}
+
 class BreastCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(BreastCollapsibleBoxViewModel::class.java)) {
@@ -64,6 +76,36 @@ class ReplaySettingsCollapsibleBoxViewModelFactory(private val initiallyExpanded
         if (modelClass.isAssignableFrom(ReplaySettingsCollapsibleBoxViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return ReplaySettingsCollapsibleBoxViewModel(initiallyExpanded) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class CameraSensitivityCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CameraSensitivityCollapsibleBoxViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CameraSensitivityCollapsibleBoxViewModel(initiallyExpanded) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class StorySettingsCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(StorySettingsCollapsibleBoxViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return StorySettingsCollapsibleBoxViewModel(initiallyExpanded) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class CameraSettingsCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CameraSettingsCollapsibleBoxViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CameraSettingsCollapsibleBoxViewModel(initiallyExpanded) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

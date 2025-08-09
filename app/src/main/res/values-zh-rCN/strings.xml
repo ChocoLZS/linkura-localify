@@ -224,5 +224,13 @@
     <string name="config.anti_aliasing.4x">4x</string>
     <string name="config.anti_aliasing.8x">8x</string>
     <string name="config.anti_aliasing.description">活动记录通常是1x 动捕渲染是2x，此设置可能会造成卡顿，请选择最合适的进行设置</string>
+    
+    <!-- Camera Sensitivity Settings -->
+    <string name="config.camera_sensitivity.title">相机灵敏度设置</string>
+    <string name="config.camera_sensitivity.movement">平移灵敏度 (WASD)</string>
+    <string name="config.camera_sensitivity.vertical">上升下降灵敏度 (Ctrl/Space)</string>
+    <string name="config.camera_sensitivity.fov">视野角灵敏度 (Q/E)</string>
+    <string name="config.camera_sensitivity.rotation">旋转灵敏度 (方向键)</string>
+    <string name="config.camera_sensitivity.description">调整自由相机模式的相机操作灵敏度。所有控制的默认值为1.0倍。</string>
 
 </resources>

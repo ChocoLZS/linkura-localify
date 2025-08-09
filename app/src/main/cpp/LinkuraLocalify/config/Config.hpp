@@ -38,6 +38,10 @@ namespace LinkuraLocal::Config {
     extern bool hideCharacterBody;
     extern int renderTextureAntiAliasing;
     extern bool unlockAfter;
+    extern float cameraMovementSensitivity;
+    extern float cameraVerticalSensitivity;
+    extern float cameraFovSensitivity;
+    extern float cameraRotationSensitivity;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
 

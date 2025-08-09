@@ -224,5 +224,13 @@
     <string name="config.anti_aliasing.4x">4x</string>
     <string name="config.anti_aliasing.8x">8x</string>
     <string name="config.anti_aliasing.description">Story records are usually 1x, motion capture rendering is 2x. This setting may cause lag, please choose the most appropriate one</string>
+    
+    <!-- Camera Sensitivity Settings -->
+    <string name="config.camera_sensitivity.title">Camera Sensitivity Settings</string>
+    <string name="config.camera_sensitivity.movement">Movement Sensitivity (WASD)</string>
+    <string name="config.camera_sensitivity.vertical">Vertical Sensitivity (Ctrl/Space)</string>
+    <string name="config.camera_sensitivity.fov">FOV Sensitivity (Q/E)</string>
+    <string name="config.camera_sensitivity.rotation">Rotation Sensitivity (Arrow Keys)</string>
+    <string name="config.camera_sensitivity.description">Adjust camera control sensitivity for free camera mode. Default is 1.0x for all controls.</string>
 
 </resources>

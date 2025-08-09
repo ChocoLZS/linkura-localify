@@ -39,6 +39,10 @@ namespace LinkuraLocal::Config {
     bool hideCharacterBody = false;
     int renderTextureAntiAliasing = 0;
     bool unlockAfter = false;
+    float cameraMovementSensitivity = 1.0f;
+    float cameraVerticalSensitivity = 1.0f;
+    float cameraFovSensitivity = 1.0f;
+    float cameraRotationSensitivity = 1.0f;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -79,6 +83,10 @@ namespace LinkuraLocal::Config {
             GetConfigItem(hideCharacterBody);
             GetConfigItem(renderTextureAntiAliasing);
             GetConfigItem(unlockAfter);
+            GetConfigItem(cameraMovementSensitivity);
+            GetConfigItem(cameraVerticalSensitivity);
+            GetConfigItem(cameraFovSensitivity);
+            GetConfigItem(cameraRotationSensitivity);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -150,6 +158,10 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_hide_character_body()) hideCharacterBody = configUpdate.hide_character_body();
                 if (configUpdate.has_render_texture_anti_aliasing()) renderTextureAntiAliasing = configUpdate.render_texture_anti_aliasing();
                 if (configUpdate.has_unlock_after()) unlockAfter = configUpdate.unlock_after();
+                if (configUpdate.has_camera_movement_sensitivity()) cameraMovementSensitivity = configUpdate.camera_movement_sensitivity();
+                if (configUpdate.has_camera_vertical_sensitivity()) cameraVerticalSensitivity = configUpdate.camera_vertical_sensitivity();
+                if (configUpdate.has_camera_fov_sensitivity()) cameraFovSensitivity = configUpdate.camera_fov_sensitivity();
+                if (configUpdate.has_camera_rotation_sensitivity()) cameraRotationSensitivity = configUpdate.camera_rotation_sensitivity();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

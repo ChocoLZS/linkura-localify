@@ -46,6 +46,10 @@ interface ConfigListener {
     fun onHideCharacterBodyChanged(value: Boolean)
     fun onRenderTextureAntiAliasingChanged(value: Int)
     fun onUnlockAfterChanged(value: Boolean)
+    fun onCameraMovementSensitivityChanged(value: Float)
+    fun onCameraVerticalSensitivityChanged(value: Float)
+    fun onCameraFovSensitivityChanged(value: Float)
+    fun onCameraRotationSensitivityChanged(value: Float)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -287,6 +291,30 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onUnlockAfterChanged(value: Boolean) {
         config.unlockAfter = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraMovementSensitivityChanged(value: Float) {
+        config.cameraMovementSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraVerticalSensitivityChanged(value: Float) {
+        config.cameraVerticalSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraFovSensitivityChanged(value: Float) {
+        config.cameraFovSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraRotationSensitivityChanged(value: Float) {
+        config.cameraRotationSensitivity = value
         saveConfig()
         sendConfigUpdate(config)
     }

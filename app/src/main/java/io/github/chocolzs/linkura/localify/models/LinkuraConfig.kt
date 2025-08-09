@@ -39,6 +39,12 @@ data class LinkuraConfig (
     var renderTextureAntiAliasing: Int = 0,
     var unlockAfter: Boolean = false,
 
+    // Camera sensitivity settings
+    var cameraMovementSensitivity: Float = 1.0f,
+    var cameraVerticalSensitivity: Float = 1.0f,
+    var cameraFovSensitivity: Float = 1.0f,
+    var cameraRotationSensitivity: Float = 1.0f,
+
     var pf: Boolean = false,
 
 )

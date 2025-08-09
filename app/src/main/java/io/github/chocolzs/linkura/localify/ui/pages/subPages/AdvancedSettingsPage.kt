@@ -33,6 +33,12 @@ import io.github.chocolzs.linkura.localify.models.BreastCollapsibleBoxViewModel
 import io.github.chocolzs.linkura.localify.models.BreastCollapsibleBoxViewModelFactory
 import io.github.chocolzs.linkura.localify.models.FirstPersonCameraCollapsibleBoxViewModel
 import io.github.chocolzs.linkura.localify.models.FirstPersonCameraCollapsibleBoxViewModelFactory
+import io.github.chocolzs.linkura.localify.models.CameraSensitivityCollapsibleBoxViewModel
+import io.github.chocolzs.linkura.localify.models.CameraSensitivityCollapsibleBoxViewModelFactory
+import io.github.chocolzs.linkura.localify.models.StorySettingsCollapsibleBoxViewModel
+import io.github.chocolzs.linkura.localify.models.StorySettingsCollapsibleBoxViewModelFactory
+import io.github.chocolzs.linkura.localify.models.CameraSettingsCollapsibleBoxViewModel
+import io.github.chocolzs.linkura.localify.models.CameraSettingsCollapsibleBoxViewModelFactory
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.base.CollapsibleBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
@@ -40,7 +46,161 @@ import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
 import io.github.chocolzs.linkura.localify.ui.components.GakuSlider
 import io.github.chocolzs.linkura.localify.ui.components.CameraControl
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@Composable
+fun SensitivityControl(
+    modifier: Modifier = Modifier,
+    text: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    step: Float = 0.01f,
+    minValue: Float = 0.1f,
+    maxValue: Float = 5.0f
+) {
+    var isLongPressing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Decrease button (square shape)
+            ElevatedButton(
+                onClick = {
+                    val newValue = (value - step).coerceIn(minValue, maxValue)
+                    onValueChange(newValue)
+                },
+                modifier = Modifier
+                    .size(48.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                isLongPressing = true
+                                coroutineScope.launch {
+                                    delay(500) // Initial delay
+                                    while (isLongPressing) {
+                                        val newValue = (value - step).coerceIn(minValue, maxValue)
+                                        onValueChange(newValue)
+                                        delay(100) // Repeat delay
+                                    }
+                                }
+                                tryAwaitRelease()
+                                isLongPressing = false
+                            }
+                        )
+                    },
+                colors = ButtonDefaults.elevatedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                shape = RoundedCornerShape(4.dp),
+                elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 2.dp),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(
+                    text = "−",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+            
+            // Value input field
+            GakuTextInput(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                value = String.format("%.2f", value),
+                onValueChange = { newText ->
+                    try {
+                        val newValue = newText.toFloat().coerceIn(minValue, maxValue)
+                        onValueChange(newValue)
+                    } catch (e: NumberFormatException) {
+                        // Ignore invalid input
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                fontSize = 14f
+            )
+            
+            // Increase button (square shape)
+            ElevatedButton(
+                onClick = {
+                    val newValue = (value + step).coerceIn(minValue, maxValue)
+                    onValueChange(newValue)
+                },
+                modifier = Modifier
+                    .size(48.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                isLongPressing = true
+                                coroutineScope.launch {
+                                    delay(500) // Initial delay
+                                    while (isLongPressing) {
+                                        val newValue = (value + step).coerceIn(minValue, maxValue)
+                                        onValueChange(newValue)
+                                        delay(100) // Repeat delay
+                                    }
+                                }
+                                tryAwaitRelease()
+                                isLongPressing = false
+                            }
+                        )
+                    },
+                colors = ButtonDefaults.elevatedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                shape = RoundedCornerShape(4.dp),
+                elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 2.dp),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(
+                    text = "+",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun AdvanceSettingsPage(modifier: Modifier = Modifier,
@@ -55,6 +215,12 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
         viewModel(factory = BreastCollapsibleBoxViewModelFactory(initiallyExpanded = false))
     val firstPersonCameraViewModel: FirstPersonCameraCollapsibleBoxViewModel =
         viewModel(factory = FirstPersonCameraCollapsibleBoxViewModelFactory(initiallyExpanded = config.value.firstPersonCameraHideHead))
+    val cameraSensitivityViewModel: CameraSensitivityCollapsibleBoxViewModel =
+        viewModel(factory = CameraSensitivityCollapsibleBoxViewModelFactory(initiallyExpanded = false))
+    val storySettingsViewModel: StorySettingsCollapsibleBoxViewModel =
+        viewModel(factory = StorySettingsCollapsibleBoxViewModelFactory(initiallyExpanded = false))
+    val cameraSettingsViewModel: CameraSettingsCollapsibleBoxViewModel =
+        viewModel(factory = CameraSettingsCollapsibleBoxViewModelFactory(initiallyExpanded = false))
     val keyBoardOptionsDecimal = remember {
         KeyboardOptions(keyboardType = KeyboardType.Decimal)
     }
@@ -73,8 +239,20 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
         }
 
         item {
-            GakuGroupBox(modifier, stringResource(R.string.camera_settings)) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            GakuGroupBox(
+                modifier, 
+                stringResource(R.string.camera_settings),
+                onHeadClick = {
+                    cameraSettingsViewModel.expanded = !cameraSettingsViewModel.expanded
+                }
+            ) {
+                CollapsibleBox(
+                    modifier = modifier,
+                    expandState = cameraSettingsViewModel.expanded,
+                    collapsedHeight = 0.dp,
+                    showExpand = false
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     GakuSwitch(modifier, stringResource(R.string.enable_free_camera), checked = config.value.enableFreeCamera) {
                             v -> context?.onEnableFreeCameraChanged(v)
                     }
@@ -150,6 +328,57 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                             ) { _ -> /* No-op since this is disabled */ }
                         }
                     }
+                    
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+        }
+
+        // Camera Sensitivity Settings Section
+        item {
+            GakuGroupBox(
+                modifier, 
+                stringResource(R.string.config_camera_sensitivity_title),
+                onHeadClick = {
+                    cameraSensitivityViewModel.expanded = !cameraSensitivityViewModel.expanded
+                }
+            ) {
+                CollapsibleBox(
+                    modifier = modifier,
+                    expandState = cameraSensitivityViewModel.expanded,
+                    collapsedHeight = 0.dp,
+                    showExpand = false
+                ) {
+                    Column(
+                        modifier = modifier.padding(top = 8.dp, bottom = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        SensitivityControl(
+                            text = stringResource(R.string.config_camera_sensitivity_movement),
+                            value = config.value.cameraMovementSensitivity,
+                            onValueChange = { value -> context?.onCameraMovementSensitivityChanged(value) }
+                        )
+                        
+                        SensitivityControl(
+                            text = stringResource(R.string.config_camera_sensitivity_vertical),
+                            value = config.value.cameraVerticalSensitivity,
+                            onValueChange = { value -> context?.onCameraVerticalSensitivityChanged(value) }
+                        )
+                        
+                        SensitivityControl(
+                            text = stringResource(R.string.config_camera_sensitivity_fov),
+                            value = config.value.cameraFovSensitivity,
+                            onValueChange = { value -> context?.onCameraFovSensitivityChanged(value) }
+                        )
+                        
+                        SensitivityControl(
+                            text = stringResource(R.string.config_camera_sensitivity_rotation),
+                            value = config.value.cameraRotationSensitivity,
+                            onValueChange = { value -> context?.onCameraRotationSensitivityChanged(value) }
+                        )
+                    }
                 }
             }
 
@@ -157,8 +386,20 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
         }
 
         item {
-            GakuGroupBox(modifier, stringResource(R.string.config_story_settings_title)) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            GakuGroupBox(
+                modifier, 
+                stringResource(R.string.config_story_settings_title),
+                onHeadClick = {
+                    storySettingsViewModel.expanded = !storySettingsViewModel.expanded
+                }
+            ) {
+                CollapsibleBox(
+                    modifier = modifier,
+                    expandState = storySettingsViewModel.expanded,
+                    collapsedHeight = 0.dp,
+                    showExpand = false
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     GakuSwitch(modifier, stringResource(R.string.config_story_hide_background), checked = config.value.storyHideBackground) {
                             v -> context?.onStoryHideBackgroundChanged(v)
                     }
@@ -192,6 +433,7 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                         valueRange = 0.5f..10.0f,
                         onValueChange = { v -> context?.onStoryNovelNonVocalTextDurationRateChanged(v) }
                     )
+                    }
                 }
             }
 

@@ -93,6 +93,10 @@ message ConfigUpdate {
   optional bool hide_character_body = 29;
   optional int32 render_texture_anti_aliasing = 30;
   optional bool unlock_after = 31;
+  optional float camera_movement_sensitivity = 32;
+  optional float camera_vertical_sensitivity = 33;
+  optional float camera_fov_sensitivity = 34;
+  optional float camera_rotation_sensitivity = 35;
 }
 
 // Overlay control actions
