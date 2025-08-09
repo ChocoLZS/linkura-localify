@@ -3,6 +3,7 @@
     <string name="abc_action_bar_home_description">ホームに戻る</string>
     <string name="abc_action_bar_up_description">前に戻る</string>
     <string name="hook.fesArchive.unlockTicket.title">Fes×LIVEアーカイブSチケットを解除</string>
+    <string name="hook.after.unlock.title">解除After</string>
     <string name="hook.render.highResolution.title">1080p/2k/4k 解像度</string>
     <string name="abc_action_menu_overflow_description">その他のオプション</string>
     <string name="abc_action_mode_done">完了</string>

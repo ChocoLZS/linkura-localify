@@ -2,6 +2,7 @@
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
     <string name="hook.fesArchive.unlockTicket.title">Unlock Fes×LIVE Archive S Ticket</string>
+    <string name="hook.after.unlock.title">Unlock After</string>
     <string name="hook.render.highResolution.title">1080p/2k/4k Resolution</string>
     <string name="enable_plugin">Enable Plugin (Not Hot Reloadable)</string>
     <string name="replace_font">Replace Font</string>

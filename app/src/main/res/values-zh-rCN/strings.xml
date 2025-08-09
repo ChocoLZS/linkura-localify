@@ -2,6 +2,7 @@
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
     <string name="hook.fesArchive.unlockTicket.title">解锁Fes×LIVE回放S等级门票</string>
+    <string name="hook.after.unlock.title">解锁After</string>
     <string name="hook.render.highResolution.title">1080p/2k/4k 分辨率</string>
     <string name="enable_plugin">启用插件 (不可热重载)</string>
     <string name="replace_font">替换字体</string>
