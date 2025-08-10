@@ -232,5 +232,14 @@
     <string name="config.camera_sensitivity.fov">视野角灵敏度 (Q/E)</string>
     <string name="config.camera_sensitivity.rotation">旋转灵敏度 (方向键)</string>
     <string name="config.camera_sensitivity.description">调整自由相机模式的相机操作灵敏度。所有控制的默认值为1.0倍。</string>
+    
+    <!-- Camera Overlay System -->
+    <string name="overlay.camera.title">相机</string>
+    <string name="overlay.camera.description">相机控制和设置</string>
+    <string name="overlay.camera.info">相机信息</string>
+    <string name="overlay.camera.sensitivity">灵敏度设置</string>
+    <string name="overlay.camera.sensitivity.floating_title">相机灵敏度</string>
+    <string name="overlay.camera.sensitivity.close">关闭</string>
+    <string name="overlay.camera.sensitivity.reset">重置为默认值</string>
 
 </resources>

@@ -232,5 +232,14 @@
     <string name="config.camera_sensitivity.fov">FOV Sensitivity (Q/E)</string>
     <string name="config.camera_sensitivity.rotation">Rotation Sensitivity (Arrow Keys)</string>
     <string name="config.camera_sensitivity.description">Adjust camera control sensitivity for free camera mode. Default is 1.0x for all controls.</string>
+    
+    <!-- Camera Overlay System -->
+    <string name="overlay.camera.title">Camera</string>
+    <string name="overlay.camera.description">Camera controls and settings</string>
+    <string name="overlay.camera.info">Camera Info</string>
+    <string name="overlay.camera.sensitivity">Sensitivity Settings</string>
+    <string name="overlay.camera.sensitivity.floating_title">Camera Sensitivity</string>
+    <string name="overlay.camera.sensitivity.close">Close</string>
+    <string name="overlay.camera.sensitivity.reset">Reset to Default</string>
 
 </resources>

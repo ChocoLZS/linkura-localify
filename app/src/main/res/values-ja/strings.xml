@@ -479,5 +479,14 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.camera_sensitivity.fov">視野角感度 (Q/E)</string>
     <string name="config.camera_sensitivity.rotation">回転感度 (方向キー)</string>
     <string name="config.camera_sensitivity.description">フリーカメラモードでのカメラ操作感度を調整します。すべての操作のデフォルト値は1.0倍です。</string>
+    
+    <!-- Camera Overlay System -->
+    <string name="overlay.camera.title">カメラ</string>
+    <string name="overlay.camera.description">カメラ操作と設定</string>
+    <string name="overlay.camera.info">カメラ情報</string>
+    <string name="overlay.camera.sensitivity">感度設定</string>
+    <string name="overlay.camera.sensitivity.floating_title">カメラ感度</string>
+    <string name="overlay.camera.sensitivity.close">閉じる</string>
+    <string name="overlay.camera.sensitivity.reset">デフォルトにリセット</string>
 
 </resources>
