@@ -70,7 +70,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
     }
 
     private fun setupMessageHandler() {
-        parentService.getMessageRouterInstance()?.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
+        parentService.getAidlService()?.registerMessageHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
     }
 
     fun show() {
@@ -359,6 +359,6 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
 
     fun destroy() {
         hide()
-        parentService.getMessageRouterInstance()?.clearHandlers(MessageType.ARCHIVE_INFO)
+        parentService.getAidlService()?.unregisterMessageHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
     }
 }

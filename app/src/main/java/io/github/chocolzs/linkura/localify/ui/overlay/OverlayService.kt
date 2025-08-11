@@ -158,7 +158,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             colorPickerOverlayService?.destroy()
             cameraSensitivityOverlayService?.destroy()
 
-            aidlService!!.messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
             aidlService = null
             isServiceBound = false
 
@@ -194,7 +193,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             aidlService = service
             isServiceBound = true
             Log.i(TAG, "Got AIDL service from static instance")
-//            service.messageRouter.registerHandler(MessageType.CAMERA_OVERLAY_REQUEST, overlayRequestHandler)
             return
         }
     }
@@ -591,7 +589,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
     }
     
-    fun getMessageRouterInstance(): MessageRouter? = aidlService?.messageRouter
+    fun getAidlService(): LinkuraAidlService? = aidlService
     fun getHandlerInstance(): Handler = handler
     fun getWindowManagerInstance(): WindowManager? = windowManager
     

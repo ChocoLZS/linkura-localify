@@ -76,7 +76,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
-            val success = service.broadcastMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
+            val success = service.binder.sendMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
             if (success) {
                 Log.i(TAG, "Config update sent successfully")
             } else {
@@ -88,6 +88,4 @@ class ConfigUpdateManager private constructor() {
             false
         }
     }
-
-    fun isConnected(): Boolean = serviceInstance?.binder?.clientCount?.let { it > 0 } ?: false
 }

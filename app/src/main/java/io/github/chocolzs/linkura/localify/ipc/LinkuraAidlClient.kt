@@ -353,8 +353,6 @@ class LinkuraAidlClient private constructor() {
 
     fun isClientConnected(): Boolean = isConnected.get()
     
-    fun isClientRunning(): Boolean = isRunning.get()
-    
     /**
      * Get detailed client status for debugging
      */

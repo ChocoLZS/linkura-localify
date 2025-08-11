@@ -26,7 +26,7 @@ class LinkuraAidlService : Service() {
     private val messagesSent = AtomicLong(0)
     private val messagesReceived = AtomicLong(0)
     private val callbacks = RemoteCallbackList<ILinkuraCallback>()
-    public val messageRouter: MessageRouter by lazy { MessageRouter() }
+    private val messageRouter: MessageRouter by lazy { MessageRouter() }
 
     // AIDL implementation
     val binder = object : ILinkuraService.Stub() {
@@ -204,15 +204,6 @@ class LinkuraAidlService : Service() {
         }
 
         return successCount > 0
-    }
-
-    /**
-     * Get current service status for debugging
-     */
-    fun logServiceStatus() {
-        val status = binder.serverStatus
-        Log.d(TAG, status)
-        LogExporter.addLogEntry(TAG, "D", "Service status requested")
     }
 
     /**
