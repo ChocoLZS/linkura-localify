@@ -11,9 +11,11 @@
 namespace BaseCamera {
 	using Vector3_t = UnityResolve::UnityType::Vector3;
 
-	float moveStep = 0.05;
-	float look_radius = 5;  // 转向半径
-	float moveAngel = 1;  // 转向角度
+    float multiplier = 0.6;
+
+    float moveStep = 0.05 * multiplier;
+    float look_radius = 5 * multiplier;  // 转向半径
+    float moveAngel = 1 * multiplier;  // 转向角度
 
 	int smoothLevel = 1;
 	unsigned long sleepTime = 0;

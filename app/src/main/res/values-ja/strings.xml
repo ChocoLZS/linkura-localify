@@ -474,7 +474,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.anti_aliasing.description">活動記録は通常1x、モーションキャプチャレンダリングは2xです。この設定はラグを引き起こす可能性があるため、最適なものを選択してください</string>
     
     <!-- Camera Sensitivity Settings -->
-    <string name="config.camera_sensitivity.title">カメラ感度設定</string>
+    <string name="config.camera_sensitivity.title">カメラ感度倍率設定</string>
     <string name="config.camera_sensitivity.movement">移動感度 (WASD)</string>
     <string name="config.camera_sensitivity.vertical">上下移動感度 (Ctrl/Space)</string>
     <string name="config.camera_sensitivity.fov">視野角感度 (Q/E)</string>

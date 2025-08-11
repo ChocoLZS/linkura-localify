@@ -399,45 +399,19 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                     )
                 }
                 
-                // Value input field
+                // Value display
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(36.dp)
+                        .height(36.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    OutlinedTextField(
-                        value = String.format("%.2f", value),
-                        onValueChange = { newText ->
-                            try {
-                                val newValue = newText.toFloat().coerceIn(minValue, maxValue)
-                                onValueChange(newValue)
-                            } catch (e: NumberFormatException) {
-                                // Ignore invalid input
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .height(36.dp),
-                        textStyle = LocalTextStyle.current.copy(
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            textAlign = TextAlign.Center
-                        ),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color(0xFF4FC3F7).copy(alpha = 0.8f),
-                            unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                            focusedContainerColor = Color.Black.copy(alpha = 0.6f),
-                            unfocusedContainerColor = Color.Black.copy(alpha = 0.4f),
-                            cursorColor = Color.White,
-                            focusedLabelColor = Color.Transparent,
-                            unfocusedLabelColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(6.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    Text(
+                        text = String.format("%.2f", value),
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
                     )
                 }
                 

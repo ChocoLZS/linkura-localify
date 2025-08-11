@@ -33,7 +33,7 @@ namespace LinkuraLocal::HookStory {
         }
 
         if (Config::storyHideNonCharacter3d) {
-            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");
+            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト[^\\n]*\\n", "");
         }
 
         if (Config::storyHideDof) {
