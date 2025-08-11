@@ -60,16 +60,16 @@ namespace L4Camera {
         originCamera.reset();
 	}
 
-	void camera_forward() {  // 向前
+	void camera_forward(float multiplier = 1.0f) {  // 向前
         switch (cameraMode) {
             case CameraMode::FREE: {
-                baseCamera.set_lon_move(0, LonMoveHState::LonMoveForward, LinkuraLocal::Config::cameraMovementSensitivity);
+                baseCamera.set_lon_move(0, LonMoveHState::LonMoveForward, multiplier);
             } break;
             case CameraMode::FIRST_PERSON: {
-                firstPersonPosOffset.z += offsetMoveStep * LinkuraLocal::Config::cameraMovementSensitivity;
+                firstPersonPosOffset.z += offsetMoveStep * multiplier;
             } break;
             case CameraMode::FOLLOW: {
-                followPosOffset.z -= offsetMoveStep * LinkuraLocal::Config::cameraMovementSensitivity;
+                followPosOffset.z -= offsetMoveStep * multiplier;
             }
         }
 
@@ -87,14 +87,14 @@ namespace L4Camera {
             }
         }
 	}
-	void camera_left() {  // 向左
+	void camera_left(float multiplier = 1.0f) {  // 向左
         switch (cameraMode) {
             case CameraMode::FREE: {
-                baseCamera.set_lon_move(90, LonMoveLeftAndRight, LinkuraLocal::Config::cameraMovementSensitivity);
+                baseCamera.set_lon_move(90, LonMoveLeftAndRight, multiplier);
             } break;
             case CameraMode::FOLLOW: {
                 // followPosOffset.x += 0.8;
-                followLookAtOffset.x += offsetMoveStep * LinkuraLocal::Config::cameraMovementSensitivity;
+                followLookAtOffset.x += offsetMoveStep * multiplier;
             }
             default:
                 break;
@@ -118,7 +118,7 @@ namespace L4Camera {
 	void camera_down(float multiplier = 1.0f) {  // 向下
         switch (cameraMode) {
             case CameraMode::FREE: {
-                float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel * multiplier * LinkuraLocal::Config::cameraVerticalSensitivity;
+                float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel * multiplier;
 
                 for (int i = 0; i < BaseCamera::smoothLevel; i++) {
                     baseCamera.pos.y -= preStep;
@@ -127,11 +127,11 @@ namespace L4Camera {
                 }
             } break;
             case CameraMode::FIRST_PERSON: {
-                firstPersonPosOffset.y -= offsetMoveStep * multiplier * LinkuraLocal::Config::cameraVerticalSensitivity;
+                firstPersonPosOffset.y -= offsetMoveStep * multiplier;
             } break;
             case CameraMode::FOLLOW: {
                 // followPosOffset.y -= offsetMoveStep;
-                followLookAtOffset.y -= offsetMoveStep * multiplier * LinkuraLocal::Config::cameraVerticalSensitivity;
+                followLookAtOffset.y -= offsetMoveStep * multiplier;
             }
         }
 	}
@@ -139,7 +139,7 @@ namespace L4Camera {
 	void camera_up(float multiplier = 1.0f) {  // 向上
         switch (cameraMode) {
             case CameraMode::FREE: {
-                float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel * multiplier * LinkuraLocal::Config::cameraVerticalSensitivity;
+                float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel * multiplier;
 
                 for (int i = 0; i < BaseCamera::smoothLevel; i++) {
                     baseCamera.pos.y += preStep;
@@ -148,11 +148,11 @@ namespace L4Camera {
                 }
             } break;
             case CameraMode::FIRST_PERSON: {
-                firstPersonPosOffset.y += offsetMoveStep * multiplier * LinkuraLocal::Config::cameraVerticalSensitivity;
+                firstPersonPosOffset.y += offsetMoveStep * multiplier;
             } break;
             case CameraMode::FOLLOW: {
                 // followPosOffset.y += offsetMoveStep;
-                followLookAtOffset.y += offsetMoveStep * multiplier * LinkuraLocal::Config::cameraVerticalSensitivity;
+                followLookAtOffset.y += offsetMoveStep * multiplier;
             }
         }
 	}
@@ -550,18 +550,18 @@ namespace L4Camera {
 			if (cameraMoveState.threadRunning) return;
 			cameraMoveState.threadRunning = true;
 			while (true) {
-				if (cameraMoveState.w) camera_forward();
-				if (cameraMoveState.s) camera_back();
-				if (cameraMoveState.a) camera_left();
-				if (cameraMoveState.d) camera_right();
-				if (cameraMoveState.ctrl) camera_down();
-				if (cameraMoveState.space) camera_up();
+				if (cameraMoveState.w) camera_forward(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.s) camera_back(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.a) camera_left(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.d) camera_right(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.ctrl) camera_down(LinkuraLocal::Config::cameraVerticalSensitivity);
+				if (cameraMoveState.space) camera_up(LinkuraLocal::Config::cameraVerticalSensitivity);
 				if (cameraMoveState.up) cameraLookat_up(moveAngel);
 				if (cameraMoveState.down) cameraLookat_down(moveAngel);
 				if (cameraMoveState.left) cameraLookat_left(moveAngel);
 				if (cameraMoveState.right) cameraLookat_right(moveAngel);
-				if (cameraMoveState.q) changeCameraFOV(0.5f);
-				if (cameraMoveState.e) changeCameraFOV(-0.5f);
+				if (cameraMoveState.q) changeCameraFOV(0.5f * LinkuraLocal::Config::cameraFovSensitivity);
+				if (cameraMoveState.e) changeCameraFOV(-0.5f * LinkuraLocal::Config::cameraFovSensitivity);
                 if (cameraMoveState.r) L4Camera::baseCamera.setCamera(&L4Camera::originCamera);
 				if (cameraMoveState.i) ChangeLiveFollowCameraOffsetY(offsetMoveStep);
 				if (cameraMoveState.k) ChangeLiveFollowCameraOffsetY(-offsetMoveStep);

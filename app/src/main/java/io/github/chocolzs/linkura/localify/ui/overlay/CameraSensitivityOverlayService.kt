@@ -1,5 +1,6 @@
 package io.github.chocolzs.linkura.localify.ui.overlay
 
+import android.annotation.SuppressLint
 import android.graphics.PixelFormat
 import android.os.Build
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
@@ -34,6 +36,7 @@ import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
+import io.github.chocolzs.linkura.localify.utils.CameraSensitivityState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -45,11 +48,11 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
     private var overlayView: View? = null
     private var isVisible = false
     
-    // Sensitivity values state
-    private var movementSensitivity by mutableStateOf(1.0f)
-    private var verticalSensitivity by mutableStateOf(1.0f)
-    private var fovSensitivity by mutableStateOf(1.0f)
-    private var rotationSensitivity by mutableStateOf(1.0f)
+    // Use global state for sensitivity values
+    private val movementSensitivity by CameraSensitivityState::movementSensitivity
+    private val verticalSensitivity by CameraSensitivityState::verticalSensitivity
+    private val fovSensitivity by CameraSensitivityState::fovSensitivity
+    private val rotationSensitivity by CameraSensitivityState::rotationSensitivity
     
     // Touch handling for dragging
     private var initialX = 0
@@ -75,25 +78,15 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
         fov: Float,
         rotation: Float
     ) {
-        movementSensitivity = movement
-        verticalSensitivity = vertical
-        fovSensitivity = fov
-        rotationSensitivity = rotation
-        Log.d(TAG, "Updated sensitivity values: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
+        // Values are now automatically updated through global state
+        Log.d(TAG, "Sensitivity values updated from external source: movement=$movement, vertical=$vertical, fov=$fov, rotation=$rotation")
     }
     
     private fun loadCurrentSensitivityValues() {
-        try {
-            val sharedPrefs = parentService.getSharedPreferences("camera_sensitivity", android.content.Context.MODE_PRIVATE)
-            movementSensitivity = sharedPrefs.getFloat("movement", 1.0f)
-            verticalSensitivity = sharedPrefs.getFloat("vertical", 1.0f)
-            fovSensitivity = sharedPrefs.getFloat("fov", 1.0f)
-            rotationSensitivity = sharedPrefs.getFloat("rotation", 1.0f)
-            Log.d(TAG, "Loaded sensitivity values: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading sensitivity values, using defaults", e)
-            // Keep default values (1.0f for all)
-        }
+        // Initialize global state and register overlay service
+        CameraSensitivityState.initialize(parentService)
+        CameraSensitivityState.setOverlayService(this)
+        Log.d(TAG, "Loaded sensitivity values from global state: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
     }
 
     fun hide() {
@@ -105,6 +98,10 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
             }
             overlayView = null
             isVisible = false
+            
+            // Clear overlay service reference
+            CameraSensitivityState.setOverlayService(null)
+            
             parentService.resetCameraSensitivityOverlayState()
         } catch (e: Exception) {
             Log.e(TAG, "Error hiding camera sensitivity overlay", e)
@@ -172,6 +169,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
 
     @Composable
     private fun CameraSensitivityOverlay() {
+        val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
         Box(
             modifier = Modifier
                 .background(
@@ -179,7 +177,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                     RoundedCornerShape(12.dp)
                 )
                 .padding(16.dp)
-                .width(280.dp)
+                .width(180.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -196,7 +194,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -212,7 +210,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                                 modifier = Modifier.size(16.dp)
                             )
                         }
-                        
+
                         // Close button
                         IconButton(
                             onClick = { hide() },
@@ -234,42 +232,43 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                 SensitivityControl(
                     label = parentService.getString(R.string.config_camera_sensitivity_movement),
                     value = movementSensitivity,
-                    onValueChange = { 
-                        movementSensitivity = it
-                        sendSensitivityUpdate()
+                    onValueChange = {
+                        CameraSensitivityState.updateMovementSensitivity(parentService, it)
+                        sendSensitivityUpdateToNative()
                     }
                 )
-                
+
                 SensitivityControl(
                     label = parentService.getString(R.string.config_camera_sensitivity_vertical),
                     value = verticalSensitivity,
-                    onValueChange = { 
-                        verticalSensitivity = it
-                        sendSensitivityUpdate()
+                    onValueChange = {
+                        CameraSensitivityState.updateVerticalSensitivity(parentService, it)
+                        sendSensitivityUpdateToNative()
                     }
                 )
-                
+
                 SensitivityControl(
                     label = parentService.getString(R.string.config_camera_sensitivity_fov),
                     value = fovSensitivity,
-                    onValueChange = { 
-                        fovSensitivity = it
-                        sendSensitivityUpdate()
+                    onValueChange = {
+                        CameraSensitivityState.updateFovSensitivity(parentService, it)
+                        sendSensitivityUpdateToNative()
                     }
                 )
-                
+
                 SensitivityControl(
                     label = parentService.getString(R.string.config_camera_sensitivity_rotation),
                     value = rotationSensitivity,
-                    onValueChange = { 
-                        rotationSensitivity = it
-                        sendSensitivityUpdate()
+                    onValueChange = {
+                        CameraSensitivityState.updateRotationSensitivity(parentService, it)
+                        sendSensitivityUpdateToNative()
                     }
                 )
             }
         }
     }
 
+    @SuppressLint("DefaultLocale")
     @Composable
     private fun SensitivityControl(
         label: String,
@@ -339,32 +338,36 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                 }
                 
                 // Value input field
-                OutlinedTextField(
-                    value = String.format("%.2f", value),
-                    onValueChange = { newText ->
-                        try {
-                            val newValue = newText.toFloat().coerceIn(minValue, maxValue)
-                            onValueChange(newValue)
-                        } catch (e: NumberFormatException) {
-                            // Ignore invalid input
-                        }
-                    },
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(36.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White.copy(alpha = 0.8f),
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.6f)
-                    ),
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center
+                        .height(36.dp)
+                        .background(
+                            Color.Gray.copy(alpha = 0.3f),
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    BasicTextField(
+                        value = String.format("%.2f", value),
+                        onValueChange = { newText ->
+                            try {
+                                val newValue = newText.toFloat().coerceIn(minValue, maxValue)
+                                onValueChange(newValue)
+                            } catch (e: NumberFormatException) {
+                                // Ignore invalid input
+                            }
+                        },
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                )
+                }
                 
                 // Increase button
                 ElevatedButton(
@@ -411,34 +414,21 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
     }
     
     private fun resetAllToDefault() {
-        movementSensitivity = 1.0f
-        verticalSensitivity = 1.0f
-        fovSensitivity = 1.0f
-        rotationSensitivity = 1.0f
-        sendSensitivityUpdate()
+        CameraSensitivityState.resetToDefaults(parentService)
+        sendSensitivityUpdateToNative()
     }
-    
-    private fun sendSensitivityUpdate() {
+
+    private fun sendSensitivityUpdateToNative() {
         try {
-            // Save to SharedPreferences
-            val sharedPrefs = parentService.getSharedPreferences("camera_sensitivity", android.content.Context.MODE_PRIVATE)
-            with(sharedPrefs.edit()) {
-                putFloat("movement", movementSensitivity)
-                putFloat("vertical", verticalSensitivity)
-                putFloat("fov", fovSensitivity)
-                putFloat("rotation", rotationSensitivity)
-                apply()
-            }
-            
             // Send to native layer
             val configUpdate = ConfigUpdate.newBuilder()
-                .setUpdateType(ConfigUpdateType.PARTIAL_UPDATE)
+                .setUpdateType(ConfigUpdateType.FULL_UPDATE)
                 .setCameraMovementSensitivity(movementSensitivity)
                 .setCameraVerticalSensitivity(verticalSensitivity)
                 .setCameraFovSensitivity(fovSensitivity)
                 .setCameraRotationSensitivity(rotationSensitivity)
                 .build()
-            
+
             if (parentService.getSocketServerInstance().isConnected()) {
                 parentService.getSocketServerInstance().sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
                 Log.d(TAG, "Sensitivity update sent: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")

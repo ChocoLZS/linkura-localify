@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import io.github.chocolzs.linkura.localify.utils.CameraSensitivityState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -357,26 +358,38 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     ) {
                         SensitivityControl(
                             text = stringResource(R.string.config_camera_sensitivity_movement),
-                            value = config.value.cameraMovementSensitivity,
-                            onValueChange = { value -> context?.onCameraMovementSensitivityChanged(value) }
+                            value = CameraSensitivityState.movementSensitivity,
+                            onValueChange = { value -> 
+                                context?.onCameraMovementSensitivityChanged(value)
+                                context?.let { ctx -> CameraSensitivityState.updateMovementSensitivity(ctx, value) }
+                            }
                         )
                         
                         SensitivityControl(
                             text = stringResource(R.string.config_camera_sensitivity_vertical),
-                            value = config.value.cameraVerticalSensitivity,
-                            onValueChange = { value -> context?.onCameraVerticalSensitivityChanged(value) }
+                            value = CameraSensitivityState.verticalSensitivity,
+                            onValueChange = { value -> 
+                                context?.onCameraVerticalSensitivityChanged(value)
+                                context?.let { ctx -> CameraSensitivityState.updateVerticalSensitivity(ctx, value) }
+                            }
                         )
                         
                         SensitivityControl(
                             text = stringResource(R.string.config_camera_sensitivity_fov),
-                            value = config.value.cameraFovSensitivity,
-                            onValueChange = { value -> context?.onCameraFovSensitivityChanged(value) }
+                            value = CameraSensitivityState.fovSensitivity,
+                            onValueChange = { value -> 
+                                context?.onCameraFovSensitivityChanged(value)
+                                context?.let { ctx -> CameraSensitivityState.updateFovSensitivity(ctx, value) }
+                            }
                         )
                         
                         SensitivityControl(
                             text = stringResource(R.string.config_camera_sensitivity_rotation),
-                            value = config.value.cameraRotationSensitivity,
-                            onValueChange = { value -> context?.onCameraRotationSensitivityChanged(value) }
+                            value = CameraSensitivityState.rotationSensitivity,
+                            onValueChange = { value -> 
+                                context?.onCameraRotationSensitivityChanged(value)
+                                context?.let { ctx -> CameraSensitivityState.updateRotationSensitivity(ctx, value) }
+                            }
                         )
                     }
                 }
