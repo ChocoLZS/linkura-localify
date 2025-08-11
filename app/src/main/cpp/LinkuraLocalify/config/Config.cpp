@@ -25,6 +25,7 @@ namespace LinkuraLocal::Config {
     bool storyHideTransition = false;
     bool storyHideNonCharacter3d = false;
     bool storyHideDof = false;
+    bool storyHideEffect = false;
     float storyNovelVocalTextDurationRate = 1.0f;
     float storyNovelNonVocalTextDurationRate = 1.0f;
     bool firstPersonCameraHideHead = true;
@@ -69,6 +70,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(storyHideTransition);
             GetConfigItem(storyHideNonCharacter3d);
             GetConfigItem(storyHideDof);
+            GetConfigItem(storyHideEffect);
             GetConfigItem(storyNovelVocalTextDurationRate);
             GetConfigItem(storyNovelNonVocalTextDurationRate);
             GetConfigItem(firstPersonCameraHideHead);
@@ -144,6 +146,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_story_hide_transition()) storyHideTransition = configUpdate.story_hide_transition();
                 if (configUpdate.has_story_hide_non_character_3d()) storyHideNonCharacter3d = configUpdate.story_hide_non_character_3d();
                 if (configUpdate.has_story_hide_dof()) storyHideDof = configUpdate.story_hide_dof();
+                if (configUpdate.has_story_hide_effect()) storyHideEffect = configUpdate.story_hide_effect();
                 if (configUpdate.has_story_novel_vocal_text_duration_rate()) storyNovelVocalTextDurationRate = configUpdate.story_novel_vocal_text_duration_rate();
                 if (configUpdate.has_story_novel_non_vocal_text_duration_rate()) storyNovelNonVocalTextDurationRate = configUpdate.story_novel_non_vocal_text_duration_rate();
                 if (configUpdate.has_first_person_camera_hide_head()) firstPersonCameraHideHead = configUpdate.first_person_camera_hide_head();

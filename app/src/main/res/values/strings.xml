@@ -135,6 +135,7 @@
     <string name="config.story.hide_transition">Hide Transition</string>
     <string name="config.story.hide_non_character_3d">Hide Non-Character 3D</string>
     <string name="config.story.hide_dof">Hide Depth of Field</string>
+    <string name="config.story.hide_effect">Hide Effects</string>
     <string name="config.story.vocal_text_duration_rate">Novel Vocal Text Duration Rate</string>
     <string name="config.story.non_vocal_text_duration_rate">Novel Narration Text Duration Rate</string>
 

@@ -33,6 +33,7 @@ interface ConfigListener {
     fun onStoryHideTransitionChanged(value: Boolean)
     fun onStoryHideNonCharacter3dChanged(value: Boolean)
     fun onStoryHideDofChanged(value: Boolean)
+    fun onStoryHideEffectChanged(value: Boolean)
     fun onStoryNovelVocalTextDurationRateChanged(value: Float)
     fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
     fun onFirstPersonCameraHideHeadChanged(value: Boolean)
@@ -216,6 +217,11 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onStoryHideDofChanged(value: Boolean) {
         config.storyHideDof = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+    override fun onStoryHideEffectChanged(value: Boolean) {
+        config.storyHideEffect = value
         saveConfig()
         sendConfigUpdate(config)
     }

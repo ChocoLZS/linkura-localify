@@ -39,6 +39,11 @@ namespace LinkuraLocal::HookStory {
         if (Config::storyHideDof) {
             content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "");
         }
+
+        if (Config::storyHideEffect) {
+            content_str = regex_replace(content_str, "\\[?プリセットポストエフェクト[^\\n]*\\n", "");
+        }
+
         content = Il2cppUtils::Il2CppString::New(content_str);
         return content;
     }

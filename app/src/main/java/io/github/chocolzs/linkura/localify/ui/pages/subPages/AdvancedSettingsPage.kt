@@ -412,6 +412,9 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.config_story_hide_dof), checked = config.value.storyHideDof) {
                             v -> context?.onStoryHideDofChanged(v)
                     }
+                    GakuSwitch(modifier, stringResource(R.string.config_story_hide_effect), checked = config.value.storyHideEffect) {
+                            v -> context?.onStoryHideEffectChanged(v)
+                    }
                     
                     HorizontalDivider(
                         thickness = 1.dp,

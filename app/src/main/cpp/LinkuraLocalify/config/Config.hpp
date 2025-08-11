@@ -24,6 +24,7 @@ namespace LinkuraLocal::Config {
     extern bool storyHideTransition;
     extern bool storyHideNonCharacter3d;
     extern bool storyHideDof;
+    extern bool storyHideEffect;
     extern float storyNovelVocalTextDurationRate;
     extern float storyNovelNonVocalTextDurationRate;
     extern bool firstPersonCameraHideHead;
