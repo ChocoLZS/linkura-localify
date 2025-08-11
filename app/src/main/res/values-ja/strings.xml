@@ -382,6 +382,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.story.hide_transition">遷移を隠す</string>
     <string name="config.story.hide_non_character_3d">非キャラクター3Dを隠す</string>
     <string name="config.story.hide_dof">深度を隠す</string>
+    <string name="config.story.hide_effect">エフェクトを隠す</string>
     <string name="config.story.vocal_text_duration_rate">小説音声テキスト持続倍率</string>
     <string name="config.story.non_vocal_text_duration_rate">小説ナレーションテキスト持続倍率</string>
 
@@ -471,5 +472,22 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.anti_aliasing.4x">4x</string>
     <string name="config.anti_aliasing.8x">8x</string>
     <string name="config.anti_aliasing.description">活動記録は通常1x、モーションキャプチャレンダリングは2xです。この設定はラグを引き起こす可能性があるため、最適なものを選択してください</string>
+    
+    <!-- Camera Sensitivity Settings -->
+    <string name="config.camera_sensitivity.title">カメラ感度倍率設定</string>
+    <string name="config.camera_sensitivity.movement">移動感度 (WASD)</string>
+    <string name="config.camera_sensitivity.vertical">上下移動感度 (Ctrl/Space)</string>
+    <string name="config.camera_sensitivity.fov">視野角感度 (Q/E)</string>
+    <string name="config.camera_sensitivity.rotation">回転感度 (方向キー)</string>
+    <string name="config.camera_sensitivity.description">フリーカメラモードでのカメラ操作感度を調整します。すべての操作のデフォルト値は1.0倍です。</string>
+    
+    <!-- Camera Overlay System -->
+    <string name="overlay.camera.title">カメラ</string>
+    <string name="overlay.camera.description">カメラ操作と設定</string>
+    <string name="overlay.camera.info">カメラ情報</string>
+    <string name="overlay.camera.sensitivity">感度設定</string>
+    <string name="overlay.camera.sensitivity.floating_title">カメラ感度</string>
+    <string name="overlay.camera.sensitivity.close">閉じる</string>
+    <string name="overlay.camera.sensitivity.reset">デフォルトにリセット</string>
 
 </resources>

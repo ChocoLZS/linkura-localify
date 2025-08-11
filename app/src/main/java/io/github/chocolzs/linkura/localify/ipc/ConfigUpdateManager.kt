@@ -47,6 +47,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.storyHideTransition != null) storyHideTransition = config.storyHideTransition
                 if (config.storyHideNonCharacter3d != null) storyHideNonCharacter3D = config.storyHideNonCharacter3d
                 if (config.storyHideDof != null) storyHideDof = config.storyHideDof
+                if (config.storyHideEffect != null) storyHideEffect = config.storyHideEffect
                 if (config.storyNovelVocalTextDurationRate != null) storyNovelVocalTextDurationRate = config.storyNovelVocalTextDurationRate
                 if (config.storyNovelNonVocalTextDurationRate != null) storyNovelNonVocalTextDurationRate = config.storyNovelNonVocalTextDurationRate
                 if (config.firstPersonCameraHideHead != null) firstPersonCameraHideHead = config.firstPersonCameraHideHead

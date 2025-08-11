@@ -28,6 +28,7 @@ import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModel
 import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModelFactory
 import io.github.chocolzs.linkura.localify.ui.pages.MainUI
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
+import io.github.chocolzs.linkura.localify.utils.CameraSensitivityState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
@@ -152,6 +153,9 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         programConfigViewModel = ViewModelProvider(this, programConfigFactory)[ProgramConfigViewModel::class.java]
 
         ShizukuApi.init()
+        
+        // Initialize global camera sensitivity state
+        CameraSensitivityState.initialize(this)
 
         if (socketServer.startServer()) {
             Log.i(TAG, "Duplex socket server started in main Activity")

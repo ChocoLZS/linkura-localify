@@ -135,6 +135,7 @@
     <string name="config.story.hide_transition">Hide Transition</string>
     <string name="config.story.hide_non_character_3d">Hide Non-Character 3D</string>
     <string name="config.story.hide_dof">Hide Depth of Field</string>
+    <string name="config.story.hide_effect">Hide Effects</string>
     <string name="config.story.vocal_text_duration_rate">Novel Vocal Text Duration Rate</string>
     <string name="config.story.non_vocal_text_duration_rate">Novel Narration Text Duration Rate</string>
 
@@ -224,5 +225,22 @@
     <string name="config.anti_aliasing.4x">4x</string>
     <string name="config.anti_aliasing.8x">8x</string>
     <string name="config.anti_aliasing.description">Story records are usually 1x, motion capture rendering is 2x. This setting may cause lag, please choose the most appropriate one</string>
+    
+    <!-- Camera Sensitivity Settings -->
+    <string name="config.camera_sensitivity.title">Camera Sensitivity Multiplier Settings</string>
+    <string name="config.camera_sensitivity.movement">Movement Sensitivity (WASD)</string>
+    <string name="config.camera_sensitivity.vertical">Vertical Sensitivity (Ctrl/Space)</string>
+    <string name="config.camera_sensitivity.fov">FOV Sensitivity (Q/E)</string>
+    <string name="config.camera_sensitivity.rotation">Rotation Sensitivity (Arrow Keys)</string>
+    <string name="config.camera_sensitivity.description">Adjust camera control sensitivity for free camera mode. Default is 1.0x for all controls.</string>
+    
+    <!-- Camera Overlay System -->
+    <string name="overlay.camera.title">Camera</string>
+    <string name="overlay.camera.description">Camera controls and settings</string>
+    <string name="overlay.camera.info">Camera Info</string>
+    <string name="overlay.camera.sensitivity">Sensitivity Settings</string>
+    <string name="overlay.camera.sensitivity.floating_title">Camera Sensitivity</string>
+    <string name="overlay.camera.sensitivity.close">Close</string>
+    <string name="overlay.camera.sensitivity.reset">Reset to Default</string>
 
 </resources>

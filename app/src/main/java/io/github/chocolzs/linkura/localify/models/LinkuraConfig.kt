@@ -22,6 +22,7 @@ data class LinkuraConfig (
     var storyHideTransition: Boolean = false,
     var storyHideNonCharacter3d: Boolean = false,
     var storyHideDof: Boolean = false,
+    var storyHideEffect: Boolean = false,
     var storyNovelVocalTextDurationRate: Float = 1.0f,
     var storyNovelNonVocalTextDurationRate: Float = 1.0f,
 
@@ -38,6 +39,12 @@ data class LinkuraConfig (
     var hideCharacterBody: Boolean = false,
     var renderTextureAntiAliasing: Int = 0,
     var unlockAfter: Boolean = false,
+
+    // Camera sensitivity settings
+    var cameraMovementSensitivity: Float = 1.0f,
+    var cameraVerticalSensitivity: Float = 1.0f,
+    var cameraFovSensitivity: Float = 1.0f,
+    var cameraRotationSensitivity: Float = 1.0f,
 
     var pf: Boolean = false,
 

@@ -5,6 +5,7 @@
 #include "../BaseDefine.h"
 #include "../../platformDefine.hpp"
 #include "../Log.h"
+#include "../config/Config.hpp"
 
 #ifdef GKMS_WINDOWS
     #include <corecrt_math_defines.h>
@@ -59,16 +60,16 @@ namespace L4Camera {
         originCamera.reset();
 	}
 
-	void camera_forward() {  // 向前
+	void camera_forward(float multiplier = 1.0f) {  // 向前
         switch (cameraMode) {
             case CameraMode::FREE: {
-                baseCamera.set_lon_move(0, LonMoveHState::LonMoveForward);
+                baseCamera.set_lon_move(0, LonMoveHState::LonMoveForward, multiplier);
             } break;
             case CameraMode::FIRST_PERSON: {
-                firstPersonPosOffset.z += offsetMoveStep;
+                firstPersonPosOffset.z += offsetMoveStep * multiplier;
             } break;
             case CameraMode::FOLLOW: {
-                followPosOffset.z -= offsetMoveStep;
+                followPosOffset.z -= offsetMoveStep * multiplier;
             }
         }
 
@@ -86,14 +87,14 @@ namespace L4Camera {
             }
         }
 	}
-	void camera_left() {  // 向左
+	void camera_left(float multiplier = 1.0f) {  // 向左
         switch (cameraMode) {
             case CameraMode::FREE: {
-                baseCamera.set_lon_move(90);
+                baseCamera.set_lon_move(90, LonMoveLeftAndRight, multiplier);
             } break;
             case CameraMode::FOLLOW: {
                 // followPosOffset.x += 0.8;
-                followLookAtOffset.x += offsetMoveStep;
+                followLookAtOffset.x += offsetMoveStep * multiplier;
             }
             default:
                 break;
@@ -156,27 +157,27 @@ namespace L4Camera {
         }
 	}
 	void cameraLookat_up(float mAngel, bool mouse = false) {
-		baseCamera.horizontalAngle += mAngel;
+		baseCamera.horizontalAngle += mAngel * LinkuraLocal::Config::cameraRotationSensitivity;
 		if (baseCamera.horizontalAngle >= 90) baseCamera.horizontalAngle = 89.99;
 		baseCamera.updateVertLook();
 	}
 	void cameraLookat_down(float mAngel, bool mouse = false) {
-		baseCamera.horizontalAngle -= mAngel;
+		baseCamera.horizontalAngle -= mAngel * LinkuraLocal::Config::cameraRotationSensitivity;
 		if (baseCamera.horizontalAngle <= -90) baseCamera.horizontalAngle = -89.99;
 		baseCamera.updateVertLook();
 	}
 	void cameraLookat_left(float mAngel) {
-		baseCamera.verticalAngle += mAngel;
+		baseCamera.verticalAngle += mAngel * LinkuraLocal::Config::cameraRotationSensitivity;
 		if (baseCamera.verticalAngle >= 360) baseCamera.verticalAngle = -360;
 		baseCamera.setHoriLook(baseCamera.verticalAngle);
 	}
 	void cameraLookat_right(float mAngel) {
-		baseCamera.verticalAngle -= mAngel;
+		baseCamera.verticalAngle -= mAngel * LinkuraLocal::Config::cameraRotationSensitivity;
 		if (baseCamera.verticalAngle <= -360) baseCamera.verticalAngle = 360;
 		baseCamera.setHoriLook(baseCamera.verticalAngle);
 	}
 	void changeCameraFOV(float value) {
-		baseCamera.fov += value;
+		baseCamera.fov += value * LinkuraLocal::Config::cameraFovSensitivity;
 	}
 
     void SwitchCameraMode() {
@@ -269,21 +270,21 @@ namespace L4Camera {
     }
 
     void JLThumbRight(float value) {
-        camera_right(value * l_sensitivity * baseCamera.fov / 60);
+        camera_right(value * l_sensitivity * LinkuraLocal::Config::cameraMovementSensitivity * baseCamera.fov / 60);
     }
 
     void JLThumbDown(float value) {
-        camera_back(value * l_sensitivity * baseCamera.fov / 60);
+        camera_back(value * l_sensitivity * LinkuraLocal::Config::cameraMovementSensitivity * baseCamera.fov / 60);
     }
 
     void JRThumbRight(float value) {
-        cameraLookat_right(value * r_sensitivity * baseCamera.fov / 60);
-        ChangeLiveFollowCameraOffsetX(-1 * value * r_sensitivity * baseCamera.fov / 60);
+        cameraLookat_right(value * r_sensitivity * LinkuraLocal::Config::cameraRotationSensitivity * baseCamera.fov / 60);
+        ChangeLiveFollowCameraOffsetX(-1 * value * r_sensitivity * LinkuraLocal::Config::cameraRotationSensitivity * baseCamera.fov / 60);
     }
 
     void JRThumbDown(float value) {
-        cameraLookat_down(value * r_sensitivity * baseCamera.fov / 60);
-        ChangeLiveFollowCameraOffsetY(-0.1 * value * r_sensitivity * baseCamera.fov / 60);
+        cameraLookat_down(value * r_sensitivity * LinkuraLocal::Config::cameraRotationSensitivity * baseCamera.fov / 60);
+        ChangeLiveFollowCameraOffsetY(-0.1 * value * r_sensitivity * LinkuraLocal::Config::cameraRotationSensitivity * baseCamera.fov / 60);
     }
 
     void JDadUp(){
@@ -549,18 +550,18 @@ namespace L4Camera {
 			if (cameraMoveState.threadRunning) return;
 			cameraMoveState.threadRunning = true;
 			while (true) {
-				if (cameraMoveState.w) camera_forward();
-				if (cameraMoveState.s) camera_back();
-				if (cameraMoveState.a) camera_left();
-				if (cameraMoveState.d) camera_right();
-				if (cameraMoveState.ctrl) camera_down();
-				if (cameraMoveState.space) camera_up();
+				if (cameraMoveState.w) camera_forward(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.s) camera_back(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.a) camera_left(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.d) camera_right(LinkuraLocal::Config::cameraMovementSensitivity);
+				if (cameraMoveState.ctrl) camera_down(LinkuraLocal::Config::cameraVerticalSensitivity);
+				if (cameraMoveState.space) camera_up(LinkuraLocal::Config::cameraVerticalSensitivity);
 				if (cameraMoveState.up) cameraLookat_up(moveAngel);
 				if (cameraMoveState.down) cameraLookat_down(moveAngel);
 				if (cameraMoveState.left) cameraLookat_left(moveAngel);
 				if (cameraMoveState.right) cameraLookat_right(moveAngel);
-				if (cameraMoveState.q) changeCameraFOV(0.5f);
-				if (cameraMoveState.e) changeCameraFOV(-0.5f);
+				if (cameraMoveState.q) changeCameraFOV(0.5f * LinkuraLocal::Config::cameraFovSensitivity);
+				if (cameraMoveState.e) changeCameraFOV(-0.5f * LinkuraLocal::Config::cameraFovSensitivity);
                 if (cameraMoveState.r) L4Camera::baseCamera.setCamera(&L4Camera::originCamera);
 				if (cameraMoveState.i) ChangeLiveFollowCameraOffsetY(offsetMoveStep);
 				if (cameraMoveState.k) ChangeLiveFollowCameraOffsetY(-offsetMoveStep);
@@ -579,14 +580,14 @@ namespace L4Camera {
                     JRThumbDown(cameraMoveState.thumb_r_down);
                 // 左扳机
                 if (std::abs(cameraMoveState.lt_button) > 0.1f)
-                    camera_down(cameraMoveState.lt_button * l_sensitivity * baseCamera.fov / 60);
+                    camera_down(cameraMoveState.lt_button * l_sensitivity * LinkuraLocal::Config::cameraVerticalSensitivity * baseCamera.fov / 60);
                 // 右扳机
                 if (std::abs(cameraMoveState.rt_button) > 0.1f)
-                    camera_up(cameraMoveState.rt_button * l_sensitivity * baseCamera.fov / 60);
+                    camera_up(cameraMoveState.rt_button * l_sensitivity * LinkuraLocal::Config::cameraVerticalSensitivity * baseCamera.fov / 60);
                 // 左肩键
-                if (cameraMoveState.lb_button) changeCameraFOV(0.5f * r_sensitivity);
+                if (cameraMoveState.lb_button) changeCameraFOV(0.5f * r_sensitivity * LinkuraLocal::Config::cameraFovSensitivity);
                 // 右肩键
-                if (cameraMoveState.rb_button) changeCameraFOV(-0.5f * r_sensitivity);
+                if (cameraMoveState.rb_button) changeCameraFOV(-0.5f * r_sensitivity * LinkuraLocal::Config::cameraFovSensitivity);
                 // 十字键
                 if (cameraMoveState.dpad_up) JDadUp();
 //                if (cameraMoveState.dpad_down) JDadDown();

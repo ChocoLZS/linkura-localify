@@ -33,12 +33,17 @@ namespace LinkuraLocal::HookStory {
         }
 
         if (Config::storyHideNonCharacter3d) {
-            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト表示[^\\n]*\\n", "");
+            content_str = regex_replace(content_str, "#[^#]*3Dオブジェクト[^\\n]*\\n", "");
         }
 
         if (Config::storyHideDof) {
             content_str = regex_replace(content_str, "\\[?被写界深度[^\\n]*\\n", "");
         }
+
+        if (Config::storyHideEffect) {
+            content_str = regex_replace(content_str, "\\[?プリセットポストエフェクト[^\\n]*\\n", "");
+        }
+
         content = Il2cppUtils::Il2CppString::New(content_str);
         return content;
     }

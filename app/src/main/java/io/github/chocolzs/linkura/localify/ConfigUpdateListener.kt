@@ -33,6 +33,7 @@ interface ConfigListener {
     fun onStoryHideTransitionChanged(value: Boolean)
     fun onStoryHideNonCharacter3dChanged(value: Boolean)
     fun onStoryHideDofChanged(value: Boolean)
+    fun onStoryHideEffectChanged(value: Boolean)
     fun onStoryNovelVocalTextDurationRateChanged(value: Float)
     fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
     fun onFirstPersonCameraHideHeadChanged(value: Boolean)
@@ -46,6 +47,10 @@ interface ConfigListener {
     fun onHideCharacterBodyChanged(value: Boolean)
     fun onRenderTextureAntiAliasingChanged(value: Int)
     fun onUnlockAfterChanged(value: Boolean)
+    fun onCameraMovementSensitivityChanged(value: Float)
+    fun onCameraVerticalSensitivityChanged(value: Float)
+    fun onCameraFovSensitivityChanged(value: Float)
+    fun onCameraRotationSensitivityChanged(value: Float)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -215,6 +220,11 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         saveConfig()
         sendConfigUpdate(config)
     }
+    override fun onStoryHideEffectChanged(value: Boolean) {
+        config.storyHideEffect = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
     override fun onStoryNovelVocalTextDurationRateChanged(value: Float) {
         config.storyNovelVocalTextDurationRate = value
         saveConfig()
@@ -287,6 +297,30 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onUnlockAfterChanged(value: Boolean) {
         config.unlockAfter = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraMovementSensitivityChanged(value: Float) {
+        config.cameraMovementSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraVerticalSensitivityChanged(value: Float) {
+        config.cameraVerticalSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraFovSensitivityChanged(value: Float) {
+        config.cameraFovSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onCameraRotationSensitivityChanged(value: Float) {
+        config.cameraRotationSensitivity = value
         saveConfig()
         sendConfigUpdate(config)
     }
