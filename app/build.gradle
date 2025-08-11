@@ -53,6 +53,7 @@ android {
         buildConfig true
         compose true
         prefab true
+        aidl true
     }
     externalNativeBuild {
         cmake {

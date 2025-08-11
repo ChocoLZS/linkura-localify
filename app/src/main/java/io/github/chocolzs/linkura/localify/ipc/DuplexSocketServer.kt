@@ -12,6 +12,11 @@ import java.io.IOException
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Deprecated(
+    message = "This class is deprecated and will be removed in future versions.",
+    replaceWith = ReplaceWith("LinkuraAidlServer()"),
+    level = DeprecationLevel.WARNING
+)
 class DuplexSocketServer private constructor() {
     companion object {
         private const val TAG = "DuplexSocketServer"

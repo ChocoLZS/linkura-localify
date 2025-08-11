@@ -105,6 +105,15 @@
             android:enabled="true"
             android:exported="false" />
 
+        <service
+            android:name=".ipc.LinkuraAidlService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="io.github.chocolzs.linkura.localify.IPC_SERVICE" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

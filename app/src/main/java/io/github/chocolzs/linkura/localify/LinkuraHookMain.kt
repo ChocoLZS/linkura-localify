@@ -17,12 +17,10 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.widget.Toast
-import androidx.core.content.edit
 import com.bytedance.shadowhook.ShadowHook
 import com.bytedance.shadowhook.ShadowHook.ConfigBuilder
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
@@ -46,7 +44,7 @@ import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
 
-import io.github.chocolzs.linkura.localify.ipc.DuplexSocketClient
+import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlClient
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 
@@ -65,7 +63,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private var externalFilesChecked: Boolean = false
     private var gameActivity: Activity? = null
 
-    private val socketClient: DuplexSocketClient by lazy { DuplexSocketClient.getInstance() }
+    private val aidlClient: LinkuraAidlClient by lazy { LinkuraAidlClient.getInstance() }
     private val messageRouter: MessageRouter by lazy { MessageRouter() }
     private var isOverlayLoopEnabled = false
     private var isCameraInfoOverlayEnabled = false
@@ -76,26 +74,26 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     // Broadcast receiver for log export requests
     private var logExportReceiver: BroadcastReceiver? = null
     
-    private val socketClientHandler = object : DuplexSocketClient.MessageHandler {
+    private val aidlClientHandler = object : LinkuraAidlClient.MessageHandler {
         override fun onMessageReceived(type: MessageType, payload: ByteArray) {
             messageRouter.routeMessage(type, payload)
         }
         
         override fun onConnected() {
-            Log.i(TAG, "Socket client connected to server")
-            LogExporter.addLogEntry(TAG, "I", "Socket client connected to server")
+            Log.i(TAG, "AIDL client connected to service")
+            LogExporter.addLogEntry(TAG, "I", "AIDL client connected to service")
         }
         
         override fun onDisconnected() {
-            Log.i(TAG, "Socket client disconnected from server")
-            LogExporter.addLogEntry(TAG, "I", "Socket client disconnected from server")
+            Log.i(TAG, "AIDL client disconnected from service")
+            LogExporter.addLogEntry(TAG, "I", "AIDL client disconnected from service")
             isOverlayLoopEnabled = false
             isCameraInfoOverlayEnabled = false
         }
         
         override fun onConnectionFailed() {
-            Log.w(TAG, "Socket client failed to connect to server")
-            LogExporter.addLogEntry(TAG, "W", "Socket client failed to connect to server")
+            Log.w(TAG, "AIDL client failed to connect to service")
+            LogExporter.addLogEntry(TAG, "W", "AIDL client failed to connect to service")
         }
     }
     
@@ -175,8 +173,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     // Parse the archive info from native layer
                     val nativeArchiveInfo = ArchiveInfo.parseFrom(archiveInfoBytes)
                     
-                    if (socketClient.isClientConnected()) {
-                        val success = socketClient.sendMessage(MessageType.ARCHIVE_INFO, nativeArchiveInfo)
+                    if (aidlClient.isClientConnected()) {
+                        val success = aidlClient.sendMessage(MessageType.ARCHIVE_INFO, nativeArchiveInfo)
                         if (success) {
                             Log.i(TAG, "Archive info sent: duration=${nativeArchiveInfo.duration}ms")
                         } else {
@@ -189,8 +187,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                         .setDuration(0L)
                         .build()
                     
-                    if (socketClient.isClientConnected()) {
-                        val success = socketClient.sendMessage(MessageType.ARCHIVE_INFO, emptyResponse)
+                    if (aidlClient.isClientConnected()) {
+                        val success = aidlClient.sendMessage(MessageType.ARCHIVE_INFO, emptyResponse)
                         if (success) {
                             Log.i(TAG, "Archive info sent: no archive running (duration=0)")
                         } else {
@@ -243,7 +241,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     }
 
     private fun onStartHandler() {
-        socketClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
+        aidlClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
     }
     
     /**
@@ -316,7 +314,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             
             // Socket client status
             sb.appendLine("=== Socket Client Status ===")
-            sb.appendLine("Socket Client Connected: ${socketClient.isClientConnected()}")
+            sb.appendLine("AIDL Client Connected: ${aidlClient.isClientConnected()}")
             sb.appendLine("Overlay Loop Enabled: $isOverlayLoopEnabled")
             sb.appendLine("Camera Info Overlay Enabled: $isCameraInfoOverlayEnabled")
             sb.appendLine()
@@ -544,8 +542,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     alreadyInitialized = true
                     LogExporter.addLogEntry(TAG, "I", "Hook initialization completed successfully")
                     
-                    // Setup socket client for duplex communication
-                    setupSocketClient()
+                    // Setup AIDL client for duplex communication
+                    setupAidlClient(app.applicationContext)
                 }
             })
 
@@ -595,9 +593,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 val protobufData = getCameraInfoProtobuf()
                 if (protobufData.isNotEmpty()) {
                     val cameraData = CameraData.parseFrom(protobufData)
-                    if (socketClient.isClientConnected()) {
+                    if (aidlClient.isClientConnected()) {
                         Log.v(TAG, "Sending camera data")
-                        val success = socketClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
+                        val success = aidlClient.sendMessage(MessageType.CAMERA_DATA, cameraData)
                         if (!success) {
                             Log.w(TAG, "Failed to send camera data via socket")
                         }
@@ -654,7 +652,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         }
     }
 
-    private fun setupSocketClient() {
+    private fun setupAidlClient(context: Context) {
         // Register message handlers
         messageRouter.registerHandler(MessageType.CONFIG_UPDATE, configUpdateHandler)
         messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_GENERAL, overlayControlHandler)
@@ -664,13 +662,13 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         messageRouter.registerHandler(MessageType.CAMERA_BACKGROUND_COLOR, cameraBackgroundColorHandler)
         
         // Add client handler and start client
-        socketClient.addMessageHandler(socketClientHandler)
-        if (socketClient.startClient()) {
-            Log.i(TAG, "Duplex socket client started successfully")
-            LogExporter.addLogEntry(TAG, "I", "Duplex socket client started successfully")
+        aidlClient.addMessageHandler(aidlClientHandler)
+        if (aidlClient.startClient(context)) {
+            Log.i(TAG, "AIDL client started successfully")
+            LogExporter.addLogEntry(TAG, "I", "AIDL client started successfully")
         } else {
-            Log.w(TAG, "Failed to start duplex socket client")
-            LogExporter.addLogEntry(TAG, "W", "Failed to start duplex socket client")
+            Log.w(TAG, "Failed to start AIDL client")
+            LogExporter.addLogEntry(TAG, "W", "Failed to start AIDL client")
         }
     }
 

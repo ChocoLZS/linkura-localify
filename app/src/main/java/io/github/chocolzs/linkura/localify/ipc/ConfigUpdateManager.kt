@@ -3,6 +3,8 @@ package io.github.chocolzs.linkura.localify.ipc
 import android.util.Log
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
+import android.content.Context
+import android.content.Intent
 
 class ConfigUpdateManager private constructor() {
     companion object {
@@ -18,11 +20,21 @@ class ConfigUpdateManager private constructor() {
         }
     }
 
-    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
+    private var serviceInstance: LinkuraAidlService? = null
+
+    fun setServiceInstance(service: LinkuraAidlService) {
+        serviceInstance = service
+    }
 
     fun sendConfigUpdate(config: LinkuraConfig): Boolean {
-        if (!socketServer.isConnected()) {
-            Log.w(TAG, "Cannot send config update: no client connected")
+        val service = serviceInstance
+        if (service == null) {
+            Log.w(TAG, "Cannot send config update: no service instance available")
+            return false
+        }
+
+        if (service.binder.clientCount <= 0) {
+            Log.w(TAG, "Cannot send config update: no clients connected")
             return false
         }
 
@@ -64,7 +76,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
-            val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
+            val success = service.broadcastMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
             if (success) {
                 Log.i(TAG, "Config update sent successfully")
             } else {
@@ -77,5 +89,5 @@ class ConfigUpdateManager private constructor() {
         }
     }
 
-    fun isConnected(): Boolean = socketServer.isConnected()
+    fun isConnected(): Boolean = serviceInstance?.binder?.clientCount?.let { it > 0 } ?: false
 }

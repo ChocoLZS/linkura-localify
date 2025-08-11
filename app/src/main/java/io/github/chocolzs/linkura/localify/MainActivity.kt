@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.hookUtils.MainKeyEventDispatcher
-import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
+import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService
 import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
@@ -45,7 +45,9 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
     override lateinit var programConfigFactory: ProgramConfigViewModelFactory
     override lateinit var programConfigViewModel: ProgramConfigViewModel
 
-    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
+    private val aidlServiceIntent: Intent by lazy { 
+        Intent(this, LinkuraAidlService::class.java)
+    }
 
 
     private fun showToast(message: String) {
@@ -157,10 +159,14 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         // Initialize global camera sensitivity state
         CameraSensitivityState.initialize(this)
 
-        if (socketServer.startServer()) {
-            Log.i(TAG, "Duplex socket server started in main Activity")
-        } else {
-            Log.e(TAG, "Failed to start duplex socket server in main Activity")
+        // Start AIDL service
+        try {
+            startService(aidlServiceIntent)
+            Log.i(TAG, "AIDL service started in main Activity")
+            LogExporter.addLogEntry(TAG, "I", "AIDL service started from MainActivity")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start AIDL service in main Activity", e)
+            LogExporter.addLogEntry(TAG, "E", "Failed to start AIDL service: ${e.message}")
         }
 
         setContent {
