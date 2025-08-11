@@ -169,24 +169,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             Log.e(TAG, "Error in onDestroy", e)
         }
     }
-    
-    private val overlayRequestHandler = object : MessageRouter.MessageTypeHandler {
-        override fun handleMessage(payload: ByteArray): Boolean {
-            return try {
-                val request = CameraOverlayRequest.parseFrom(payload)
-                handler.post {
-                    val overlayControl = OverlayControl.newBuilder()
-                        .setAction(OverlayAction.START_OVERLAY)
-                        .build()
-                    sendMessage(MessageType.OVERLAY_CONTROL_GENERAL.number, overlayControl.toByteArray())
-                }
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "Error handling CameraOverlayRequest", e)
-                false
-            }
-        }
-    }
 
     private fun setupAidlService() {
         LinkuraAidlService.getInstance()?.let { service ->
@@ -564,28 +546,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 .setBlue(color.blue)
                 .setAlpha(color.alpha)
                 .build()
-            
-            if (sendMessage(MessageType.CAMERA_BACKGROUND_COLOR.number, colorMessage.toByteArray())) {
-                Log.d(TAG, "Sent background color: R=${color.red}, G=${color.green}, B=${color.blue}, A=${color.alpha}")
-            } else {
-                Log.w(TAG, "Failed to send background color change")
-            }
+            aidlService!!.sendMessage(MessageType.CAMERA_BACKGROUND_COLOR, colorMessage)
         } catch (e: Exception) {
             Log.e(TAG, "Error sending color change", e)
-        }
-    }
-    
-    fun sendMessage(messageType: Int, payload: ByteArray): Boolean {
-        return if (isServiceBound && aidlService != null) {
-            try {
-                aidlService!!.binder.sendMessage(messageType, payload)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error sending message to service", e)
-                false
-            }
-        } else {
-            Log.w(TAG, "AIDL service not available, cannot send message")
-            false
         }
     }
     

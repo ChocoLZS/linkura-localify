@@ -20,9 +20,9 @@ class ConfigUpdateManager private constructor() {
         }
     }
 
-    private var serviceInstance: ILinkuraService? = null
+    private var serviceInstance: LinkuraAidlService? = null
 
-    fun setServiceInstance(service: ILinkuraService) {
+    fun setServiceInstance(service: LinkuraAidlService) {
         serviceInstance = service
     }
 
@@ -33,7 +33,7 @@ class ConfigUpdateManager private constructor() {
             return false
         }
 
-        if (service.clientCount <= 0) {
+        if (service.binder.clientCount <= 0) {
             Log.w(TAG, "Cannot send config update: no clients connected")
             return false
         }
@@ -41,7 +41,7 @@ class ConfigUpdateManager private constructor() {
         return try {
             val configUpdate = ConfigUpdate.newBuilder().apply {
                 updateType = ConfigUpdateType.FULL_UPDATE
-                
+
                 // Map LinkuraConfig fields to protobuf
                 if (config.dbgMode != null) dbgMode = config.dbgMode
                 if (config.enabled != null) enabled = config.enabled
@@ -76,13 +76,8 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
-            val success = service.sendMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
-            if (success) {
-                Log.i(TAG, "Config update sent successfully")
-            } else {
-                Log.e(TAG, "Failed to send config update")
-            }
-            success
+            service.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
+            true
         } catch (e: Exception) {
             Log.e(TAG, "Error sending config update", e)
             false

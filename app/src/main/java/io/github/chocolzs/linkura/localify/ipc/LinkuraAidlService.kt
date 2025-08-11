@@ -128,7 +128,7 @@ class LinkuraAidlService : Service() {
         startTime.set(System.currentTimeMillis())
         
         // Set service instance for ConfigUpdateManager
-        ConfigUpdateManager.getInstance().setServiceInstance(this.binder)
+        ConfigUpdateManager.getInstance().setServiceInstance(this)
         
         Log.i(TAG, "LinkuraAidlService created")
         LogExporter.addLogEntry(TAG, "I", "AIDL service created successfully")
@@ -204,6 +204,10 @@ class LinkuraAidlService : Service() {
         }
 
         return successCount > 0
+    }
+
+    fun sendMessage(type: MessageType, message: com.google.protobuf.MessageLite) {
+        this.binder.sendMessage(type.number, message.toByteArray())
     }
 
     /**

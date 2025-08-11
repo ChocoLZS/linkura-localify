@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 )
 class DuplexSocketClient private constructor() {
     companion object {
-        private const val TAG = "DuplexSocketClient"
+        private const val TAG = "DuplexSockesendMessagetClient"
         private const val SOCKET_ADDRESS = "linkura_duplex_socket"
         private const val RECONNECT_INTERVAL_MS = 2000L
         

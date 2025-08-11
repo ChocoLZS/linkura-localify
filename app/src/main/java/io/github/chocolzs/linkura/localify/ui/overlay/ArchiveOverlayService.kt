@@ -106,7 +106,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
     private fun requestArchiveInfo() {
         try {
             val archiveInfo = ArchiveInfo.newBuilder().build()
-            parentService.sendMessage(MessageType.ARCHIVE_INFO.number, archiveInfo.toByteArray())
+            parentService.getAidlService()?.sendMessage(MessageType.ARCHIVE_INFO, archiveInfo)
         } catch (e: Exception) {
             Log.e(TAG, "Error requesting archive info", e)
         }
@@ -117,7 +117,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
             val request = ArchivePositionSetRequest.newBuilder()
                 .setSeconds(seconds)
                 .build()
-            parentService.sendMessage(MessageType.ARCHIVE_POSITION_SET_REQUEST.number, request.toByteArray())
+            parentService.getAidlService()?.sendMessage(MessageType.ARCHIVE_POSITION_SET_REQUEST, request)
             Log.d(TAG, "Archive position set to: ${seconds}s")
             
             // Save the last dragged position and hide the overlay after setting position

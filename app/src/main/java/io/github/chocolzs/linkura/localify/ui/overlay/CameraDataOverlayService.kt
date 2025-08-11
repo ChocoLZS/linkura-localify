@@ -97,7 +97,7 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             val overlayControl = OverlayControl.newBuilder()
                 .setAction(OverlayAction.START_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO.number, overlayControl.toByteArray())
+            parentService.getAidlService()?.sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
         } catch (e: Exception) {
             Log.e(TAG, "Error showing camera overlay", e)
         }
@@ -111,7 +111,7 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             val overlayControl = OverlayControl.newBuilder()
                 .setAction(OverlayAction.STOP_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO.number, overlayControl.toByteArray())
+            parentService.getAidlService()?.sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
             
             overlayView?.let { view ->
                 parentService.getWindowManagerInstance()?.removeView(view)

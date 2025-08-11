@@ -472,7 +472,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                 .setCameraFovSensitivity(fovSensitivity)
                 .setCameraRotationSensitivity(rotationSensitivity)
                 .build()
-            parentService.sendMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
+            parentService.getAidlService()?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
             Log.d(TAG, "Sensitivity update sent: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
         } catch (e: Exception) {
             Log.e(TAG, "Error sending sensitivity update", e)
