@@ -128,7 +128,7 @@ class LinkuraAidlService : Service() {
         startTime.set(System.currentTimeMillis())
         
         // Set service instance for ConfigUpdateManager
-        ConfigUpdateManager.getInstance().setServiceInstance(this)
+        ConfigUpdateManager.getInstance().setServiceInstance(this.binder)
         
         Log.i(TAG, "LinkuraAidlService created")
         LogExporter.addLogEntry(TAG, "I", "AIDL service created successfully")

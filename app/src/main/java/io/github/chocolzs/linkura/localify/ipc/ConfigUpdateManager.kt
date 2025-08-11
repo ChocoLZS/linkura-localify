@@ -20,9 +20,9 @@ class ConfigUpdateManager private constructor() {
         }
     }
 
-    private var serviceInstance: LinkuraAidlService? = null
+    private var serviceInstance: ILinkuraService? = null
 
-    fun setServiceInstance(service: LinkuraAidlService) {
+    fun setServiceInstance(service: ILinkuraService) {
         serviceInstance = service
     }
 
@@ -33,7 +33,7 @@ class ConfigUpdateManager private constructor() {
             return false
         }
 
-        if (service.binder.clientCount <= 0) {
+        if (service.clientCount <= 0) {
             Log.w(TAG, "Cannot send config update: no clients connected")
             return false
         }
@@ -76,7 +76,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
-            val success = service.binder.sendMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
+            val success = service.sendMessage(MessageType.CONFIG_UPDATE.number, configUpdate.toByteArray())
             if (success) {
                 Log.i(TAG, "Config update sent successfully")
             } else {
