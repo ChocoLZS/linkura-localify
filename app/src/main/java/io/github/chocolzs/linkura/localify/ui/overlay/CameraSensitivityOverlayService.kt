@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -169,6 +171,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
 
     @Composable
     private fun CameraSensitivityOverlay() {
+        val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
         Box(
             modifier = Modifier
@@ -177,7 +180,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                     RoundedCornerShape(12.dp)
                 )
                 .padding(16.dp)
-                .width(180.dp)
+                .width(if (isLandscape) 360.dp else 180.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -228,42 +231,100 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                 
                 Divider(color = Color.Gray, thickness = 1.dp)
                 
-                // Sensitivity controls
-                SensitivityControl(
-                    label = parentService.getString(R.string.config_camera_sensitivity_movement),
-                    value = movementSensitivity,
-                    onValueChange = {
-                        CameraSensitivityState.updateMovementSensitivity(parentService, it)
-                        sendSensitivityUpdateToNative()
+                // Sensitivity controls - adaptive layout
+                if (isLandscape) {
+                    // Landscape: 2x2 grid layout
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            SensitivityControl(
+                                label = parentService.getString(R.string.config_camera_sensitivity_movement),
+                                value = movementSensitivity,
+                                onValueChange = {
+                                    CameraSensitivityState.updateMovementSensitivity(parentService, it)
+                                    sendSensitivityUpdateToNative()
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            SensitivityControl(
+                                label = parentService.getString(R.string.config_camera_sensitivity_vertical),
+                                value = verticalSensitivity,
+                                onValueChange = {
+                                    CameraSensitivityState.updateVerticalSensitivity(parentService, it)
+                                    sendSensitivityUpdateToNative()
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            SensitivityControl(
+                                label = parentService.getString(R.string.config_camera_sensitivity_fov),
+                                value = fovSensitivity,
+                                onValueChange = {
+                                    CameraSensitivityState.updateFovSensitivity(parentService, it)
+                                    sendSensitivityUpdateToNative()
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            SensitivityControl(
+                                label = parentService.getString(R.string.config_camera_sensitivity_rotation),
+                                value = rotationSensitivity,
+                                onValueChange = {
+                                    CameraSensitivityState.updateRotationSensitivity(parentService, it)
+                                    sendSensitivityUpdateToNative()
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
-                )
+                } else {
+                    // Portrait: 1x4 column layout
+                    SensitivityControl(
+                        label = parentService.getString(R.string.config_camera_sensitivity_movement),
+                        value = movementSensitivity,
+                        onValueChange = {
+                            CameraSensitivityState.updateMovementSensitivity(parentService, it)
+                            sendSensitivityUpdateToNative()
+                        }
+                    )
 
-                SensitivityControl(
-                    label = parentService.getString(R.string.config_camera_sensitivity_vertical),
-                    value = verticalSensitivity,
-                    onValueChange = {
-                        CameraSensitivityState.updateVerticalSensitivity(parentService, it)
-                        sendSensitivityUpdateToNative()
-                    }
-                )
+                    SensitivityControl(
+                        label = parentService.getString(R.string.config_camera_sensitivity_vertical),
+                        value = verticalSensitivity,
+                        onValueChange = {
+                            CameraSensitivityState.updateVerticalSensitivity(parentService, it)
+                            sendSensitivityUpdateToNative()
+                        }
+                    )
 
-                SensitivityControl(
-                    label = parentService.getString(R.string.config_camera_sensitivity_fov),
-                    value = fovSensitivity,
-                    onValueChange = {
-                        CameraSensitivityState.updateFovSensitivity(parentService, it)
-                        sendSensitivityUpdateToNative()
-                    }
-                )
+                    SensitivityControl(
+                        label = parentService.getString(R.string.config_camera_sensitivity_fov),
+                        value = fovSensitivity,
+                        onValueChange = {
+                            CameraSensitivityState.updateFovSensitivity(parentService, it)
+                            sendSensitivityUpdateToNative()
+                        }
+                    )
 
-                SensitivityControl(
-                    label = parentService.getString(R.string.config_camera_sensitivity_rotation),
-                    value = rotationSensitivity,
-                    onValueChange = {
-                        CameraSensitivityState.updateRotationSensitivity(parentService, it)
-                        sendSensitivityUpdateToNative()
-                    }
-                )
+                    SensitivityControl(
+                        label = parentService.getString(R.string.config_camera_sensitivity_rotation),
+                        value = rotationSensitivity,
+                        onValueChange = {
+                            CameraSensitivityState.updateRotationSensitivity(parentService, it)
+                            sendSensitivityUpdateToNative()
+                        }
+                    )
+                }
             }
         }
     }
@@ -274,6 +335,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
         label: String,
         value: Float,
         onValueChange: (Float) -> Unit,
+        modifier: Modifier = Modifier,
         step: Float = 0.01f,
         minValue: Float = 0.1f,
         maxValue: Float = 5.0f
@@ -282,7 +344,7 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
         val coroutineScope = rememberCoroutineScope()
         
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
@@ -342,14 +404,8 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
-                        .background(
-                            Color.Gray.copy(alpha = 0.3f),
-                            RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
                 ) {
-                    BasicTextField(
+                    OutlinedTextField(
                         value = String.format("%.2f", value),
                         onValueChange = { newText ->
                             try {
@@ -359,13 +415,29 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                                 // Ignore invalid input
                             }
                         },
-                        textStyle = androidx.compose.ui.text.TextStyle(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(36.dp),
+                        textStyle = LocalTextStyle.current.copy(
                             color = Color.White,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center
                         ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = Color(0xFF4FC3F7).copy(alpha = 0.8f),
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+                            focusedContainerColor = Color.Black.copy(alpha = 0.6f),
+                            unfocusedContainerColor = Color.Black.copy(alpha = 0.4f),
+                            cursorColor = Color.White,
+                            focusedLabelColor = Color.Transparent,
+                            unfocusedLabelColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(6.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
                 
