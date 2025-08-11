@@ -267,13 +267,8 @@ class LinkuraAidlClient private constructor() {
         }
         
         return try {
-            val envelope = MessageEnvelope.newBuilder()
-                .setType(type)
-                .setPayload(com.google.protobuf.ByteString.copyFrom(message.toByteArray()))
-                .build()
-            
-            val data = envelope.toByteArray()
-            val result = service?.sendMessage(type.number, data) ?: false
+            val data = message.toByteArray()
+            val result = service?.receiveMessage(type.number, data) ?: false
             
             if (result) {
                 messagesSent.incrementAndGet()

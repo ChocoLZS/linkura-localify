@@ -46,7 +46,11 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.R
-import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
+import android.content.ComponentName
+import android.content.ServiceConnection
+import io.github.chocolzs.linkura.localify.ipc.ILinkuraCallback
+import io.github.chocolzs.linkura.localify.ipc.ILinkuraService
+import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.ui.components.ColorPicker
@@ -79,9 +83,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var isToolbarCollapsed by mutableStateOf(false)
     private var isToolbarVisible by mutableStateOf(true)
     
-    // Socket communication
-    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
-    private val messageRouter: MessageRouter by lazy { MessageRouter() }
+    // AIDL communication
+    private var aidlService: LinkuraAidlService? = null
+    private var isServiceBound = false
     
     // Touch handling for dragging
     private var initialX = 0
@@ -120,7 +124,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
         try {
             createToolbarOverlay()
-            setupSocketServer()
+            setupAidlService()
             
             // Create child services
             cameraOverlayService = CameraDataOverlayService(this)
@@ -153,30 +157,17 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             archiveOverlayService?.destroy()
             colorPickerOverlayService?.destroy()
             cameraSensitivityOverlayService?.destroy()
-            
-            // Clean up socket server
-            socketServer.removeMessageHandler(socketServerHandler)
-            messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
+
+            aidlService!!.messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
+            aidlService = null
+            isServiceBound = false
+
 
             toolbarView?.let {
                 windowManager?.removeView(it)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error in onDestroy", e)
-        }
-    }
-
-    private val socketServerHandler = object : DuplexSocketServer.MessageHandler {
-        override fun onMessageReceived(type: MessageType, payload: ByteArray) {
-            messageRouter.routeMessage(type, payload)
-        }
-
-        override fun onClientConnected() {
-            Log.d(TAG, "Socket client connected")
-        }
-
-        override fun onClientDisconnected() {
-            Log.d(TAG, "Socket client disconnected")
         }
     }
     
@@ -188,7 +179,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val overlayControl = OverlayControl.newBuilder()
                         .setAction(OverlayAction.START_OVERLAY)
                         .build()
-                    socketServer.sendMessage(MessageType.OVERLAY_CONTROL_GENERAL, overlayControl)
+                    sendMessage(MessageType.OVERLAY_CONTROL_GENERAL.number, overlayControl.toByteArray())
                 }
                 true
             } catch (e: Exception) {
@@ -198,16 +189,13 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
     }
 
-    private fun setupSocketServer() {
-        // Register message handlers
-        messageRouter.registerHandler(MessageType.CAMERA_OVERLAY_REQUEST, overlayRequestHandler)
-        
-        // Add server handler and start server
-        socketServer.addMessageHandler(socketServerHandler)
-        if (socketServer.startServer()) {
-            Log.i(TAG, "Duplex socket server started for main overlay")
-        } else {
-            Log.e(TAG, "Failed to start duplex socket server for main overlay")
+    private fun setupAidlService() {
+        LinkuraAidlService.getInstance()?.let { service ->
+            aidlService = service
+            isServiceBound = true
+            Log.i(TAG, "Got AIDL service from static instance")
+//            service.messageRouter.registerHandler(MessageType.CAMERA_OVERLAY_REQUEST, overlayRequestHandler)
+            return
         }
     }
 
@@ -570,7 +558,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             apply()
         }
 
-        // Send color change message via socket
+        // Send color change message via AIDL service
         try {
             val colorMessage = CameraBackgroundColor.newBuilder()
                 .setRed(color.red)
@@ -579,19 +567,31 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 .setAlpha(color.alpha)
                 .build()
             
-            if (socketServer.isConnected()) {
-                socketServer.sendMessage(MessageType.CAMERA_BACKGROUND_COLOR, colorMessage)
+            if (sendMessage(MessageType.CAMERA_BACKGROUND_COLOR.number, colorMessage.toByteArray())) {
                 Log.d(TAG, "Sent background color: R=${color.red}, G=${color.green}, B=${color.blue}, A=${color.alpha}")
             } else {
-                Log.w(TAG, "Socket server not connected, cannot send color change")
+                Log.w(TAG, "Failed to send background color change")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error sending color change", e)
         }
     }
-
-    fun getSocketServerInstance(): DuplexSocketServer = socketServer
-    fun getMessageRouterInstance(): MessageRouter = messageRouter
+    
+    fun sendMessage(messageType: Int, payload: ByteArray): Boolean {
+        return if (isServiceBound && aidlService != null) {
+            try {
+                aidlService!!.binder.sendMessage(messageType, payload)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error sending message to service", e)
+                false
+            }
+        } else {
+            Log.w(TAG, "AIDL service not available, cannot send message")
+            false
+        }
+    }
+    
+    fun getMessageRouterInstance(): MessageRouter? = aidlService?.messageRouter
     fun getHandlerInstance(): Handler = handler
     fun getWindowManagerInstance(): WindowManager? = windowManager
     

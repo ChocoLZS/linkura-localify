@@ -52,10 +52,11 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
                 val cameraData = CameraData.parseFrom(payload)
                 parentService.getHandlerInstance().post {
                     updateCameraInfoFromProtobuf(cameraData)
+                    Log.v(TAG, "Received camera data response from Xposed client")
                 }
                 true
             } catch (e: Exception) {
-                Log.e(TAG, "Error handling camera data", e)
+                Log.e(TAG, "Error handling camera data response", e)
                 false
             }
         }
@@ -83,7 +84,8 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
     }
 
     private fun setupMessageHandler() {
-        parentService.getMessageRouterInstance().registerHandler(MessageType.CAMERA_DATA, cameraDataHandler)
+        parentService.getMessageRouterInstance()?.registerHandler(MessageType.CAMERA_DATA, cameraDataHandler)
+        Log.d(TAG, "Camera data handler registered")
     }
 
     fun show() {
@@ -93,11 +95,12 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             createOverlay()
             isVisible = true
             
-            // Send start camera info overlay command to enable camera data loop
+            // Send camera data request to Xposed clients to start camera data loop
             val overlayControl = OverlayControl.newBuilder()
                 .setAction(OverlayAction.START_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
+            Log.d(TAG, "Sending camera overlay control message")
+            parentService.sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO.number, overlayControl.toByteArray())
         } catch (e: Exception) {
             Log.e(TAG, "Error showing camera overlay", e)
         }
@@ -111,7 +114,7 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             val overlayControl = OverlayControl.newBuilder()
                 .setAction(OverlayAction.STOP_CAMERA_INFO_OVERLAY)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO, overlayControl)
+            parentService.sendMessage(MessageType.OVERLAY_CONTROL_CAMERA_INFO.number, overlayControl.toByteArray())
             
             overlayView?.let { view ->
                 parentService.getWindowManagerInstance()?.removeView(view)
@@ -210,7 +213,6 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
             handleStateTransition(cameraInfo)
 
             cameraInfoState = cameraInfo
-            Log.v(TAG, "Camera info state updated successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error updating camera info from protobuf", e)
         }
@@ -341,6 +343,6 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
 
     fun destroy() {
         hide()
-        parentService.getMessageRouterInstance().clearHandlers(MessageType.CAMERA_DATA)
+        parentService.getMessageRouterInstance()?.clearHandlers(MessageType.CAMERA_DATA)
     }
 }

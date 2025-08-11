@@ -55,11 +55,11 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
                 val archiveInfo = ArchiveInfo.parseFrom(payload)
                 parentService.getHandlerInstance().post {
                     archiveDuration = archiveInfo.duration
-                    Log.d(TAG, "Archive duration updated: ${archiveDuration}ms")
+                    Log.d(TAG, "Received archive info response: duration=${archiveDuration}ms")
                 }
                 true
             } catch (e: Exception) {
-                Log.e(TAG, "Error handling archive info", e)
+                Log.e(TAG, "Error handling archive info response", e)
                 false
             }
         }
@@ -70,7 +70,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
     }
 
     private fun setupMessageHandler() {
-        parentService.getMessageRouterInstance().registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
+        parentService.getMessageRouterInstance()?.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
     }
 
     fun show() {
@@ -106,7 +106,8 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
     private fun requestArchiveInfo() {
         try {
             val archiveInfo = ArchiveInfo.newBuilder().build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.ARCHIVE_INFO, archiveInfo)
+            Log.d(TAG, "Requesting archive info from Xposed clients")
+            parentService.sendMessage(MessageType.ARCHIVE_INFO.number, archiveInfo.toByteArray())
         } catch (e: Exception) {
             Log.e(TAG, "Error requesting archive info", e)
         }
@@ -117,7 +118,8 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
             val request = ArchivePositionSetRequest.newBuilder()
                 .setSeconds(seconds)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.ARCHIVE_POSITION_SET_REQUEST, request)
+            Log.d(TAG, "Sending archive position set request: ${seconds}s")
+            parentService.sendMessage(MessageType.ARCHIVE_POSITION_SET_REQUEST.number, request.toByteArray())
             Log.d(TAG, "Archive position set to: ${seconds}s")
             
             // Save the last dragged position and hide the overlay after setting position
@@ -357,6 +359,6 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
 
     fun destroy() {
         hide()
-        parentService.getMessageRouterInstance().clearHandlers(MessageType.ARCHIVE_INFO)
+        parentService.getMessageRouterInstance()?.clearHandlers(MessageType.ARCHIVE_INFO)
     }
 }

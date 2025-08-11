@@ -65,7 +65,6 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
 
     private val aidlClient: LinkuraAidlClient by lazy { LinkuraAidlClient.getInstance() }
     private val messageRouter: MessageRouter by lazy { MessageRouter() }
-    private var isOverlayLoopEnabled = false
     private var isCameraInfoOverlayEnabled = false
     
     // Loop control variables
@@ -87,7 +86,6 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         override fun onDisconnected() {
             Log.i(TAG, "AIDL client disconnected from service")
             LogExporter.addLogEntry(TAG, "I", "AIDL client disconnected from service")
-            isOverlayLoopEnabled = false
             isCameraInfoOverlayEnabled = false
         }
         
@@ -105,32 +103,6 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing config update", e)
-                false
-            }
-        }
-    }
-    
-    private val overlayControlHandler = object : MessageRouter.MessageTypeHandler {
-        override fun handleMessage(payload: ByteArray): Boolean {
-            return try {
-                val overlayControl = OverlayControl.parseFrom(payload)
-                when (overlayControl.action) {
-                    OverlayAction.START_OVERLAY -> {
-                        isOverlayLoopEnabled = true
-                        Log.i(TAG, "Camera data loop enabled by overlay control")
-                    }
-                    OverlayAction.STOP_OVERLAY -> {
-                        isOverlayLoopEnabled = false
-                        Log.i(TAG, "Camera data loop disabled by overlay control")
-                    }
-                    else -> {
-                        Log.w(TAG, "Unknown overlay action: ${overlayControl.action}")
-                        return false
-                    }
-                }
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "Error processing overlay control", e)
                 false
             }
         }
@@ -228,8 +200,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             return try {
                 val colorMessage = CameraBackgroundColor.parseFrom(payload)
                 Log.i(TAG, "Received camera background color: R=${colorMessage.red}, G=${colorMessage.green}, B=${colorMessage.blue}, A=${colorMessage.alpha}")
-                
-                // Call native function to set camera background color
+
                 setCameraBackgroundColor(colorMessage.red, colorMessage.green, colorMessage.blue, colorMessage.alpha)
                 Log.i(TAG, "Camera background color updated successfully")
                 true
@@ -315,7 +286,6 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             // Socket client status
             sb.appendLine("=== Socket Client Status ===")
             sb.appendLine("AIDL Client Connected: ${aidlClient.isClientConnected()}")
-            sb.appendLine("Overlay Loop Enabled: $isOverlayLoopEnabled")
             sb.appendLine("Camera Info Overlay Enabled: $isCameraInfoOverlayEnabled")
             sb.appendLine()
             
@@ -587,7 +557,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     
     // Camera data tasks - runs at 30fps
     private fun executeCameraDataTasks() {
-        if (isOverlayLoopEnabled && isCameraInfoOverlayEnabled && !sharedIgnoreCameraInfoLoop) {
+        if (isCameraInfoOverlayEnabled && !sharedIgnoreCameraInfoLoop) {
             try {
                 Log.v(TAG, "Trying to get camera info protobuf")
                 val protobufData = getCameraInfoProtobuf()
@@ -655,7 +625,6 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private fun setupAidlClient(context: Context) {
         // Register message handlers
         messageRouter.registerHandler(MessageType.CONFIG_UPDATE, configUpdateHandler)
-        messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_GENERAL, overlayControlHandler)
         messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_CAMERA_INFO, cameraInfoOverlayControlHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_POSITION_SET_REQUEST, archivePositionSetHandler)

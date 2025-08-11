@@ -28,6 +28,8 @@ interface ILinkuraService {
      * @return true if message was sent successfully
      */
     boolean sendMessage(int messageType, in byte[] payload);
+
+    boolean receiveMessage(int messageType, in byte[] payload);
     
     /**
      * Get server status information

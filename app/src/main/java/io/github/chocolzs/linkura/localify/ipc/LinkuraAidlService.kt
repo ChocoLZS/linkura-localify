@@ -7,6 +7,7 @@ import android.os.RemoteCallbackList
 import android.os.RemoteException
 import android.util.Log
 import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
+import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
@@ -25,6 +26,7 @@ class LinkuraAidlService : Service() {
     private val messagesSent = AtomicLong(0)
     private val messagesReceived = AtomicLong(0)
     private val callbacks = RemoteCallbackList<ILinkuraCallback>()
+    public val messageRouter: MessageRouter by lazy { MessageRouter() }
 
     // AIDL implementation
     val binder = object : ILinkuraService.Stub() {
@@ -78,11 +80,23 @@ class LinkuraAidlService : Service() {
 
             Log.v(TAG, "Message received: type=$messageType, size=${payload.size}, total_received=$receivedCount")
 
-            // Process message based on type (if needed)
-            processIncomingMessage(messageType, payload)
-
             // Broadcast to all registered callbacks
             return broadcastMessage(messageType, payload)
+        }
+
+        override fun receiveMessage(messageType: Int, payload: ByteArray?): Boolean {
+            // First try to route through MessageRouter
+            try {
+                val messageTypeEnum = MessageType.forNumber(messageType)
+                if (messageTypeEnum != null && payload?.isNotEmpty() == true
+                        && messageRouter.routeMessage(messageTypeEnum, payload)) {
+                    Log.d(TAG, "Message handled by MessageRouter: type=$messageType")
+                    return true
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error routing message through MessageRouter", e)
+            }
+            return false
         }
 
         override fun getServerStatus(): String {
@@ -193,31 +207,27 @@ class LinkuraAidlService : Service() {
     }
 
     /**
-     * Process incoming messages for server-side handling
-     */
-    private fun processIncomingMessage(messageType: Int, payload: ByteArray) {
-        // Add any server-side message processing logic here
-        when (messageType) {
-            LinkuraMessages.MessageType.LOG_EXPORT_REQUEST_VALUE -> {
-                Log.d(TAG, "Log export request received")
-                // Handle log export request
-            }
-            LinkuraMessages.MessageType.CONFIG_UPDATE_VALUE -> {
-                Log.d(TAG, "Config update request received")
-                // Handle config update
-            }
-            else -> {
-                Log.v(TAG, "Message type $messageType received for processing")
-            }
-        }
-    }
-
-    /**
      * Get current service status for debugging
      */
     fun logServiceStatus() {
         val status = binder.serverStatus
         Log.d(TAG, status)
         LogExporter.addLogEntry(TAG, "D", "Service status requested")
+    }
+
+    /**
+     * Register a message handler for a specific message type
+     */
+    fun registerMessageHandler(messageType: MessageType, handler: MessageRouter.MessageTypeHandler) {
+        messageRouter.registerHandler(messageType, handler)
+        Log.d(TAG, "Message handler registered for type: $messageType")
+    }
+    
+    /**
+     * Unregister a message handler for a specific message type
+     */
+    fun unregisterMessageHandler(messageType: MessageType, handler: MessageRouter.MessageTypeHandler) {
+        messageRouter.unregisterHandler(messageType, handler)
+        Log.d(TAG, "Message handler unregistered for type: $messageType")
     }
 }
