@@ -97,6 +97,31 @@ android {
     }
 }
 
+// Generate protobuf files during project configuration phase
+project.afterEvaluate {
+    // Check if protobuf files exist, if not create a simple task to generate them
+    def protoSrcDir = "${projectDir}/src/main/proto"
+    def cppOutDir = "${projectDir}/src/main/cpp/build"
+    def protobufGenerated = file("${cppOutDir}/linkura_messages.pb.cc").exists()
+    
+    if (!protobufGenerated) {
+        logger.lifecycle("Protobuf files not found, will generate during build...")
+        
+        // Create output directory
+        file(cppOutDir).mkdirs()
+        
+        // Create a simple placeholder file to satisfy CMake during sync
+        def placeholderFile = file("${cppOutDir}/linkura_messages.pb.cc")
+        placeholderFile.text = """// Placeholder file generated during sync
+// This will be replaced by actual protobuf generated code during build
+namespace linkura { namespace ipc {
+// Placeholder content
+}}
+"""
+        logger.lifecycle("Created placeholder protobuf file for CMake sync")
+    }
+}
+
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
@@ -112,49 +137,23 @@ protobuf {
                 // Generate C++ protobuf files for native code
                 def protoSrcDir = "${projectDir}/src/main/proto"
                 def cppOutDir = "${projectDir}/src/main/cpp/build"
-                
+
                 // Create output directory if it doesn't exist
                 file(cppOutDir).mkdirs()
-                
+
                 // Use the protoc binary downloaded by Gradle
+                def protocPath = protobuf.tools.protoc.artifact
                 def protocExe = configurations.protobufToolsLocator_protoc.singleFile
-                
+
                 fileTree(dir: protoSrcDir, include: '**/*.proto').each { protoFile ->
                     exec {
-                        commandLine protocExe, 
-                            '--cpp_out=lite:' + cppOutDir,
-                            '--proto_path=' + protoSrcDir,
-                            protoFile.absolutePath
+                        commandLine protocExe,
+                                '--cpp_out=lite:' + cppOutDir,
+                                '--proto_path=' + protoSrcDir,
+                                protoFile.absolutePath
                     }
                 }
-                
-                println "C++ protobuf files generated successfully in: $cppOutDir"
             }
-        }
-    }
-}
-
-// Ensure C++ protobuf files are generated before CMake runs
-afterEvaluate {
-    // Make all CMake related tasks depend on protobuf generation
-    tasks.matching { task ->
-        task.name.startsWith('externalNativeBuild') || 
-        task.name.startsWith('buildCMake') ||
-        task.name.contains('Cmake') ||
-        task.name.contains('cmake')
-    }.configureEach { task ->
-        // Depend on all generateProto tasks that will generate the C++ files
-        task.dependsOn tasks.matching { protoTask ->
-            protoTask.name.startsWith('generateProto') && protoTask.name.contains('Java')
-        }
-    }
-    
-    // Also make sure it runs before any compile tasks
-    tasks.matching { task ->
-        task.name.startsWith('compile') && task.name.contains('Cpp')
-    }.configureEach { task ->
-        task.dependsOn tasks.matching { protoTask ->
-            protoTask.name.startsWith('generateProto') && protoTask.name.contains('Java')
         }
     }
 }
