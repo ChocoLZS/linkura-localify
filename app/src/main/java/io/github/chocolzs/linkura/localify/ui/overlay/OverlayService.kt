@@ -253,28 +253,52 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         // Main Box that contains both toolbar and secondary menu
         Box {
             if (isToolbarCollapsed) {
-                // Collapsed state - show only expand button on the right side
+                // Collapsed state - show drag handle and expand button
                 Box(
                     modifier = Modifier
                         .background(
                             Color.Black.copy(alpha = 0.8f),
                             RoundedCornerShape(16.dp)
                         )
-                        .padding(8.dp)
+                        .padding(6.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            isToolbarCollapsed = false
-                            updateToolbarPosition()
-                        },
-                        modifier = Modifier.size(32.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowLeft,
-                            contentDescription = "Expand Toolbar",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        // Drag handle for collapsed state
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(
+                                    Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DragHandle,
+                                contentDescription = "Drag to move",
+                                tint = Color.White.copy(alpha = 0.7f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                        
+                        // Expand button
+                        IconButton(
+                            onClick = {
+                                isToolbarCollapsed = false
+                                updateToolbarPosition()
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowLeft,
+                                contentDescription = "Expand Toolbar",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             } else {
@@ -472,11 +496,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Camera Info button
-                IconButton(
-                    onClick = {
-                        toggleCameraOverlay()
-                        isCameraMenuVisible = false
-                    },
+                Box(
                     modifier = Modifier
                         .size(32.dp)
                         .background(
@@ -484,20 +504,24 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             RoundedCornerShape(6.dp)
                         )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = getString(R.string.overlay_camera_info),
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    IconButton(
+                        onClick = {
+                            toggleCameraOverlay()
+                            isCameraMenuVisible = false
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = getString(R.string.overlay_camera_info),
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
 
                 // Camera Sensitivity button
-                IconButton(
-                    onClick = {
-                        toggleCameraSensitivityOverlay()
-                        isCameraMenuVisible = false
-                    },
+                Box(
                     modifier = Modifier
                         .size(32.dp)
                         .background(
@@ -505,12 +529,20 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             RoundedCornerShape(6.dp)
                         )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = getString(R.string.overlay_camera_sensitivity),
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    IconButton(
+                        onClick = {
+                            toggleCameraSensitivityOverlay()
+                            isCameraMenuVisible = false
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = getString(R.string.overlay_camera_sensitivity),
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -602,9 +634,11 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private fun updateToolbarPosition() {
         toolbarParams?.let { params ->
             if (isToolbarCollapsed) {
-                // Position collapsed toolbar on the right side
-                params.gravity = Gravity.TOP or Gravity.END
-                params.x = 0
+                // Position collapsed toolbar on the right side using START gravity for consistent dragging
+                params.gravity = Gravity.TOP or Gravity.START
+                // Calculate right side position manually
+                val displayMetrics = resources.displayMetrics
+                params.x = displayMetrics.widthPixels - 150 // Offset from right edge
                 params.y = 200
             } else {
                 // Position expanded toolbar in center

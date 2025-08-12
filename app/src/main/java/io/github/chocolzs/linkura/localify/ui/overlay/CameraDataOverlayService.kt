@@ -241,7 +241,7 @@ class CameraDataOverlayService(private val parentService: OverlayService) {
         parentService.getHandlerInstance().post {
             Toast.makeText(
                 parentService,
-                parentService.getString(R.string.overlay_camera_info_crash_warning),
+                parentService.getString(R.string.overlay_toolbar_crash_warning),
                 Toast.LENGTH_LONG
             ).show()
         }
