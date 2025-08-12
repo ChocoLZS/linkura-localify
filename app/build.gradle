@@ -108,71 +108,53 @@ protobuf {
                     option 'lite'
                 }
             }
-        }
-    }
-}
-
-// Create a separate task for generating C++ protobuf files
-tasks.register('generateCppProto') {
-    description = 'Generate C++ protobuf files for native code'
-    group = 'protobuf'
-    
-    inputs.dir("${projectDir}/src/main/proto")
-    outputs.dir("${projectDir}/src/main/cpp/build")
-    
-    doLast {
-        // Generate C++ protobuf files for native code
-        def protoSrcDir = "${projectDir}/src/main/proto"
-        def cppOutDir = "${projectDir}/src/main/cpp/build"
-        
-        // Create output directory if it doesn't exist
-        file(cppOutDir).mkdirs()
-        
-        // Use the protoc binary downloaded by Gradle
-        def protocExe = configurations.protobufToolsLocator_protoc.singleFile
-        
-        fileTree(dir: protoSrcDir, include: '**/*.proto').each { protoFile ->
-            exec {
-                commandLine protocExe, 
-                    '--cpp_out=lite:' + cppOutDir,
-                    '--proto_path=' + protoSrcDir,
-                    protoFile.absolutePath
+            task.doLast {
+                // Generate C++ protobuf files for native code
+                def protoSrcDir = "${projectDir}/src/main/proto"
+                def cppOutDir = "${projectDir}/src/main/cpp/build"
+                
+                // Create output directory if it doesn't exist
+                file(cppOutDir).mkdirs()
+                
+                // Use the protoc binary downloaded by Gradle
+                def protocExe = configurations.protobufToolsLocator_protoc.singleFile
+                
+                fileTree(dir: protoSrcDir, include: '**/*.proto').each { protoFile ->
+                    exec {
+                        commandLine protocExe, 
+                            '--cpp_out=lite:' + cppOutDir,
+                            '--proto_path=' + protoSrcDir,
+                            protoFile.absolutePath
+                    }
+                }
+                
+                println "C++ protobuf files generated successfully in: $cppOutDir"
             }
         }
     }
 }
 
-// Setup dependencies after project evaluation
+// Ensure C++ protobuf files are generated before CMake runs
 afterEvaluate {
-    // Make generateCppProto depend on protobuf plugin setup
-    tasks.named('generateCppProto').configure {
-        // Depend on Android protobuf tasks (they are named differently)
-        dependsOn tasks.matching { task ->
-            task.name.startsWith('generateProto') && task.name.contains('Java')
-        }
-    }
-    
-    // Make sure C++ proto files are generated before any CMake task runs
+    // Make all CMake related tasks depend on protobuf generation
     tasks.matching { task ->
         task.name.startsWith('externalNativeBuild') || 
         task.name.startsWith('buildCMake') ||
         task.name.contains('Cmake') ||
         task.name.contains('cmake')
     }.configureEach { task ->
-        task.dependsOn 'generateCppProto'
+        // Depend on all generateProto tasks that will generate the C++ files
+        task.dependsOn tasks.matching { protoTask ->
+            protoTask.name.startsWith('generateProto') && protoTask.name.contains('Java')
+        }
     }
     
-    // Also ensure it runs before compilation starts
+    // Also make sure it runs before any compile tasks
     tasks.matching { task ->
         task.name.startsWith('compile') && task.name.contains('Cpp')
     }.configureEach { task ->
-        task.dependsOn 'generateCppProto'
-    }
-    
-    // Hook into preBuild for good measure
-    if (tasks.findByName('preBuild')) {
-        tasks.named('preBuild').configure {
-            dependsOn 'generateCppProto'
+        task.dependsOn tasks.matching { protoTask ->
+            protoTask.name.startsWith('generateProto') && protoTask.name.contains('Java')
         }
     }
 }
