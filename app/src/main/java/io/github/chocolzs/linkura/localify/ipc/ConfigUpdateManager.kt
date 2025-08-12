@@ -27,17 +27,6 @@ class ConfigUpdateManager private constructor() {
     }
 
     fun sendConfigUpdate(config: LinkuraConfig): Boolean {
-        val service = serviceInstance
-        if (service == null) {
-            Log.w(TAG, "Cannot send config update: no service instance available")
-            return false
-        }
-
-        if (service.binder.clientCount <= 0) {
-            Log.w(TAG, "Cannot send config update: no clients connected")
-            return false
-        }
-
         return try {
             val configUpdate = ConfigUpdate.newBuilder().apply {
                 updateType = ConfigUpdateType.FULL_UPDATE
@@ -76,7 +65,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
-            service.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
+            serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
             true
         } catch (e: Exception) {
             Log.e(TAG, "Error sending config update", e)

@@ -45,7 +45,7 @@ import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
 import io.github.chocolzs.linkura.localify.ui.components.GakuSlider
-import io.github.chocolzs.linkura.localify.ui.components.CameraControl
+import io.github.chocolzs.linkura.localify.ui.components.OverlayToolbarControl
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
@@ -235,7 +235,7 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
     ) {
         // Floating Window Section (moved to top)
         item {
-            CameraControl(modifier = modifier)
+            OverlayToolbarControl(modifier = modifier)
             Spacer(Modifier.height(6.dp))
         }
 

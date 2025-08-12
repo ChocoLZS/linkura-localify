@@ -109,18 +109,17 @@
     <string name="about_contributors_asset_file">about_contributors_zh_cn.json</string>
     <string name="default_assets_check_api">https://uma.chinosk6.cn/api/gkms_trans_data</string>
     
-    <!-- Camera Overlay -->
-    <string name="overlay.camera_info.title">摄像机信息悬浮窗</string>
-    <string name="overlay.camera_info.description">在悬浮窗中显示摄像机参数</string>
-    <string name="overlay.camera_info.permission_required">需要权限</string>
-    <string name="overlay.camera_info.permission_description">应用需要悬浮窗权限才能在其他应用上方显示内容。</string>
-    <string name="overlay.camera_info.grant_permission">授予权限</string>
-    <string name="overlay.camera_info.status_active">悬浮窗已启用</string>
-    <string name="overlay.camera_info.status_inactive">悬浮窗未启用</string>
-    <string name="overlay.camera_info.start">启动悬浮窗</string>
-    <string name="overlay.camera_info.stop">停止悬浮窗</string>
-    <string name="overlay.camera_info.running_description">摄像机悬浮窗正在运行。悬浮窗显示实时摄像机参数，包括位置、旋转、视野角、模式和场景类型。</string>
-    <string name="overlay.camera_info.crash_warning">注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。</string>
+    <!-- toobar Overlay -->
+    <string name="overlay.toolbar.title">工具栏悬浮窗</string>
+    <string name="overlay.toolbar.description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能</string>
+    <string name="overlay.toolbar.permission_required">需要权限</string>
+    <string name="overlay.toolbar.permission_description">应用需要悬浮窗权限才能在其他应用上方显示内容。</string>
+    <string name="overlay.toolbar.grant_permission">授予权限</string>
+    <string name="overlay.toolbar.status_active">悬浮窗已启用</string>
+    <string name="overlay.toolbar.status_inactive">悬浮窗未启用</string>
+    <string name="overlay.toolbar.start">启动悬浮窗</string>
+    <string name="overlay.toolbar.stop">停止悬浮窗</string>
+    <string name="overlay.toolbar.crash_warning">注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。</string>
     <string name="overlay.archive.no_rendering_running">当前没有正在运行的渲染</string>
     
     <!-- Color Picker -->
@@ -146,20 +145,15 @@
     <string name="config.first_person_camera.head_accessories_note">注意：头部饰品属于服装的一部分，无法单独隐藏</string>
     
     <!-- Connection Status -->
-    <string name="connection_status_dialog_title">实时数据交互状态</string>
-    <string name="connection_status_connected">已连接</string>
-    <string name="connection_status_disconnected">未连接</string>
-    <string name="connection_status_dialog_description">此图标显示插件应用与游戏应用之间的实时数据交互功能是否正常运行。</string>
-    <string name="connection_status_features_title">实时数据交互：</string>
-    <string name="connection_status_feature_1">1. 大部分配置修改后，点击右下角的 ＞ 按钮，可以热更新配置，无需关闭游戏再打开</string>
-    <string name="connection_status_feature_2">2. 悬浮窗的功能严重依赖于此数据交互</string>
-    <string name="connection_status_feature_3">3. 实时数据交互功能插件会自动开启</string>
-    <string name="connection_status_troubleshooting">如果图标状态显示未连接，那么代表此功能未正常开启，可以将此问题反馈至 GitHub。</string>
-    
-    <!-- Floating Toolbar -->
-    <string name="overlay.toolbar.title">工具栏悬浮窗</string>
-    <string name="overlay.toolbar.description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能</string>
-    <string name="overlay.toolbar.crash_warning">注意：在With×MEETS场景中，使用自由相机模式并打开相机信息显示，有概率造成崩溃。如果要进行时间跳转，可以尝试关闭相机信息显示。</string>
+    <string name="connection_status.dialog_title">实时数据交互状态</string>
+    <string name="connection_status.connected">已连接</string>
+    <string name="connection_status.disconnected">未连接</string>
+    <string name="connection_status.dialog_description">此图标显示插件应用与游戏应用之间的实时数据交互功能是否正常运行。</string>
+    <string name="connection_status.features_title">实时数据交互：</string>
+    <string name="connection_status.feature_1">1. 大部分配置修改后，点击右下角的 ＞ 按钮，可以热更新配置，无需关闭游戏再打开</string>
+    <string name="connection_status.feature_2">2. 悬浮窗的功能严重依赖于此数据交互</string>
+    <string name="connection_status.feature_3">3. 实时数据交互功能插件会自动开启</string>
+    <string name="connection_status.troubleshooting">如果图标状态显示未连接，那么代表此功能未正常开启，可以将此问题反馈至 GitHub。</string>
     
     <!-- Log Export -->
     <string name="log.export.title">导出日志</string>

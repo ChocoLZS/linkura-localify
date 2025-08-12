@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -161,7 +162,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             aidlService = null
             isServiceBound = false
 
-
+            // Update OverlayManager state to reflect service is stopped
+            OverlayManager.markServiceAsStopped()
+            
             toolbarView?.let {
                 windowManager?.removeView(it)
             }
@@ -224,7 +227,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             initialY = params.y
                             initialTouchX = event.rawX
                             initialTouchY = event.rawY
-                            true
+                            false
                         }
                         MotionEvent.ACTION_MOVE -> {
                             params.x = initialX + (event.rawX - initialTouchX).toInt()
@@ -280,7 +283,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Hide button (smaller, centered at top)
+                    // Top control bar with drag handle and close button
                     Box(
                         modifier = Modifier
                             .background(
@@ -289,20 +292,43 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             )
                             .padding(4.dp)
                     ) {
-                        IconButton(
-                            onClick = {
-                                isToolbarVisible = false
-                                // Update plugin side overlay state
-                                OverlayManager.markOverlayAsHidden()
-                            },
-                            modifier = Modifier.size(24.dp)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Hide Toolbar",
-                                tint = Color.White,
-                                modifier = Modifier.size(14.dp)
-                            )
+                            // Drag handle
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(
+                                        Color.Transparent,
+                                        RoundedCornerShape(8.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DragHandle,
+                                    contentDescription = "Drag to move",
+                                    tint = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                            
+                            // Close button
+                            IconButton(
+                                onClick = {
+                                    // Stop the service completely
+                                    stopSelf()
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close Toolbar",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
                         }
                     }
                     
