@@ -247,7 +247,11 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 }
                 
                 val intentFilter = IntentFilter(LogExporter.ACTION_LOG_EXPORT_REQUEST)
-                context.registerReceiver(logExportReceiver, intentFilter)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.registerReceiver(logExportReceiver, intentFilter, Context.RECEIVER_EXPORTED)
+                } else {
+                    context.registerReceiver(logExportReceiver, intentFilter)
+                }
                 Log.i(TAG, "Log export broadcast receiver registered")
                 LogExporter.addLogEntry(TAG, "I", "Log export broadcast receiver registered")
             }
