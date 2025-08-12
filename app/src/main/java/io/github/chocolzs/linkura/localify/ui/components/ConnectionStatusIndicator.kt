@@ -21,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.github.chocolzs.linkura.localify.R
-import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
+import android.app.ActivityManager
+import android.content.Context
+import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService
 
 @Composable
 fun ConnectionStatusIndicator(
@@ -34,10 +36,10 @@ fun ConnectionStatusIndicator(
     val context = LocalContext.current
     var isConnected by remember { mutableStateOf(false) }
     
-    // Update connection status
+    // Update connection status - check if AIDL service is running AND has clients
     LaunchedEffect(Unit) {
         while (true) {
-            isConnected = DuplexSocketServer.getInstance().isConnected()
+            isConnected = isAidlServiceConnected(context)
             kotlinx.coroutines.delay(1000) // Update every second
         }
     }
@@ -222,4 +224,34 @@ private fun DrawScope.drawRadarEffect(
         center = center,
         alpha = alpha
     )
+}
+
+/**
+ * Check if LinkuraAidlService is currently running AND has connected clients
+ */
+private fun isAidlServiceConnected(context: Context): Boolean {
+    // First check if service is running
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val runningServices = activityManager.getRunningServices(Integer.MAX_VALUE)
+    
+    var serviceRunning = false
+    for (serviceInfo in runningServices) {
+        if (serviceInfo.service.className == LinkuraAidlService::class.java.name) {
+            serviceRunning = true
+            break
+        }
+    }
+    
+    if (!serviceRunning) {
+        return false
+    }
+    
+    // Then check if service has connected clients
+    return try {
+        val serviceInstance = LinkuraAidlService.getInstance()
+        val clientCount = serviceInstance?.binder?.clientCount ?: 0
+        clientCount > 0
+    } catch (e: Exception) {
+        false
+    }
 }

@@ -13,18 +13,30 @@ import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.ui.overlay.OverlayManager
 
 @Composable
-fun CameraControl(
+fun OverlayToolbarControl(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var isOverlayEnabled by remember { mutableStateOf(OverlayManager.isOverlayRunning()) }
     var hasPermission by remember { mutableStateOf(OverlayManager.hasOverlayPermission(context)) }
     
-    val TAG = "CameraControl"
+    val TAG = "OverlayToolbarControl"
 
     // Check permission status on composition
     LaunchedEffect(Unit) {
         hasPermission = OverlayManager.hasOverlayPermission(context)
+    }
+    
+    // Monitor overlay state changes
+    LaunchedEffect(isOverlayEnabled) {
+        // Periodically check overlay state in case it was stopped externally
+        while (true) {
+            kotlinx.coroutines.delay(1000) // Check every second
+            val currentState = OverlayManager.isOverlayRunning()
+            if (currentState != isOverlayEnabled) {
+                isOverlayEnabled = currentState
+            }
+        }
     }
 
     GakuGroupBox(
@@ -52,18 +64,18 @@ fun CameraControl(
                         modifier = Modifier.padding(12.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.overlay_camera_info_permission_required),
+                            text = stringResource(R.string.overlay_toolbar_permission_required),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Text(
-                            text = stringResource(R.string.overlay_camera_info_permission_description),
+                            text = stringResource(R.string.overlay_toolbar_permission_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         GakuButton(
-                            text = stringResource(R.string.overlay_camera_info_grant_permission),
+                            text = stringResource(R.string.overlay_toolbar_grant_permission),
                             onClick = {
                                 Log.d(TAG, "Grant Permission button clicked")
                                 Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
@@ -84,12 +96,12 @@ fun CameraControl(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isOverlayEnabled) stringResource(R.string.overlay_camera_info_status_active) else stringResource(R.string.overlay_camera_info_status_inactive),
+                        text = if (isOverlayEnabled) stringResource(R.string.overlay_toolbar_status_active) else stringResource(R.string.overlay_toolbar_status_inactive),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     
                     GakuButton(
-                        text = if (isOverlayEnabled) stringResource(R.string.overlay_camera_info_stop) else stringResource(R.string.overlay_camera_info_start),
+                        text = if (isOverlayEnabled) stringResource(R.string.overlay_toolbar_stop) else stringResource(R.string.overlay_toolbar_start),
                         onClick = {
                             try {
                                 val newState = OverlayManager.toggleOverlay(context)
@@ -116,12 +128,6 @@ fun CameraControl(
                         Column(
                             modifier = Modifier.padding(12.dp)
                         ) {
-                            Text(
-                                text = stringResource(R.string.overlay_camera_info_running_description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = stringResource(R.string.overlay_toolbar_crash_warning),
                                 style = MaterialTheme.typography.bodySmall,

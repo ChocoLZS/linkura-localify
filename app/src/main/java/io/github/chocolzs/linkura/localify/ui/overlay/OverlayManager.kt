@@ -68,9 +68,6 @@ object OverlayManager {
         return false
     }
     
-    @Deprecated("Use startOverlay() instead")
-    fun startCameraOverlay(context: Context): Boolean = startOverlay(context)
-    
     fun stopOverlay(context: Context) {
         Log.d(TAG, "stopOverlay called")
         if (isServiceRunning) {
@@ -106,5 +103,11 @@ object OverlayManager {
         // This method is called when the overlay is hidden but service is still running
         // We don't change isServiceRunning state as the service is still active
         Log.d(TAG, "Overlay marked as hidden (but service still running)")
+    }
+    
+    fun markServiceAsStopped() {
+        // This method is called when the service is actually destroyed
+        isServiceRunning = false
+        Log.d(TAG, "Overlay service marked as stopped")
     }
 }

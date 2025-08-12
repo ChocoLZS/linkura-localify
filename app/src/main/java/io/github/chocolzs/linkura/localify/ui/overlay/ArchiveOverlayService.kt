@@ -70,7 +70,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
     }
 
     private fun setupMessageHandler() {
-        parentService.getMessageRouterInstance().registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
+        parentService.getAidlService()?.registerMessageHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
     }
 
     fun show() {
@@ -106,7 +106,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
     private fun requestArchiveInfo() {
         try {
             val archiveInfo = ArchiveInfo.newBuilder().build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.ARCHIVE_INFO, archiveInfo)
+            parentService.getAidlService()?.sendMessage(MessageType.ARCHIVE_INFO, archiveInfo)
         } catch (e: Exception) {
             Log.e(TAG, "Error requesting archive info", e)
         }
@@ -117,7 +117,7 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
             val request = ArchivePositionSetRequest.newBuilder()
                 .setSeconds(seconds)
                 .build()
-            parentService.getSocketServerInstance().sendMessage(MessageType.ARCHIVE_POSITION_SET_REQUEST, request)
+            parentService.getAidlService()?.sendMessage(MessageType.ARCHIVE_POSITION_SET_REQUEST, request)
             Log.d(TAG, "Archive position set to: ${seconds}s")
             
             // Save the last dragged position and hide the overlay after setting position
@@ -357,6 +357,6 @@ class ArchiveOverlayService(private val parentService: OverlayService) {
 
     fun destroy() {
         hide()
-        parentService.getMessageRouterInstance().clearHandlers(MessageType.ARCHIVE_INFO)
+        parentService.getAidlService()?.unregisterMessageHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
     }
 }

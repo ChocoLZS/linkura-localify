@@ -3,6 +3,8 @@ package io.github.chocolzs.linkura.localify.ipc
 import android.util.Log
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
+import android.content.Context
+import android.content.Intent
 
 class ConfigUpdateManager private constructor() {
     companion object {
@@ -18,18 +20,17 @@ class ConfigUpdateManager private constructor() {
         }
     }
 
-    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
+    private var serviceInstance: LinkuraAidlService? = null
+
+    fun setServiceInstance(service: LinkuraAidlService) {
+        serviceInstance = service
+    }
 
     fun sendConfigUpdate(config: LinkuraConfig): Boolean {
-        if (!socketServer.isConnected()) {
-            Log.w(TAG, "Cannot send config update: no client connected")
-            return false
-        }
-
         return try {
             val configUpdate = ConfigUpdate.newBuilder().apply {
                 updateType = ConfigUpdateType.FULL_UPDATE
-                
+
                 // Map LinkuraConfig fields to protobuf
                 if (config.dbgMode != null) dbgMode = config.dbgMode
                 if (config.enabled != null) enabled = config.enabled
@@ -64,18 +65,11 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
             }.build()
 
-            val success = socketServer.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
-            if (success) {
-                Log.i(TAG, "Config update sent successfully")
-            } else {
-                Log.e(TAG, "Failed to send config update")
-            }
-            success
+            serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
+            true
         } catch (e: Exception) {
             Log.e(TAG, "Error sending config update", e)
             false
         }
     }
-
-    fun isConnected(): Boolean = socketServer.isConnected()
 }

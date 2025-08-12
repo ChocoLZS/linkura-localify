@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,7 +47,11 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.chocolzs.linkura.localify.R
-import io.github.chocolzs.linkura.localify.ipc.DuplexSocketServer
+import android.content.ComponentName
+import android.content.ServiceConnection
+import io.github.chocolzs.linkura.localify.ipc.ILinkuraCallback
+import io.github.chocolzs.linkura.localify.ipc.ILinkuraService
+import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.ui.components.ColorPicker
@@ -79,9 +84,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var isToolbarCollapsed by mutableStateOf(false)
     private var isToolbarVisible by mutableStateOf(true)
     
-    // Socket communication
-    private val socketServer: DuplexSocketServer by lazy { DuplexSocketServer.getInstance() }
-    private val messageRouter: MessageRouter by lazy { MessageRouter() }
+    // AIDL communication
+    private var aidlService: LinkuraAidlService? = null
+    private var isServiceBound = false
     
     // Touch handling for dragging
     private var initialX = 0
@@ -120,7 +125,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
         try {
             createToolbarOverlay()
-            setupSocketServer()
+            setupAidlService()
             
             // Create child services
             cameraOverlayService = CameraDataOverlayService(this)
@@ -153,11 +158,13 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             archiveOverlayService?.destroy()
             colorPickerOverlayService?.destroy()
             cameraSensitivityOverlayService?.destroy()
-            
-            // Clean up socket server
-            socketServer.removeMessageHandler(socketServerHandler)
-            messageRouter.clearHandlers(MessageType.CAMERA_OVERLAY_REQUEST)
 
+            aidlService = null
+            isServiceBound = false
+
+            // Update OverlayManager state to reflect service is stopped
+            OverlayManager.markServiceAsStopped()
+            
             toolbarView?.let {
                 windowManager?.removeView(it)
             }
@@ -166,48 +173,12 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
     }
 
-    private val socketServerHandler = object : DuplexSocketServer.MessageHandler {
-        override fun onMessageReceived(type: MessageType, payload: ByteArray) {
-            messageRouter.routeMessage(type, payload)
-        }
-
-        override fun onClientConnected() {
-            Log.d(TAG, "Socket client connected")
-        }
-
-        override fun onClientDisconnected() {
-            Log.d(TAG, "Socket client disconnected")
-        }
-    }
-    
-    private val overlayRequestHandler = object : MessageRouter.MessageTypeHandler {
-        override fun handleMessage(payload: ByteArray): Boolean {
-            return try {
-                val request = CameraOverlayRequest.parseFrom(payload)
-                handler.post {
-                    val overlayControl = OverlayControl.newBuilder()
-                        .setAction(OverlayAction.START_OVERLAY)
-                        .build()
-                    socketServer.sendMessage(MessageType.OVERLAY_CONTROL_GENERAL, overlayControl)
-                }
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "Error handling CameraOverlayRequest", e)
-                false
-            }
-        }
-    }
-
-    private fun setupSocketServer() {
-        // Register message handlers
-        messageRouter.registerHandler(MessageType.CAMERA_OVERLAY_REQUEST, overlayRequestHandler)
-        
-        // Add server handler and start server
-        socketServer.addMessageHandler(socketServerHandler)
-        if (socketServer.startServer()) {
-            Log.i(TAG, "Duplex socket server started for main overlay")
-        } else {
-            Log.e(TAG, "Failed to start duplex socket server for main overlay")
+    private fun setupAidlService() {
+        LinkuraAidlService.getInstance()?.let { service ->
+            aidlService = service
+            isServiceBound = true
+            Log.i(TAG, "Got AIDL service from static instance")
+            return
         }
     }
 
@@ -256,7 +227,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             initialY = params.y
                             initialTouchX = event.rawX
                             initialTouchY = event.rawY
-                            true
+                            false
                         }
                         MotionEvent.ACTION_MOVE -> {
                             params.x = initialX + (event.rawX - initialTouchX).toInt()
@@ -282,28 +253,52 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         // Main Box that contains both toolbar and secondary menu
         Box {
             if (isToolbarCollapsed) {
-                // Collapsed state - show only expand button on the right side
+                // Collapsed state - show drag handle and expand button
                 Box(
                     modifier = Modifier
                         .background(
                             Color.Black.copy(alpha = 0.8f),
                             RoundedCornerShape(16.dp)
                         )
-                        .padding(8.dp)
+                        .padding(6.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            isToolbarCollapsed = false
-                            updateToolbarPosition()
-                        },
-                        modifier = Modifier.size(32.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowLeft,
-                            contentDescription = "Expand Toolbar",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        // Drag handle for collapsed state
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(
+                                    Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DragHandle,
+                                contentDescription = "Drag to move",
+                                tint = Color.White.copy(alpha = 0.7f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                        
+                        // Expand button
+                        IconButton(
+                            onClick = {
+                                isToolbarCollapsed = false
+                                updateToolbarPosition()
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowLeft,
+                                contentDescription = "Expand Toolbar",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             } else {
@@ -312,7 +307,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Hide button (smaller, centered at top)
+                    // Top control bar with drag handle and close button
                     Box(
                         modifier = Modifier
                             .background(
@@ -321,20 +316,43 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             )
                             .padding(4.dp)
                     ) {
-                        IconButton(
-                            onClick = {
-                                isToolbarVisible = false
-                                // Update plugin side overlay state
-                                OverlayManager.markOverlayAsHidden()
-                            },
-                            modifier = Modifier.size(24.dp)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Hide Toolbar",
-                                tint = Color.White,
-                                modifier = Modifier.size(14.dp)
-                            )
+                            // Drag handle
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(
+                                        Color.Transparent,
+                                        RoundedCornerShape(8.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DragHandle,
+                                    contentDescription = "Drag to move",
+                                    tint = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                            
+                            // Close button
+                            IconButton(
+                                onClick = {
+                                    // Stop the service completely
+                                    stopSelf()
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close Toolbar",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
                         }
                     }
                     
@@ -478,11 +496,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Camera Info button
-                IconButton(
-                    onClick = {
-                        toggleCameraOverlay()
-                        isCameraMenuVisible = false
-                    },
+                Box(
                     modifier = Modifier
                         .size(32.dp)
                         .background(
@@ -490,20 +504,24 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             RoundedCornerShape(6.dp)
                         )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = getString(R.string.overlay_camera_info),
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    IconButton(
+                        onClick = {
+                            toggleCameraOverlay()
+                            isCameraMenuVisible = false
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = getString(R.string.overlay_camera_info),
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
 
                 // Camera Sensitivity button
-                IconButton(
-                    onClick = {
-                        toggleCameraSensitivityOverlay()
-                        isCameraMenuVisible = false
-                    },
+                Box(
                     modifier = Modifier
                         .size(32.dp)
                         .background(
@@ -511,12 +529,20 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             RoundedCornerShape(6.dp)
                         )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = getString(R.string.overlay_camera_sensitivity),
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    IconButton(
+                        onClick = {
+                            toggleCameraSensitivityOverlay()
+                            isCameraMenuVisible = false
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = getString(R.string.overlay_camera_sensitivity),
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -570,7 +596,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             apply()
         }
 
-        // Send color change message via socket
+        // Send color change message via AIDL service
         try {
             val colorMessage = CameraBackgroundColor.newBuilder()
                 .setRed(color.red)
@@ -578,20 +604,13 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 .setBlue(color.blue)
                 .setAlpha(color.alpha)
                 .build()
-            
-            if (socketServer.isConnected()) {
-                socketServer.sendMessage(MessageType.CAMERA_BACKGROUND_COLOR, colorMessage)
-                Log.d(TAG, "Sent background color: R=${color.red}, G=${color.green}, B=${color.blue}, A=${color.alpha}")
-            } else {
-                Log.w(TAG, "Socket server not connected, cannot send color change")
-            }
+            aidlService!!.sendMessage(MessageType.CAMERA_BACKGROUND_COLOR, colorMessage)
         } catch (e: Exception) {
             Log.e(TAG, "Error sending color change", e)
         }
     }
-
-    fun getSocketServerInstance(): DuplexSocketServer = socketServer
-    fun getMessageRouterInstance(): MessageRouter = messageRouter
+    
+    fun getAidlService(): LinkuraAidlService? = aidlService
     fun getHandlerInstance(): Handler = handler
     fun getWindowManagerInstance(): WindowManager? = windowManager
     
@@ -615,9 +634,11 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private fun updateToolbarPosition() {
         toolbarParams?.let { params ->
             if (isToolbarCollapsed) {
-                // Position collapsed toolbar on the right side
-                params.gravity = Gravity.TOP or Gravity.END
-                params.x = 0
+                // Position collapsed toolbar on the right side using START gravity for consistent dragging
+                params.gravity = Gravity.TOP or Gravity.START
+                // Calculate right side position manually
+                val displayMetrics = resources.displayMetrics
+                params.x = displayMetrics.widthPixels - 150 // Offset from right edge
                 params.y = 200
             } else {
                 // Position expanded toolbar in center

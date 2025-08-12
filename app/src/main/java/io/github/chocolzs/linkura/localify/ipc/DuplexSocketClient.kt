@@ -12,9 +12,14 @@ import java.io.IOException
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Deprecated(
+    message = "This class is deprecated and will be removed in future versions.",
+    replaceWith = ReplaceWith("LinkuraAidlClient()"),
+    level = DeprecationLevel.WARNING
+)
 class DuplexSocketClient private constructor() {
     companion object {
-        private const val TAG = "DuplexSocketClient"
+        private const val TAG = "DuplexSockesendMessagetClient"
         private const val SOCKET_ADDRESS = "linkura_duplex_socket"
         private const val RECONNECT_INTERVAL_MS = 2000L
         

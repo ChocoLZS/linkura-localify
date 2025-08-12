@@ -28,13 +28,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import io.github.chocolzs.linkura.localify.ipc.MessageRouter
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
@@ -474,13 +472,8 @@ class CameraSensitivityOverlayService(private val parentService: OverlayService)
                 .setCameraFovSensitivity(fovSensitivity)
                 .setCameraRotationSensitivity(rotationSensitivity)
                 .build()
-
-            if (parentService.getSocketServerInstance().isConnected()) {
-                parentService.getSocketServerInstance().sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
-                Log.d(TAG, "Sensitivity update sent: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
-            } else {
-                Log.w(TAG, "Socket server not connected, cannot send sensitivity update")
-            }
+            parentService.getAidlService()?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)
+            Log.d(TAG, "Sensitivity update sent: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
         } catch (e: Exception) {
             Log.e(TAG, "Error sending sensitivity update", e)
         }
