@@ -1,0 +1,3 @@
+[submodule "app/src/main/assets/linkura-local"]
+	path = app/src/main/assets/linkura-local
+	url = https://github.com/ChocoLZS/linkura-localify-assets
