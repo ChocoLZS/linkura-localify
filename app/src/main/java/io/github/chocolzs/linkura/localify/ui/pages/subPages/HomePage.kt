@@ -235,25 +235,25 @@ fun HomePage(modifier: Modifier = Modifier,
         .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-//        item {
-//            GakuGroupBox(modifier = modifier, stringResource(R.string.basic_settings)) {
-//                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-//                    GakuSwitch(modifier, stringResource(R.string.enable_plugin), checked = config.value.enabled) {
-//                            v -> context?.onEnabledChanged(v)
-//                    }
-//
-//                    GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
-//                            v -> context?.onLazyInitChanged(v)
-//                    }
-//
-//                    GakuSwitch(modifier, stringResource(R.string.replace_font), checked = config.value.replaceFont) {
-//                            v -> context?.onReplaceFontChanged(v)
-//                    }
-//
-//                }
-//            }
-//            Spacer(Modifier.height(6.dp))
-//        }
+        item {
+            GakuGroupBox(modifier = modifier, stringResource(R.string.basic_settings)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    GakuSwitch(modifier, stringResource(R.string.enable_plugin), checked = config.value.enabled) {
+                            v -> context?.onEnabledChanged(v)
+                    }
+
+                    GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
+                            v -> context?.onLazyInitChanged(v)
+                    }
+
+                    GakuSwitch(modifier, stringResource(R.string.replace_font), checked = config.value.replaceFont) {
+                            v -> context?.onReplaceFontChanged(v)
+                    }
+
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+        }
         item {
             GakuGroupBox(modifier = modifier, "Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
