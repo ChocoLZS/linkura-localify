@@ -456,33 +456,33 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
             Spacer(Modifier.height(6.dp))
         }
 
-//        item {
-//            GakuGroupBox(modifier, stringResource(R.string.debug_settings)) {
-//                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        item {
+            GakuGroupBox(modifier, stringResource(R.string.debug_settings)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
 //                    GakuSwitch(modifier, stringResource(R.string.useMasterDBTrans), checked = config.value.useMasterTrans) {
 //                            v -> context?.onUseMasterTransChanged(v)
 //                    }
-//
-//                    GakuSwitch(modifier, stringResource(R.string.text_hook_test_mode), checked = config.value.textTest) {
-//                            v -> context?.onTextTestChanged(v)
-//                    }
-//
+
+                    GakuSwitch(modifier, stringResource(R.string.text_hook_test_mode), checked = config.value.textTest) {
+                            v -> context?.onTextTestChanged(v)
+                    }
+
 //                    GakuSwitch(modifier, stringResource(R.string.export_text), checked = config.value.dumpText) {
 //                            v -> context?.onDumpTextChanged(v)
 //                    }
-//
+
 //                    GakuSwitch(modifier, stringResource(R.string.force_export_resource), checked = config.value.forceExportResource) {
 //                            v -> context?.onForceExportResourceChanged(v)
 //                    }
-//
+
 //                    GakuSwitch(modifier, stringResource(R.string.login_as_ios), checked = config.value.loginAsIOS) {
 //                            v -> context?.onLoginAsIOSChanged(v)
 //                    }
-//                }
-//            }
-//
-//            Spacer(Modifier.height(6.dp))
-//        }
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+        }
 //
 //        item {
 //            GakuGroupBox(modifier, stringResource(R.string.breast_param),
