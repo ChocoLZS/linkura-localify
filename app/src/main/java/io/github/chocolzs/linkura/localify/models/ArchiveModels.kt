@@ -3,6 +3,12 @@ package io.github.chocolzs.linkura.localify.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+enum class ReplayType {
+    VIDEO,
+    MOTION_CAPTURE,
+    MOTION_CAPTURE_FIX
+}
+
 @Serializable
 data class ArchiveItem(
     @SerialName("archives_id")
@@ -33,7 +39,10 @@ data class ArchiveItem(
     val thumbnailImageUrl: String,
     
     @SerialName("video_url")
-    val videoUrl: String
+    val videoUrl: String,
+
+    @SerialName("external_fix_link")
+    val externalFixLink: String = "",
 )
 
 @Serializable
@@ -49,9 +58,12 @@ data class ArchiveConfig(
     
     @SerialName("video_url")
     val videoUrl: String,
+
+    @SerialName("external_fix_link")
+    val externalFixLink: String = "",
     
     @SerialName("replay_type")
-    val replayType: Int // 0 for video replay, 1 for motion capture replay
+    val replayType: Int // 0 for video replay, 1 for motion capture replay, 2 for motion capture with fix
 )
 
 typealias ArchiveList = List<ArchiveItem>

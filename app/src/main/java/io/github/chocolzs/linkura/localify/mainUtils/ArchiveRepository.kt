@@ -108,6 +108,7 @@ object ArchiveRepository {
                 liveId = item.liveId,
                 externalLink = item.externalLink,
                 videoUrl = item.videoUrl,
+                externalFixLink = item.externalFixLink,
                 replayType = existing?.replayType ?: if (item.externalLink.isNotEmpty()) 1 else 0
             )
         }

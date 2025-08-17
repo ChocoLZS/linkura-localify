@@ -182,7 +182,13 @@ private fun ReplayTabPage(
     val config = getConfigState(context, previewData)
     val defaultMetadataUrl = stringResource(R.string.replay_default_metadata_url)
 
-    var localMetadataUrl by remember { mutableStateOf(defaultMetadataUrl) }
+    // Load saved metadata URL or use default
+    var localMetadataUrl by remember { 
+        mutableStateOf(
+            context?.getSharedPreferences("linkura_prefs", 0)
+                ?.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
+        )
+    }
 
     val replaySettingsViewModel: ReplaySettingsCollapsibleBoxViewModel =
         viewModel(factory = ReplaySettingsCollapsibleBoxViewModelFactory(initiallyExpanded = false))
@@ -357,7 +363,14 @@ private fun ReplayTabPage(
                         ) {
                             GakuTextInput(
                                 value = localMetadataUrl,
-                                onValueChange = { localMetadataUrl = it },
+                                onValueChange = { newUrl ->
+                                    localMetadataUrl = newUrl
+                                    // Save to SharedPreferences
+                                    context?.getSharedPreferences("linkura_prefs", 0)
+                                        ?.edit()
+                                        ?.putString("metadata_url", newUrl)
+                                        ?.apply()
+                                },
                                 modifier = Modifier.weight(1f),
                                 label = {
                                     Text(text = stringResource(R.string.replay_settings_metadata_url))
@@ -365,7 +378,14 @@ private fun ReplayTabPage(
                             )
 
                             IconButton(
-                                onClick = { localMetadataUrl = defaultMetadataUrl },
+                                onClick = { 
+                                    localMetadataUrl = defaultMetadataUrl
+                                    // Save to SharedPreferences
+                                    context?.getSharedPreferences("linkura_prefs", 0)
+                                        ?.edit()
+                                        ?.putString("metadata_url", defaultMetadataUrl)
+                                        ?.apply()
+                                },
                                 modifier = Modifier.size(48.dp)
                             ) {
                                 Icon(
