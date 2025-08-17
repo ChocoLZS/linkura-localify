@@ -52,10 +52,6 @@ namespace LinkuraLocal::HookShare {
     void Install(HookInstaller* hookInstaller);
 
     namespace Shareable {
-        struct ArchiveData {
-            std::string id;
-            long long duration;
-        };
         enum RenderScene {
             None,
             FesLive,
@@ -66,10 +62,11 @@ namespace LinkuraLocal::HookShare {
             Nothing,
             UpdateReceived
         };
-        extern std::unordered_map<std::string, ArchiveData> archiveData;
+        extern std::unordered_map<std::string, nlohmann::json> archiveData;
         extern void* realtimeRenderingArchiveControllerCache;
         extern float realtimeRenderingArchivePositionSeconds;
         extern std::string currentArchiveId;
+        extern float currentArchiveDuration;
         extern RenderScene renderScene;
         extern SetPlayPosition_State setPlayPositionState;
 

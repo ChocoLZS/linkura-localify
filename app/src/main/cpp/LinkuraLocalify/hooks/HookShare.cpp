@@ -5,10 +5,11 @@
 namespace LinkuraLocal::HookShare {
     namespace Shareable {
         // memory leak ?
-        std::unordered_map<std::string, ArchiveData> archiveData{};
+        std::unordered_map<std::string, nlohmann::json> archiveData{};
         void* realtimeRenderingArchiveControllerCache = nullptr;
         float realtimeRenderingArchivePositionSeconds = 0;
         std::string currentArchiveId = "";
+        float currentArchiveDuration = 0;
         RenderScene renderScene = RenderScene::None;
         SetPlayPosition_State setPlayPositionState = SetPlayPosition_State::Nothing;
 
@@ -180,15 +181,13 @@ namespace LinkuraLocal::HookShare {
                 if (Config::unlockAfter) {
                     archive["has_extra_admission"] = "true";
                 }
-                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
-                    auto live_start_time = archive["live_start_time"].get<std::string>();
-                    auto live_end_time = archive["live_end_time"].get<std::string>();
-                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
-                    Shareable::archiveData[archive_id] = {
-                            .duration = duration
-                    };
-                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
-                }
+//                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
+//                    auto live_start_time = archive["live_start_time"].get<std::string>();
+//                    auto live_end_time = archive["live_end_time"].get<std::string>();
+//                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
+//                    Shareable::archiveData[archive_id] = archive;
+//                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
+//                }
                 if (Config::enableMotionCaptureReplay && Config::enableInGameReplayDisplay) {
                     auto it = Config::archiveConfigMap.find(archive_id);
                     if (it == Config::archiveConfigMap.end()) continue;
