@@ -80,6 +80,8 @@ namespace LinkuraLocal::HookCamera {
         unregisterCurrentCamera();
         L4Camera::reset_camera();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
+        HookShare::Shareable::currentArchiveDuration = 0;
+        HookShare::Shareable::currentArchiveId = "";
         initialCameraRendered = false;
         backgroundColorCameraCache = nullptr;
     }

@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include "../camera/camera.hpp"
+#include <re2/re2.h>
 
 namespace LinkuraLocal::HookLiveRender {
 
@@ -196,13 +197,8 @@ namespace LinkuraLocal::HookLiveRender {
         try {
             linkura::ipc::ArchiveInfo archiveInfo;
             // Get duration from cached archive data
-            auto archiveDataIt = HookShare::Shareable::archiveData.find(HookShare::Shareable::currentArchiveId);
-            if (archiveDataIt != HookShare::Shareable::archiveData.end()) {
-                Log::DebugFmt("getCurrentArchiveInfo: duration=%lld", archiveDataIt->second.duration);
-                archiveInfo.set_duration(archiveDataIt->second.duration);
-            } else {
-                archiveInfo.set_duration(0);
-            }
+            auto duration = (int64_t)(HookShare::Shareable::currentArchiveDuration * 1000);
+            archiveInfo.set_duration(duration);
 
             // Serialize to protobuf
             std::vector<uint8_t> result(archiveInfo.ByteSize());
@@ -254,6 +250,30 @@ namespace LinkuraLocal::HookLiveRender {
         Camera_set_targetTexture_Orig(camera, targetTexture);
     }
 
+    float getPlayListDuration(const std::string& playlist) {
+        float totalDuration = 0.0f;
+        
+        re2::RE2 extinf_pattern(R"(#EXTINF:(\d+(?:\.\d+)?),)");
+        std::string duration_str;
+        
+        re2::StringPiece input(playlist);
+        while (re2::RE2::FindAndConsume(&input, extinf_pattern, &duration_str)) {
+            try {
+                float duration = std::stof(duration_str);
+                totalDuration += duration;
+            } catch (const std::exception& e) {
+                Log::ErrorFmt("Failed to parse duration: %s", duration_str.c_str());
+            }
+        }
+        
+        return totalDuration;
+    }
+
+    DEFINE_HOOK(void*, MediaPlaylist_LoadFromText, (Il2cppUtils::Il2CppString* text, void* mtd)) {
+        HookShare::Shareable::currentArchiveDuration = getPlayListDuration(text->ToString());
+        return MediaPlaylist_LoadFromText_Orig(text, mtd);
+    }
+
     void Install(HookInstaller* hookInstaller) {
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                                       "SchoolResolution", "GetResolution"));
@@ -280,6 +300,9 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(Screen_SetResolution,Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)"));
         ADD_HOOK(Camera_set_targetTexture, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Camera::set_targetTexture(UnityEngine.RenderTexture)"));
 //        ADD_HOOK(QualitySettings_set_antiAliasing, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)"));
+
+        ADD_HOOK(MediaPlaylist_LoadFromText, Il2cppUtils::GetMethodPointer("M3U8Parser.dll", "M3U8Parser",
+                                                "MediaPlaylist", "LoadFromText"));
 
     }
 

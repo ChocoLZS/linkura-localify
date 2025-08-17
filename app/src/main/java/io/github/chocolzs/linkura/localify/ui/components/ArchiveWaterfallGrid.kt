@@ -26,8 +26,46 @@ import androidx.compose.foundation.basicMarquee
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import io.github.chocolzs.linkura.localify.models.ArchiveItem
+import io.github.chocolzs.linkura.localify.models.ReplayType
 import java.text.SimpleDateFormat
 import java.util.*
+
+fun Int.toReplayType(): ReplayType = when(this) {
+    0 -> ReplayType.VIDEO
+    1 -> ReplayType.MOTION_CAPTURE
+    2 -> ReplayType.MOTION_CAPTURE_FIX
+    else -> ReplayType.VIDEO
+}
+
+fun ReplayType.toInt(): Int = when(this) {
+    ReplayType.VIDEO -> 0
+    ReplayType.MOTION_CAPTURE -> 1
+    ReplayType.MOTION_CAPTURE_FIX -> 2
+}
+
+fun getAvailableReplayTypes(item: ArchiveItem): List<ReplayType> {
+    val availableTypes = mutableListOf<ReplayType>()
+    
+    if (item.videoUrl.isNotEmpty()) {
+        availableTypes.add(ReplayType.VIDEO)
+    }
+    if (item.externalLink.isNotEmpty()) {
+        availableTypes.add(ReplayType.MOTION_CAPTURE)
+    }
+    if (item.externalFixLink.isNotEmpty()) {
+        availableTypes.add(ReplayType.MOTION_CAPTURE_FIX)
+    }
+    
+    return availableTypes
+}
+
+fun cycleToNextReplayType(currentType: ReplayType, availableTypes: List<ReplayType>): ReplayType {
+    if (availableTypes.size <= 1) return currentType
+    
+    val currentIndex = availableTypes.indexOf(currentType)
+    val nextIndex = if (currentIndex == -1) 0 else (currentIndex + 1) % availableTypes.size
+    return availableTypes[nextIndex]
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -50,8 +88,11 @@ fun ArchiveWaterfallGrid(
             ArchiveGridItem(
                 item = item,
                 replayType = replayTypes[item.archivesId] ?: 1,
-                onReplayTypeToggle = { newType ->
-                    onReplayTypeToggle(item.archivesId, newType)
+                onReplayTypeToggle = { 
+                    val availableTypes = getAvailableReplayTypes(item)
+                    val currentType = (replayTypes[item.archivesId] ?: 1).toReplayType()
+                    val nextType = cycleToNextReplayType(currentType, availableTypes)
+                    onReplayTypeToggle(item.archivesId, nextType.toInt())
                 }
             )
         }
@@ -62,7 +103,7 @@ fun ArchiveWaterfallGrid(
 private fun ArchiveGridItem(
     item: ArchiveItem,
     replayType: Int,
-    onReplayTypeToggle: (Int) -> Unit,
+    onReplayTypeToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -113,14 +154,13 @@ private fun ArchiveGridItem(
                 }
                 
                 // Replay type badge (top left)
-                val hasVideo = item.videoUrl.isNotEmpty()
-                val hasExternalLink = item.externalLink.isNotEmpty()
-                val canToggle = hasVideo && hasExternalLink
-                val isFixMode = item.externalLink.contains("-fix")
+                val availableTypes = getAvailableReplayTypes(item)
+                val canToggle = availableTypes.size > 1
+                val currentReplayType = replayType.toReplayType()
                 
-                val badgeColor = when {
-                    replayType == 1 && isFixMode -> Color(0xFF816CC6) // Purple for motion capture with fix
-                    else -> Color(0xFF58D68E) // Green for video or regular motion capture
+                val badgeColor = when (currentReplayType) {
+                    ReplayType.VIDEO, ReplayType.MOTION_CAPTURE -> Color(0xFF58D68E) // Green for video
+                    ReplayType.MOTION_CAPTURE_FIX -> Color(0xFF816CC6) // Purple for motion capture with fix
                 }
                 
                 Box(
@@ -140,7 +180,7 @@ private fun ArchiveGridItem(
                         .then(
                             if (canToggle) {
                                 Modifier.clickable {
-                                    onReplayTypeToggle(if (replayType == 0) 1 else 0)
+                                    onReplayTypeToggle()
                                 }
                             } else {
                                 Modifier
@@ -148,8 +188,15 @@ private fun ArchiveGridItem(
                         )
                 ) {
                     Icon(
-                        imageVector = if (replayType == 0) Icons.Default.VideoFile else Icons.Default.EmojiPeople,
-                        contentDescription = if (replayType == 0) "Video Replay" else "Motion Capture Replay",
+                        imageVector = when (currentReplayType) {
+                            ReplayType.VIDEO -> Icons.Default.VideoFile
+                            ReplayType.MOTION_CAPTURE, ReplayType.MOTION_CAPTURE_FIX -> Icons.Default.EmojiPeople
+                        },
+                        contentDescription = when (currentReplayType) {
+                            ReplayType.VIDEO -> "Video Replay"
+                            ReplayType.MOTION_CAPTURE -> "Motion Capture Replay"
+                            ReplayType.MOTION_CAPTURE_FIX -> "Motion Capture with Fix Replay"
+                        },
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )

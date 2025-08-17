@@ -17,6 +17,7 @@ import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.hookUtils.MainKeyEventDispatcher
 import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService
+import io.github.chocolzs.linkura.localify.mainUtils.ArchiveRepository
 import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
@@ -29,8 +30,11 @@ import io.github.chocolzs.linkura.localify.models.ProgramConfigViewModelFactory
 import io.github.chocolzs.linkura.localify.ui.pages.MainUI
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
 import io.github.chocolzs.linkura.localify.utils.CameraSensitivityState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import java.io.File
 
@@ -123,6 +127,48 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         }
     }
 
+    private fun performFirstLaunchArchiveRefresh() {
+        val prefs = getSharedPreferences("linkura_prefs", 0)
+        val isFirstLaunch = prefs.getBoolean("is_first_launch", true)
+        val lastRefreshTime = prefs.getLong("last_archive_refresh", 0)
+        val currentTime = System.currentTimeMillis()
+        val oneHourInMs = 60 * 60 * 1000L
+
+        if (isFirstLaunch || (currentTime - lastRefreshTime) > oneHourInMs) {
+            LogExporter.addLogEntry("MainActivity", "I", "Performing automatic archive refresh on first launch")
+            
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val defaultMetadataUrl = getString(R.string.replay_default_metadata_url)
+                    val savedMetadataUrl = prefs.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
+                    val result = ArchiveRepository.fetchArchiveList(savedMetadataUrl)
+                    
+                    result.onSuccess { fetchedList ->
+                        // Save archive list
+                        ArchiveRepository.saveArchiveList(this@MainActivity, fetchedList)
+                        
+                        // Update archive config
+                        val existingConfig = ArchiveRepository.loadArchiveConfig(this@MainActivity)
+                        val newConfig = ArchiveRepository.createArchiveConfigFromList(fetchedList, existingConfig)
+                        ArchiveRepository.saveArchiveConfig(this@MainActivity, newConfig)
+                        
+                        LogExporter.addLogEntry("MainActivity", "I", "Archive refresh successful: ${fetchedList.size} items")
+                    }.onFailure { error ->
+                        LogExporter.addLogEntry("MainActivity", "E", "Archive refresh failed: ${error.message}")
+                    }
+                } catch (e: Exception) {
+                    LogExporter.addLogEntry("MainActivity", "E", "Archive refresh error: ${e.message}")
+                }
+                
+                // Update preferences
+                prefs.edit()
+                    .putBoolean("is_first_launch", false)
+                    .putLong("last_archive_refresh", currentTime)
+                    .apply()
+            }
+        }
+    }
+
     override fun pushKeyEvent(event: KeyEvent): Boolean {
         return dispatchKeyEvent(event)
     }
@@ -158,6 +204,9 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         
         // Initialize global camera sensitivity state
         CameraSensitivityState.initialize(this)
+
+        // Auto-refresh archive data on first launch
+        performFirstLaunchArchiveRefresh()
 
         // Start AIDL service
         try {

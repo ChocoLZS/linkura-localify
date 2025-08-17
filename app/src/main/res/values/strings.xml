@@ -175,7 +175,7 @@
     <string name="replay.settings.title">Replay Settings</string>
     <string name="replay.settings.enable_motion_capture">Enable Motion Capture Replay</string>
     <string name="replay.settings.enable_in_game_display">In-Game Replay Display</string>
-    <string name="replay.settings.description">✅Official Motion Capture Replay, ☑️Restored Motion Capture Replay, 📺Video Replay</string>
+    <string name="replay.settings.description">✅Official Motion Capture Replay, ☑️Reconstructed Motion Capture Replay, 📺Video Replay</string>
     <string name="replay.settings.metadata_url">Replay Metadata URL</string>
     <string name="replay.settings.metadata_url_placeholder">Replay metadata link</string>
     <string name="replay.settings.reset_url">Reset to Default</string>

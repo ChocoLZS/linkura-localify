@@ -5,10 +5,11 @@
 namespace LinkuraLocal::HookShare {
     namespace Shareable {
         // memory leak ?
-        std::unordered_map<std::string, ArchiveData> archiveData{};
+        std::unordered_map<std::string, nlohmann::json> archiveData{};
         void* realtimeRenderingArchiveControllerCache = nullptr;
         float realtimeRenderingArchivePositionSeconds = 0;
         std::string currentArchiveId = "";
+        float currentArchiveDuration = 0;
         RenderScene renderScene = RenderScene::None;
         SetPlayPosition_State setPlayPositionState = SetPlayPosition_State::Nothing;
 
@@ -107,7 +108,8 @@ namespace LinkuraLocal::HookShare {
                 if (it == Config::archiveConfigMap.end()) return result;
                 auto archive_config = it->second;
                 auto replay_type = archive_config["replay_type"].get<uint>();
-                auto external_link = archive_config["external_link"].get<std::string>();
+                auto external_link = archive_config.contains("external_link") ? archive_config["external_link"].get<std::string>() : "";
+                auto external_fix_link = archive_config.contains("external_fix_link") ? archive_config["external_fix_link"].get<std::string>() : "";
                 auto assets_url = Config::motionCaptureResourceUrl;
                 if (replay_type == 0) {
                     json.erase("archive_url");
@@ -118,6 +120,13 @@ namespace LinkuraLocal::HookShare {
                         auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
                         json["archive_url"] = new_external_link;
                         if (new_external_link.ends_with(".iarc")) Log::ShowToast("The motion replay before 2025.05.29 can't be replayed for now!");
+                    }
+                }
+                if (replay_type == 2) {
+                    json.erase("video_url");
+                    if (!external_fix_link.empty()) {
+                        auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
+                        json["archive_url"] = new_external_fix_link;
                     }
                 }
             }
@@ -139,11 +148,12 @@ namespace LinkuraLocal::HookShare {
                 if (it == Config::archiveConfigMap.end()) return result;
                 auto archive_config = it->second;
                 auto replay_type = archive_config["replay_type"].get<uint>();
-                auto external_link = archive_config["external_link"].get<std::string>();
+                auto external_link = archive_config.contains("external_link") ? archive_config["external_link"].get<std::string>() : "";
+                auto external_fix_link = archive_config.contains("external_fix_link") ? archive_config["external_fix_link"].get<std::string>() : "";
+
                 auto assets_url = Config::motionCaptureResourceUrl;
                 if (replay_type == 0) {
                     json.erase("archive_url");
-                    // do nothing
                 }
                 if (replay_type == 1) {
                     json.erase("video_url");
@@ -151,6 +161,13 @@ namespace LinkuraLocal::HookShare {
                         auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
                         json["archive_url"] = new_external_link;
                         if (new_external_link.ends_with(".iarc")) Log::ShowToast("The motion replay before 2025.05.29 can't be replayed for now!");
+                    }
+                }
+                if (replay_type == 2) {
+                    json.erase("video_url");
+                    if (!external_fix_link.empty()) {
+                        auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
+                        json["archive_url"] = new_external_fix_link;
                     }
                 }
             }
@@ -180,15 +197,13 @@ namespace LinkuraLocal::HookShare {
                 if (Config::unlockAfter) {
                     archive["has_extra_admission"] = "true";
                 }
-                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
-                    auto live_start_time = archive["live_start_time"].get<std::string>();
-                    auto live_end_time = archive["live_end_time"].get<std::string>();
-                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
-                    Shareable::archiveData[archive_id] = {
-                            .duration = duration
-                    };
-                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
-                }
+//                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
+//                    auto live_start_time = archive["live_start_time"].get<std::string>();
+//                    auto live_end_time = archive["live_end_time"].get<std::string>();
+//                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
+//                    Shareable::archiveData[archive_id] = archive;
+//                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
+//                }
                 if (Config::enableMotionCaptureReplay && Config::enableInGameReplayDisplay) {
                     auto it = Config::archiveConfigMap.find(archive_id);
                     if (it == Config::archiveConfigMap.end()) continue;
@@ -197,12 +212,10 @@ namespace LinkuraLocal::HookShare {
                     auto archive_title = archive["name"].get<std::string>();
                     if (it != Config::archiveConfigMap.end()) {
                         if (replay_type == 1) { // motion capture replay
-                            auto external_link = archive_config["external_link"].get<std::string>();
-                            if (external_link.contains("fix")) {
-                                archive_title = "☑️ " + archive_title;
-                            } else {
-                                archive_title = "✅ " + archive_title;
-                            }
+                            archive_title = "✅ " + archive_title;
+                        }
+                        if (replay_type == 2) {
+                            archive_title = "☑️ " + archive_title;
                         }
                         if (replay_type == 0) { // video replay
                             archive_title = "📺 " + archive_title;
