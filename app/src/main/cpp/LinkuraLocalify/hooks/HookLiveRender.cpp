@@ -197,9 +197,19 @@ namespace LinkuraLocal::HookLiveRender {
         try {
             linkura::ipc::ArchiveInfo archiveInfo;
             // Get duration from cached archive data
-            auto duration = (int64_t)(HookShare::Shareable::currentArchiveDuration * 1000);
-            archiveInfo.set_duration(duration);
-
+            if (HookShare::Shareable::currentArchiveDuration != 0) {
+                auto duration = (int64_t)(HookShare::Shareable::currentArchiveDuration * 1000);
+                archiveInfo.set_duration(duration);
+            } else {
+                // old version temp compatibility
+                auto archiveDataIt = HookShare::Shareable::archiveData.find(HookShare::Shareable::currentArchiveId);
+                if (archiveDataIt != HookShare::Shareable::archiveData.end()) {
+                    Log::DebugFmt("getCurrentArchiveInfo: duration=%lld", archiveDataIt->second.duration);
+                    archiveInfo.set_duration(archiveDataIt->second.duration);
+                } else {
+                    archiveInfo.set_duration(0);
+                }
+            }
             // Serialize to protobuf
             std::vector<uint8_t> result(archiveInfo.ByteSize());
             archiveInfo.SerializeToArray(result.data(), result.size());

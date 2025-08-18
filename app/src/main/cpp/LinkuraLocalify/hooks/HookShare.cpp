@@ -5,7 +5,7 @@
 namespace LinkuraLocal::HookShare {
     namespace Shareable {
         // memory leak ?
-        std::unordered_map<std::string, nlohmann::json> archiveData{};
+        std::unordered_map<std::string, ArchiveData> archiveData{};
         void* realtimeRenderingArchiveControllerCache = nullptr;
         float realtimeRenderingArchivePositionSeconds = 0;
         std::string currentArchiveId = "";
@@ -197,13 +197,16 @@ namespace LinkuraLocal::HookShare {
                 if (Config::unlockAfter) {
                     archive["has_extra_admission"] = "true";
                 }
-//                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
-//                    auto live_start_time = archive["live_start_time"].get<std::string>();
-//                    auto live_end_time = archive["live_end_time"].get<std::string>();
-//                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
-//                    Shareable::archiveData[archive_id] = archive;
-//                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
-//                }
+                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
+                    auto live_start_time = archive["live_start_time"].get<std::string>();
+                    auto live_end_time = archive["live_end_time"].get<std::string>();
+                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
+                    Shareable::archiveData[archive_id] = {
+                            .id = archive_id,
+                            .duration = duration,
+                    };
+                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
+                }
                 if (Config::enableMotionCaptureReplay && Config::enableInGameReplayDisplay) {
                     auto it = Config::archiveConfigMap.find(archive_id);
                     if (it == Config::archiveConfigMap.end()) continue;
@@ -308,6 +311,67 @@ namespace LinkuraLocal::HookShare {
 
 #pragma endregion
 
+#pragma region oldVersion
+    DEFINE_HOOK(void, Configuration_AddDefaultHeader, (void* self, Il2cppUtils::Il2CppString* key, Il2cppUtils::Il2CppString* value, void* mtd)) {
+        Log::DebugFmt("Configuration_AddDefaultHeader HOOKED, %s=%s", key->ToString().c_str(), value->ToString().c_str());
+        auto key_str = key->ToString();
+        auto value_str = value->ToString();
+        if (key_str == "x-client-version") {
+            value = Il2cppUtils::Il2CppString::New("4.5.0");
+        }
+        if (key_str == "x-res-version") {
+            value = Il2cppUtils::Il2CppString::New("R2508150");
+        }
+        Configuration_AddDefaultHeader_Orig(self, key, value ,mtd);
+    }
+
+    DEFINE_HOOK(void, Configuration_set_UserAgent, (void* self, Il2cppUtils::Il2CppString* value, void* mtd)) {
+        Log::DebugFmt("Configuration_set_UserAgent HOOKED, %s", value->ToString().c_str());
+        auto value_str = value->ToString();
+        if (value_str.starts_with("inspix-android")) {
+            value = Il2cppUtils::Il2CppString::New("inspix-android/4.5.0");
+        }
+        Configuration_set_UserAgent_Orig(self, value ,mtd);
+    }
+
+//    DEFINE_HOOK(void, AssetManager_SynchronizeResourceVersion_MoveNext, (void* self, void* mtd)) {
+////        Log::DebugFmt("AssetManager_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
+//        static auto AssetManager_klass = Il2cppUtils::GetClassIl2cpp("Core.dll", "Hailstorm", "AssetManager");
+//        static auto SynchronizeResourceVersion_klass = Il2cppUtils::find_nested_class_from_name(AssetManager_klass, "<SynchronizeResourceVersion>d__22");
+//        Log::DebugFmt("SynchronizeResourceVersion_klass is at %p", SynchronizeResourceVersion_klass);
+//        if (SynchronizeResourceVersion_klass) {
+//            static auto requestedVersion_field = UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_field_from_name", SynchronizeResourceVersion_klass, "requestedVersion");
+//            static auto savedVersion_field = UnityResolve::Invoke<Il2cppUtils::FieldInfo*>("il2cpp_class_get_field_from_name", SynchronizeResourceVersion_klass, "savedVersion");
+//            Log::DebugFmt("requestedVersion_field is %p, savedVersion_field is %p", requestedVersion_field, savedVersion_field);
+//            auto requestedVersion = Il2cppUtils::ClassGetFieldValue<Il2cppUtils::Il2CppString*>(self, requestedVersion_field);
+//            auto savedVersion = Il2cppUtils::ClassGetFieldValue<Il2cppUtils::Il2CppString*>(self, savedVersion_field);
+//            if (requestedVersion) {
+//                auto requestedVersion_str = requestedVersion->ToString();
+//                Log::DebugFmt("AssetManager_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion_str.c_str());
+//            }
+//            if (savedVersion) {
+//                auto savedVersion_str = savedVersion->ToString();
+//                Log::DebugFmt("AssetManager_SynchronizeResourceVersion HOOKED, savedVersion is %s",  savedVersion_str.c_str());
+//            }
+//        }
+//        AssetManager_SynchronizeResourceVersion_MoveNext_Orig(self, mtd);
+//    }
+
+    // this will cause stuck
+    DEFINE_HOOK(void*, AssetManager_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion, Il2cppUtils::Il2CppString* savedVersion, void* mtd)) {
+        Log::DebugFmt("Hailstorm_AssetManager__SynchronizeResourceVersion HOOKED, requestedVersion is %s, savedVersion is %s", requestedVersion->ToString().c_str(), savedVersion->ToString().c_str());
+//        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New("R2504300@hbZZOCoWTueF+rikQLgPapC2Qw==");
+        return AssetManager_SynchronizeResourceVersion_Orig(self, requestedVersion, savedVersion, mtd);
+    }
+
+    // Core_SynchronizeResourceVersion -> AssetManager_SynchronizeResourceVersion
+    DEFINE_HOOK(void* ,Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
+        Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
+        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New("R2504300@hbZZOCoWTueF+rikQLgPapC2Qw==");
+        return Core_SynchronizeResourceVersion_Orig(self, hooked_requestedVersion, mtd);
+    }
+#pragma region
+
     void Install(HookInstaller* hookInstaller) {
 
         // GetHttpAsyncAddr
@@ -406,6 +470,20 @@ namespace LinkuraLocal::HookShare {
         ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
 
+#pragma endregion
+#pragma region oldVersion
+        ADD_HOOK(Configuration_AddDefaultHeader, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "AddDefaultHeader"));
+        ADD_HOOK(Configuration_set_UserAgent, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_UserAgent"));
+//        ADD_HOOK(AssetManager_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetManager", "SynchronizeResourceVersion"));
+        ADD_HOOK(Core_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "", "Core", "SynchronizeResourceVersion"));
+        //        auto AssetManager_klass = Il2cppUtils::GetClassIl2cpp("Core.dll", "Hailstorm", "AssetManager");
+//        if (AssetManager_klass) {
+//            auto SynchronizeResourceVersion_klss = Il2cppUtils::find_nested_class_from_name(AssetManager_klass, "<SynchronizeResourceVersion>d__22");
+//            method = Il2cppUtils::GetMethodIl2cpp(SynchronizeResourceVersion_klss, "MoveNext", 0);
+//            if (method) {
+//                ADD_HOOK(AssetManager_SynchronizeResourceVersion_MoveNext, method->methodPointer);
+//            }
+//        }
 #pragma endregion
     }
 }
