@@ -76,6 +76,13 @@ namespace LinkuraLocal::HookLiveRender {
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
 
+    DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync, (void* self, float seconds)) {
+        Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
+        HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
+//        L4Camera::clearRenderSet();
+        return LiveConnectMrsController_SetPlayPositionAsync_Orig(self, seconds);
+    }
+
     DEFINE_HOOK(void, LiveScreenOrientationModel_ctor, (void* self, int32_t liveOrientation, int32_t deviceOrientation)) {
 
 //        Log::DebugFmt("LiveScreenOrientationModel_ctor_HOOKED, %d %d", liveOrientation, deviceOrientation);
@@ -108,19 +115,19 @@ namespace LinkuraLocal::HookLiveRender {
             result = (u_int64_t)(height << 32 | width);
         }
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
-            L4Camera::clearRenderSet();
-            if (HookShare::Shareable::renderSceneIsWithLive()) {
-                auto cameraMode = L4Camera::GetCameraMode();
-                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    // Log::DebugFmt("set camera mode to FREE");
-                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                }
-                HookShare::Shareable::resetRenderScene();
-                HookCamera::unregisterMainFreeCamera(false);
-                HookCamera::unregisterCurrentCamera();
-            }
-            RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
+//            L4Camera::clearRenderSet();
+//            if (HookShare::Shareable::renderSceneIsWithLive()) {
+//                auto cameraMode = L4Camera::GetCameraMode();
+//                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+//                    // Log::DebugFmt("set camera mode to FREE");
+//                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+//                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//                }
+//                HookShare::Shareable::resetRenderScene();
+//                HookCamera::unregisterMainFreeCamera(false);
+//                HookCamera::unregisterCurrentCamera();
+//            }
+            LiveConnectMrsController_SetPlayPositionAsync_Orig(
                     HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                     HookShare::Shareable::realtimeRenderingArchivePositionSeconds
             );
@@ -294,7 +301,7 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
-
+        ADD_HOOK(LiveConnectMrsController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectMrsController", "SetPlayPositionAsync"));
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));
 //        ADD_HOOK(FesConnectArchivePlayer_get_RunningTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_RunningTime"));
