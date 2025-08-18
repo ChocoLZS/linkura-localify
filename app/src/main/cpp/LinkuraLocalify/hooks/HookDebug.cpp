@@ -21,7 +21,7 @@ namespace LinkuraLocal::HookDebug {
         if (Config::removeRenderImageCover) return;
         CoverImageCommandReceiver_Awake_Orig(self, method);
     }
-    // 👀
+    // 👀　work for both als and mrs
     DEFINE_HOOK(void, CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self,void* character, void* method)) {
         Log::DebugFmt("CharacterVisibleReceiver_SetupExistCharacter HOOKED");
         if (Config::avoidCharacterExit) return;
@@ -35,12 +35,6 @@ namespace LinkuraLocal::HookDebug {
         MRS_AppsCoverScreen_SetActiveCoverImage_Orig(self, isActive, method);
     }
 
-    DEFINE_HOOK(void, MRS_CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self, void* character, void* method)) {
-        Log::DebugFmt("CharacterVisibleReceiver_SetupExistCharacter HOOKED");
-        if (Config::avoidCharacterExit) return;
-        MRS_CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
-    }
-
     void Install(HookInstaller* hookInstaller) {
         ADD_HOOK(Internal_LogException, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.DebugLogHandler::Internal_LogException(System.Exception,UnityEngine.Object)"));
@@ -49,10 +43,9 @@ namespace LinkuraLocal::HookDebug {
         
         // 👀
         ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
-//        ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
+        ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
 
         // 👀 old
         ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
-        ADD_HOOK(MRS_CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupReceiveActions"));
     }
 }

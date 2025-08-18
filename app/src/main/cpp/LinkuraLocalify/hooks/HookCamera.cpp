@@ -273,10 +273,10 @@ namespace LinkuraLocal::HookCamera {
         auto camera = CameraManager_get_CameraComponent->Invoke<UnityResolve::UnityType::Camera*>(baseCamera);
         Log::DebugFmt("CameraManager_AddCamera: %s, camera is at %p", name->ToString().c_str(), camera);
         
-        // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc)
-        static re2::RE2 pattern(R"(^\d{6}_[a-zA-Z]+$)");
+        // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
+        static re2::RE2 pattern(R"(^\d{6}(_[a-zA-Z]+$)?)");
         std::string nameStr = name->ToString();
-        if (re2::RE2::FullMatch(nameStr, pattern)) {
+        if (re2::RE2::FullMatch(nameStr, pattern) && !nameStr.ends_with("after")) {
             if (!HookShare::Shareable::renderSceneIsFesLive()) {
                 HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
                 if (!initialCameraRendered) {
@@ -292,16 +292,6 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(void*, CameraManager_get_Cameras, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("CameraManager_get_Cameras HOOKED");
         return CameraManager_get_Cameras_Addr(self, method);
-    }
-
-    DEFINE_HOOK(void, CameraManager_SetAntialias, (Il2cppUtils::Il2CppObject* self, void* baseCamera, void* method)) {
-        Log::DebugFmt("CameraManager_SetAntialias HOOKED");
-        CameraManager_SetAntialias_Orig(self, baseCamera, method);
-    }
-
-    DEFINE_HOOK(void, CameraManager_SetRenderPipelineDefault, (Il2cppUtils::Il2CppObject* self, void* baseCamera, void* method)) {
-        Log::DebugFmt("CameraManager_SetRenderPipelineDefault HOOKED");
-        CameraManager_SetRenderPipelineDefault_Orig(self, baseCamera, method);
     }
     // fes live / with meets, but we treat it as with live
     // when every dynamic camera change, this will be called
@@ -573,8 +563,6 @@ namespace LinkuraLocal::HookCamera {
         ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
         ADD_HOOK(CameraManager_AddCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "AddCamera"));
         ADD_HOOK(CameraManager_get_Cameras, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "get_Cameras"));
-        ADD_HOOK(CameraManager_SetAntialias, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "SetAntialias"));
-        ADD_HOOK(CameraManager_SetRenderPipelineDefault, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "SetRenderPipelineDefault"));
         auto LiveConnectChapterListPresenter_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterListPresenter");
         auto display_klass = Il2cppUtils::find_nested_class_from_name(LiveConnectChapterListPresenter_klass, "<>c__DisplayClass10_0");
         auto createAvailableChapterNodeView_klass = Il2cppUtils::find_nested_class_from_name(display_klass, "<<CreateAvailableChapterNodeView>b__2>d");
