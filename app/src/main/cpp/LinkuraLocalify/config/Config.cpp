@@ -44,9 +44,15 @@ namespace LinkuraLocal::Config {
     float cameraVerticalSensitivity = 1.0f;
     float cameraFovSensitivity = 1.0f;
     float cameraRotationSensitivity = 1.0f;
+    bool enableLegacyCompatibility = false;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
+    // runtime
+    std::string currentClientVersion;
+    std::string currentResVersion;
+    std::string latestClientVersion;
+    std::string latestResVersion;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -98,8 +104,6 @@ namespace LinkuraLocal::Config {
     
     void LoadArchiveConfig(const std::string& configStr) {
         try {
-            Log::VerboseFmt("Parsing archive config JSON: %s", configStr.c_str());
-            
             const auto config = nlohmann::json::parse(configStr);
             
             // Clear existing archive config map

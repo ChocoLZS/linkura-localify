@@ -28,6 +28,7 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
+import io.github.chocolzs.linkura.localify.mainUtils.AssetsRepository
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -646,6 +647,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         val l4Data = intent.getStringExtra("l4Data")
         val programData = intent.getStringExtra("localData")
         val archiveData = intent.getStringExtra("archiveData")
+        val clientResData = intent.getStringExtra("clientResData")
         if (l4Data != null) {
             val readVersion = intent.getStringExtra("lVerName")
             checkPluginVersion(activity, readVersion)
@@ -717,6 +719,60 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         if (archiveData != null) {
             loadArchiveConfig(archiveData)
             Log.d(TAG, "archiveData loaded")
+        }
+        // Get target app version info
+        val packageInfo = activity.packageManager.getPackageInfo(targetPackageName, 0)
+        val versionName = packageInfo.versionName
+        val versionCode = packageInfo.longVersionCode
+
+        Log.i(TAG, "Game version info - Name: $versionName, Code: $versionCode")
+        LogExporter.addLogEntry(TAG, "I", "Game version: $versionName ($versionCode)")
+        if (clientResData != null) {
+            processClientResourceData(clientResData, versionName)
+        }
+    }
+
+    private fun processClientResourceData(clientResData: String, currentVersionName: String) {
+        val allClientRes = json.decodeFromString<Map<String, List<String>>>(clientResData)
+        val clientResList = allClientRes[currentVersionName]
+        
+        // Find the latest client version (highest version key in the map)
+        val latestClientVersion = allClientRes.keys.maxOrNull() ?: currentVersionName
+        val latestClientResList = allClientRes[latestClientVersion]
+        val latestResVersion = latestClientResList?.lastOrNull() ?: ""
+        
+        if (clientResList != null && clientResList.isNotEmpty()) {
+            Log.i(TAG, "Found ${clientResList.size} client resources for current version $currentVersionName")
+            LogExporter.addLogEntry(TAG, "I", "Client resources for $currentVersionName: ${clientResList.size} items")
+            
+            // Get the last item from the resource list as current res version
+            val currentResVersion = clientResList.lastOrNull()
+            if (currentResVersion != null) {
+                Log.i(TAG, "Current client: $currentVersionName, current res: $currentResVersion")
+                Log.i(TAG, "Latest client: $latestClientVersion, latest res: $latestResVersion")
+                LogExporter.addLogEntry(TAG, "I", "Current: client=$currentVersionName, res=$currentResVersion")
+                LogExporter.addLogEntry(TAG, "I", "Latest: client=$latestClientVersion, res=$latestResVersion")
+                
+                // Call native function to store all version information
+                loadClientResVersion(currentVersionName, currentResVersion, latestClientVersion, latestResVersion)
+            } else {
+                Log.w(TAG, "Client resources list is empty for version $currentVersionName")
+                LogExporter.addLogEntry(TAG, "W", "Empty client resources list for $currentVersionName")
+            }
+            
+            clientResList.forEach { resource ->
+                Log.d(TAG, "Client resource: $resource")
+            }
+        } else {
+            Log.w(TAG, "No client resources found for current version $currentVersionName")
+            LogExporter.addLogEntry(TAG, "W", "No client resources for version $currentVersionName")
+            
+            // Even if current version has no resources, still try to load latest version info
+            if (latestResVersion.isNotEmpty()) {
+                Log.i(TAG, "Loading latest version info only - Latest client: $latestClientVersion, latest res: $latestResVersion")
+                LogExporter.addLogEntry(TAG, "I", "Latest version only: client=$latestClientVersion, res=$latestResVersion")
+                loadClientResVersion("", "", latestClientVersion, latestResVersion)
+            }
         }
     }
 
@@ -883,6 +939,10 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         @JvmStatic
         external fun loadArchiveConfig(configJsonStr: String)
+
+        @JvmStatic
+        external fun loadClientResVersion(currentClientVersion: String, currentResVersion: String,
+                                          latestClientVersion: String, latestResVersion: String)
 
         // Toast快速切换内容
         private var toast: Toast? = null

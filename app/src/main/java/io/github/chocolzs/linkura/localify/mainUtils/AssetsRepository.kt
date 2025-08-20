@@ -15,10 +15,11 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-object ArchiveRepository {
-    private const val TAG = "ArchiveRepository"
+object AssetsRepository {
+    private const val TAG = "AssetsRepository"
     private const val ARCHIVE_FILE = "archive.json"
     private const val ARCHIVE_CONFIG_FILE = "archive-config.json"
+    private const val CLIENT_RES_FILE = "client-res.json"
 
     suspend fun fetchArchiveList(metadataUrl: String): Result<ArchiveList> = withContext(Dispatchers.IO) {
         try {
@@ -128,5 +129,60 @@ object ArchiveRepository {
             }
         }
         return saveArchiveConfig(context, updatedConfig)
+    }
+
+    suspend fun fetchClientRes(clientResUrl: String = "https://assets.chocoie.com/client-res"): Result<Map<String, List<String>>> = withContext(Dispatchers.IO) {
+        try {
+            val url = URL(clientResUrl)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 10000
+            connection.readTimeout = 10000
+            
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val jsonString = connection.inputStream.bufferedReader().use { it.readText() }
+                val clientRes = json.decodeFromString<Map<String, List<String>>>(jsonString)
+                Result.success(clientRes)
+            } else {
+                Result.failure(Exception("HTTP $responseCode"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch client resources", e)
+            Result.failure(e)
+        }
+    }
+
+    fun saveClientRes(context: Context, clientRes: Map<String, List<String>>): Boolean {
+        return try {
+            val file = File(context.filesDir, CLIENT_RES_FILE)
+            val jsonString = json.encodeToString<Map<String, List<String>>>(clientRes)
+            file.writeText(jsonString)
+            Log.d(TAG, "Client resources saved successfully")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save client resources", e)
+            false
+        }
+    }
+
+    fun loadClientRes(context: Context): Map<String, List<String>>? {
+        return try {
+            val file = File(context.filesDir, CLIENT_RES_FILE)
+            if (file.exists()) {
+                val jsonString = file.readText()
+                json.decodeFromString<Map<String, List<String>>>(jsonString)
+            } else {
+                null
+            }
+        } catch (e: SerializationException) {
+            Log.e(TAG, "Failed to load client resources", e)
+            null
+        }
+    }
+
+    fun getClientResForVersion(context: Context, version: String): List<String>? {
+        val clientRes = loadClientRes(context)
+        return clientRes?.get(version)
     }
 }

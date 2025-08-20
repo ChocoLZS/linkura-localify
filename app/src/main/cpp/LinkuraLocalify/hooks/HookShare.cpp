@@ -317,10 +317,10 @@ namespace LinkuraLocal::HookShare {
         auto key_str = key->ToString();
         auto value_str = value->ToString();
         if (key_str == "x-client-version") {
-            value = Il2cppUtils::Il2CppString::New("4.5.0");
+            value = Il2cppUtils::Il2CppString::New(Config::latestClientVersion);
         }
         if (key_str == "x-res-version") {
-            value = Il2cppUtils::Il2CppString::New("R2508150");
+            value = Il2cppUtils::Il2CppString::New(Misc::StringFormat::split_once(Config::latestResVersion, "@").first);
         }
         Configuration_AddDefaultHeader_Orig(self, key, value ,mtd);
     }
@@ -329,7 +329,7 @@ namespace LinkuraLocal::HookShare {
         Log::DebugFmt("Configuration_set_UserAgent HOOKED, %s", value->ToString().c_str());
         auto value_str = value->ToString();
         if (value_str.starts_with("inspix-android")) {
-            value = Il2cppUtils::Il2CppString::New("inspix-android/4.5.0");
+            value = Il2cppUtils::Il2CppString::New("inspix-android/" + Config::latestClientVersion);
         }
         Configuration_set_UserAgent_Orig(self, value ,mtd);
     }
@@ -367,7 +367,7 @@ namespace LinkuraLocal::HookShare {
     // Core_SynchronizeResourceVersion -> AssetManager_SynchronizeResourceVersion
     DEFINE_HOOK(void* ,Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
         Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
-        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New("R2504300@hbZZOCoWTueF+rikQLgPapC2Qw==");
+        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
         return Core_SynchronizeResourceVersion_Orig(self, hooked_requestedVersion, mtd);
     }
 #pragma region

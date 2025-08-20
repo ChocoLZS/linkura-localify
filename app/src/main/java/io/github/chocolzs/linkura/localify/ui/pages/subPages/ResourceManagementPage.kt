@@ -61,7 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.chocolzs.linkura.localify.MainActivity
 import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.getConfigState
-import io.github.chocolzs.linkura.localify.mainUtils.ArchiveRepository
+import io.github.chocolzs.linkura.localify.mainUtils.AssetsRepository
 import io.github.chocolzs.linkura.localify.models.ArchiveItem
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.models.ReplaySettingsCollapsibleBoxViewModel
@@ -213,16 +213,16 @@ private fun ReplayTabPage(
         archiveError = null
 
         try {
-            val result = ArchiveRepository.fetchArchiveList(localMetadataUrl)
+            val result = AssetsRepository.fetchArchiveList(localMetadataUrl)
             result.onSuccess { fetchedList ->
                 archiveList = fetchedList
                 context?.let { ctx ->
-                    ArchiveRepository.saveArchiveList(ctx, fetchedList)
+                    AssetsRepository.saveArchiveList(ctx, fetchedList)
 
-                    val existingConfig = ArchiveRepository.loadArchiveConfig(ctx)
+                    val existingConfig = AssetsRepository.loadArchiveConfig(ctx)
                     val newConfig =
-                        ArchiveRepository.createArchiveConfigFromList(fetchedList, existingConfig)
-                    ArchiveRepository.saveArchiveConfig(ctx, newConfig)
+                        AssetsRepository.createArchiveConfigFromList(fetchedList, existingConfig)
+                    AssetsRepository.saveArchiveConfig(ctx, newConfig)
 
                     replayTypes = newConfig.associateBy({ it.archivesId }, { it.replayType })
                 }
@@ -237,10 +237,10 @@ private fun ReplayTabPage(
     // Load initial archive data
     LaunchedEffect(Unit) {
         context?.let { ctx ->
-            val savedArchives = ArchiveRepository.loadArchiveList(ctx)
+            val savedArchives = AssetsRepository.loadArchiveList(ctx)
             if (savedArchives != null) {
                 archiveList = savedArchives
-                val savedConfig = ArchiveRepository.loadArchiveConfig(ctx)
+                val savedConfig = AssetsRepository.loadArchiveConfig(ctx)
                 replayTypes =
                     savedConfig?.associateBy({ it.archivesId }, { it.replayType }) ?: emptyMap()
             } else {
@@ -589,7 +589,7 @@ private fun ReplayTabPage(
                             replayTypes = replayTypes,
                             onReplayTypeToggle = { archivesId, newType ->
                                 context?.let { ctx ->
-                                    if (ArchiveRepository.updateArchiveConfigReplayType(
+                                    if (AssetsRepository.updateArchiveConfigReplayType(
                                             ctx,
                                             archivesId,
                                             newType
