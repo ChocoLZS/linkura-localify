@@ -213,21 +213,17 @@ private fun ReplayTabPage(
         archiveError = null
 
         try {
-            val result = AssetsRepository.fetchArchiveList(localMetadataUrl)
-            result.onSuccess { fetchedList ->
-                archiveList = fetchedList
-                context?.let { ctx ->
-                    AssetsRepository.saveArchiveList(ctx, fetchedList)
-
-                    val existingConfig = AssetsRepository.loadArchiveConfig(ctx)
-                    val newConfig =
-                        AssetsRepository.createArchiveConfigFromList(fetchedList, existingConfig)
-                    AssetsRepository.saveArchiveConfig(ctx, newConfig)
-
-                    replayTypes = newConfig.associateBy({ it.archivesId }, { it.replayType })
+            context?.let { ctx ->
+                val result = AssetsRepository.fetchAndSaveArchiveData(ctx, localMetadataUrl)
+                result.onSuccess { fetchedList ->
+                    archiveList = fetchedList
+                    
+                    // Load the newly created config
+                    val newConfig = AssetsRepository.loadArchiveConfig(ctx)
+                    replayTypes = newConfig?.associateBy({ it.archivesId }, { it.replayType }) ?: emptyMap()
+                }.onFailure { error ->
+                    archiveError = error.message ?: "Unknown error"
                 }
-            }.onFailure { error ->
-                archiveError = error.message ?: "Unknown error"
             }
         } finally {
             isLoadingArchives = false

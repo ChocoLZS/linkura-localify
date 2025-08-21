@@ -100,18 +100,46 @@ object AssetsRepository {
     }
 
     fun createArchiveConfigFromList(archiveList: ArchiveList, existingConfig: ArchiveConfigList? = null): ArchiveConfigList {
-        val existingConfigMap = existingConfig?.associateBy { it.archivesId } ?: emptyMap()
-        
         return archiveList.map { item ->
-            val existing = existingConfigMap[item.archivesId]
+            val replayType = when {
+                item.externalFixLink.isNotEmpty() -> 2  // external_fix_link 优先级最高
+                item.externalLink.isNotEmpty() -> 1      // external_link 次之
+                else -> 0                               // video_link 默认为0
+            }
+            
             ArchiveConfig(
                 archivesId = item.archivesId,
                 liveId = item.liveId,
                 externalLink = item.externalLink,
                 videoUrl = item.videoUrl,
                 externalFixLink = item.externalFixLink,
-                replayType = existing?.replayType ?: if (item.externalLink.isNotEmpty()) 1 else 0
+                replayType = replayType
             )
+        }
+    }
+
+    /**
+     * 公共函数：处理 fetchArchiveList 后的保存逻辑
+     * 刷新后不检测 existingConfig，直接进行覆盖
+     * 创建规则：external_fix_link > external_link > video_link
+     */
+    suspend fun fetchAndSaveArchiveData(context: Context, metadataUrl: String): Result<ArchiveList> {
+        return try {
+            val result = fetchArchiveList(metadataUrl)
+            result.onSuccess { fetchedList ->
+                // Save archive list
+                saveArchiveList(context, fetchedList)
+                
+                // Create new config without considering existing config (直接覆盖)
+                val newConfig = createArchiveConfigFromList(fetchedList, null)
+                saveArchiveConfig(context, newConfig)
+                
+                Log.d(TAG, "Archive data fetched and saved successfully: ${fetchedList.size} items")
+            }
+            result
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch and save archive data", e)
+            Result.failure(e)
         }
     }
 

@@ -141,17 +141,9 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
                 try {
                     val defaultMetadataUrl = getString(R.string.replay_default_metadata_url)
                     val savedMetadataUrl = prefs.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
-                    val result = AssetsRepository.fetchArchiveList(savedMetadataUrl)
+                    val result = AssetsRepository.fetchAndSaveArchiveData(this@MainActivity, savedMetadataUrl)
                     
                     result.onSuccess { fetchedList ->
-                        // Save archive list
-                        AssetsRepository.saveArchiveList(this@MainActivity, fetchedList)
-                        
-                        // Update archive config
-                        val existingConfig = AssetsRepository.loadArchiveConfig(this@MainActivity)
-                        val newConfig = AssetsRepository.createArchiveConfigFromList(fetchedList, existingConfig)
-                        AssetsRepository.saveArchiveConfig(this@MainActivity, newConfig)
-                        
                         LogExporter.addLogEntry("MainActivity", "I", "Archive refresh successful: ${fetchedList.size} items")
                     }.onFailure { error ->
                         LogExporter.addLogEntry("MainActivity", "E", "Archive refresh failed: ${error.message}")
