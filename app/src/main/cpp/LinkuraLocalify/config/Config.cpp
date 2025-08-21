@@ -4,6 +4,7 @@
 #include <thread>
 #include <fstream>
 #include <unordered_map>
+#include <sstream>
 #include "../build/linkura_messages.pb.h"
 
 namespace LinkuraLocal::Config {
@@ -53,6 +54,10 @@ namespace LinkuraLocal::Config {
     std::string currentResVersion;
     std::string latestClientVersion;
     std::string latestResVersion;
+    
+    // cache
+    bool isLegacyVersionCached = false;
+    bool legacyVersionResult = false;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -95,6 +100,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(cameraVerticalSensitivity);
             GetConfigItem(cameraFovSensitivity);
             GetConfigItem(cameraRotationSensitivity);
+            GetConfigItem(enableLegacyCompatibility);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -172,6 +178,61 @@ namespace LinkuraLocal::Config {
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());
+        }
+    }
+
+    std::vector<int> parseVersion(const std::string& version) {
+        std::vector<int> parts;
+        std::stringstream ss(version);
+        std::string part;
+        
+        while (std::getline(ss, part, '.')) {
+            if (!part.empty()) {
+                try {
+                    parts.push_back(std::stoi(part));
+                } catch (const std::exception&) {
+                    // Skip invalid parts
+                }
+            }
+        }
+        
+        return parts;
+    }
+    
+    int compareVersions(const std::string& version1, const std::string& version2) {
+        auto v1Parts = parseVersion(version1);
+        auto v2Parts = parseVersion(version2);
+        
+        size_t maxLength = std::max(v1Parts.size(), v2Parts.size());
+        
+        for (size_t i = 0; i < maxLength; i++) {
+            int v1Part = (i < v1Parts.size()) ? v1Parts[i] : 0;
+            int v2Part = (i < v2Parts.size()) ? v2Parts[i] : 0;
+            
+            if (v1Part < v2Part) return -1;
+            if (v1Part > v2Part) return 1;
+        }
+        
+        return 0;
+    }
+
+    bool isLegacyMrsVersion() {
+        if (currentClientVersion.empty()) return false;
+        
+        if (isLegacyVersionCached) {
+            return legacyVersionResult;
+        }
+        
+        const std::string legacyVersionThreshold = "4.0.1";
+        
+        try {
+            int compareResult = compareVersions(currentClientVersion, legacyVersionThreshold);
+            legacyVersionResult = compareResult < 0;
+            isLegacyVersionCached = true;
+            return legacyVersionResult;
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version comparison error: %s", e.what());
+            return false;
         }
     }
 }

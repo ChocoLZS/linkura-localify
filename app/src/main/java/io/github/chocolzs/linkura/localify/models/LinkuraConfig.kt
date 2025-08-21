@@ -46,6 +46,8 @@ data class LinkuraConfig (
     var cameraFovSensitivity: Float = 1.0f,
     var cameraRotationSensitivity: Float = 1.0f,
 
+    var enableLegacyCompatibility: Boolean = false,
+
     var pf: Boolean = false,
 
 )

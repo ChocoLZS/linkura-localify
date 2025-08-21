@@ -257,12 +257,22 @@ fun HomePage(modifier: Modifier = Modifier,
         item {
             GakuGroupBox(modifier = modifier, "Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    GakuSwitch(modifier, stringResource(R.string.hook_fesArchive_unlockTicket_title), checked = config.value.fesArchiveUnlockTicket) {
+                    GakuSwitch(modifier, stringResource(R.string.config_fesArchive_unlockTicket_title), checked = config.value.fesArchiveUnlockTicket) {
                             v -> context?.onFesArchiveUnlockTicketChanged(v)
                     }
-                    GakuSwitch(modifier, stringResource(R.string.hook_after_unlock_title), checked = config.value.unlockAfter) {
+                    GakuSwitch(modifier, stringResource(R.string.config_after_unlock_title), checked = config.value.unlockAfter) {
                             v -> context?.onUnlockAfterChanged(v)
                     }
+                    GakuSwitch(modifier, stringResource(R.string.config_legacy_title), checked = config.value.enableLegacyCompatibility) {
+                            v -> context?.onEnableLegacyCompatibilityChanged(v)
+                    }
+                    // Note text for enableLegacyCompatibility
+                    Text(
+                        text = stringResource(R.string.config_legacy_description),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = modifier.padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
                 }
             }
             Spacer(Modifier.height(6.dp))
@@ -503,7 +513,7 @@ fun HomePage(modifier: Modifier = Modifier,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
-                        GakuSwitch(modifier, stringResource(R.string.hook_render_highResolution_title), checked = config.value.renderHighResolution) {
+                        GakuSwitch(modifier, stringResource(R.string.config_render_highResolution_title), checked = config.value.renderHighResolution) {
                                 v -> context?.onRenderHighResolutionChanged(v)
                         }
                     }

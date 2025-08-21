@@ -51,6 +51,7 @@ interface ConfigListener {
     fun onCameraVerticalSensitivityChanged(value: Float)
     fun onCameraFovSensitivityChanged(value: Float)
     fun onCameraRotationSensitivityChanged(value: Float)
+    fun onEnableLegacyCompatibilityChanged(value: Boolean)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -317,6 +318,14 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         config.cameraFovSensitivity = value
         saveConfig()
         sendConfigUpdate(config)
+    }
+
+    /**
+     * No Hot Reload
+     */
+    override fun onEnableLegacyCompatibilityChanged(value: Boolean) {
+        config.enableLegacyCompatibility = value
+        saveConfig()
     }
 
     override fun onCameraRotationSensitivityChanged(value: Float) {

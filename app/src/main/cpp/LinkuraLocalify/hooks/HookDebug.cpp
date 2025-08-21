@@ -28,7 +28,7 @@ namespace LinkuraLocal::HookDebug {
         CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
     }
 
-    // old
+    // old Config::enableLegacyCompatibility
     DEFINE_HOOK(void, MRS_AppsCoverScreen_SetActiveCoverImage, (Il2cppUtils::Il2CppObject* self, bool isActive, void* method)) {
         Log::DebugFmt("AppsCoverScreen_SetActiveCoverImage HOOKED");
         if (Config::removeRenderImageCover) isActive = false;

@@ -55,4 +55,6 @@ namespace LinkuraLocal::Config {
     void LoadArchiveConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);
     void UpdateConfig(const linkura::ipc::ConfigUpdate& configUpdate);
+
+    bool isLegacyMrsVersion();
 }

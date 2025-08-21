@@ -76,6 +76,7 @@ namespace LinkuraLocal::HookLiveRender {
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
 
+    // Config::isLegacyMrsVersion
     DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
@@ -115,22 +116,29 @@ namespace LinkuraLocal::HookLiveRender {
             result = (u_int64_t)(height << 32 | width);
         }
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
-//            L4Camera::clearRenderSet();
-//            if (HookShare::Shareable::renderSceneIsWithLive()) {
-//                auto cameraMode = L4Camera::GetCameraMode();
-//                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-//                    // Log::DebugFmt("set camera mode to FREE");
-//                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
-//                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//                }
-//                HookShare::Shareable::resetRenderScene();
-//                HookCamera::unregisterMainFreeCamera(false);
-//                HookCamera::unregisterCurrentCamera();
-//            }
-            LiveConnectMrsController_SetPlayPositionAsync_Orig(
-                    HookShare::Shareable::realtimeRenderingArchiveControllerCache,
-                    HookShare::Shareable::realtimeRenderingArchivePositionSeconds
-            );
+            if (!Config::isLegacyMrsVersion()) {
+                L4Camera::clearRenderSet();
+                if (HookShare::Shareable::renderSceneIsWithLive()) {
+                    auto cameraMode = L4Camera::GetCameraMode();
+                    if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+                        // Log::DebugFmt("set camera mode to FREE");
+                        L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    }
+                    HookShare::Shareable::resetRenderScene();
+                    HookCamera::unregisterMainFreeCamera(false);
+                    HookCamera::unregisterCurrentCamera();
+                }
+                RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
+                        HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                        HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+                );
+            } else {
+                LiveConnectMrsController_SetPlayPositionAsync_Orig(
+                        HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                        HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+                );
+            }
             HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         }
         return result;

@@ -77,6 +77,10 @@ namespace LinkuraLocal::HookShare {
         }
     }
 
+    bool isMotionCaptureCompatible(const std::string & url) {
+        auto isAlsArchive = url.ends_with("md");
+        return Config::isLegacyMrsVersion() ^ isAlsArchive;
+    }
 #pragma region HttpRequests
     uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
@@ -119,7 +123,9 @@ namespace LinkuraLocal::HookShare {
                     if (!external_link.empty()) {
                         auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
                         json["archive_url"] = new_external_link;
-                        if (new_external_link.ends_with(".iarc")) Log::ShowToast("The motion replay before 2025.05.29 can't be replayed for now!");
+                        if (!isMotionCaptureCompatible(new_external_link)) {
+                            Log::ShowToast("The motion replay is not compatible for current client!");
+                        }
                     }
                 }
                 if (replay_type == 2) {
@@ -127,6 +133,9 @@ namespace LinkuraLocal::HookShare {
                     if (!external_fix_link.empty()) {
                         auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
                         json["archive_url"] = new_external_fix_link;
+                        if (!isMotionCaptureCompatible(new_external_fix_link)) {
+                            Log::ShowToast("The motion replay is not compatible for current client!");
+                        }
                     }
                 }
             }
@@ -160,7 +169,9 @@ namespace LinkuraLocal::HookShare {
                     if (!external_link.empty()) {
                         auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
                         json["archive_url"] = new_external_link;
-                        if (new_external_link.ends_with(".iarc")) Log::ShowToast("The motion replay before 2025.05.29 can't be replayed for now!");
+                        if (!isMotionCaptureCompatible(new_external_link)) {
+                            Log::ShowToast("The motion replay is not compatible for current client!");
+                        }
                     }
                 }
                 if (replay_type == 2) {
@@ -168,6 +179,9 @@ namespace LinkuraLocal::HookShare {
                     if (!external_fix_link.empty()) {
                         auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
                         json["archive_url"] = new_external_fix_link;
+                        if (!isMotionCaptureCompatible(new_external_fix_link)) {
+                            Log::ShowToast("The motion replay is not compatible for current client!");
+                        }
                     }
                 }
             }
@@ -213,18 +227,27 @@ namespace LinkuraLocal::HookShare {
                     auto archive_config = it->second;
                     auto replay_type = archive_config["replay_type"].get<uint>();
                     auto archive_title = archive["name"].get<std::string>();
-                    if (it != Config::archiveConfigMap.end()) {
-                        if (replay_type == 1) { // motion capture replay
-                            archive_title = "✅ " + archive_title;
-                        }
-                        if (replay_type == 2) {
-                            archive_title = "☑️ " + archive_title;
-                        }
-                        if (replay_type == 0) { // video replay
-                            archive_title = "📺 " + archive_title;
-                        }
-                        archive["name"] = archive_title;
+                    /**
+                     * isMrsVersion isAlsArchive Playable
+                     * 0            0            0
+                     * 0            1            1
+                     * 1            0            1
+                     * 1            1            0
+                     *
+                     * Exclusive or: isMrsVersion ^ isAls
+                     */
+                    if (replay_type == 1) { // motion capture replay
+                        std::string mark = isMotionCaptureCompatible(archive_config["external_link"].get<std::string>()) ? "✅" : "❌";
+                        archive_title = mark + archive_title;
                     }
+                    if (replay_type == 2) {
+                        std::string mark = isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>()) ? "☑️" : "❌";
+                        archive_title = mark + archive_title;
+                    }
+                    if (replay_type == 0) { // video replay
+                        archive_title = "📺" + archive_title;
+                    }
+                    archive["name"] = archive_title;
                 }
 
             }
@@ -313,23 +336,27 @@ namespace LinkuraLocal::HookShare {
 
 #pragma region oldVersion
     DEFINE_HOOK(void, Configuration_AddDefaultHeader, (void* self, Il2cppUtils::Il2CppString* key, Il2cppUtils::Il2CppString* value, void* mtd)) {
-        Log::DebugFmt("Configuration_AddDefaultHeader HOOKED, %s=%s", key->ToString().c_str(), value->ToString().c_str());
-        auto key_str = key->ToString();
-        auto value_str = value->ToString();
-        if (key_str == "x-client-version") {
-            value = Il2cppUtils::Il2CppString::New(Config::latestClientVersion);
-        }
-        if (key_str == "x-res-version") {
-            value = Il2cppUtils::Il2CppString::New(Misc::StringFormat::split_once(Config::latestResVersion, "@").first);
+        if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("Configuration_AddDefaultHeader HOOKED, %s=%s", key->ToString().c_str(), value->ToString().c_str());
+            auto key_str = key->ToString();
+            auto value_str = value->ToString();
+            if (key_str == "x-client-version") {
+                value = Il2cppUtils::Il2CppString::New(Config::latestClientVersion);
+            }
+            if (key_str == "x-res-version") {
+                value = Il2cppUtils::Il2CppString::New(Misc::StringFormat::split_once(Config::latestResVersion, "@").first);
+            }
         }
         Configuration_AddDefaultHeader_Orig(self, key, value ,mtd);
     }
 
     DEFINE_HOOK(void, Configuration_set_UserAgent, (void* self, Il2cppUtils::Il2CppString* value, void* mtd)) {
-        Log::DebugFmt("Configuration_set_UserAgent HOOKED, %s", value->ToString().c_str());
-        auto value_str = value->ToString();
-        if (value_str.starts_with("inspix-android")) {
-            value = Il2cppUtils::Il2CppString::New("inspix-android/" + Config::latestClientVersion);
+        if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("Configuration_set_UserAgent HOOKED, %s", value->ToString().c_str());
+            auto value_str = value->ToString();
+            if (value_str.starts_with("inspix-android")) {
+                value = Il2cppUtils::Il2CppString::New("inspix-android/" + Config::latestClientVersion);
+            }
         }
         Configuration_set_UserAgent_Orig(self, value ,mtd);
     }
@@ -358,17 +385,19 @@ namespace LinkuraLocal::HookShare {
 //    }
 
     // this will cause stuck
-    DEFINE_HOOK(void*, AssetManager_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion, Il2cppUtils::Il2CppString* savedVersion, void* mtd)) {
-        Log::DebugFmt("Hailstorm_AssetManager__SynchronizeResourceVersion HOOKED, requestedVersion is %s, savedVersion is %s", requestedVersion->ToString().c_str(), savedVersion->ToString().c_str());
-//        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New("R2504300@hbZZOCoWTueF+rikQLgPapC2Qw==");
-        return AssetManager_SynchronizeResourceVersion_Orig(self, requestedVersion, savedVersion, mtd);
-    }
+//    DEFINE_HOOK(void*, AssetManager_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion, Il2cppUtils::Il2CppString* savedVersion, void* mtd)) {
+//        Log::DebugFmt("Hailstorm_AssetManager__SynchronizeResourceVersion HOOKED, requestedVersion is %s, savedVersion is %s", requestedVersion->ToString().c_str(), savedVersion->ToString().c_str());
+////        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New("R2504300@hbZZOCoWTueF+rikQLgPapC2Qw==");
+//        return AssetManager_SynchronizeResourceVersion_Orig(self, requestedVersion, savedVersion, mtd);
+//    }
 
     // Core_SynchronizeResourceVersion -> AssetManager_SynchronizeResourceVersion
-    DEFINE_HOOK(void* ,Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
-        Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
-        auto hooked_requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
-        return Core_SynchronizeResourceVersion_Orig(self, hooked_requestedVersion, mtd);
+    DEFINE_HOOK(void* , Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
+        if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
+            requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
+        }
+        return Core_SynchronizeResourceVersion_Orig(self, requestedVersion, mtd);
     }
 #pragma region
 
