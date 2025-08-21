@@ -76,6 +76,14 @@ namespace LinkuraLocal::HookLiveRender {
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
 
+    // Config::isLegacyMrsVersion
+    DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync, (void* self, float seconds)) {
+        Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
+        HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
+//        L4Camera::clearRenderSet();
+        return LiveConnectMrsController_SetPlayPositionAsync_Orig(self, seconds);
+    }
+
     DEFINE_HOOK(void, LiveScreenOrientationModel_ctor, (void* self, int32_t liveOrientation, int32_t deviceOrientation)) {
 
 //        Log::DebugFmt("LiveScreenOrientationModel_ctor_HOOKED, %d %d", liveOrientation, deviceOrientation);
@@ -108,22 +116,29 @@ namespace LinkuraLocal::HookLiveRender {
             result = (u_int64_t)(height << 32 | width);
         }
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
-            L4Camera::clearRenderSet();
-            if (HookShare::Shareable::renderSceneIsWithLive()) {
-                auto cameraMode = L4Camera::GetCameraMode();
-                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    // Log::DebugFmt("set camera mode to FREE");
-                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            if (!Config::isLegacyMrsVersion()) {
+                L4Camera::clearRenderSet();
+                if (HookShare::Shareable::renderSceneIsWithLive()) {
+                    auto cameraMode = L4Camera::GetCameraMode();
+                    if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+                        // Log::DebugFmt("set camera mode to FREE");
+                        L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    }
+                    HookShare::Shareable::resetRenderScene();
+                    HookCamera::unregisterMainFreeCamera(false);
+                    HookCamera::unregisterCurrentCamera();
                 }
-                HookShare::Shareable::resetRenderScene();
-                HookCamera::unregisterMainFreeCamera(false);
-                HookCamera::unregisterCurrentCamera();
+                RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
+                        HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                        HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+                );
+            } else {
+                LiveConnectMrsController_SetPlayPositionAsync_Orig(
+                        HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                        HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+                );
             }
-            RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
-                    HookShare::Shareable::realtimeRenderingArchiveControllerCache,
-                    HookShare::Shareable::realtimeRenderingArchivePositionSeconds
-            );
             HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         }
         return result;
@@ -197,9 +212,19 @@ namespace LinkuraLocal::HookLiveRender {
         try {
             linkura::ipc::ArchiveInfo archiveInfo;
             // Get duration from cached archive data
-            auto duration = (int64_t)(HookShare::Shareable::currentArchiveDuration * 1000);
-            archiveInfo.set_duration(duration);
-
+            if (HookShare::Shareable::currentArchiveDuration != 0) {
+                auto duration = (int64_t)(HookShare::Shareable::currentArchiveDuration * 1000);
+                archiveInfo.set_duration(duration);
+            } else {
+                // old version temp compatibility
+                auto archiveDataIt = HookShare::Shareable::archiveData.find(HookShare::Shareable::currentArchiveId);
+                if (archiveDataIt != HookShare::Shareable::archiveData.end()) {
+                    Log::DebugFmt("getCurrentArchiveInfo: duration=%lld", archiveDataIt->second.duration);
+                    archiveInfo.set_duration(archiveDataIt->second.duration);
+                } else {
+                    archiveInfo.set_duration(0);
+                }
+            }
             // Serialize to protobuf
             std::vector<uint8_t> result(archiveInfo.ByteSize());
             archiveInfo.SerializeToArray(result.data(), result.size());
@@ -284,7 +309,7 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
-
+        ADD_HOOK(LiveConnectMrsController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectMrsController", "SetPlayPositionAsync"));
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));
 //        ADD_HOOK(FesConnectArchivePlayer_get_RunningTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_RunningTime"));

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import io.github.chocolzs.linkura.localify.mainUtils.json
+import io.github.chocolzs.linkura.localify.mainUtils.AssetsRepository
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.models.ProgramConfigSerializer
@@ -67,6 +68,15 @@ fun <T> T.getArchiveConfigContent(): String where T : Activity {
     }
 }
 
+fun <T> T.getClientResContent(): String where T : Activity {
+    val configFile = File(filesDir, "client-res.json")
+    return if (configFile.exists()) {
+        configFile.readText()
+    } else {
+        "{}"
+    }
+}
+
 fun <T> T.loadConfig() where T : Activity, T : IHasConfigItems {
     val configStr = getConfigContent()
     config = try {
@@ -117,7 +127,9 @@ fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
                 "localAPIAssetsVersion", "p"), programConfig)
         )
         putExtra("archiveData", getArchiveConfigContent())
+        putExtra("clientResData", getClientResContent())
         putExtra("lVerName", version)
+
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
 

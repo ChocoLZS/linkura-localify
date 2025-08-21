@@ -143,6 +143,45 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_loadArchiveConfig(JNIEn
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_loadClientResVersion(JNIEnv *env, jclass clazz,
+                                                                             jstring currentClient, jstring currentRes,
+                                                                             jstring latestClient, jstring latestRes) {
+    try {
+        const auto currentClientChars = env->GetStringUTFChars(currentClient, nullptr);
+        const auto currentResChars = env->GetStringUTFChars(currentRes, nullptr);
+        const auto latestClientChars = env->GetStringUTFChars(latestClient, nullptr);
+        const auto latestResChars = env->GetStringUTFChars(latestRes, nullptr);
+        
+        const std::string currentClientVersion = currentClientChars;
+        const std::string currentResVersion = currentResChars;
+        const std::string latestClientVersion = latestClientChars;
+        const std::string latestResVersion = latestResChars;
+        
+        LinkuraLocal::Log::InfoFmt("Loading current client: %s, current res: %s", currentClientVersion.c_str(), currentResVersion.c_str());
+        LinkuraLocal::Log::InfoFmt("Loading latest client: %s, latest res: %s", latestClientVersion.c_str(), latestResVersion.c_str());
+        
+        // Store versions in Config
+        LinkuraLocal::Config::currentClientVersion = currentClientVersion;
+        LinkuraLocal::Config::currentResVersion = currentResVersion;
+        LinkuraLocal::Config::latestClientVersion = latestClientVersion;
+        LinkuraLocal::Config::latestResVersion = latestResVersion;
+        
+        env->ReleaseStringUTFChars(currentClient, currentClientChars);
+        env->ReleaseStringUTFChars(currentRes, currentResChars);
+        env->ReleaseStringUTFChars(latestClient, latestClientChars);
+        env->ReleaseStringUTFChars(latestRes, latestResChars);
+        
+        LinkuraLocal::Log::Info("Client and res versions (current and latest) loaded successfully");
+        
+    } catch (const std::exception& e) {
+        LinkuraLocal::Log::ErrorFmt("Error loading client res version: %s", e.what());
+    } catch (...) {
+        LinkuraLocal::Log::Error("Unknown error loading client res version");
+    }
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_pluginCallbackLooper(JNIEnv *env,
                                                                              jclass clazz) {

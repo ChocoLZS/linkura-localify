@@ -2,9 +2,9 @@
 <resources>
     <string name="abc_action_bar_home_description">ホームに戻る</string>
     <string name="abc_action_bar_up_description">前に戻る</string>
-    <string name="hook.fesArchive.unlockTicket.title">Fes×LIVEアーカイブSチケットを解除</string>
-    <string name="hook.after.unlock.title">解除After</string>
-    <string name="hook.render.highResolution.title">1080p/2k/4k 解像度</string>
+    <string name="config.fesArchive.unlockTicket.title">Fes×LIVEアーカイブSチケットを解除</string>
+    <string name="config.after.unlock.title">解除After</string>
+    <string name="config.render.highResolution.title">1080p/2k/4k 解像度</string>
     <string name="abc_action_menu_overflow_description">その他のオプション</string>
     <string name="abc_action_mode_done">完了</string>
     <string name="abc_activity_chooser_view_see_all">すべて表示</string>
@@ -423,7 +423,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="replay.settings.title">再生設定</string>
     <string name="replay.settings.enable_motion_capture">モーションキャプチャ再生を有効にする</string>
     <string name="replay.settings.enable_in_game_display">ゲーム内再生表示</string>
-    <string name="replay.settings.description">✅公式モーションキャプチャ再生、☑️復元モーションキャプチャ再生、📺ビデオ再生</string>
+    <string name="replay.settings.description">✅公式モーションキャプチャ再生、☑️復元モーションキャプチャ再生、📺ビデオ再生、❌現在のバージョンと互換性のないモーションキャプチャ再生</string>
     <string name="replay.settings.metadata_url">再生メタデータURL</string>
     <string name="replay.settings.metadata_url_placeholder">再生メタデータリンク</string>
     <string name="replay.settings.reset_url">リセット</string>
@@ -484,5 +484,9 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="overlay.camera.sensitivity.floating_title">カメラ感度</string>
     <string name="overlay.camera.sensitivity.close">閉じる</string>
     <string name="overlay.camera.sensitivity.reset">デフォルトにリセット</string>
+
+    <!-- Legacy Compatibility Settings -->
+    <string name="config.legacy.title">レガシーバージョン互換性を有効にする（ホットリロード不可）</string>
+    <string name="config.legacy.description">この機能を有効にすると、古いクライアントバージョンが正常にログインできるようになります。このプラグインは主に2025年5月29日以前に記録されたモーションキャプチャデータの再生に使用され、その他の機能はまだ互換性対応が行われていません。現在はバージョン3.1.0でのみテストが完了しており、バージョン4.0.0以前のバージョンは古い形式のモーションキャプチャデータの再生をサポートしています。</string>
 
 </resources>

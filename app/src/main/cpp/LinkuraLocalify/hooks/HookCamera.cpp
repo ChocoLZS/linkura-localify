@@ -6,6 +6,7 @@
 #include "thread"
 #include "chrono"
 #include "vector"
+#include <re2/re2.h>
 
 namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera
@@ -261,6 +262,40 @@ namespace LinkuraLocal::HookCamera {
         TimelineCamera,
         LookAtCamera
     };
+
+
+    DEFINE_HOOK(void, CameraManager_AddCamera, (Il2cppUtils::Il2CppObject* self, void* baseCamera, void* method)) {
+        if (Config::isLegacyMrsVersion()) {
+            Log::DebugFmt("CameraManager_AddCamera HOOKED");
+            static auto CameraManager_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "BaseCamera");
+            static auto CameraManager_get_Name = CameraManager_klass->Get<UnityResolve::Method>("get_Name");
+            static auto CameraManager_get_CameraComponent = CameraManager_klass->Get<UnityResolve::Method>("get_CameraComponent");
+            auto name = CameraManager_get_Name->Invoke<Il2cppUtils::Il2CppString*>(baseCamera);
+            auto camera = CameraManager_get_CameraComponent->Invoke<UnityResolve::UnityType::Camera*>(baseCamera);
+            Log::DebugFmt("CameraManager_AddCamera: %s, camera is at %p", name->ToString().c_str(), camera);
+
+            // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
+            static re2::RE2 pattern(R"(^\d{6}(_[a-zA-Z]+$)?)");
+            std::string nameStr = name->ToString();
+            if (re2::RE2::FullMatch(nameStr, pattern) && !nameStr.ends_with("after")) {
+                if (!HookShare::Shareable::renderSceneIsFesLive()) {
+                    HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
+                    if (!initialCameraRendered) {
+                        sanitizeFreeCamera(camera);
+                    }
+                    registerMainFreeCamera(camera);
+                    registerCurrentCamera(camera);
+                }
+            }
+        }
+        CameraManager_AddCamera_Orig(self, baseCamera, method);
+    }
+
+    // useless
+    DEFINE_HOOK(void*, CameraManager_get_Cameras, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        Log::DebugFmt("CameraManager_get_Cameras HOOKED");
+        return CameraManager_get_Cameras_Addr(self, method);
+    }
     // fes live / with meets, but we treat it as with live
     // when every dynamic camera change, this will be called
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, CameraManager_GetCamera, (Il2cppUtils::Il2CppObject* self, CameraType cameraType , int cameraId , void* method)) {
@@ -284,20 +319,23 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(void, LiveConnectChapterModel_NewChapterConfirmed, (Il2cppUtils::Il2CppObject* self, void* method)) {
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(LiveConnectChapterListPresenter_CreateAvailableChapterNodeView_MoveNext_Addr, caller, 2000) {
-            L4Camera::clearRenderSet();
-            // fes live will use the same fixed camera at all time
-            if (HookShare::Shareable::renderSceneIsWithLive()) {
-                Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
-                auto cameraMode = L4Camera::GetCameraMode();
-                if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                    // Log::DebugFmt("set camera mode to FREE");
-                    L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            if (!Config::isLegacyMrsVersion()) {
+                L4Camera::clearRenderSet();
+                // fes live will use the same fixed camera at all time
+                if (HookShare::Shareable::renderSceneIsWithLive()) {
+                    Log::DebugFmt("LiveConnectChapterModel_NewChapterConfirmed HOOKED");
+                    auto cameraMode = L4Camera::GetCameraMode();
+                    if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
+                        // Log::DebugFmt("set camera mode to FREE");
+                        L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    }
+                    HookShare::Shareable::resetRenderScene();
+                    unregisterMainFreeCamera();
+                    unregisterCurrentCamera();
                 }
-                HookShare::Shareable::resetRenderScene();
-                unregisterMainFreeCamera();
-                unregisterCurrentCamera();
             }
+
         }
         LiveConnectChapterModel_NewChapterConfirmed_Orig(self, method);
     }
@@ -523,13 +561,14 @@ namespace LinkuraLocal::HookCamera {
 //        ADD_HOOK(FixedCamera_Initialize, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "FixedCamera", "Initialize"));
 //        ADD_HOOK(CameraManager_CreatePresetCameras, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "CreatePresetCameras"));
 
-
 //  useless ADD_HOOK(SwipeCamera_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "SwipeCamera", ".ctor"));
 
 #pragma endregion
 #pragma region FreeCamera_ADD_HOOK
         ADD_HOOK(FesLiveFixedCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveFixedCamera", "GetCamera"));
         ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
+        ADD_HOOK(CameraManager_AddCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "AddCamera"));
+        ADD_HOOK(CameraManager_get_Cameras, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "get_Cameras"));
         auto LiveConnectChapterListPresenter_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterListPresenter");
         auto display_klass = Il2cppUtils::find_nested_class_from_name(LiveConnectChapterListPresenter_klass, "<>c__DisplayClass10_0");
         auto createAvailableChapterNodeView_klass = Il2cppUtils::find_nested_class_from_name(display_klass, "<<CreateAvailableChapterNodeView>b__2>d");

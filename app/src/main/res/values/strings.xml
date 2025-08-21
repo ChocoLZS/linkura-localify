@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
-    <string name="hook.fesArchive.unlockTicket.title">Unlock Fes×LIVE Archive S Ticket</string>
-    <string name="hook.after.unlock.title">Unlock After</string>
-    <string name="hook.render.highResolution.title">1080p/2k/4k Resolution</string>
+    <string name="config.fesArchive.unlockTicket.title">Unlock Fes×LIVE Archive S Ticket</string>
+    <string name="config.after.unlock.title">Unlock After</string>
+    <string name="config.render.highResolution.title">1080p/2k/4k Resolution</string>
     <string name="enable_plugin">Enable Plugin (Not Hot Reloadable)</string>
     <string name="replace_font">Replace Font</string>
     <string name="lazy_init">Fast Initialization (Lazy loading)</string>
@@ -175,7 +175,7 @@
     <string name="replay.settings.title">Replay Settings</string>
     <string name="replay.settings.enable_motion_capture">Enable Motion Capture Replay</string>
     <string name="replay.settings.enable_in_game_display">In-Game Replay Display</string>
-    <string name="replay.settings.description">✅Official Motion Capture Replay, ☑️Reconstructed Motion Capture Replay, 📺Video Replay</string>
+    <string name="replay.settings.description">✅Official Motion Capture Replay, ☑️Reconstructed Motion Capture Replay, 📺Video Replay, ❌Motion Capture Replay incompatible with current version</string>
     <string name="replay.settings.metadata_url">Replay Metadata URL</string>
     <string name="replay.settings.metadata_url_placeholder">Replay metadata link</string>
     <string name="replay.settings.reset_url">Reset to Default</string>
@@ -236,5 +236,9 @@
     <string name="overlay.camera.sensitivity.floating_title">Camera Sensitivity</string>
     <string name="overlay.camera.sensitivity.close">Close</string>
     <string name="overlay.camera.sensitivity.reset">Reset to Default</string>
+
+    <!-- Legacy Compatibility Settings -->
+    <string name="config.legacy.title">Enable Legacy Version Compatibility (Not Hot Reloadable)</string>
+    <string name="config.legacy.description">Enabling this allows older client versions to log in normally. Please note that this plugin is primarily used for playing motion capture replay before May 29, 2025, and other features have not yet been adapted for compatibility. Currently only tested on version 3.1.0, both version 4.0.0 and earlier versions support playing old format motion capture data.</string>
 
 </resources>

@@ -17,7 +17,7 @@ import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.hookUtils.MainKeyEventDispatcher
 import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService
-import io.github.chocolzs.linkura.localify.mainUtils.ArchiveRepository
+import io.github.chocolzs.linkura.localify.mainUtils.AssetsRepository
 import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
@@ -141,16 +141,16 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
                 try {
                     val defaultMetadataUrl = getString(R.string.replay_default_metadata_url)
                     val savedMetadataUrl = prefs.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
-                    val result = ArchiveRepository.fetchArchiveList(savedMetadataUrl)
+                    val result = AssetsRepository.fetchArchiveList(savedMetadataUrl)
                     
                     result.onSuccess { fetchedList ->
                         // Save archive list
-                        ArchiveRepository.saveArchiveList(this@MainActivity, fetchedList)
+                        AssetsRepository.saveArchiveList(this@MainActivity, fetchedList)
                         
                         // Update archive config
-                        val existingConfig = ArchiveRepository.loadArchiveConfig(this@MainActivity)
-                        val newConfig = ArchiveRepository.createArchiveConfigFromList(fetchedList, existingConfig)
-                        ArchiveRepository.saveArchiveConfig(this@MainActivity, newConfig)
+                        val existingConfig = AssetsRepository.loadArchiveConfig(this@MainActivity)
+                        val newConfig = AssetsRepository.createArchiveConfigFromList(fetchedList, existingConfig)
+                        AssetsRepository.saveArchiveConfig(this@MainActivity, newConfig)
                         
                         LogExporter.addLogEntry("MainActivity", "I", "Archive refresh successful: ${fetchedList.size} items")
                     }.onFailure { error ->
@@ -158,6 +158,20 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
                     }
                 } catch (e: Exception) {
                     LogExporter.addLogEntry("MainActivity", "E", "Archive refresh error: ${e.message}")
+                }
+
+                try {
+                    LogExporter.addLogEntry("MainActivity", "I", "Fetching client resources")
+                    val clientResResult = AssetsRepository.fetchClientRes()
+
+                    clientResResult.onSuccess { clientRes ->
+                        AssetsRepository.saveClientRes(this@MainActivity, clientRes)
+                        LogExporter.addLogEntry("MainActivity", "I", "Client resources refresh successful: ${clientRes.size} versions")
+                    }.onFailure { error ->
+                        LogExporter.addLogEntry("MainActivity", "E", "Client resources refresh failed: ${error.message}")
+                    }
+                } catch (e: Exception) {
+                    LogExporter.addLogEntry("MainActivity", "E", "Client resources refresh error: ${e.message}")
                 }
                 
                 // Update preferences

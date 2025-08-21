@@ -89,6 +89,11 @@ namespace LinkuraLocal::HookStory {
         return durationSec;
     }
 
+    DEFINE_HOOK(void*, PresetPostProcessStartCommand_LoadPresetProfile, (Il2cppUtils::Il2CppString* presetName, void* mtd)){
+        Log::DebugFmt("PresetPostProcessStartCommand_LoadPresetProfile HOOKED, %s", presetName->ToString().c_str());
+        return PresetPostProcessStartCommand_LoadPresetProfile_Orig(presetName, mtd);
+    }
+
 
     void Install(HookInstaller* hookInstaller) {
 #pragma region Story
@@ -113,6 +118,7 @@ namespace LinkuraLocal::HookStory {
 //        ADD_HOOK(Tween_UpdateDelay, Il2cppUtils::GetMethodPointer("DOTween.dll", "DG.Tweening", "Tween", "UpdateDelay"));
 //        ADD_HOOK(TweeningDOTween_To, Il2cppUtils::GetMethodPointer("DOTween.dll", "DG.Tweening", "DOTween", "To", {"DG.Tweening.Core.DOGetter", "DG.Tweening.Core.DOSetter", "System.Single", "System.Single"}));
 //        ADD_HOOK(StorySystem_Pause, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "StorySystem", "Pause"));
+        ADD_HOOK(PresetPostProcessStartCommand_LoadPresetProfile, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "PresetPostProcessStartCommand", "LoadPresetProfile"));
 #pragma endregion
     }
 }

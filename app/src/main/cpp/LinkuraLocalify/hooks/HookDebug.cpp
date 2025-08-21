@@ -21,11 +21,18 @@ namespace LinkuraLocal::HookDebug {
         if (Config::removeRenderImageCover) return;
         CoverImageCommandReceiver_Awake_Orig(self, method);
     }
-    // 👀
+    // 👀　work for both als and mrs
     DEFINE_HOOK(void, CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self,void* character, void* method)) {
         Log::DebugFmt("CharacterVisibleReceiver_SetupExistCharacter HOOKED");
         if (Config::avoidCharacterExit) return;
         CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
+    }
+
+    // old Config::enableLegacyCompatibility
+    DEFINE_HOOK(void, MRS_AppsCoverScreen_SetActiveCoverImage, (Il2cppUtils::Il2CppObject* self, bool isActive, void* method)) {
+        Log::DebugFmt("AppsCoverScreen_SetActiveCoverImage HOOKED");
+        if (Config::removeRenderImageCover) isActive = false;
+        MRS_AppsCoverScreen_SetActiveCoverImage_Orig(self, isActive, method);
     }
 
     void Install(HookInstaller* hookInstaller) {
@@ -37,5 +44,8 @@ namespace LinkuraLocal::HookDebug {
         // 👀
         ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
         ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
+
+        // 👀 old
+        ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
     }
 }
