@@ -301,6 +301,15 @@ namespace LinkuraLocal::HookShare {
                                                                           cancellation_token, method_info);
     }
 
+    DEFINE_HOOK(void* , ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        if (Config::unlockAfter || Config::enableMotionCaptureReplay) {
+            return nullptr;
+        }
+        return ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_Orig(self,
+                                                                          request,
+                                                                          cancellation_token, method_info);
+    }
+
     DEFINE_HOOK(void* , FesliveApi_FesliveEnterWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
         Shareable::renderScene = Shareable::RenderScene::FesLive;
         return FesliveApi_FesliveEnterWithHttpInfoAsync_Orig(self,
@@ -434,6 +443,7 @@ namespace LinkuraLocal::HookShare {
                 ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
             }
         }
+        ADD_HOOK(ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveWithliveInfoWithHttpInfoAsync"));
 #pragma endregion
 
 #pragma region WithliveApi
