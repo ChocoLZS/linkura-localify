@@ -265,7 +265,7 @@ namespace LinkuraLocal::HookCamera {
 
 
     DEFINE_HOOK(void, CameraManager_AddCamera, (Il2cppUtils::Il2CppObject* self, void* baseCamera, void* method)) {
-        if (Config::isLegacyMrsVersion()) {
+        if (Config::isLegacyMrsVersion() && !HookShare::Shareable::renderSceneIsFesLive()) {
             Log::DebugFmt("CameraManager_AddCamera HOOKED");
             static auto CameraManager_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "BaseCamera");
             static auto CameraManager_get_Name = CameraManager_klass->Get<UnityResolve::Method>("get_Name");
