@@ -82,17 +82,47 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         override fun onConnected() {
             Log.i(TAG, "AIDL client connected to service")
             LogExporter.addLogEntry(TAG, "I", "AIDL client connected to service")
+            
+            // Additional connection success diagnosis
+            Log.i(TAG, "=== Connection Success Details ===")
+            val connectionTime = System.currentTimeMillis()
+            Log.i(TAG, "Connection established at: $connectionTime")
+            LogExporter.addLogEntry(TAG, "I", "Connection success at $connectionTime")
         }
         
         override fun onDisconnected() {
             Log.i(TAG, "AIDL client disconnected from service")
             LogExporter.addLogEntry(TAG, "I", "AIDL client disconnected from service")
             isCameraInfoOverlayEnabled = false
+            
+            // Additional disconnection diagnosis
+            Log.w(TAG, "=== Disconnection Details ===")
+            val disconnectionTime = System.currentTimeMillis()
+            Log.w(TAG, "Disconnection occurred at: $disconnectionTime")
+            LogExporter.addLogEntry(TAG, "W", "Disconnection at $disconnectionTime")
         }
         
         override fun onConnectionFailed() {
             Log.w(TAG, "AIDL client failed to connect to service")
             LogExporter.addLogEntry(TAG, "W", "AIDL client failed to connect to service")
+            
+            // Enhanced connection failure diagnosis
+            Log.e(TAG, "=== Connection Failure Details ===")
+            val failureTime = System.currentTimeMillis()
+            Log.e(TAG, "Connection failure occurred at: $failureTime")
+            Log.e(TAG, "Current process UID: ${android.os.Process.myUid()}")
+            Log.e(TAG, "Current thread: ${Thread.currentThread().name}")
+            
+            // Try to get more details about the failure
+            try {
+                val context = AndroidAppHelper.currentApplication()?.applicationContext
+                if (context != null) {
+                    diagnosePotentialConnectionIssues(context)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during failure diagnosis: ${e.message}")
+                LogExporter.addLogEntry(TAG, "E", "Failure diagnosis error: ${e.message}")
+            }
         }
     }
     
@@ -207,6 +237,50 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing camera background color", e)
+                false
+            }
+        }
+    }
+    
+    private val virtualKeyboardInputHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val keyboardInput = VirtualKeyboardInput.parseFrom(payload)
+                Log.v(TAG, "Received virtual keyboard input: keyCode=${keyboardInput.keyCode}, action=${keyboardInput.action}")
+
+                // Forward to native keyboard event handler
+                keyboardEvent(keyboardInput.keyCode, keyboardInput.action)
+                
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing virtual keyboard input", e)
+                false
+            }
+        }
+    }
+    
+    private val virtualJoystickInputHandler = object : MessageRouter.MessageTypeHandler {
+        override fun handleMessage(payload: ByteArray): Boolean {
+            return try {
+                val joystickInput = VirtualJoystickInput.parseFrom(payload)
+                Log.v(TAG, "Received virtual joystick input: action=${joystickInput.action}, rightX=${joystickInput.rightStickX}, rightY=${joystickInput.rightStickY}")
+
+                // Forward to native joystick event handler
+                joystickEvent(
+                    joystickInput.action,
+                    joystickInput.leftStickX,
+                    joystickInput.leftStickY,
+                    joystickInput.rightStickX,
+                    joystickInput.rightStickY,
+                    joystickInput.leftTrigger,
+                    joystickInput.rightTrigger,
+                    joystickInput.hatX,
+                    joystickInput.hatY
+                )
+                
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing virtual joystick input", e)
                 false
             }
         }
@@ -624,21 +698,140 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     }
 
     private fun setupAidlClient(context: Context) {
+        Log.i(TAG, "=== AIDL Client Setup Diagnosis ===")
+        LogExporter.addLogEntry(TAG, "I", "Starting AIDL client setup diagnosis")
+        
+        // Device info diagnosis
+        Log.i(TAG, "Android API level: ${Build.VERSION.SDK_INT}")
+        Log.i(TAG, "Android version: ${Build.VERSION.RELEASE}")
+        Log.i(TAG, "Device manufacturer: ${Build.MANUFACTURER}")
+        Log.i(TAG, "Device model: ${Build.MODEL}")
+//        LogExporter.addLogEntry(TAG, "I", "Device: API${Build.VERSION.SDK_INT}, Root=$isRooted, ${Build.MANUFACTURER} ${Build.MODEL}")
+        
+        // Target package diagnosis
+        try {
+            val packageInfo = context.packageManager.getPackageInfo("io.github.chocolzs.linkura.localify", 0)
+            Log.i(TAG, "Target package found: version=${packageInfo.versionName}, code=${packageInfo.longVersionCode}")
+            LogExporter.addLogEntry(TAG, "I", "Target package: ${packageInfo.versionName} (${packageInfo.longVersionCode})")
+            
+            val appInfo = packageInfo.applicationInfo
+            Log.i(TAG, "Target package enabled: ${appInfo.enabled}")
+            Log.i(TAG, "Target package system app: ${(appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0}")
+            Log.i(TAG, "Target package uid: ${appInfo.uid}")
+            LogExporter.addLogEntry(TAG, "I", "Target app: enabled=${appInfo.enabled}, uid=${appInfo.uid}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Target package not found or error: ${e.message}")
+            LogExporter.addLogEntry(TAG, "E", "Target package error: ${e.message}")
+        }
+        
+        // Current app info
+        val currentAppInfo = context.applicationInfo
+        Log.i(TAG, "Current app uid: ${currentAppInfo.uid}")
+        Log.i(TAG, "Current app process name: ${android.os.Process.myPid()}")
+        LogExporter.addLogEntry(TAG, "I", "Current app: uid=${currentAppInfo.uid}, pid=${android.os.Process.myPid()}")
+        
+        // Service intent diagnosis
+        val serviceIntent = android.content.Intent().apply {
+            setClassName("io.github.chocolzs.linkura.localify", "io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService")
+        }
+        
+        try {
+            val resolveInfo = context.packageManager.resolveService(serviceIntent, 0)
+            if (resolveInfo != null) {
+                Log.i(TAG, "AIDL service found: ${resolveInfo.serviceInfo.name}")
+                Log.i(TAG, "Service enabled: ${resolveInfo.serviceInfo.enabled}")
+                Log.i(TAG, "Service exported: ${resolveInfo.serviceInfo.exported}")
+                Log.i(TAG, "Service permission: ${resolveInfo.serviceInfo.permission ?: "none"}")
+                LogExporter.addLogEntry(TAG, "I", "AIDL service: enabled=${resolveInfo.serviceInfo.enabled}, exported=${resolveInfo.serviceInfo.exported}")
+            } else {
+                Log.w(TAG, "AIDL service not found or not resolvable")
+                LogExporter.addLogEntry(TAG, "W", "AIDL service not found")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error resolving AIDL service: ${e.message}")
+            LogExporter.addLogEntry(TAG, "E", "Service resolve error: ${e.message}")
+        }
+        
+        // // Permission diagnosis
+        // val permissions = arrayOf(
+        //     "android.permission.BIND_DEVICE_ADMIN",
+        //     "android.permission.SYSTEM_ALERT_WINDOW",
+        //     "android.permission.QUERY_ALL_PACKAGES"
+        // )
+        
+        // permissions.forEach { permission ->
+        //     val granted = context.checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        //     Log.i(TAG, "Permission $permission: $granted")
+        // }
+        
         // Register message handlers
         messageRouter.registerHandler(MessageType.CONFIG_UPDATE, configUpdateHandler)
         messageRouter.registerHandler(MessageType.OVERLAY_CONTROL_CAMERA_INFO, cameraInfoOverlayControlHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_INFO, archiveInfoHandler)
         messageRouter.registerHandler(MessageType.ARCHIVE_POSITION_SET_REQUEST, archivePositionSetHandler)
         messageRouter.registerHandler(MessageType.CAMERA_BACKGROUND_COLOR, cameraBackgroundColorHandler)
+        messageRouter.registerHandler(MessageType.VIRTUAL_KEYBOARD_INPUT, virtualKeyboardInputHandler)
+        messageRouter.registerHandler(MessageType.VIRTUAL_JOYSTICK_INPUT, virtualJoystickInputHandler)
+        
+        Log.i(TAG, "Message handlers registered, starting AIDL client...")
+        LogExporter.addLogEntry(TAG, "I", "Starting AIDL client connection attempt")
         
         // Add client handler and start client
         aidlClient.addMessageHandler(aidlClientHandler)
-        if (aidlClient.startClient(context)) {
-            Log.i(TAG, "AIDL client started successfully")
-            LogExporter.addLogEntry(TAG, "I", "AIDL client started successfully")
+        val startTime = System.currentTimeMillis()
+        val result = aidlClient.startClient(context)
+        val duration = System.currentTimeMillis() - startTime
+        
+        if (result) {
+            Log.i(TAG, "AIDL client started successfully (took ${duration}ms)")
+            LogExporter.addLogEntry(TAG, "I", "AIDL client started successfully in ${duration}ms")
         } else {
-            Log.w(TAG, "Failed to start AIDL client")
-            LogExporter.addLogEntry(TAG, "W", "Failed to start AIDL client")
+            Log.w(TAG, "Failed to start AIDL client (took ${duration}ms)")
+            LogExporter.addLogEntry(TAG, "W", "Failed to start AIDL client after ${duration}ms")
+            
+            // Additional failure diagnosis
+            diagnosePotentialConnectionIssues(context)
+        }
+        
+        Log.i(TAG, "=== AIDL Client Setup Diagnosis Complete ===")
+    }
+    
+    private fun diagnosePotentialConnectionIssues(context: Context) {
+        Log.w(TAG, "=== Connection Failure Analysis ===")
+        LogExporter.addLogEntry(TAG, "W", "Analyzing connection failure")
+        
+        // Check if service is running
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        val runningServices = activityManager.getRunningServices(Integer.MAX_VALUE)
+        val serviceRunning = runningServices.any { 
+            it.service.className.contains("LinkuraAidlService") 
+        }
+        Log.w(TAG, "AIDL service currently running: $serviceRunning")
+        LogExporter.addLogEntry(TAG, "W", "Service running: $serviceRunning")
+        
+        // Check SELinux status
+        try {
+            val selinuxFile = java.io.File("/sys/fs/selinux/enforce")
+            if (selinuxFile.exists()) {
+                val selinuxStatus = selinuxFile.readText().trim()
+                Log.w(TAG, "SELinux enforce status: $selinuxStatus")
+                LogExporter.addLogEntry(TAG, "W", "SELinux enforce: $selinuxStatus")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Cannot read SELinux status: ${e.message}")
+        }
+        
+        // Check if we can start the target service manually
+        try {
+            val serviceIntent = android.content.Intent().apply {
+                setClassName("io.github.chocolzs.linkura.localify", "io.github.chocolzs.linkura.localify.ipc.LinkuraAidlService")
+            }
+            val componentName = context.startService(serviceIntent)
+            Log.w(TAG, "Manual service start result: $componentName")
+            LogExporter.addLogEntry(TAG, "W", "Manual service start: ${componentName != null}")
+        } catch (e: Exception) {
+            Log.w(TAG, "Manual service start failed: ${e.message}")
+            LogExporter.addLogEntry(TAG, "W", "Manual service start failed: ${e.message}")
         }
     }
 

@@ -23,6 +23,8 @@ enum MessageType {
   OVERLAY_CONTROL_CAMERA_INFO = 7;
   CAMERA_BACKGROUND_COLOR = 8;
   LOG_EXPORT_REQUEST = 9;
+  VIRTUAL_KEYBOARD_INPUT = 10;
+  VIRTUAL_JOYSTICK_INPUT = 11;
   // Future message types can be added here
 }
 
@@ -140,4 +142,24 @@ message CameraBackgroundColor {
 // Log export request message
 message LogExportRequest {
   optional string export_path = 1; // Optional path for log export
+}
+
+// Virtual keyboard input message
+message VirtualKeyboardInput {
+  int32 key_code = 1;    // Key code (using Android KeyEvent constants)
+  int32 action = 2;      // Key action (ACTION_DOWN = 0, ACTION_UP = 1)
+  optional bool repeat = 3; // Whether this is a repeat key event
+}
+
+// Virtual joystick input message  
+message VirtualJoystickInput {
+  int32 action = 1;               // Motion event action
+  float left_stick_x = 2;         // Left stick X axis (-1.0 to 1.0)
+  float left_stick_y = 3;         // Left stick Y axis (-1.0 to 1.0)
+  float right_stick_x = 4;        // Right stick X axis (-1.0 to 1.0)
+  float right_stick_y = 5;        // Right stick Y axis (-1.0 to 1.0)
+  float left_trigger = 6;         // Left trigger (0.0 to 1.0)
+  float right_trigger = 7;        // Right trigger (0.0 to 1.0)
+  float hat_x = 8;                // D-pad X axis (-1.0 to 1.0)
+  float hat_y = 9;                // D-pad Y axis (-1.0 to 1.0)
 }
