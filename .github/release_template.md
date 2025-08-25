@@ -14,6 +14,11 @@
 </div>
 
 **Download based on your OS:**
+<ul>
+    <li>如果release版本APK无法正常工作，请尝试使用debug版本APK。</li>
+    <li>If the release APK does not work properly, please try using the debug APK.</li>
+    <li>リリース版APKが正常に動作しない場合は、デバッグ版APKをお試しください。</li>
+</ul>
 
 <div align=left>
 <table>
@@ -28,6 +33,7 @@
         <td>Android</td>
             <td>
                 <a href="https://github.com/ChocoLZS/linkura-localify/releases/download/VERSION/linkura-localify-VERSION-release-arm64-v8a.apk"><img src="https://img.shields.io/badge/APK-ARMv8-168039.svg?logo=android"></a><br>
+                <a href="https://github.com/ChocoLZS/linkura-localify/releases/download/VERSION/linkura-localify-VERSION-debug-arm64-v8a.apk"><img src="https://img.shields.io/badge/APK%20Debug-ARMv8-FF6B35.svg?logo=android"></a><br>
             </td>
         </tr>
     </tbody>

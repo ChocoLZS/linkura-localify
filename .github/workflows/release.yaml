@@ -57,7 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-apk:
+  build-release-apk:
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.get_tag.outputs.tag_name }}
@@ -130,8 +130,69 @@ jobs:
           name: ${{ steps.rename_apk.outputs.apk_name }}
           path: ${{ steps.rename_apk.outputs.apk_path }}
 
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      apk_path: ${{ steps.rename_apk.outputs.apk_path }}
+      apk_name: ${{ steps.rename_apk.outputs.apk_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android Development Environment
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: |
+          sdkmanager --install "cmake;3.22.1"
+          echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" > local.properties
+          echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+
+      - name: Update Submodules
+        run: |
+          git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
+        continue-on-error: true
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Get tag name
+        id: get_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag_name=v$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Rename APK
+        id: rename_apk
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+          apk_name="linkura-localify-${tag_name}-debug-arm64-v8a.apk"
+          cp "app/build/outputs/apk/debug/app-debug.apk" "$apk_name"
+          echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
+          echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rename_apk.outputs.apk_name }}
+          path: ${{ steps.rename_apk.outputs.apk_path }}
+
   upload-to-release:
-    needs: [create-release, build-apk]
+    needs: [create-release, build-release-apk, build-debug-apk]
     if: inputs.create_release == true
     runs-on: ubuntu-latest
     steps:
