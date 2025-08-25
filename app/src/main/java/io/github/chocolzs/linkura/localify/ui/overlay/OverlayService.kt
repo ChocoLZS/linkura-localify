@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.ControlPoint
+import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,12 +75,14 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var archiveOverlayService: ArchiveOverlayService? = null
     private var colorPickerOverlayService: ColorPickerOverlayService? = null
     private var cameraSensitivityOverlayService: CameraSensitivityOverlayService? = null
+    private var freeCameraControlOverlayService: FreeCameraControlOverlayService? = null
     
     // UI state
     private var isCameraOverlayVisible by mutableStateOf(false)
     private var isArchiveOverlayVisible by mutableStateOf(false)
     private var isColorPickerVisible by mutableStateOf(false)
     private var isCameraSensitivityVisible by mutableStateOf(false)
+    private var isFreeCameraControlVisible by mutableStateOf(false)
     private var isCameraMenuVisible by mutableStateOf(false)
     private var currentBackgroundColor by mutableStateOf(Color.Black)
     private var isToolbarCollapsed by mutableStateOf(false)
@@ -132,6 +136,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             archiveOverlayService = ArchiveOverlayService(this)
             colorPickerOverlayService = ColorPickerOverlayService(this)
             cameraSensitivityOverlayService = CameraSensitivityOverlayService(this)
+            freeCameraControlOverlayService = FreeCameraControlOverlayService(this)
             
             // Move to STARTED state after successful initialization
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -158,6 +163,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             archiveOverlayService?.destroy()
             colorPickerOverlayService?.destroy()
             cameraSensitivityOverlayService?.destroy()
+            freeCameraControlOverlayService?.destroy()
 
             aidlService = null
             isServiceBound = false
@@ -544,6 +550,31 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                         )
                     }
                 }
+
+                // Free Camera Control button
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(
+                            if (isFreeCameraControlVisible) Color.Blue.copy(alpha = 0.3f) else Color.Transparent,
+                            RoundedCornerShape(6.dp)
+                        )
+                ) {
+                    IconButton(
+                        onClick = {
+                            toggleFreeCameraControlOverlay()
+                            isCameraMenuVisible = false
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Gamepad,
+                            contentDescription = "free camera control",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -585,6 +616,15 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             cameraSensitivityOverlayService?.show()
         } else {
             cameraSensitivityOverlayService?.hide()
+        }
+    }
+    
+    private fun toggleFreeCameraControlOverlay() {
+        isFreeCameraControlVisible = !isFreeCameraControlVisible
+        if (isFreeCameraControlVisible) {
+            freeCameraControlOverlayService?.show()
+        } else {
+            freeCameraControlOverlayService?.hide()
         }
     }
 
@@ -629,6 +669,10 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     
     fun resetCameraSensitivityOverlayState() {
         isCameraSensitivityVisible = false
+    }
+    
+    fun resetFreeCameraControlOverlayState() {
+        isFreeCameraControlVisible = false
     }
     
     private fun updateToolbarPosition() {
