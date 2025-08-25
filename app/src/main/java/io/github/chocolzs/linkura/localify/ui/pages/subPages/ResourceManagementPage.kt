@@ -194,13 +194,14 @@ private fun ReplayTabPage(
         viewModel(factory = ReplaySettingsCollapsibleBoxViewModelFactory(initiallyExpanded = false))
     
     // Separate state for icon legend collapsible
-    var isIconLegendExpanded by remember { mutableStateOf(false) }
+    var isIconLegendExpanded by remember { mutableStateOf(true) }
 
     // Archive data state
     var archiveList by remember { mutableStateOf<List<ArchiveItem>>(emptyList()) }
     var replayTypes by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
     var isLoadingArchives by remember { mutableStateOf(false) }
     var archiveError by remember { mutableStateOf<String?>(null) }
+
 
     // Pull to refresh state for ReplayTabPage
     var isRefreshing by remember { mutableStateOf(false) }
@@ -230,7 +231,21 @@ private fun ReplayTabPage(
         }
     }
 
-    // Load initial archive data
+    // Fetch client resources function (silent)
+    suspend fun fetchClientResources() {
+        try {
+            val result = AssetsRepository.fetchClientRes()
+            result.onSuccess { clientRes ->
+                context?.let { ctx ->
+                    AssetsRepository.saveClientRes(ctx, clientRes)
+                }
+            }
+        } catch (e: Exception) {
+            // Silent failure - no UI feedback needed
+        }
+    }
+
+    // Load initial archive data and client resources
     LaunchedEffect(Unit) {
         context?.let { ctx ->
             val savedArchives = AssetsRepository.loadArchiveList(ctx)
@@ -243,6 +258,12 @@ private fun ReplayTabPage(
                 // Auto-fetch if no data exists
                 fetchArchiveData()
             }
+            
+            // Also check and fetch client resources if not available
+            val hasClientRes = AssetsRepository.loadClientRes(ctx) != null
+            if (!hasClientRes) {
+                fetchClientResources()
+            }
         }
     }
 
@@ -250,17 +271,32 @@ private fun ReplayTabPage(
     suspend fun onRefresh() {
         isRefreshing = true
         try {
+            // Fetch both archive data and client resources
             fetchArchiveData()
+            fetchClientResources()
         } finally {
             isRefreshing = false
         }
     }
 
-    Column(
+    // Pull to refresh now covers the entire content area
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            CoroutineScope(Dispatchers.Main).launch {
+                onRefresh()
+            }
+        },
         modifier = modifier
             .sizeIn(maxHeight = screenH)
             .fillMaxWidth()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
         // Fixed GakuGroupBox at the top
         GakuGroupBox(
             Modifier
@@ -279,6 +315,15 @@ private fun ReplayTabPage(
                     modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    GakuSwitch(text = stringResource(R.string.config_legacy_title), checked = config.value.enableLegacyCompatibility) {
+                            v -> context?.onEnableLegacyCompatibilityChanged(v)
+                    }
+                    // Note text for enableLegacyCompatibility
+                    Text(
+                        text = stringResource(R.string.config_legacy_description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                     // Enable Motion Capture Replay Switch
                     GakuSwitch(
                         text = stringResource(R.string.replay_settings_enable_motion_capture),
@@ -404,24 +449,12 @@ private fun ReplayTabPage(
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-        // Scrollable waterfall grid area with pull to refresh
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                CoroutineScope(Dispatchers.Main).launch {
-                    onRefresh()
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
+            // Archive waterfall grid area
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

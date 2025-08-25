@@ -53,7 +53,7 @@ jobs:
           name: Release ${{ steps.get_tag.outputs.tag_name }}
           body: ${{ steps.prepare_release_body.outputs.release_body }}
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(steps.get_tag.outputs.tag_name, 'alpha') || contains(steps.get_tag.outputs.tag_name, 'beta') || contains(steps.get_tag.outputs.tag_name, 'rc') || contains(steps.get_tag.outputs.tag_name, 'dev') || contains(steps.get_tag.outputs.tag_name, 'snapshot') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
