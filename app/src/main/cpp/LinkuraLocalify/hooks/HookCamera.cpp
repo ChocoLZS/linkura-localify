@@ -272,19 +272,20 @@ namespace LinkuraLocal::HookCamera {
             static auto CameraManager_get_CameraComponent = CameraManager_klass->Get<UnityResolve::Method>("get_CameraComponent");
             auto name = CameraManager_get_Name->Invoke<Il2cppUtils::Il2CppString*>(baseCamera);
             auto camera = CameraManager_get_CameraComponent->Invoke<UnityResolve::UnityType::Camera*>(baseCamera);
-            Log::DebugFmt("CameraManager_AddCamera: %s, camera is at %p", name->ToString().c_str(), camera);
-
-            // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
-            static re2::RE2 pattern(R"(^\d{6}(_[a-zA-Z]+$)?)");
-            std::string nameStr = name->ToString();
-            if (re2::RE2::FullMatch(nameStr, pattern) && !nameStr.ends_with("after")) {
-                if (!HookShare::Shareable::renderSceneIsFesLive()) {
-                    HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
-                    if (!initialCameraRendered) {
-                        sanitizeFreeCamera(camera);
+            if (name) {
+                std::string nameStr = name->ToString();
+                Log::DebugFmt("CameraManager_AddCamera: %s, camera is at %p", nameStr.c_str(), camera);
+                // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
+                static re2::RE2 pattern(R"(^\d{6}(_[a-zA-Z]+$)?)");
+                if (re2::RE2::FullMatch(nameStr, pattern) && !nameStr.ends_with("after")) {
+                    if (!HookShare::Shareable::renderSceneIsFesLive()) {
+                        HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
+                        if (!initialCameraRendered) {
+                            sanitizeFreeCamera(camera);
+                        }
+                        registerMainFreeCamera(camera);
+                        registerCurrentCamera(camera);
                     }
-                    registerMainFreeCamera(camera);
-                    registerCurrentCamera(camera);
                 }
             }
         }

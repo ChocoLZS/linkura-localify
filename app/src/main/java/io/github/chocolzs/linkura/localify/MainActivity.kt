@@ -127,6 +127,9 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         }
     }
 
+    /**
+     * will not work in none root real phone
+     */
     private fun performFirstLaunchArchiveRefresh() {
         val prefs = getSharedPreferences("linkura_prefs", 0)
         val isFirstLaunch = prefs.getBoolean("is_first_launch", true)
