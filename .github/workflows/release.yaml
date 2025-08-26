@@ -191,24 +191,38 @@ jobs:
           name: ${{ steps.rename_apk.outputs.apk_name }}
           path: ${{ steps.rename_apk.outputs.apk_path }}
 
-  upload-to-release:
-    needs: [create-release, build-release-apk, build-debug-apk]
+  upload-release-apk:
+    needs: [create-release, build-release-apk]
     if: inputs.create_release == true
     runs-on: ubuntu-latest
     steps:
-      - name: Download APK Artifact
+      - name: Download Release APK Artifact
         uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-release-apk.outputs.apk_name }}
 
-      - name: Find and Upload APK to Release
-        run: |
-          find . -name "*.apk" -type f
-          apk_file=$(find . -name "*.apk" -type f | head -1)
-          echo "Found APK: $apk_file"
-          
-      - name: Upload APK to Release
+      - name: Upload Release APK to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.create-release.outputs.tag_name }}
-          files: "**/*.apk"
+          files: ${{ needs.build-release-apk.outputs.apk_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-debug-apk:
+    needs: [create-release, build-debug-apk]
+    if: inputs.create_release == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Debug APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-debug-apk.outputs.apk_name }}
+
+      - name: Upload Debug APK to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag_name }}
+          files: ${{ needs.build-debug-apk.outputs.apk_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
