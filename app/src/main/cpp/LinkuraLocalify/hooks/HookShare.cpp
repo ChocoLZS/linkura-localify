@@ -184,6 +184,13 @@ namespace LinkuraLocal::HookShare {
                         }
                     }
                 }
+                static auto clear_json_arr = [](nlohmann::json& json, const std::string& key) {
+                    if (json.contains(key) && json[key].is_array()) {
+                        json[key].clear();
+                    }
+                };
+                clear_json_arr(json, "timelines");
+                clear_json_arr(json, "gift_pt_rankings");
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
