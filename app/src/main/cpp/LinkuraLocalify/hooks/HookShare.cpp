@@ -209,10 +209,10 @@ namespace LinkuraLocal::HookShare {
             if (Config::unlockAfter) {
                 json["has_extra_admission"] = "true";
             }
-            // if (Config::fesArchiveUnlockTicket) {
-            //     json["selectable_camera_types"] = {1,2,3,4};
-            //     json["ticket_rank"] = 6;
-            // }
+            if (Config::fesArchiveUnlockTicket) {
+                json["selectable_camera_types"] = {1,2,3,4};
+                json["ticket_rank"] = 6;
+            }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
@@ -332,9 +332,9 @@ namespace LinkuraLocal::HookShare {
                                                                     cancellation_token, method_info);
     }
     DEFINE_HOOK(void*, FesliveApi_FesliveSetCameraWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        // if (Config::fesArchiveUnlockTicket) {
-        //     return nullptr;
-        // }
+        if (Config::fesArchiveUnlockTicket) {
+            return nullptr;
+        }
         return FesliveApi_FesliveSetCameraWithHttpInfoAsync_Orig(self,
                                                                     request,
                                                                     cancellation_token, method_info);
