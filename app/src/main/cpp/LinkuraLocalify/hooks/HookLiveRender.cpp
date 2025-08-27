@@ -144,23 +144,6 @@ namespace LinkuraLocal::HookLiveRender {
         return result;
     }
 
-    // cheat for server api, but we need to decrease the abnormal behaviour here. ( camera_type should change when every request sends )
-    DEFINE_HOOK(void* ,ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        if (Config::fesArchiveUnlockTicket) {
-            auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-            json["camera_type"] = 1;
-            if (json.contains("focus_character_id")){
-                json.erase("focus_character_id");
-            }
-            request = static_cast<Il2cppUtils::Il2CppObject*>(
-                    Il2cppUtils::FromJsonStr(json.dump(), Il2cppUtils::get_system_type_from_instance(request))
-            );
-        }
-        return ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync_Orig(self,
-                                                                    request,
-                                                                    cancellation_token, method_info);
-    }
-
     /**
      * @brief set target frame rate for unity engine
      */
@@ -303,9 +286,7 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(SchoolResolution_GetResolution, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                                       "SchoolResolution", "GetResolution"));
 //        ADD_HOOK(LiveScreenOrientationModel_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveScreenOrientationModel", ".ctor"));
-        
-        // Fes live camera unlock
-        ADD_HOOK(ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveSetFesCameraWithHttpInfoAsync"));
+
         ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));

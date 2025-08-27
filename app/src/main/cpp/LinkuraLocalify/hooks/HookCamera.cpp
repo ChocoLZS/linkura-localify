@@ -278,7 +278,7 @@ namespace LinkuraLocal::HookCamera {
                 // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
                 static re2::RE2 pattern(R"(^\d{6}(_\w+$)?)");
                 if (re2::RE2::FullMatch(nameStr, pattern) && !nameStr.ends_with("after")) {
-                    if (!HookShare::Shareable::renderSceneIsFesLive()) {
+                    if (!HookShare::Shareable::renderSceneIsFesLive() && HookShare::Shareable::renderScene != HookShare::Shareable::RenderScene::WithLive) {
                         HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
                         if (!initialCameraRendered) {
                             sanitizeFreeCamera(camera);

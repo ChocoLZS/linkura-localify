@@ -104,7 +104,6 @@ namespace LinkuraLocal::HookShare {
             if (Config::fesArchiveUnlockTicket) {
                 json["selectable_camera_types"] = {1,2,3,4};
                 json["ticket_rank"] = 6;
-                result = Il2cppUtils::FromJsonStr(json.dump(), type);
             }
             if (Config::enableMotionCaptureReplay) {
                 auto archive_id = Shareable::currentArchiveId;
@@ -210,6 +209,10 @@ namespace LinkuraLocal::HookShare {
             if (Config::unlockAfter) {
                 json["has_extra_admission"] = "true";
             }
+            // if (Config::fesArchiveUnlockTicket) {
+            //     json["selectable_camera_types"] = {1,2,3,4};
+            //     json["ticket_rank"] = 6;
+            // }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
@@ -270,19 +273,14 @@ namespace LinkuraLocal::HookShare {
         }
         IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
             if (Config::unlockAfter) {
+                json["has_admission"] = "true";
                 json["has_extra_admission"] = "true";
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
             if (Config::unlockAfter) {
-                json["has_extra_admission"] = "true";
-            }
-            result = Il2cppUtils::FromJsonStr(json.dump(), type);
-        }
-        IF_CALLER_WITHIN(WebviewLiveApi_WebviewLiveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
-            if (Config::unlockAfter) {
-                json["has_extra_admission"] = "true";
+                json["has_admission"] = "true";
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
@@ -315,6 +313,31 @@ namespace LinkuraLocal::HookShare {
         return ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_Orig(self,
                                                                           request,
                                                                           cancellation_token, method_info);
+    }
+    // cheat for server api, but we need to decrease the abnormal behaviour here. ( camera_type should change when every request sends )
+    DEFINE_HOOK(void* ,ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        if (Config::fesArchiveUnlockTicket) {
+            return nullptr;
+//            auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
+//            json["camera_type"] = 1;
+//            if (json.contains("focus_character_id")){
+//                json.erase("focus_character_id");
+//            }
+//            request = static_cast<Il2cppUtils::Il2CppObject*>(
+//                    Il2cppUtils::FromJsonStr(json.dump(), Il2cppUtils::get_system_type_from_instance(request))
+//            );
+        }
+        return ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync_Orig(self,
+                                                                    request,
+                                                                    cancellation_token, method_info);
+    }
+    DEFINE_HOOK(void*, FesliveApi_FesliveSetCameraWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        // if (Config::fesArchiveUnlockTicket) {
+        //     return nullptr;
+        // }
+        return FesliveApi_FesliveSetCameraWithHttpInfoAsync_Orig(self,
+                                                                    request,
+                                                                    cancellation_token, method_info);
     }
 
     DEFINE_HOOK(void* , FesliveApi_FesliveEnterWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
@@ -409,8 +432,8 @@ namespace LinkuraLocal::HookShare {
 
     // Core_SynchronizeResourceVersion -> AssetManager_SynchronizeResourceVersion
     DEFINE_HOOK(void* , Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
+        Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
         if (Config::enableLegacyCompatibility) {
-            Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
             requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
         }
         return Core_SynchronizeResourceVersion_Orig(self, requestedVersion, mtd);
@@ -451,6 +474,8 @@ namespace LinkuraLocal::HookShare {
             }
         }
         ADD_HOOK(ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveWithliveInfoWithHttpInfoAsync"));
+        // Fes live camera unlock
+        ADD_HOOK(ArchiveApi_ArchiveSetFesCameraWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveSetFesCameraWithHttpInfoAsync"));
 #pragma endregion
 
 #pragma region WithliveApi
@@ -494,6 +519,8 @@ namespace LinkuraLocal::HookShare {
                 FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
             }
         }
+        // Fes live camera unlock
+        ADD_HOOK(FesliveApi_FesliveSetCameraWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "FesliveApi", "FesliveSetCameraWithHttpInfoAsync"));
 #pragma endregion
 
 #pragma region WebviewLiveApi
