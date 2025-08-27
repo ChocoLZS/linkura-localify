@@ -61,8 +61,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.get_tag.outputs.tag_name }}
-      apk_path: ${{ steps.rename_apk.outputs.apk_path }}
-      apk_name: ${{ steps.rename_apk.outputs.apk_name }}
+      artifact_path: ${{ steps.rename_apk.outputs.artifact_path }}
+      artifact_name: ${{ steps.rename_apk.outputs.artifact_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -121,21 +121,21 @@ jobs:
           tag_name="${{ steps.get_tag.outputs.tag_name }}"
           apk_name="linkura-localify-${tag_name}-release-arm64-v8a.apk"
           cp "${{ steps.sign_app.outputs.signedReleaseFile }}" "$apk_name"
-          echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
-          echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
+          echo "artifact_path=$apk_name" >> $GITHUB_OUTPUT
+          echo "artifact_name=$apk_name" >> $GITHUB_OUTPUT
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.rename_apk.outputs.apk_name }}
-          path: ${{ steps.rename_apk.outputs.apk_path }}
+          name: ${{ steps.rename_apk.outputs.artifact_name }}
+          path: ${{ steps.rename_apk.outputs.artifact_path }}
 
   build-debug-apk:
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.get_tag.outputs.tag_name }}
-      apk_path: ${{ steps.rename_apk.outputs.apk_path }}
-      apk_name: ${{ steps.rename_apk.outputs.apk_name }}
+      artifact_path: ${{ steps.rename_apk.outputs.artifact_path }}
+      artifact_name: ${{ steps.rename_apk.outputs.artifact_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -182,14 +182,14 @@ jobs:
           tag_name="${{ steps.get_tag.outputs.tag_name }}"
           apk_name="linkura-localify-${tag_name}-debug-arm64-v8a.apk"
           cp "app/build/outputs/apk/debug/app-debug.apk" "$apk_name"
-          echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
-          echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
+          echo "artifact_path=$apk_name" >> $GITHUB_OUTPUT
+          echo "artifact_name=$apk_name" >> $GITHUB_OUTPUT
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.rename_apk.outputs.apk_name }}
-          path: ${{ steps.rename_apk.outputs.apk_path }}
+          name: ${{ steps.rename_apk.outputs.artifact_name }}
+          path: ${{ steps.rename_apk.outputs.artifact_path }}
 
   upload-release-apk:
     needs: [create-release, build-release-apk]
@@ -199,13 +199,13 @@ jobs:
       - name: Download Release APK Artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build-release-apk.outputs.apk_name }}
+          name: ${{ needs.build-release-apk.outputs.artifact_name }}
 
       - name: Upload Release APK to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.create-release.outputs.tag_name }}
-          files: ${{ needs.build-release-apk.outputs.apk_name }}
+          files: ${{ needs.build-release-apk.outputs.artifact_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -217,12 +217,12 @@ jobs:
       - name: Download Debug APK Artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build-debug-apk.outputs.apk_name }}
+          name: ${{ needs.build-debug-apk.outputs.artifact_name }}
 
       - name: Upload Debug APK to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.create-release.outputs.tag_name }}
-          files: ${{ needs.build-debug-apk.outputs.apk_name }}
+          files: ${{ needs.build-debug-apk.outputs.artifact_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
