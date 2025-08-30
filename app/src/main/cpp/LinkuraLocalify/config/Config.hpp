@@ -44,6 +44,8 @@ namespace LinkuraLocal::Config {
     extern float cameraFovSensitivity;
     extern float cameraRotationSensitivity;
     extern bool enableLegacyCompatibility;
+    extern bool enableSetArchiveStartTime;
+    extern int archiveStartTime;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     extern std::string currentClientVersion;

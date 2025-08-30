@@ -46,6 +46,8 @@ namespace LinkuraLocal::Config {
     float cameraFovSensitivity = 1.0f;
     float cameraRotationSensitivity = 1.0f;
     bool enableLegacyCompatibility = false;
+    bool enableSetArchiveStartTime = false;
+    int archiveStartTime = 0;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -208,7 +210,7 @@ namespace LinkuraLocal::Config {
         for (size_t i = 0; i < maxLength; i++) {
             int v1Part = (i < v1Parts.size()) ? v1Parts[i] : 0;
             int v2Part = (i < v2Parts.size()) ? v2Parts[i] : 0;
-            
+            Log::DebugFmt("Comparing version parts: v1Part=%d, v2Part=%d", v1Part, v2Part);
             if (v1Part < v2Part) return -1;
             if (v1Part > v2Part) return 1;
         }

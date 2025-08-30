@@ -82,9 +82,166 @@ namespace LinkuraLocal::HookShare {
         return Config::isLegacyMrsVersion() ^ isAlsArchive;
     }
 #pragma region HttpRequests
+    nlohmann::json handle_get_with_archive_data(nlohmann::json json) {
+        if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
+            json["is_horizontal"] = "true";
+        }
+        if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
+            json["is_horizontal"] = "false";
+        }
+        if (Config::unlockAfter) {
+            json["has_extra_admission"] = "true";
+        }
+        if (Config::enableSetArchiveStartTime) {
+            json["chapters"][0]["play_time_second"] = Config::archiveStartTime;
+        }
+        if (Config::enableMotionCaptureReplay) {
+            auto archive_id = Shareable::currentArchiveId;
+            auto it = Config::archiveConfigMap.find(archive_id);
+            if (it == Config::archiveConfigMap.end()) return json;
+            auto archive_config = it->second;
+            auto replay_type = archive_config["replay_type"].get<uint>();
+            auto external_link = archive_config.contains("external_link") ? archive_config["external_link"].get<std::string>() : "";
+            auto external_fix_link = archive_config.contains("external_fix_link") ? archive_config["external_fix_link"].get<std::string>() : "";
+
+            auto assets_url = Config::motionCaptureResourceUrl;
+            if (replay_type == 0) {
+                json.erase("archive_url");
+            }
+            if (replay_type == 1) {
+                json.erase("video_url");
+                if (!external_link.empty()) {
+                    auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
+                    json["archive_url"] = new_external_link;
+                    if (!isMotionCaptureCompatible(new_external_link)) {
+                        Log::ShowToast("The motion replay is not compatible for current client!");
+                    }
+                }
+            }
+            if (replay_type == 2) {
+                json.erase("video_url");
+                if (!external_fix_link.empty()) {
+                    auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
+                    json["archive_url"] = new_external_fix_link;
+                    if (!isMotionCaptureCompatible(new_external_fix_link)) {
+                        Log::ShowToast("The motion replay is not compatible for current client!");
+                    }
+                }
+            }
+            static auto clear_json_arr = [](nlohmann::json& json, const std::string& key) {
+                if (json.contains(key) && json[key].is_array()) {
+                    json[key].clear();
+                }
+            };
+            clear_json_arr(json, "timelines");
+            clear_json_arr(json, "gift_pt_rankings");
+        }
+        return json;
+    }
+    nlohmann::json handle_get_fes_archive_data(nlohmann::json json) {
+        if (Config::unlockAfter) {
+            json["has_extra_admission"] = "true";
+        }
+        if (Config::fesArchiveUnlockTicket) {
+            json["selectable_camera_types"] = {1,2,3,4};
+            json["ticket_rank"] = 6;
+        }
+        if (Config::enableSetArchiveStartTime) {
+            json["chapters"][0]["play_time_second"] = Config::archiveStartTime;
+        }
+        if (Config::enableMotionCaptureReplay) {
+            auto archive_id = Shareable::currentArchiveId;
+            auto it = Config::archiveConfigMap.find(archive_id);
+            if (it == Config::archiveConfigMap.end()) return json;
+            auto archive_config = it->second;
+            auto replay_type = archive_config["replay_type"].get<uint>();
+            auto external_link = archive_config.contains("external_link") ? archive_config["external_link"].get<std::string>() : "";
+            auto external_fix_link = archive_config.contains("external_fix_link") ? archive_config["external_fix_link"].get<std::string>() : "";
+            auto assets_url = Config::motionCaptureResourceUrl;
+            if (replay_type == 0) {
+                json.erase("archive_url");
+            }
+            if (replay_type == 1) {
+                json.erase("video_url");
+                if (!external_link.empty()) {
+                    auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
+                    json["archive_url"] = new_external_link;
+                    if (!isMotionCaptureCompatible(new_external_link)) {
+                        Log::ShowToast("The motion replay is not compatible for current client!");
+                    }
+                }
+            }
+            if (replay_type == 2) {
+                json.erase("video_url");
+                if (!external_fix_link.empty()) {
+                    auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
+                    json["archive_url"] = new_external_fix_link;
+                    if (!isMotionCaptureCompatible(new_external_fix_link)) {
+                        Log::ShowToast("The motion replay is not compatible for current client!");
+                    }
+                }
+            }
+        }
+        return json;
+    }
+    nlohmann::json handle_get_archive_list(nlohmann::json json) {
+        for (auto& archive : json["archive_list"]) {
+            auto archive_id = archive["archives_id"].get<std::string>();
+            if (Config::unlockAfter) {
+                archive["has_extra_admission"] = "true";
+            }
+            if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
+                auto live_start_time = archive["live_start_time"].get<std::string>();
+                auto live_end_time = archive["live_end_time"].get<std::string>();
+                auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
+                Shareable::archiveData[archive_id] = {
+                        .id = archive_id,
+                        .duration = duration,
+                };
+                Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
+            }
+            if (Config::enableMotionCaptureReplay && Config::enableInGameReplayDisplay) {
+                auto it = Config::archiveConfigMap.find(archive_id);
+                if (it == Config::archiveConfigMap.end()) continue;
+                auto archive_config = it->second;
+                auto replay_type = archive_config["replay_type"].get<uint>();
+                auto archive_title = archive["name"].get<std::string>();
+                /**
+                 * isMrsVersion isAlsArchive Playable
+                 * 0            0            0
+                 * 0            1            1
+                 * 1            0            1
+                 * 1            1            0
+                 *
+                 * Exclusive or: isMrsVersion ^ isAls
+                 */
+                if (replay_type == 1) { // motion capture replay
+                    std::string mark = isMotionCaptureCompatible(archive_config["external_link"].get<std::string>()) ? "✅" : "❌";
+                    archive_title = mark + archive_title;
+                }
+                if (replay_type == 2) {
+                    std::string mark = isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>()) ? "☑️" : "❌";
+                    archive_title = mark + archive_title;
+                }
+                if (replay_type == 0) { // video replay
+                    archive_title = "📺" + archive_title;
+                }
+                archive["name"] = archive_title;
+            }
+        }
+        return json;
+    }
     uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
+    /**
+     * Legacy version 1.10.60
+     */
+    uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = 0;
+    /**
+     * Legacy version 1.10.60
+     */
+    uintptr_t ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr = 0;
     uintptr_t WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
 
@@ -98,99 +255,23 @@ namespace LinkuraLocal::HookShare {
         auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(result)->ToString());
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_fes_archive_data response
-            if (Config::unlockAfter) {
-                json["has_extra_admission"] = "true";
-            }
-            if (Config::fesArchiveUnlockTicket) {
-                json["selectable_camera_types"] = {1,2,3,4};
-                json["ticket_rank"] = 6;
-            }
-            if (Config::enableMotionCaptureReplay) {
-                auto archive_id = Shareable::currentArchiveId;
-                auto it = Config::archiveConfigMap.find(archive_id);
-                if (it == Config::archiveConfigMap.end()) return result;
-                auto archive_config = it->second;
-                auto replay_type = archive_config["replay_type"].get<uint>();
-                auto external_link = archive_config.contains("external_link") ? archive_config["external_link"].get<std::string>() : "";
-                auto external_fix_link = archive_config.contains("external_fix_link") ? archive_config["external_fix_link"].get<std::string>() : "";
-                auto assets_url = Config::motionCaptureResourceUrl;
-                if (replay_type == 0) {
-                    json.erase("archive_url");
-                }
-                if (replay_type == 1) {
-                    json.erase("video_url");
-                    if (!external_link.empty()) {
-                        auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
-                        json["archive_url"] = new_external_link;
-                        if (!isMotionCaptureCompatible(new_external_link)) {
-                            Log::ShowToast("The motion replay is not compatible for current client!");
-                        }
-                    }
-                }
-                if (replay_type == 2) {
-                    json.erase("video_url");
-                    if (!external_fix_link.empty()) {
-                        auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
-                        json["archive_url"] = new_external_fix_link;
-                        if (!isMotionCaptureCompatible(new_external_fix_link)) {
-                            Log::ShowToast("The motion replay is not compatible for current client!");
-                        }
-                    }
-                }
-            }
+            json = handle_get_fes_archive_data(json);
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_with_archive_data response
-            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
-                json["is_horizontal"] = "true";
-            }
-            if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Portrait) {
-                json["is_horizontal"] = "false";
-            }
-            if (Config::unlockAfter) {
-                json["has_extra_admission"] = "true";
-            }
-            if (Config::enableMotionCaptureReplay) {
-                auto archive_id = Shareable::currentArchiveId;
-                auto it = Config::archiveConfigMap.find(archive_id);
-                if (it == Config::archiveConfigMap.end()) return result;
-                auto archive_config = it->second;
-                auto replay_type = archive_config["replay_type"].get<uint>();
-                auto external_link = archive_config.contains("external_link") ? archive_config["external_link"].get<std::string>() : "";
-                auto external_fix_link = archive_config.contains("external_fix_link") ? archive_config["external_fix_link"].get<std::string>() : "";
-
-                auto assets_url = Config::motionCaptureResourceUrl;
-                if (replay_type == 0) {
-                    json.erase("archive_url");
-                }
-                if (replay_type == 1) {
-                    json.erase("video_url");
-                    if (!external_link.empty()) {
-                        auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
-                        json["archive_url"] = new_external_link;
-                        if (!isMotionCaptureCompatible(new_external_link)) {
-                            Log::ShowToast("The motion replay is not compatible for current client!");
-                        }
-                    }
-                }
-                if (replay_type == 2) {
-                    json.erase("video_url");
-                    if (!external_fix_link.empty()) {
-                        auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
-                        json["archive_url"] = new_external_fix_link;
-                        if (!isMotionCaptureCompatible(new_external_fix_link)) {
-                            Log::ShowToast("The motion replay is not compatible for current client!");
-                        }
-                    }
-                }
-                static auto clear_json_arr = [](nlohmann::json& json, const std::string& key) {
-                    if (json.contains(key) && json[key].is_array()) {
-                        json[key].clear();
-                    }
-                };
-                clear_json_arr(json, "timelines");
-                clear_json_arr(json, "gift_pt_rankings");
-            }
+            json = handle_get_with_archive_data(json);
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr, caller, 3000) { // 1.10.60
+            json = handle_get_with_archive_data(json);
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
+            json = handle_get_archive_list(json);
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr, caller, 3000) { // 1.10.60
+            json = handle_get_archive_list(json);
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
@@ -205,65 +286,16 @@ namespace LinkuraLocal::HookShare {
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
-        IF_CALLER_WITHIN(FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
-            if (Config::unlockAfter) {
-                json["has_extra_admission"] = "true";
-            }
-            // if (Config::fesArchiveUnlockTicket) {
-            //     json["selectable_camera_types"] = {1,2,3,4};
-            //     json["ticket_rank"] = 6;
-            // }
-            result = Il2cppUtils::FromJsonStr(json.dump(), type);
-        }
-        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
-            for (auto& archive : json["archive_list"]) {
-                auto archive_id = archive["archives_id"].get<std::string>();
-                if (Config::unlockAfter) {
-                    archive["has_extra_admission"] = "true";
-                }
-                if (Shareable::archiveData.find(archive_id) == Shareable::archiveData.end()) {
-                    auto live_start_time = archive["live_start_time"].get<std::string>();
-                    auto live_end_time = archive["live_end_time"].get<std::string>();
-                    auto duration = LinkuraLocal::Misc::Time::parseISOTime(live_end_time) - LinkuraLocal::Misc::Time::parseISOTime(live_start_time);
-                    Shareable::archiveData[archive_id] = {
-                            .id = archive_id,
-                            .duration = duration,
-                    };
-                    Log::VerboseFmt("archives id is %s, duration is %lld", archive_id.c_str(), duration);
-                }
-                if (Config::enableMotionCaptureReplay && Config::enableInGameReplayDisplay) {
-                    auto it = Config::archiveConfigMap.find(archive_id);
-                    if (it == Config::archiveConfigMap.end()) continue;
-                    auto archive_config = it->second;
-                    auto replay_type = archive_config["replay_type"].get<uint>();
-                    auto archive_title = archive["name"].get<std::string>();
-                    /**
-                     * isMrsVersion isAlsArchive Playable
-                     * 0            0            0
-                     * 0            1            1
-                     * 1            0            1
-                     * 1            1            0
-                     *
-                     * Exclusive or: isMrsVersion ^ isAls
-                     */
-                    if (replay_type == 1) { // motion capture replay
-                        std::string mark = isMotionCaptureCompatible(archive_config["external_link"].get<std::string>()) ? "✅" : "❌";
-                        archive_title = mark + archive_title;
-                    }
-                    if (replay_type == 2) {
-                        std::string mark = isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>()) ? "☑️" : "❌";
-                        archive_title = mark + archive_title;
-                    }
-                    if (replay_type == 0) { // video replay
-                        archive_title = "📺" + archive_title;
-                    }
-                    archive["name"] = archive_title;
-                }
-
-            }
-            result = Il2cppUtils::FromJsonStr(json.dump(), type);
-        }
-
+//        IF_CALLER_WITHIN(FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+////            if (Config::unlockAfter) {
+////                json["has_extra_admission"] = "true";
+////            }
+//            // if (Config::fesArchiveUnlockTicket) {
+//            //     json["selectable_camera_types"] = {1,2,3,4};
+//            //     json["ticket_rank"] = 6;
+//            // }
+//            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+//        }
         // live info
         IF_CALLER_WITHIN(ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
             if (Config::unlockAfter) {
@@ -271,19 +303,19 @@ namespace LinkuraLocal::HookShare {
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
-        IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
-            if (Config::unlockAfter) {
-                json["has_admission"] = "true";
-                json["has_extra_admission"] = "true";
-            }
-            result = Il2cppUtils::FromJsonStr(json.dump(), type);
-        }
-        IF_CALLER_WITHIN(FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
-            if (Config::unlockAfter) {
-                json["has_admission"] = "true";
-            }
-            result = Il2cppUtils::FromJsonStr(json.dump(), type);
-        }
+//        IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+//            if (Config::unlockAfter) {
+////                json["has_admission"] = "true";
+//                json["has_extra_admission"] = "true";
+//            }
+//            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+//        }
+//        IF_CALLER_WITHIN(FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+////            if (Config::unlockAfter) {
+////                json["has_admission"] = "true";
+////            }
+//            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+//        }
         return result;
     }
 
@@ -331,10 +363,15 @@ namespace LinkuraLocal::HookShare {
                                                                     request,
                                                                     cancellation_token, method_info);
     }
+
+    DEFINE_HOOK(void*, ArchiveApi_ArchiveSetFesCameraAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveSetFesCameraAsync HOOKED");
+        return nullptr;
+    }
     DEFINE_HOOK(void*, FesliveApi_FesliveSetCameraWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        // if (Config::fesArchiveUnlockTicket) {
-        //     return nullptr;
-        // }
+         if (Config::fesArchiveUnlockTicket) {
+             return nullptr;
+         }
         return FesliveApi_FesliveSetCameraWithHttpInfoAsync_Orig(self,
                                                                     request,
                                                                     cancellation_token, method_info);
@@ -460,11 +497,23 @@ namespace LinkuraLocal::HookShare {
             if (method) {
                 ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
             }
+            // hook /v1/archive/get_with_archive_data response 1.10.60
+            auto ArchiveGetWithArchiveDataWithHttpInfoAsync_old_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetWithArchiveDataWithHttpInfoAsync>d__50");
+            method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetWithArchiveDataWithHttpInfoAsync_old_klass, "MoveNext", 0);
+            if (method) {
+                ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr = method->methodPointer;
+            }
             // hook /v1/archive/get_archive_list response
             auto ArchiveGetArchiveListWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetArchiveListWithHttpInfoAsync>d__18");
             method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetArchiveListWithHttpInfoAsync_klass, "MoveNext", 0);
             if (method) {
                 ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = method->methodPointer;
+            }
+            // hook /v1/archive/get_archive_list response 1.10.60
+            auto ArchiveGetArchiveListWithHttpInfoAsync_old_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetArchiveListWithHttpInfoAsync>d__22");
+            method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetArchiveListWithHttpInfoAsync_old_klass, "MoveNext", 0);
+            if (method) {
+                ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr = method->methodPointer;
             }
             // hook /v1/archive/withlive_info
             auto ArchiveWithliveInfoWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveWithliveInfoWithHttpInfoAsync>d__70");
