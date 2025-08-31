@@ -433,6 +433,46 @@ namespace LinkuraLocal::HookCamera {
         registerCurrentCamera(camera);
         return camera;
     }
+    enum LiveCameraType {
+        LiveCameraTypeUndefined,
+        LiveCameraTypeDynamicView,
+        LiveCameraTypeArenaView,
+        LiveCameraTypeStandView,
+        LiveCameraTypeSchoolIdle
+    };
+
+    DEFINE_HOOK(void, FesLiveCameraSwitcher_SwitchCamera, (Il2cppUtils::Il2CppObject* self, LiveCameraType enableCameraType, void* method)) {
+        static auto FesLiveCameraSwitcher_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "School.LiveMain", "FesLiveCameraSwitcher");
+        static auto currentCamera_field = FesLiveCameraSwitcher_klass->Get<UnityResolve::Field>("currentCamera");
+        static auto FesLiveFixedCamera_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "School.LiveMain", "FesLiveFixedCamera");
+        static auto FesLiveFixedCamera_camera_field = FesLiveFixedCamera_klass->Get<UnityResolve::Field>("camera");
+        static auto IdolTargetingCamera_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "School.LiveMain", "IdolTargetingCamera");
+        static auto IdolTargetingCamera_camera_field = IdolTargetingCamera_klass->Get<UnityResolve::Field>("camera");
+
+        Log::DebugFmt("FesLiveCameraSwitcher_SwitchCamera HOOKED, %d", enableCameraType);
+        FesLiveCameraSwitcher_SwitchCamera_Orig(self, enableCameraType, method);
+        auto currentCamera = Il2cppUtils::ClassGetFieldValue<void*>(self, currentCamera_field);
+        if (!currentCamera) return;
+        if (enableCameraType == LiveCameraType::LiveCameraTypeArenaView || enableCameraType == LiveCameraType::LiveCameraTypeStandView) {
+            auto camera = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Camera*>(currentCamera, FesLiveFixedCamera_camera_field);
+            if (!initialCameraRendered) {
+                sanitizeFreeCamera(camera);
+            }
+            registerMainFreeCamera(camera);
+            registerCurrentCamera(camera);
+        }
+//        if (enableCameraType == LiveCameraType::LiveCameraTypeDynamicView) {
+//            static auto DynamicCamera_klass = Il2cppUtils::GetClass("Assembly-CSharp.dll", "School.LiveMain", "DynamicCamera");
+//            static auto DynamicCamera_camera_field = DynamicCamera_klass->Get<UnityResolve::Field>("camera");
+//            auto camera = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Camera*>(currentCamera, DynamicCamera_camera_field);
+//            registerCurrentCamera(camera);
+//        }
+        if (enableCameraType == LiveCameraType::LiveCameraTypeSchoolIdle) {
+            auto camera = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Camera*>(currentCamera, IdolTargetingCamera_camera_field);
+            registerCurrentCamera(camera);
+        }
+    }
+
 
 #pragma endregion
 
@@ -548,9 +588,9 @@ namespace LinkuraLocal::HookCamera {
         return ItemSyncTransform_SyncTransform_Orig(self, bindBone, method);
     }
 
-    //  not hooked
+    //  hooked
     DEFINE_HOOK(void, ItemSyncTransform_SetupSyncTransform, (void* self,uint32_t c_id, UnityResolve::UnityType::Transform* bindBone, void* mtd)) {
-        Log::DebugFmt("ItemSyncTransform_SetupSyncTransform HOOKED, %p", self);
+//        Log::DebugFmt("ItemSyncTransform_SetupSyncTransform HOOKED, %p", self);
         return ItemSyncTransform_SetupSyncTransform_Orig(self, c_id, bindBone, mtd);
     }
 
@@ -582,7 +622,7 @@ namespace LinkuraLocal::HookCamera {
 
     void Install(HookInstaller* hookInstaller) {
 #pragma region Camera
-//        ADD_HOOK(FesLiveCameraSwitcher_SwitchCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveCameraSwitcher", "SwitchCamera"));
+        ADD_HOOK(FesLiveCameraSwitcher_SwitchCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveCameraSwitcher", "SwitchCamera"));
 
         ADD_HOOK(DynamicCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "DynamicCamera", "GetCamera"));
         ADD_HOOK(IdolTargetingCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "IdolTargetingCamera", "GetCamera"));
