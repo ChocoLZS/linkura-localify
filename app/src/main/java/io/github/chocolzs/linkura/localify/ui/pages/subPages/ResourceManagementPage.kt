@@ -333,6 +333,24 @@ private fun ReplayTabPage(
                         }
                     )
 
+                    GakuSwitch(
+                        text = stringResource(R.string.replay_settings_filter_motion_capture_replay),
+                        checked = config.value.filterMotionCaptureReplay,
+                        enabled = config.value.enableMotionCaptureReplay,
+                        onCheckedChange = { value ->
+                            context?.onFilterMotionCaptureReplayChanged(value)
+                        }
+                    )
+
+                    GakuSwitch(
+                        text = stringResource(R.string.replay_settings_filter_playable_motion_capture),
+                        checked = config.value.filterPlayableMotionCapture,
+                        enabled = config.value.enableMotionCaptureReplay,
+                        onCheckedChange = { value ->
+                            context?.onFilterPlayableMotionCaptureChanged(value)
+                        }
+                    )
+
                     // In-Game Replay Display Sub-switch
                     GakuSwitch(
                         text = stringResource(R.string.replay_settings_enable_in_game_display),

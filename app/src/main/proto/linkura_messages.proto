@@ -100,6 +100,8 @@ message ConfigUpdate {
   optional float camera_fov_sensitivity = 34;
   optional float camera_rotation_sensitivity = 35;
   optional bool story_hide_effect = 36;
+  optional bool filter_motion_capture_replay = 37;
+  optional bool filter_playable_motion_capture = 38;
 }
 
 // Overlay control actions

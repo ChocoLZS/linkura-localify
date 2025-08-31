@@ -82,7 +82,19 @@ namespace LinkuraLocal::HookShare {
         return Config::isLegacyMrsVersion() ^ isAlsArchive;
     }
 #pragma region HttpRequests
-    nlohmann::json handle_get_with_archive_data(nlohmann::json json) {
+    nlohmann::json handle_legacy_archive_data(nlohmann::json json) {
+        json["live_timeline_ids"] = json["timeline_ids"];
+        nlohmann::json character_ids = nlohmann::json::array();
+        for (const auto& character : json["characters"]) {
+            character_ids.push_back(character["character_id"]);
+        }
+        json["character_ids"] = character_ids;
+//        json["live_location_id"] = 23;
+//        json["costume_ids"] = {3016};
+        Log::VerboseFmt("%s", json.dump().c_str());
+        return json;
+    }
+    nlohmann::json handle_get_with_archive_data(nlohmann::json json, bool is_legacy = false) {
         if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
             json["is_horizontal"] = "true";
         }
@@ -136,9 +148,12 @@ namespace LinkuraLocal::HookShare {
             clear_json_arr(json, "timelines");
             clear_json_arr(json, "gift_pt_rankings");
         }
+        if (is_legacy) {
+            json = handle_legacy_archive_data(json);
+        }
         return json;
     }
-    nlohmann::json handle_get_fes_archive_data(nlohmann::json json) {
+    nlohmann::json handle_get_fes_archive_data(nlohmann::json json, bool is_legacy = false) {
         if (Config::unlockAfter) {
             json["has_extra_admission"] = "true";
         }
@@ -182,10 +197,45 @@ namespace LinkuraLocal::HookShare {
                 }
             }
         }
+        if (is_legacy) {
+            json = handle_legacy_archive_data(json);
+        }
         return json;
     }
+    bool filter_archive_by_rule(nlohmann::json archive) {
+        auto archive_id = archive["archives_id"].get<std::string>();
+        if (!Config::filterMotionCaptureReplay) return false; // default
+        auto it = Config::archiveConfigMap.find(archive_id);
+        if (it == Config::archiveConfigMap.end()) return true; // not found should be filtered
+        auto archive_config = it->second;
+
+        /**
+         * filter by simple replay type
+         */
+        auto replay_type = archive_config["replay_type"].get<uint>();
+        if (replay_type == 0) return true;
+
+        // apply rule
+
+        // judge motion capture version is compatible with current client
+        if (Config::filterPlayableMotionCapture) {
+            if (!isMotionCaptureCompatible(archive_config["external_link"].get<std::string>())
+                && !isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     nlohmann::json handle_get_archive_list(nlohmann::json json) {
-        for (auto& archive : json["archive_list"]) {
+        auto& archive_list = json["archive_list"];
+        archive_list.erase(
+                std::remove_if(archive_list.begin(), archive_list.end(),
+                               [](const nlohmann::json& archive) {
+                                   return filter_archive_by_rule(archive);
+                }),
+                archive_list.end());
+        for (auto& archive : archive_list) {
             auto archive_id = archive["archives_id"].get<std::string>();
             if (Config::unlockAfter) {
                 archive["has_extra_admission"] = "true";
@@ -234,14 +284,13 @@ namespace LinkuraLocal::HookShare {
     uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     /**
-     * Legacy version 1.10.60
+     * Legacy version 1.x.x
      */
+    uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr = 0;
-    uintptr_t ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = 0;
-    /**
-     * Legacy version 1.10.60
-     */
     uintptr_t ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr = 0;
+
+    uintptr_t ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = 0;
     uintptr_t WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t FesliveApi_FesliveEnterWithHttpInfoAsync_MoveNext_Addr = 0;
 
@@ -262,15 +311,19 @@ namespace LinkuraLocal::HookShare {
             json = handle_get_with_archive_data(json);
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
-        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr, caller, 3000) { // 1.10.60
-            json = handle_get_with_archive_data(json);
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_fes_archive_data response 1.x.x
+            json = handle_get_fes_archive_data(json, Config::isFirstYearVersion());
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_with_archive_data response 1.x.x
+            json = handle_get_with_archive_data(json, Config::isFirstYearVersion());
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_archive_list response
             json = handle_get_archive_list(json);
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
-        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr, caller, 3000) { // 1.10.60
+        IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr, caller, 3000) { // 1.x.x
             json = handle_get_archive_list(json);
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
@@ -497,7 +550,13 @@ namespace LinkuraLocal::HookShare {
             if (method) {
                 ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
             }
-            // hook /v1/archive/get_with_archive_data response 1.10.60
+            // hook /v1/archive/get_fes_archive_data response 1.x.x
+            auto ArchiveGetFesArchiveDataWithHttpInfoAsync_old_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetFesArchiveDataWithHttpInfoAsync>d__34");
+            method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetFesArchiveDataWithHttpInfoAsync_old_klass, "MoveNext", 0);
+            if (method) {
+                ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Old_MoveNext_Addr = method->methodPointer;
+            }
+            // hook /v1/archive/get_with_archive_data response 1.x.x
             auto ArchiveGetWithArchiveDataWithHttpInfoAsync_old_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetWithArchiveDataWithHttpInfoAsync>d__50");
             method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetWithArchiveDataWithHttpInfoAsync_old_klass, "MoveNext", 0);
             if (method) {
@@ -509,7 +568,7 @@ namespace LinkuraLocal::HookShare {
             if (method) {
                 ArchiveApi_ArchiveGetArchiveList_MoveNext_Addr = method->methodPointer;
             }
-            // hook /v1/archive/get_archive_list response 1.10.60
+            // hook /v1/archive/get_archive_list response 1.x.x
             auto ArchiveGetArchiveListWithHttpInfoAsync_old_klass = Il2cppUtils::find_nested_class_from_name(ArchiveApi_klass, "<ArchiveGetArchiveListWithHttpInfoAsync>d__22");
             method = Il2cppUtils::GetMethodIl2cpp(ArchiveGetArchiveListWithHttpInfoAsync_old_klass, "MoveNext", 0);
             if (method) {

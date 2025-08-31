@@ -180,6 +180,8 @@
     <string name="replay.settings.metadata_url_placeholder">Replay metadata link</string>
     <string name="replay.settings.reset_url">Reset to Default</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.filter_motion_capture_replay">Only Show Replays with Motion Capture</string>
+    <string name="replay.settings.filter_playable_motion_capture">Only Show Playable Motion Capture Replays</string>
 
     <!-- Archive Grid -->
     <string name="archive.loading">Loading archive data...</string>

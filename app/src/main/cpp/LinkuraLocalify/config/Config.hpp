@@ -46,6 +46,14 @@ namespace LinkuraLocal::Config {
     extern bool enableLegacyCompatibility;
     extern bool enableSetArchiveStartTime;
     extern int archiveStartTime;
+    /**
+     * Only show the archive with motion captures
+     */
+    extern bool filterMotionCaptureReplay;
+    /**
+     * Only show playable archive
+     */
+    extern bool filterPlayableMotionCapture;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     extern std::string currentClientVersion;
@@ -59,4 +67,5 @@ namespace LinkuraLocal::Config {
     void UpdateConfig(const linkura::ipc::ConfigUpdate& configUpdate);
 
     bool isLegacyMrsVersion();
+    bool isFirstYearVersion();
 }

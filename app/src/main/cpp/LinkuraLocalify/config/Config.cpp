@@ -48,6 +48,8 @@ namespace LinkuraLocal::Config {
     bool enableLegacyCompatibility = false;
     bool enableSetArchiveStartTime = false;
     int archiveStartTime = 0;
+    bool filterMotionCaptureReplay = false;
+    bool filterPlayableMotionCapture = false;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -60,6 +62,8 @@ namespace LinkuraLocal::Config {
     // cache
     bool isLegacyVersionCached = false;
     bool legacyVersionResult = false;
+    bool isFirstYearVersionCached = false;
+    bool isFirstYearVersionResult = false;
 
     void LoadConfig(const std::string& configStr) {
         try {
@@ -103,6 +107,8 @@ namespace LinkuraLocal::Config {
             GetConfigItem(cameraFovSensitivity);
             GetConfigItem(cameraRotationSensitivity);
             GetConfigItem(enableLegacyCompatibility);
+            GetConfigItem(filterMotionCaptureReplay);
+            GetConfigItem(filterPlayableMotionCapture);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -177,6 +183,8 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_camera_vertical_sensitivity()) cameraVerticalSensitivity = configUpdate.camera_vertical_sensitivity();
                 if (configUpdate.has_camera_fov_sensitivity()) cameraFovSensitivity = configUpdate.camera_fov_sensitivity();
                 if (configUpdate.has_camera_rotation_sensitivity()) cameraRotationSensitivity = configUpdate.camera_rotation_sensitivity();
+                if (configUpdate.has_filter_motion_capture_replay()) filterMotionCaptureReplay = configUpdate.filter_motion_capture_replay();
+                if (configUpdate.has_filter_playable_motion_capture()) filterPlayableMotionCapture = configUpdate.filter_playable_motion_capture();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());
@@ -220,18 +228,30 @@ namespace LinkuraLocal::Config {
 
     bool isLegacyMrsVersion() {
         if (currentClientVersion.empty()) return false;
-        
-        if (isLegacyVersionCached) {
-            return legacyVersionResult;
-        }
+        if (isLegacyVersionCached) return legacyVersionResult;
         
         const std::string legacyVersionThreshold = "4.0.1";
-        
         try {
             int compareResult = compareVersions(currentClientVersion, legacyVersionThreshold);
             legacyVersionResult = compareResult < 0;
             isLegacyVersionCached = true;
             return legacyVersionResult;
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version comparison error: %s", e.what());
+            return false;
+        }
+    }
+
+    bool isFirstYearVersion() {
+        if (currentClientVersion.empty()) return false;
+        if (isFirstYearVersionCached) return isFirstYearVersionResult;
+
+        const std::string firstYearVersionThreshold = "2.0.0";
+        try {
+            int compareResult = compareVersions(currentClientVersion, firstYearVersionThreshold);
+            isFirstYearVersionResult = compareResult < 0;
+            isFirstYearVersionCached = true;
+            return isFirstYearVersionResult;
         } catch (const std::exception& e) {
             Log::ErrorFmt("Version comparison error: %s", e.what());
             return false;

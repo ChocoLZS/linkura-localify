@@ -180,6 +180,8 @@
     <string name="replay.settings.metadata_url_placeholder">回放元信息链接</string>
     <string name="replay.settings.reset_url">复原</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.filter_motion_capture_replay">仅显示含动捕的回放</string>
+    <string name="replay.settings.filter_playable_motion_capture">仅显示可播放的动捕回放</string>
 
     <!-- Archive Grid -->
     <string name="archive.loading">正在加载存档数据...</string>

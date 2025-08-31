@@ -63,6 +63,8 @@ class ConfigUpdateManager private constructor() {
 //                if (config.motionCaptureResourceUrl != null) motionCaptureResourceUrl = config.motionCaptureResourceUrl
                 if (config.renderTextureAntiAliasing != null) renderTextureAntiAliasing = config.renderTextureAntiAliasing
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
+                if (config.filterMotionCaptureReplay != null) filterMotionCaptureReplay = config.filterMotionCaptureReplay
+                if (config.filterPlayableMotionCapture != null) filterPlayableMotionCapture = config.filterPlayableMotionCapture
             }.build()
 
             serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

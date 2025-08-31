@@ -52,6 +52,8 @@ interface ConfigListener {
     fun onCameraFovSensitivityChanged(value: Float)
     fun onCameraRotationSensitivityChanged(value: Float)
     fun onEnableLegacyCompatibilityChanged(value: Boolean)
+    fun onFilterMotionCaptureReplayChanged(value: Boolean)
+    fun onFilterPlayableMotionCaptureChanged(value: Boolean)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -330,6 +332,18 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onCameraRotationSensitivityChanged(value: Float) {
         config.cameraRotationSensitivity = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onFilterMotionCaptureReplayChanged(value: Boolean) {
+        config.filterMotionCaptureReplay = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onFilterPlayableMotionCaptureChanged(value: Boolean) {
+        config.filterPlayableMotionCapture = value
         saveConfig()
         sendConfigUpdate(config)
     }

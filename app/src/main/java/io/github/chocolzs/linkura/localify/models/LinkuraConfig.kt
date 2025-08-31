@@ -47,6 +47,9 @@ data class LinkuraConfig (
     var cameraRotationSensitivity: Float = 1.0f,
 
     var enableLegacyCompatibility: Boolean = false,
+    var filterMotionCaptureReplay: Boolean = false,
+    var filterPlayableMotionCapture: Boolean = false,
+
 
     var pf: Boolean = false,
 
