@@ -65,6 +65,9 @@ namespace LinkuraLocal::HookCamera {
     UnityResolve::UnityType::Transform* currentCameraTransformCache = nullptr;
     bool currentCameraRegistered = false;
 
+    bool namedCameraRegistered = false;
+    std::chrono::steady_clock::time_point namedCameraRegistrationTime;
+
     void registerCurrentCamera(UnityResolve::UnityType::Camera* currentCamera) {
         currentCameraCache = currentCamera;
         if (currentCameraCache) currentCameraTransformCache = currentCameraCache->GetTransform();
@@ -85,6 +88,16 @@ namespace LinkuraLocal::HookCamera {
         HookShare::Shareable::currentArchiveId = "";
         initialCameraRendered = false;
         backgroundColorCameraCache = nullptr;
+        namedCameraRegistered = false;
+    }
+
+    void CheckAndUpdateMainCamera() {
+        static auto userCamera_get_CachedCamera = UnityResolve::Get("Core.dll")->Get("UserCamera")->Get<UnityResolve::Method>("get_CachedCamera");
+        if (!Config::enableFreeCamera) return;
+
+        mainFreeCameraCache = UnityResolve::UnityType::Camera::GetCurrent();
+        freeCameraTransformCache = mainFreeCameraCache->GetTransform();
+        Log::VerboseFmt("CheckAndUpdateMainCamera: %p, %p", mainFreeCameraCache, freeCameraTransformCache);
     }
 
     std::vector<uint8_t> getCameraInfoProtobuf() {
@@ -263,39 +276,58 @@ namespace LinkuraLocal::HookCamera {
         LookAtCamera
     };
 
-
-    DEFINE_HOOK(void, CameraManager_AddCamera, (Il2cppUtils::Il2CppObject* self, void* baseCamera, void* method)) {
-        if (Config::isLegacyMrsVersion() && !HookShare::Shareable::renderSceneIsFesLive()) {
-            Log::DebugFmt("CameraManager_AddCamera HOOKED");
-            static auto CameraManager_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "BaseCamera");
-            static auto CameraManager_get_Name = CameraManager_klass->Get<UnityResolve::Method>("get_Name");
-            static auto CameraManager_get_CameraComponent = CameraManager_klass->Get<UnityResolve::Method>("get_CameraComponent");
-            auto name = CameraManager_get_Name->Invoke<Il2cppUtils::Il2CppString*>(baseCamera);
-            auto camera = CameraManager_get_CameraComponent->Invoke<UnityResolve::UnityType::Camera*>(baseCamera);
-            if (name) {
-                std::string nameStr = name->ToString();
-                Log::DebugFmt("CameraManager_AddCamera: %s, camera is at %p", nameStr.c_str(), camera);
-                // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
-                static re2::RE2 pattern(R"(^\d{6}(_\w+$)?)");
-                if (re2::RE2::FullMatch(nameStr, pattern) && !nameStr.ends_with("after")) {
-                    if (!HookShare::Shareable::renderSceneIsFesLive()) {
-                        HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
-                        if (!initialCameraRendered) {
-                            sanitizeFreeCamera(camera);
-                        }
-                        registerMainFreeCamera(camera);
-                        registerCurrentCamera(camera);
-                    }
-                }
-            }
-        }
-        CameraManager_AddCamera_Orig(self, baseCamera, method);
-    }
-
     // useless
     DEFINE_HOOK(void*, CameraManager_get_Cameras, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("CameraManager_get_Cameras HOOKED");
         return CameraManager_get_Cameras_Addr(self, method);
+    }
+
+
+    DEFINE_HOOK(UnityResolve::UnityType::Camera*, BaseCamera_get_CameraComponent, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        static auto BaseCamera_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "BaseCamera");
+        static auto BaseCamera_get_Name = BaseCamera_klass->Get<UnityResolve::Method>("get_Name");
+        auto camera = BaseCamera_get_CameraComponent_Orig(self, method);
+        if (Config::isLegacyMrsVersion() && !HookShare::Shareable::renderSceneIsFesLive()) {
+            Log::DebugFmt("BaseCamera_get_CameraComponent HOOKED");
+            auto name = BaseCamera_get_Name->Invoke<Il2cppUtils::Il2CppString*>(self);
+            if (name) {
+                std::string nameStr = name->ToString();
+                Log::DebugFmt("BaseCamera_get_CameraComponent: %s, camera is at %p", nameStr.c_str(), camera);
+                // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
+                static re2::RE2 pattern(R"(^\d{6}(_\w+$)?)");
+                if (re2::RE2::FullMatch(nameStr, pattern)) {
+                    Log::DebugFmt("Register named camera");
+                    namedCameraRegistered = true;
+                    namedCameraRegistrationTime = std::chrono::steady_clock::now();
+                    HookShare::Shareable::renderScene = HookShare::Shareable::RenderScene::WithLive;
+                    if (!initialCameraRendered) {
+                        sanitizeFreeCamera(camera);
+                    }
+                    registerMainFreeCamera(camera);
+                    registerCurrentCamera(camera);
+                }
+            } else if (HookShare::Shareable::renderSceneIsWithLive()) { // Unnamed camera wait for 100ms when named camera registered
+                bool canExecuteHandHold = true;
+                if (namedCameraRegistered) {
+                    auto currentTime = std::chrono::steady_clock::now();
+                    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - namedCameraRegistrationTime);
+                    if (elapsedTime.count() < 100) {
+                        canExecuteHandHold = false;
+                        Log::DebugFmt("Unnamed camera blocked, waiting for 100ms delay (elapsed: %lld ms)", elapsedTime.count());
+                    }
+                }
+                
+                if (canExecuteHandHold) {
+                    Log::DebugFmt("BaseCamera_get_CameraComponent: unnamed camera, %p", camera);
+                    registerMainFreeCamera(camera);
+                    registerCurrentCamera(camera);
+                    namedCameraRegistered = true;
+                    namedCameraRegistrationTime = std::chrono::steady_clock::now();
+                }
+            }
+        }
+
+        return camera;
     }
     // fes live / with meets, but we treat it as with live
     // when every dynamic camera change, this will be called
@@ -568,8 +600,8 @@ namespace LinkuraLocal::HookCamera {
 #pragma region FreeCamera_ADD_HOOK
         ADD_HOOK(FesLiveFixedCamera_GetCamera, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesLiveFixedCamera", "GetCamera"));
         ADD_HOOK(CameraManager_GetCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "GetCamera"));
-        ADD_HOOK(CameraManager_AddCamera, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "AddCamera"));
         ADD_HOOK(CameraManager_get_Cameras, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CameraManager", "get_Cameras"));
+        ADD_HOOK(BaseCamera_get_CameraComponent, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "BaseCamera", "get_CameraComponent"));
         auto LiveConnectChapterListPresenter_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectChapterListPresenter");
         auto display_klass = Il2cppUtils::find_nested_class_from_name(LiveConnectChapterListPresenter_klass, "<>c__DisplayClass10_0");
         auto createAvailableChapterNodeView_klass = Il2cppUtils::find_nested_class_from_name(display_klass, "<<CreateAvailableChapterNodeView>b__2>d");
