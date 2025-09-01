@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <sstream>
 #include "../build/linkura_messages.pb.h"
+#include "version_compatibility.h"
 
 namespace LinkuraLocal::Config {
     bool isConfigInit = false;
@@ -226,35 +227,35 @@ namespace LinkuraLocal::Config {
         return 0;
     }
 
+    bool checkVersionCompatibility(const std::string& rule, const std::string& version) {
+        try {
+            VersionCompatibility::VersionChecker checker(rule);
+            return checker.checkCompatibility(version);
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version compatibility check error: %s", e.what());
+            return false;
+        }
+    }
+
     bool isLegacyMrsVersion() {
         if (currentClientVersion.empty()) return false;
         if (isLegacyVersionCached) return legacyVersionResult;
-        
-        const std::string legacyVersionThreshold = "4.0.1";
-        try {
-            int compareResult = compareVersions(currentClientVersion, legacyVersionThreshold);
-            legacyVersionResult = compareResult < 0;
-            isLegacyVersionCached = true;
-            return legacyVersionResult;
-        } catch (const std::exception& e) {
-            Log::ErrorFmt("Version comparison error: %s", e.what());
-            return false;
-        }
+        // Use the new version compatibility checker: version < 4.0.1
+        legacyVersionResult = checkVersionCompatibility("< 4.0.1", currentClientVersion);
+        isLegacyVersionCached = true;
+        Log::DebugFmt("Legacy MRS version check: %s < 4.0.1 = %s",
+                      currentClientVersion.c_str(), legacyVersionResult ? "true" : "false");
+        return legacyVersionResult;
     }
 
     bool isFirstYearVersion() {
         if (currentClientVersion.empty()) return false;
         if (isFirstYearVersionCached) return isFirstYearVersionResult;
-
-        const std::string firstYearVersionThreshold = "2.0.0";
-        try {
-            int compareResult = compareVersions(currentClientVersion, firstYearVersionThreshold);
-            isFirstYearVersionResult = compareResult < 0;
-            isFirstYearVersionCached = true;
-            return isFirstYearVersionResult;
-        } catch (const std::exception& e) {
-            Log::ErrorFmt("Version comparison error: %s", e.what());
-            return false;
-        }
+        // Use the new version compatibility checker: version < 2.0.0
+        isFirstYearVersionResult = checkVersionCompatibility("< 2.0.0", currentClientVersion);
+        isFirstYearVersionCached = true;
+        Log::DebugFmt("First year version check: %s < 2.0.0 = %s",
+                      currentClientVersion.c_str(), isFirstYearVersionResult ? "true" : "false");
+        return isFirstYearVersionResult;
     }
 }

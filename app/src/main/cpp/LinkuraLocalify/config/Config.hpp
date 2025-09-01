@@ -66,6 +66,15 @@ namespace LinkuraLocal::Config {
     void SaveConfig(const std::string& configPath);
     void UpdateConfig(const linkura::ipc::ConfigUpdate& configUpdate);
 
+    // Legacy version comparison functions (keep for compatibility)
+    std::vector<int> parseVersion(const std::string& version);
+    int compareVersions(const std::string& version1, const std::string& version2);
+    
+    // New enhanced version compatibility functions
+    bool checkVersionCompatibility(const std::string& rule, const std::string& version);
+    bool isVersionInRange(const std::string& version, const std::string& minVersion, const std::string& maxVersion);
+    
+    // Version check functions (now using enhanced compatibility checker)
     bool isLegacyMrsVersion();
     bool isFirstYearVersion();
 }

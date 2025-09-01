@@ -89,10 +89,21 @@ namespace LinkuraLocal::HookShare {
             character_ids.push_back(character["character_id"]);
         }
         json["character_ids"] = character_ids;
-//        json["live_location_id"] = 23;
+//        json["_id"] = 23;
 //        json["costume_ids"] = {3016};
         Log::VerboseFmt("%s", json.dump().c_str());
+        if (Config::isFirstYearVersion()) {
+            for (auto& chapter : json["chapters"]) {
+                chapter["is_available"] = "true";
+            }
+        }
         return json;
+    }
+
+    void clear_json_arr(nlohmann::json& json, const std::string& key) {
+        if (json.contains(key) && json[key].is_array()) {
+            json[key].clear();
+        }
     }
     nlohmann::json handle_get_with_archive_data(nlohmann::json json, bool is_legacy = false) {
         if (Config::withliveOrientation == (int)HookLiveRender::LiveScreenOrientation::Landscape) {
@@ -140,11 +151,6 @@ namespace LinkuraLocal::HookShare {
                     }
                 }
             }
-            static auto clear_json_arr = [](nlohmann::json& json, const std::string& key) {
-                if (json.contains(key) && json[key].is_array()) {
-                    json[key].clear();
-                }
-            };
             clear_json_arr(json, "timelines");
             clear_json_arr(json, "gift_pt_rankings");
         }
@@ -196,6 +202,8 @@ namespace LinkuraLocal::HookShare {
                     }
                 }
             }
+            clear_json_arr(json, "timelines");
+            clear_json_arr(json, "gift_pt_rankings");
         }
         if (is_legacy) {
             json = handle_legacy_archive_data(json);
@@ -227,7 +235,7 @@ namespace LinkuraLocal::HookShare {
         return false;
     }
 
-    nlohmann::json handle_get_archive_list(nlohmann::json json) {
+    nlohmann::json handle_get_archive_list(nlohmann::json json, bool is_legacy = false) {
         auto& archive_list = json["archive_list"];
         archive_list.erase(
                 std::remove_if(archive_list.begin(), archive_list.end(),
@@ -278,6 +286,15 @@ namespace LinkuraLocal::HookShare {
                 }
                 archive["name"] = archive_title;
             }
+            if (is_legacy) {
+                if (archive["live_type"].get<int>() == 2) { // with meets
+                    archive["ticket_rank"] = 1;
+                }
+            }
+        }
+        if (is_legacy) {
+            json.erase("filterable_characters");
+            json.erase("sortable_fields");
         }
         return json;
     }
@@ -324,7 +341,7 @@ namespace LinkuraLocal::HookShare {
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetArchiveList_Old_MoveNext_Addr, caller, 3000) { // 1.x.x
-            json = handle_get_archive_list(json);
+            json = handle_get_archive_list(json, Config::isFirstYearVersion());
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
         IF_CALLER_WITHIN(WithliveApi_WithliveEnterWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
@@ -428,6 +445,13 @@ namespace LinkuraLocal::HookShare {
         return FesliveApi_FesliveSetCameraWithHttpInfoAsync_Orig(self,
                                                                     request,
                                                                     cancellation_token, method_info);
+    }
+
+    DEFINE_HOOK(void*, ArchiveApi_ArchiveGetWithTimelineDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        return nullptr;
+    }
+    DEFINE_HOOK(void*, ArchiveApi_ArchiveGetFesTimelineDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        return nullptr;
     }
 
     DEFINE_HOOK(void* , FesliveApi_FesliveEnterWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
@@ -657,6 +681,8 @@ namespace LinkuraLocal::HookShare {
         ADD_HOOK(Configuration_set_UserAgent, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_UserAgent"));
 //        ADD_HOOK(AssetManager_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetManager", "SynchronizeResourceVersion"));
         ADD_HOOK(Core_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "", "Core", "SynchronizeResourceVersion"));
+        ADD_HOOK(ArchiveApi_ArchiveGetWithTimelineDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithTimelineDataWithHttpInfoAsync"));
+        ADD_HOOK(ArchiveApi_ArchiveGetFesTimelineDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesTimelineDataWithHttpInfoAsync"));
         //        auto AssetManager_klass = Il2cppUtils::GetClassIl2cpp("Core.dll", "Hailstorm", "AssetManager");
 //        if (AssetManager_klass) {
 //            auto SynchronizeResourceVersion_klss = Il2cppUtils::find_nested_class_from_name(AssetManager_klass, "<SynchronizeResourceVersion>d__22");
