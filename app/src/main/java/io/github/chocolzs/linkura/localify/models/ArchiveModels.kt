@@ -10,6 +10,15 @@ enum class ReplayType {
 }
 
 @Serializable
+data class VersionCompatibility(
+    @SerialName("rule")
+    val rule: String,
+    
+    @SerialName("message")
+    val message: String
+)
+
+@Serializable
 data class ArchiveItem(
     @SerialName("archives_id")
     val archivesId: String,
@@ -43,6 +52,9 @@ data class ArchiveItem(
 
     @SerialName("external_fix_link")
     val externalFixLink: String = "",
+
+    @SerialName("version_compatibility")
+    val versionCompatibility: VersionCompatibility? = null
 )
 
 @Serializable
@@ -63,7 +75,10 @@ data class ArchiveConfig(
     val externalFixLink: String = "",
     
     @SerialName("replay_type")
-    val replayType: Int // 0 for video replay, 1 for motion capture replay, 2 for motion capture with fix
+    val replayType: Int, // 0 for video replay, 1 for motion capture replay, 2 for motion capture with fix
+    
+    @SerialName("version_compatibility")
+    val versionCompatibility: VersionCompatibility? = null
 )
 
 typealias ArchiveList = List<ArchiveItem>

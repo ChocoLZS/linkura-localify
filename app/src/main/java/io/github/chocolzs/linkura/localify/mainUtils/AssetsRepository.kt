@@ -113,7 +113,8 @@ object AssetsRepository {
                 externalLink = item.externalLink,
                 videoUrl = item.videoUrl,
                 externalFixLink = item.externalFixLink,
-                replayType = replayType
+                replayType = replayType,
+                versionCompatibility = item.versionCompatibility
             )
         }
     }

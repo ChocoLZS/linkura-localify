@@ -77,9 +77,21 @@ namespace LinkuraLocal::HookShare {
         }
     }
 
-    bool isMotionCaptureCompatible(const std::string & url) {
+    bool isMotionCaptureCompatible(const std::string & url, const nlohmann::json& archive_config) {
+        bool isCompatible = true;
         auto isAlsArchive = url.ends_with("md");
-        return Config::isLegacyMrsVersion() ^ isAlsArchive;
+        isCompatible &= Config::isLegacyMrsVersion() ^ isAlsArchive;
+        if (archive_config.contains("version_compatibility") && 
+            !archive_config["version_compatibility"].is_null() && 
+            archive_config["version_compatibility"].is_object()) {
+            auto version_compatibility = archive_config["version_compatibility"];
+//            Log::DebugFmt("version_compatibility is %s", version_compatibility.dump().c_str());
+            if (version_compatibility.contains("rule") && !version_compatibility["rule"].is_null()) {
+                std::string rule = version_compatibility["rule"].get<std::string>();
+                isCompatible &= VersionCompatibility::VersionChecker(rule).checkCompatibility(Config::currentClientVersion);
+            }
+        }
+        return isCompatible;
     }
 #pragma region HttpRequests
     nlohmann::json handle_legacy_archive_data(nlohmann::json json) {
@@ -92,7 +104,7 @@ namespace LinkuraLocal::HookShare {
 //        json["_id"] = 23;
 //        json["costume_ids"] = {3016};
         Log::VerboseFmt("%s", json.dump().c_str());
-        if (Config::isFirstYearVersion()) {
+        if (Config::isLegacyMrsVersion()) {
             for (auto& chapter : json["chapters"]) {
                 chapter["is_available"] = "true";
             }
@@ -136,9 +148,6 @@ namespace LinkuraLocal::HookShare {
                 if (!external_link.empty()) {
                     auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
                     json["archive_url"] = new_external_link;
-                    if (!isMotionCaptureCompatible(new_external_link)) {
-                        Log::ShowToast("The motion replay is not compatible for current client!");
-                    }
                 }
             }
             if (replay_type == 2) {
@@ -146,9 +155,6 @@ namespace LinkuraLocal::HookShare {
                 if (!external_fix_link.empty()) {
                     auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
                     json["archive_url"] = new_external_fix_link;
-                    if (!isMotionCaptureCompatible(new_external_fix_link)) {
-                        Log::ShowToast("The motion replay is not compatible for current client!");
-                    }
                 }
             }
             clear_json_arr(json, "timelines");
@@ -187,9 +193,6 @@ namespace LinkuraLocal::HookShare {
                 if (!external_link.empty()) {
                     auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
                     json["archive_url"] = new_external_link;
-                    if (!isMotionCaptureCompatible(new_external_link)) {
-                        Log::ShowToast("The motion replay is not compatible for current client!");
-                    }
                 }
             }
             if (replay_type == 2) {
@@ -197,9 +200,6 @@ namespace LinkuraLocal::HookShare {
                 if (!external_fix_link.empty()) {
                     auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
                     json["archive_url"] = new_external_fix_link;
-                    if (!isMotionCaptureCompatible(new_external_fix_link)) {
-                        Log::ShowToast("The motion replay is not compatible for current client!");
-                    }
                 }
             }
             clear_json_arr(json, "timelines");
@@ -214,7 +214,9 @@ namespace LinkuraLocal::HookShare {
         auto archive_id = archive["archives_id"].get<std::string>();
         if (!Config::filterMotionCaptureReplay) return false; // default
         auto it = Config::archiveConfigMap.find(archive_id);
-        if (it == Config::archiveConfigMap.end()) return true; // not found should be filtered
+        if (it == Config::archiveConfigMap.end()) {
+            return true; // not found should be filtered
+        }
         auto archive_config = it->second;
 
         /**
@@ -227,12 +229,60 @@ namespace LinkuraLocal::HookShare {
 
         // judge motion capture version is compatible with current client
         if (Config::filterPlayableMotionCapture) {
-            if (!isMotionCaptureCompatible(archive_config["external_link"].get<std::string>())
-                && !isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>())) {
-                return true;
+            if (replay_type == 1) {
+                if (!isMotionCaptureCompatible(archive_config["external_link"].get<std::string>(), archive_config)) {
+                    return true;
+                }
+            }
+            if (replay_type == 2) {
+                if (!isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>(), archive_config)) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+
+    bool try_handle_get_archive_data(const std::string& archive_id) {
+        std::string message = "The motion replay is not compatible for current client!";
+        bool avoid_next = false;
+        if (Config::enableMotionCaptureReplay && Config::avoidAccidentalTouch) {
+            auto it = Config::archiveConfigMap.find(archive_id);
+            if (it == Config::archiveConfigMap.end()) return false;
+            auto archive_config = it->second;
+
+            if (archive_config.contains("version_compatibility") &&
+                  !archive_config["version_compatibility"].is_null() &&
+                  archive_config["version_compatibility"].is_object()) {
+                auto version_compatibility = archive_config["version_compatibility"];
+                if (version_compatibility.contains("rule") && !version_compatibility["rule"].is_null()) {
+                    std::string rule = version_compatibility["rule"].get<std::string>();
+                    // show toast
+                    if (!version_compatibility["message"].is_null()) {
+                        message = version_compatibility["message"].get<std::string>();
+                    }
+                }
+            }
+            // client version is valid
+            auto replay_type = archive_config["replay_type"].get<uint>();
+            if (replay_type == 0) {
+                return false;
+            }
+            if (replay_type == 1) {
+                if (!isMotionCaptureCompatible(archive_config["external_link"].get<std::string>(), archive_config)) {
+                    avoid_next = true;
+                }
+            }
+            if (replay_type == 2) {
+                if (!isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>(), archive_config)) {
+                    avoid_next = true;
+                }
+            }
+        }
+        if (avoid_next) {
+            Log::ShowToast(message.c_str());
+        }
+        return avoid_next;
     }
 
     nlohmann::json handle_get_archive_list(nlohmann::json json, bool is_legacy = false) {
@@ -264,6 +314,19 @@ namespace LinkuraLocal::HookShare {
                 auto archive_config = it->second;
                 auto replay_type = archive_config["replay_type"].get<uint>();
                 auto archive_title = archive["name"].get<std::string>();
+                std::string recommendVersion;
+                if (archive_config.contains("version_compatibility") &&
+                    !archive_config["version_compatibility"].is_null() &&
+                    archive_config["version_compatibility"].is_object()) {
+                    auto version_compatibility = archive_config["version_compatibility"];
+                    if (version_compatibility.contains("rule") &&
+                        !version_compatibility["rule"].is_null()) {
+                        std::string rule = version_compatibility["rule"].get<std::string>();
+                        recommendVersion = Config::getRecommendVersion(rule);
+                    }
+                }
+                recommendVersion = recommendVersion.empty() ? recommendVersion : "[" + recommendVersion + "]";
+
                 /**
                  * isMrsVersion isAlsArchive Playable
                  * 0            0            0
@@ -274,11 +337,11 @@ namespace LinkuraLocal::HookShare {
                  * Exclusive or: isMrsVersion ^ isAls
                  */
                 if (replay_type == 1) { // motion capture replay
-                    std::string mark = isMotionCaptureCompatible(archive_config["external_link"].get<std::string>()) ? "✅" : "❌";
+                    std::string mark = isMotionCaptureCompatible(archive_config["external_link"].get<std::string>(), archive_config) ? "✅" : "❌" + recommendVersion;
                     archive_title = mark + archive_title;
                 }
                 if (replay_type == 2) {
-                    std::string mark = isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>()) ? "☑️" : "❌";
+                    std::string mark = isMotionCaptureCompatible(archive_config["external_fix_link"].get<std::string>(), archive_config) ? "☑️" : "❌" + recommendVersion;
                     archive_title = mark + archive_title;
                 }
                 if (replay_type == 0) { // video replay
@@ -392,7 +455,11 @@ namespace LinkuraLocal::HookShare {
     DEFINE_HOOK(void* , ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
         Log::DebugFmt("ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync HOOKED");
         auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-        Shareable::currentArchiveId = json["archives_id"].get<std::string>();
+        auto archive_id = json["archives_id"].get<std::string>();
+        if (try_handle_get_archive_data(archive_id)) {
+            return nullptr;
+        }
+        Shareable::currentArchiveId = archive_id;
         Shareable::renderScene = Shareable::RenderScene::FesLive;
         return ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_Orig(self,
                                                                          request,
@@ -401,11 +468,28 @@ namespace LinkuraLocal::HookShare {
     DEFINE_HOOK(void* , ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
         Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
         auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
-        Shareable::currentArchiveId = json["archives_id"].get<std::string>();
+        auto archive_id = json["archives_id"].get<std::string>();
+        if (try_handle_get_archive_data(archive_id)) {
+            return nullptr;
+        }
+        Shareable::currentArchiveId = archive_id;
         Shareable::renderScene = Shareable::RenderScene::WithLive;
         return ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_Orig(self,
                                                                           request,
                                                                           cancellation_token, method_info);
+    }
+
+    DEFINE_HOOK(void*, ArchiveApi_ArchiveGetArchiveListWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
+        Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
+        if (Config::filterMotionCaptureReplay) {
+            auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
+            json.erase("limit");
+            json.erase("offset");
+            request = static_cast<Il2cppUtils::Il2CppObject*>(
+                    Il2cppUtils::FromJsonStr(json.dump(), Il2cppUtils::get_system_type_from_instance(request))
+            );
+        }
+        return ArchiveApi_ArchiveGetArchiveListWithHttpInfoAsync_Orig(self, request, cancellation_token, method_info);
     }
 
     DEFINE_HOOK(void* , ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
@@ -494,7 +578,7 @@ namespace LinkuraLocal::HookShare {
             auto key_str = key->ToString();
             auto value_str = value->ToString();
             if (key_str == "x-client-version") {
-                value = Il2cppUtils::Il2CppString::New(Config::latestClientVersion);
+                value = Il2cppUtils::Il2CppString::New(Config::latestClientVersion.toString());
             }
             if (key_str == "x-res-version") {
                 value = Il2cppUtils::Il2CppString::New(Misc::StringFormat::split_once(Config::latestResVersion, "@").first);
@@ -508,7 +592,7 @@ namespace LinkuraLocal::HookShare {
             Log::DebugFmt("Configuration_set_UserAgent HOOKED, %s", value->ToString().c_str());
             auto value_str = value->ToString();
             if (value_str.starts_with("inspix-android")) {
-                value = Il2cppUtils::Il2CppString::New("inspix-android/" + Config::latestClientVersion);
+                value = Il2cppUtils::Il2CppString::New("inspix-android/" + Config::latestClientVersion.toString());
             }
         }
         Configuration_set_UserAgent_Orig(self, value ,mtd);
@@ -674,7 +758,7 @@ namespace LinkuraLocal::HookShare {
         ADD_HOOK(WithliveApi_WithliveEnterWithHttpInfoAsync , Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "WithliveApi", "WithliveEnterWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesArchiveDataWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithArchiveDataWithHttpInfoAsync"));
-
+        ADD_HOOK(ArchiveApi_ArchiveGetArchiveListWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetArchiveListWithHttpInfoAsync"));
 #pragma endregion
 #pragma region oldVersion
         ADD_HOOK(Configuration_AddDefaultHeader, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "AddDefaultHeader"));

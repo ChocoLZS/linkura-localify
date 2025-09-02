@@ -295,7 +295,7 @@ namespace LinkuraLocal::HookCamera {
                 Log::DebugFmt("BaseCamera_get_CameraComponent: %s, camera is at %p", nameStr.c_str(), camera);
                 // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
                 // first year: ruribirthday
-                static re2::RE2 pattern(Config::isFirstYearVersion() ? R"(^\w+)" : R"(^\d{6}(_\w+$)?)");
+                static re2::RE2 pattern(Config::isFirstYearVersion() ? R"(^\w+)" : R"(^\d{6}(_?\w+$)?)");
                 if (re2::RE2::FullMatch(nameStr, pattern)) {
                     Log::DebugFmt("Register named camera");
                     namedCameraRegistered = true;
@@ -377,6 +377,7 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(void*, LiveSceneController_FinalizeSceneAsync, (Il2cppUtils::Il2CppObject* self, void* token, void* method)) {
         Log::DebugFmt("LiveSceneController_FinalizeSceneAsync HOOKED");
         onRenderExit();
+        HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         return LiveSceneController_FinalizeSceneAsync_Orig(self, token, method);
     }
 

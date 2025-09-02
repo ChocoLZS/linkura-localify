@@ -47,17 +47,18 @@ namespace LinkuraLocal::Config {
     float cameraFovSensitivity = 1.0f;
     float cameraRotationSensitivity = 1.0f;
     bool enableLegacyCompatibility = false;
-    bool enableSetArchiveStartTime = false;
+    bool enableSetArchiveStartTime = true;
     int archiveStartTime = 0;
     bool filterMotionCaptureReplay = false;
     bool filterPlayableMotionCapture = false;
+    bool avoidAccidentalTouch = true;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     // runtime
-    std::string currentClientVersion;
+    VersionCompatibility::Version currentClientVersion;
     std::string currentResVersion;
-    std::string latestClientVersion;
+    VersionCompatibility::Version latestClientVersion;
     std::string latestResVersion;
     
     // cache
@@ -227,7 +228,7 @@ namespace LinkuraLocal::Config {
         return 0;
     }
 
-    bool checkVersionCompatibility(const std::string& rule, const std::string& version) {
+    bool checkVersionCompatibility(const std::string& rule, const VersionCompatibility::Version& version) {
         try {
             VersionCompatibility::VersionChecker checker(rule);
             return checker.checkCompatibility(version);
@@ -236,26 +237,44 @@ namespace LinkuraLocal::Config {
             return false;
         }
     }
+    
+    std::string getVersionRuleDescription(const std::string& rule) {
+        try {
+            VersionCompatibility::VersionChecker checker(rule);
+            return checker.toHumanReadable();
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version rule description error: %s", e.what());
+            return rule; // Fallback to original rule
+        }
+    }
+
+    std::string getRecommendVersion(const std::string& rule) {
+        try {
+            VersionCompatibility::VersionChecker checker(rule);
+            return checker.getRecommendVersion();
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version recommend error: %s", e.what());
+            return ""; // Return empty string on error
+        }
+    }
 
     bool isLegacyMrsVersion() {
-        if (currentClientVersion.empty()) return false;
         if (isLegacyVersionCached) return legacyVersionResult;
         // Use the new version compatibility checker: version < 4.0.1
         legacyVersionResult = checkVersionCompatibility("< 4.0.1", currentClientVersion);
         isLegacyVersionCached = true;
         Log::DebugFmt("Legacy MRS version check: %s < 4.0.1 = %s",
-                      currentClientVersion.c_str(), legacyVersionResult ? "true" : "false");
+                      currentClientVersion.toString().c_str(), legacyVersionResult ? "true" : "false");
         return legacyVersionResult;
     }
 
     bool isFirstYearVersion() {
-        if (currentClientVersion.empty()) return false;
         if (isFirstYearVersionCached) return isFirstYearVersionResult;
         // Use the new version compatibility checker: version < 2.0.0
         isFirstYearVersionResult = checkVersionCompatibility("< 2.0.0", currentClientVersion);
         isFirstYearVersionCached = true;
         Log::DebugFmt("First year version check: %s < 2.0.0 = %s",
-                      currentClientVersion.c_str(), isFirstYearVersionResult ? "true" : "false");
+                      currentClientVersion.toString().c_str(), isFirstYearVersionResult ? "true" : "false");
         return isFirstYearVersionResult;
     }
 }

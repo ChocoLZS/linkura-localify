@@ -57,6 +57,8 @@ class ASTNode {
 public:
     virtual ~ASTNode() = default;
     virtual bool evaluate(const Version& current_version) const = 0;
+    virtual std::string toHumanReadable() const = 0;
+    virtual std::string getRecommendVersion() const = 0;
 };
 
 // 版本比较节点
@@ -70,6 +72,8 @@ public:
         : operator_(op), target_version_(version) {}
     
     bool evaluate(const Version& current_version) const override;
+    std::string toHumanReadable() const override;
+    std::string getRecommendVersion() const override;
 };
 
 // 逻辑操作节点
@@ -84,6 +88,8 @@ public:
         : operator_(op), left_(std::move(left)), right_(std::move(right)) {}
     
     bool evaluate(const Version& current_version) const override;
+    std::string toHumanReadable() const override;
+    std::string getRecommendVersion() const override;
 };
 
 // 词法分析器
@@ -128,12 +134,19 @@ public:
 class VersionChecker {
 private:
     std::unique_ptr<ASTNode> ast_;
+    std::string original_rule_;
     
 public:
     explicit VersionChecker(const std::string& rule);
     
     bool checkCompatibility(const std::string& current_version) const;
     bool checkCompatibility(const Version& current_version) const;
+    
+    // Convert rule to human readable format
+    std::string toHumanReadable() const;
+    
+    // Get recommended version (first exact match found, empty if range)
+    std::string getRecommendVersion() const;
 };
 
 } // namespace VersionCompatibility

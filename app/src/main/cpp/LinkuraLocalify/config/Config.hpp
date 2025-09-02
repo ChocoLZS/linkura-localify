@@ -2,6 +2,7 @@
 
 #include "nlohmann/json.hpp"
 #include <unordered_map>
+#include "version_compatibility.h"
 
 namespace linkura { namespace ipc { class ConfigUpdate; } }
 
@@ -54,11 +55,12 @@ namespace LinkuraLocal::Config {
      * Only show playable archive
      */
     extern bool filterPlayableMotionCapture;
+    extern bool avoidAccidentalTouch;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
-    extern std::string currentClientVersion;
+    extern VersionCompatibility::Version currentClientVersion;
     extern std::string currentResVersion;
-    extern std::string latestClientVersion;
+    extern VersionCompatibility::Version latestClientVersion;
     extern std::string latestResVersion;
 
     void LoadConfig(const std::string& configStr);
@@ -73,6 +75,8 @@ namespace LinkuraLocal::Config {
     // New enhanced version compatibility functions
     bool checkVersionCompatibility(const std::string& rule, const std::string& version);
     bool isVersionInRange(const std::string& version, const std::string& minVersion, const std::string& maxVersion);
+    std::string getVersionRuleDescription(const std::string& rule);
+    std::string getRecommendVersion(const std::string& rule);
     
     // Version check functions (now using enhanced compatibility checker)
     bool isLegacyMrsVersion();

@@ -155,16 +155,17 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_loadClientResVersion(JN
         
         const std::string currentClientVersion = currentClientChars;
         const std::string currentResVersion = currentResChars;
-        const std::string latestClientVersion = latestClientChars;
-        const std::string latestResVersion = latestResChars;
-        
+        std::string latestClientVersion = latestClientChars;
+        std::string latestResVersion = latestResChars;
+
         LinkuraLocal::Log::InfoFmt("Loading current client: %s, current res: %s", currentClientVersion.c_str(), currentResVersion.c_str());
         LinkuraLocal::Log::InfoFmt("Loading latest client: %s, latest res: %s", latestClientVersion.c_str(), latestResVersion.c_str());
-        
+        if (latestClientVersion.empty()) latestClientVersion = currentClientVersion;
+        if (latestResVersion.empty()) latestResVersion = currentResVersion;
         // Store versions in Config
-        LinkuraLocal::Config::currentClientVersion = currentClientVersion;
+        LinkuraLocal::Config::currentClientVersion = VersionCompatibility::Version(currentClientVersion);
         LinkuraLocal::Config::currentResVersion = currentResVersion;
-        LinkuraLocal::Config::latestClientVersion = latestClientVersion;
+        LinkuraLocal::Config::latestClientVersion = VersionCompatibility::Version(latestClientVersion);
         LinkuraLocal::Config::latestResVersion = latestResVersion;
         
         env->ReleaseStringUTFChars(currentClient, currentClientChars);

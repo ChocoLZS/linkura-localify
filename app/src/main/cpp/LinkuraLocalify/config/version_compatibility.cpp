@@ -122,6 +122,41 @@ bool ComparisonNode::evaluate(const Version& current_version) const {
     return false;
 }
 
+std::string ComparisonNode::toHumanReadable() const {
+    std::string version_str = target_version_.toString();
+    
+    if (operator_ == "==") {
+        return version_str;                    // "1.5.0"
+    } else if (operator_ == "!=") {
+        return "!=" + version_str;            // "!=1.0.0"  
+    } else if (operator_ == "<") {
+        return "<" + version_str;             // "<2.0.0"
+    } else if (operator_ == "<=") {
+        return "<=" + version_str;            // "<=1.9.0"
+    } else if (operator_ == ">") {
+        return ">" + version_str;             // ">1.0.0"
+    } else if (operator_ == ">=") {
+        return version_str + "+";             // "1.2.0+"
+    }
+    
+    return operator_ + " " + version_str;     // Fallback
+}
+
+/**
+ * @brief Gets the recommended version from this comparison node
+ * 
+ * Returns the target version if this is an exact match (==), otherwise
+ * returns an empty string for range expressions.
+ * 
+ * @return Version string for exact matches, empty string for ranges
+ */
+std::string ComparisonNode::getRecommendVersion() const {
+    if (operator_ == "==") {
+        return target_version_.toString();
+    }
+    return "";  // Range expressions return empty
+}
+
 /**
  * @brief Evaluates a logical operation between two sub-expressions
  * 
@@ -138,6 +173,85 @@ bool LogicalNode::evaluate(const Version& current_version) const {
         return left_->evaluate(current_version) || right_->evaluate(current_version);
     }
     return false;
+}
+
+std::string LogicalNode::toHumanReadable() const {
+    if (operator_ == "&&") {
+        // Try to detect range pattern: >= x && < y
+        std::string left_readable = left_->toHumanReadable();
+        std::string right_readable = right_->toHumanReadable();
+        
+        // Check for range patterns like "1.0.0+" and "<2.0.0" -> [1.0.0, 2.0.0)
+        if (left_readable.back() == '+' && right_readable.front() == '<') {
+            std::string lower = left_readable.substr(0, left_readable.length() - 1);
+            std::string upper = right_readable.substr(1);
+            return "[" + lower + ", " + upper + ")";
+        }
+        // Check for ">x" and "<y" -> (x, y)
+        else if (left_readable.front() == '>' && left_readable[1] != '=' && 
+                 right_readable.front() == '<' && right_readable[1] != '=') {
+            std::string lower = left_readable.substr(1);
+            std::string upper = right_readable.substr(1);
+            return "(" + lower + ", " + upper + ")";
+        }
+        // Check for ">x" and "<=y" -> (x, y]
+        else if (left_readable.front() == '>' && left_readable[1] != '=' && 
+                 right_readable.substr(0, 2) == "<=") {
+            std::string lower = left_readable.substr(1);
+            std::string upper = right_readable.substr(2);  // Skip <=
+            return "(" + lower + ", " + upper + "]";
+        }
+        // Check for "x+" and "<=y" -> [x, y]
+        else if (left_readable.back() == '+' && right_readable.substr(0, 2) == "<=") {
+            std::string lower = left_readable.substr(0, left_readable.length() - 1);
+            std::string upper = right_readable.substr(2);  // Skip <=
+            return "[" + lower + ", " + upper + "]";
+        }
+        
+        // Default: just concatenate with space
+        return left_readable + " " + right_readable;
+        
+    } else if (operator_ == "||") {
+        // For OR, separate with comma
+        std::string left_readable = left_->toHumanReadable();
+        std::string right_readable = right_->toHumanReadable();
+        return left_readable + ", " + right_readable;
+    }
+    
+    return left_->toHumanReadable() + " " + operator_ + " " + right_->toHumanReadable();
+}
+
+/**
+ * @brief Gets the recommended version from this logical node
+ * 
+ * For OR expressions, returns the first exact version found in either branch.
+ * For AND expressions, returns empty string since it represents a range constraint.
+ * Special case: For closed intervals [x, x], returns that version.
+ * 
+ * @return Version string for exact matches, empty string for ranges
+ */
+std::string LogicalNode::getRecommendVersion() const {
+    if (operator_ == "||") {
+        // For OR expressions, return the first exact match found
+        std::string left_version = left_->getRecommendVersion();
+        if (!left_version.empty()) {
+            return left_version;
+        }
+        return right_->getRecommendVersion();
+    } else if (operator_ == "&&") {
+        // For AND expressions, check if it's a closed interval [x, x]
+        std::string left_version = left_->getRecommendVersion();
+        std::string right_version = right_->getRecommendVersion();
+        
+        // If both sides are exact matches and equal, return that version
+        if (!left_version.empty() && left_version == right_version) {
+            return left_version;
+        }
+        
+        // For range constraints, return empty
+        return "";
+    }
+    return "";
 }
 
 // =============================================================================
@@ -431,7 +545,7 @@ std::unique_ptr<ASTNode> Parser::parse() {
  *   "== 1.5.2 || == 1.5.3"       - Exactly version 1.5.2 or 1.5.3
  *   "(>= 1.0.0 && < 1.5.0) || >= 2.0.0" - Complex expression with grouping
  */
-VersionChecker::VersionChecker(const std::string& rule) {
+VersionChecker::VersionChecker(const std::string& rule) : original_rule_(rule) {
     Lexer lexer(rule);
     auto tokens = lexer.tokenize();
     Parser parser(std::move(tokens));
@@ -458,6 +572,34 @@ bool VersionChecker::checkCompatibility(const std::string& current_version) cons
  */
 bool VersionChecker::checkCompatibility(const Version& current_version) const {
     return ast_->evaluate(current_version);
+}
+
+/**
+ * @brief Converts the rule to human readable format
+ * 
+ * @return Human readable representation of the version rule
+ */
+std::string VersionChecker::toHumanReadable() const {
+    return ast_->toHumanReadable();
+}
+
+/**
+ * @brief Gets the recommended version from the parsed rule
+ * 
+ * Returns the first exact version match found in the rule expression.
+ * For range expressions, returns empty string unless it's a closed interval
+ * where both bounds are equal (e.g., >= 1.0.0 && <= 1.0.0).
+ * 
+ * @return Version string for exact matches, empty string for ranges
+ * 
+ * Examples:
+ *   "== 1.5.0"                     -> "1.5.0"
+ *   "== 1.5.0 || == 2.0.0"        -> "1.5.0" (first match)
+ *   ">= 1.0.0 && < 2.0.0"         -> "" (range)
+ *   ">= 1.5.0 && <= 1.5.0"        -> "1.5.0" (closed interval)
+ */
+std::string VersionChecker::getRecommendVersion() const {
+    return ast_->getRecommendVersion();
 }
 
 } // namespace VersionCompatibility
