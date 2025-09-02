@@ -182,6 +182,9 @@
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
     <string name="replay.settings.filter_motion_capture_replay">Only Show Replays with Motion Capture</string>
     <string name="replay.settings.filter_playable_motion_capture">Only Show Playable Motion Capture Replays</string>
+    <string name="replay.settings.enable_custom_start_time">Enable Custom Replay Start Time</string>
+    <string name="replay.settings.custom_start_time">Replay Start Time (Seconds)</string>
+    <string name="replay.settings.avoid_accidental_touch">Avoid Accidental Touch on Non-Compatible Motion Capture Replays</string>
 
     <!-- Archive Grid -->
     <string name="archive.loading">Loading archive data...</string>

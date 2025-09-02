@@ -47,7 +47,7 @@ namespace LinkuraLocal::Config {
     float cameraFovSensitivity = 1.0f;
     float cameraRotationSensitivity = 1.0f;
     bool enableLegacyCompatibility = false;
-    bool enableSetArchiveStartTime = true;
+    bool enableSetArchiveStartTime = false;
     int archiveStartTime = 0;
     bool filterMotionCaptureReplay = false;
     bool filterPlayableMotionCapture = false;
@@ -111,6 +111,9 @@ namespace LinkuraLocal::Config {
             GetConfigItem(enableLegacyCompatibility);
             GetConfigItem(filterMotionCaptureReplay);
             GetConfigItem(filterPlayableMotionCapture);
+            GetConfigItem(enableSetArchiveStartTime);
+            GetConfigItem(archiveStartTime);
+            GetConfigItem(avoidAccidentalTouch);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -187,6 +190,9 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_camera_rotation_sensitivity()) cameraRotationSensitivity = configUpdate.camera_rotation_sensitivity();
                 if (configUpdate.has_filter_motion_capture_replay()) filterMotionCaptureReplay = configUpdate.filter_motion_capture_replay();
                 if (configUpdate.has_filter_playable_motion_capture()) filterPlayableMotionCapture = configUpdate.filter_playable_motion_capture();
+                if (configUpdate.has_enable_set_archive_start_time()) enableSetArchiveStartTime = configUpdate.enable_set_archive_start_time();
+                if (configUpdate.has_archive_start_time()) archiveStartTime = configUpdate.archive_start_time();
+                if (configUpdate.has_avoid_accidental_touch()) avoidAccidentalTouch = configUpdate.avoid_accidental_touch();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());
