@@ -453,7 +453,7 @@ namespace LinkuraLocal::HookShare {
             if (it == Config::archiveConfigMap.end()) return result;
             auto archive_config = it->second;
             auto replay_type = archive_config["replay_type"].get<uint>();
-            if (replay_type == 1) { // replay
+            if (replay_type == 1 || replay_type == 2) { // replay
                 auto new_result_str = replaceExternalLinkUrl(result_str, Config::motionCaptureResourceUrl);
                 result = Il2cppUtils::Il2CppString::New(new_result_str);
             }
