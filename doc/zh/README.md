@@ -1,5 +1,9 @@
 # linkura-localify
 
+# 声明
+
+本仓库内的所有代码与资源仅供开发者学习与参考。作者不对代码的准确性、完整性或适用性作任何保证，使用者因使用本代码而引发的任何直接或间接的后果、损失或法律责任，均与作者无关，由使用者自行承担全部风险。
+
 [![GitHub stars](https://img.shields.io/github/stars/ChocoLZS/linkura-localify?style=social)](https://github.com/ChocoLZS/linkura-localify/stargazers) [![GitHub forks](https://img.shields.io/github/forks/ChocoLZS/linkura-localify?style=social)](https://github.com/ChocoLZS/linkura-localify/network/members) [![GitHub license](https://img.shields.io/github/license/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify) [![GitHub contributors](https://img.shields.io/github/contributors/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/graphs/contributors)
 [![GitHub issues](https://img.shields.io/github/issues/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues) [![GitHub issues closed](https://img.shields.io/github/issues-closed/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/pulls) [![GitHub last commit](https://img.shields.io/github/last-commit/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/commits) 
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify) [![GitHub repo size](https://img.shields.io/github/repo-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify)
