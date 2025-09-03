@@ -233,8 +233,9 @@ private fun ReplayTabPage(
 
     // Fetch client resources function (silent)
     suspend fun fetchClientResources() {
+        if (localMetadataUrl.isBlank()) return
         try {
-            val result = AssetsRepository.fetchClientRes()
+            val result = AssetsRepository.fetchClientRes(localMetadataUrl)
             result.onSuccess { clientRes ->
                 context?.let { ctx ->
                     AssetsRepository.saveClientRes(ctx, clientRes)
