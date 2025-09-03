@@ -211,8 +211,8 @@ namespace LinkuraLocal::HookShare {
         return json;
     }
     bool filter_archive_by_rule(nlohmann::json archive) {
+        if (!Config::enableMotionCaptureReplay || !Config::filterMotionCaptureReplay) return false;
         auto archive_id = archive["archives_id"].get<std::string>();
-        if (!Config::filterMotionCaptureReplay) return false; // default
         auto it = Config::archiveConfigMap.find(archive_id);
         if (it == Config::archiveConfigMap.end()) {
             return true; // not found should be filtered
@@ -255,12 +255,8 @@ namespace LinkuraLocal::HookShare {
                   !archive_config["version_compatibility"].is_null() &&
                   archive_config["version_compatibility"].is_object()) {
                 auto version_compatibility = archive_config["version_compatibility"];
-                if (version_compatibility.contains("rule") && !version_compatibility["rule"].is_null()) {
-                    std::string rule = version_compatibility["rule"].get<std::string>();
-                    // show toast
-                    if (!version_compatibility["message"].is_null()) {
-                        message = version_compatibility["message"].get<std::string>();
-                    }
+                if (version_compatibility.contains("message") && !version_compatibility["message"].is_null()) {
+                    message = version_compatibility["message"].get<std::string>();
                 }
             }
             // client version is valid
@@ -481,7 +477,7 @@ namespace LinkuraLocal::HookShare {
 
     DEFINE_HOOK(void*, ArchiveApi_ArchiveGetArchiveListWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
         Log::DebugFmt("ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync HOOKED");
-        if (Config::filterMotionCaptureReplay) {
+        if (Config::enableMotionCaptureReplay && Config::filterMotionCaptureReplay) {
             auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(request)->ToString());
             json.erase("limit");
             json.erase("offset");
@@ -493,7 +489,7 @@ namespace LinkuraLocal::HookShare {
     }
 
     DEFINE_HOOK(void* , ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync, (void* self, Il2cppUtils::Il2CppObject* request, void* cancellation_token, void* method_info)) {
-        if (Config::unlockAfter || Config::enableMotionCaptureReplay) {
+        if (Config::unlockAfter || (Config::enableMotionCaptureReplay && Config::filterMotionCaptureReplay)) {
             return nullptr;
         }
         return ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_Orig(self,
