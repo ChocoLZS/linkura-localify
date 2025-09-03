@@ -113,7 +113,8 @@ object AssetsRepository {
                 externalLink = item.externalLink,
                 videoUrl = item.videoUrl,
                 externalFixLink = item.externalFixLink,
-                replayType = replayType
+                replayType = replayType,
+                versionCompatibility = item.versionCompatibility
             )
         }
     }
@@ -159,9 +160,11 @@ object AssetsRepository {
         return saveArchiveConfig(context, updatedConfig)
     }
 
-    suspend fun fetchClientRes(clientResUrl: String = "https://assets.chocoie.com/client-res"): Result<Map<String, List<String>>> = withContext(Dispatchers.IO) {
+    suspend fun fetchClientRes(metadataUrl: String): Result<Map<String, List<String>>> = withContext(Dispatchers.IO) {
         try {
-            val url = URL(clientResUrl)
+            val metaUrl = URL(metadataUrl)
+
+            val url = URL("${metaUrl.protocol}://${metaUrl.host}/client-res")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = 10000

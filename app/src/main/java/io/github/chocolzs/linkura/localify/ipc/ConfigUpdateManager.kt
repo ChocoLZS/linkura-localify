@@ -65,6 +65,9 @@ class ConfigUpdateManager private constructor() {
                 if (config.unlockAfter != null) unlockAfter = config.unlockAfter
                 if (config.filterMotionCaptureReplay != null) filterMotionCaptureReplay = config.filterMotionCaptureReplay
                 if (config.filterPlayableMotionCapture != null) filterPlayableMotionCapture = config.filterPlayableMotionCapture
+                if (config.enableSetArchiveStartTime != null) enableSetArchiveStartTime = config.enableSetArchiveStartTime
+                if (config.archiveStartTime != null) archiveStartTime = config.archiveStartTime
+                if (config.avoidAccidentalTouch != null) avoidAccidentalTouch = config.avoidAccidentalTouch
             }.build()
 
             serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

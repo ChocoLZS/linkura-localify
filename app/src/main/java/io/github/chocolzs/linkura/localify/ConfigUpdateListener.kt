@@ -54,6 +54,9 @@ interface ConfigListener {
     fun onEnableLegacyCompatibilityChanged(value: Boolean)
     fun onFilterMotionCaptureReplayChanged(value: Boolean)
     fun onFilterPlayableMotionCaptureChanged(value: Boolean)
+    fun onEnableSetArchiveStartTimeChanged(value: Boolean)
+    fun onArchiveStartTimeChanged(value: Int)
+    fun onAvoidAccidentalTouchChanged(value: Boolean)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -344,6 +347,24 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onFilterPlayableMotionCaptureChanged(value: Boolean) {
         config.filterPlayableMotionCapture = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onEnableSetArchiveStartTimeChanged(value: Boolean) {
+        config.enableSetArchiveStartTime = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onArchiveStartTimeChanged(value: Int) {
+        config.archiveStartTime = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onAvoidAccidentalTouchChanged(value: Boolean) {
+        config.avoidAccidentalTouch = value
         saveConfig()
         sendConfigUpdate(config)
     }

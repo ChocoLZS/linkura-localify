@@ -139,11 +139,11 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
 
         if (isFirstLaunch || (currentTime - lastRefreshTime) > oneHourInMs) {
             LogExporter.addLogEntry("MainActivity", "I", "Performing automatic archive refresh on first launch")
-            
+            val defaultMetadataUrl = getString(R.string.replay_default_metadata_url)
+            val savedMetadataUrl = prefs.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val defaultMetadataUrl = getString(R.string.replay_default_metadata_url)
-                    val savedMetadataUrl = prefs.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
+
                     val result = AssetsRepository.fetchAndSaveArchiveData(this@MainActivity, savedMetadataUrl)
                     
                     result.onSuccess { fetchedList ->
@@ -157,7 +157,7 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
 
                 try {
                     LogExporter.addLogEntry("MainActivity", "I", "Fetching client resources")
-                    val clientResResult = AssetsRepository.fetchClientRes()
+                    val clientResResult = AssetsRepository.fetchClientRes(savedMetadataUrl)
 
                     clientResResult.onSuccess { clientRes ->
                         AssetsRepository.saveClientRes(this@MainActivity, clientRes)

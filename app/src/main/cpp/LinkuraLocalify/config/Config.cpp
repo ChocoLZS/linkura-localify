@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <sstream>
 #include "../build/linkura_messages.pb.h"
+#include "version_compatibility.h"
 
 namespace LinkuraLocal::Config {
     bool isConfigInit = false;
@@ -50,13 +51,14 @@ namespace LinkuraLocal::Config {
     int archiveStartTime = 0;
     bool filterMotionCaptureReplay = false;
     bool filterPlayableMotionCapture = false;
+    bool avoidAccidentalTouch = true;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     // runtime
-    std::string currentClientVersion;
+    VersionCompatibility::Version currentClientVersion;
     std::string currentResVersion;
-    std::string latestClientVersion;
+    VersionCompatibility::Version latestClientVersion;
     std::string latestResVersion;
     
     // cache
@@ -109,6 +111,9 @@ namespace LinkuraLocal::Config {
             GetConfigItem(enableLegacyCompatibility);
             GetConfigItem(filterMotionCaptureReplay);
             GetConfigItem(filterPlayableMotionCapture);
+            GetConfigItem(enableSetArchiveStartTime);
+            GetConfigItem(archiveStartTime);
+            GetConfigItem(avoidAccidentalTouch);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -185,6 +190,9 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_camera_rotation_sensitivity()) cameraRotationSensitivity = configUpdate.camera_rotation_sensitivity();
                 if (configUpdate.has_filter_motion_capture_replay()) filterMotionCaptureReplay = configUpdate.filter_motion_capture_replay();
                 if (configUpdate.has_filter_playable_motion_capture()) filterPlayableMotionCapture = configUpdate.filter_playable_motion_capture();
+                if (configUpdate.has_enable_set_archive_start_time()) enableSetArchiveStartTime = configUpdate.enable_set_archive_start_time();
+                if (configUpdate.has_archive_start_time()) archiveStartTime = configUpdate.archive_start_time();
+                if (configUpdate.has_avoid_accidental_touch()) avoidAccidentalTouch = configUpdate.avoid_accidental_touch();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());
@@ -226,35 +234,53 @@ namespace LinkuraLocal::Config {
         return 0;
     }
 
-    bool isLegacyMrsVersion() {
-        if (currentClientVersion.empty()) return false;
-        if (isLegacyVersionCached) return legacyVersionResult;
-        
-        const std::string legacyVersionThreshold = "4.0.1";
+    bool checkVersionCompatibility(const std::string& rule, const VersionCompatibility::Version& version) {
         try {
-            int compareResult = compareVersions(currentClientVersion, legacyVersionThreshold);
-            legacyVersionResult = compareResult < 0;
-            isLegacyVersionCached = true;
-            return legacyVersionResult;
+            VersionCompatibility::VersionChecker checker(rule);
+            return checker.checkCompatibility(version);
         } catch (const std::exception& e) {
-            Log::ErrorFmt("Version comparison error: %s", e.what());
+            Log::ErrorFmt("Version compatibility check error: %s", e.what());
             return false;
         }
     }
+    
+    std::string getVersionRuleDescription(const std::string& rule) {
+        try {
+            VersionCompatibility::VersionChecker checker(rule);
+            return checker.toHumanReadable();
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version rule description error: %s", e.what());
+            return rule; // Fallback to original rule
+        }
+    }
+
+    std::string getRecommendVersion(const std::string& rule) {
+        try {
+            VersionCompatibility::VersionChecker checker(rule);
+            return checker.getRecommendVersion();
+        } catch (const std::exception& e) {
+            Log::ErrorFmt("Version recommend error: %s", e.what());
+            return ""; // Return empty string on error
+        }
+    }
+
+    bool isLegacyMrsVersion() {
+        if (isLegacyVersionCached) return legacyVersionResult;
+        // Use the new version compatibility checker: version < 4.0.1
+        legacyVersionResult = checkVersionCompatibility("< 4.0.1", currentClientVersion);
+        isLegacyVersionCached = true;
+        Log::DebugFmt("Legacy MRS version check: %s < 4.0.1 = %s",
+                      currentClientVersion.toString().c_str(), legacyVersionResult ? "true" : "false");
+        return legacyVersionResult;
+    }
 
     bool isFirstYearVersion() {
-        if (currentClientVersion.empty()) return false;
         if (isFirstYearVersionCached) return isFirstYearVersionResult;
-
-        const std::string firstYearVersionThreshold = "2.0.0";
-        try {
-            int compareResult = compareVersions(currentClientVersion, firstYearVersionThreshold);
-            isFirstYearVersionResult = compareResult < 0;
-            isFirstYearVersionCached = true;
-            return isFirstYearVersionResult;
-        } catch (const std::exception& e) {
-            Log::ErrorFmt("Version comparison error: %s", e.what());
-            return false;
-        }
+        // Use the new version compatibility checker: version < 2.0.0
+        isFirstYearVersionResult = checkVersionCompatibility("< 2.0.0", currentClientVersion);
+        isFirstYearVersionCached = true;
+        Log::DebugFmt("First year version check: %s < 2.0.0 = %s",
+                      currentClientVersion.toString().c_str(), isFirstYearVersionResult ? "true" : "false");
+        return isFirstYearVersionResult;
     }
 }

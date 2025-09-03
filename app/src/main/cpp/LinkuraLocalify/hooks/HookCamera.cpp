@@ -294,7 +294,8 @@ namespace LinkuraLocal::HookCamera {
                 std::string nameStr = name->ToString();
                 Log::DebugFmt("BaseCamera_get_CameraComponent: %s, camera is at %p", nameStr.c_str(), camera);
                 // Use RE2 to match pattern: 6 digits + underscore + letters (e.g., 250222_abc、 250412)
-                static re2::RE2 pattern(R"(^\d{6}(_\w+$)?)");
+                // first year: ruribirthday
+                static re2::RE2 pattern(Config::isFirstYearVersion() ? R"(^\w+)" : R"(^\d{6}(_?\w+$)?)");
                 if (re2::RE2::FullMatch(nameStr, pattern)) {
                     Log::DebugFmt("Register named camera");
                     namedCameraRegistered = true;
@@ -376,6 +377,7 @@ namespace LinkuraLocal::HookCamera {
     DEFINE_HOOK(void*, LiveSceneController_FinalizeSceneAsync, (Il2cppUtils::Il2CppObject* self, void* token, void* method)) {
         Log::DebugFmt("LiveSceneController_FinalizeSceneAsync HOOKED");
         onRenderExit();
+        HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         return LiveSceneController_FinalizeSceneAsync_Orig(self, token, method);
     }
 
@@ -613,8 +615,9 @@ namespace LinkuraLocal::HookCamera {
         return CategorizedMeshRenderer_ctor_Orig(self, category, method);
     }
 
+    // hooked
     DEFINE_HOOK(UnityResolve::UnityType::Transform*, AvatarSettings_GetBoneTransform, (Il2cppUtils::Il2CppObject* self, int32_t humanBodyBones, void* method)) {
-        Log::DebugFmt("AvatarSettings_GetBoneTransform HOOKED, humanBodyBones is %d", humanBodyBones);
+//        Log::DebugFmt("AvatarSettings_GetBoneTransform HOOKED, humanBodyBones is %d", humanBodyBones);
         return AvatarSettings_GetBoneTransform_Orig(self, humanBodyBones, method);
     }
 

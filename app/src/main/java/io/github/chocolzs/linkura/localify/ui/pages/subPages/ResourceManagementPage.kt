@@ -233,8 +233,9 @@ private fun ReplayTabPage(
 
     // Fetch client resources function (silent)
     suspend fun fetchClientResources() {
+        if (localMetadataUrl.isBlank()) return
         try {
-            val result = AssetsRepository.fetchClientRes()
+            val result = AssetsRepository.fetchClientRes(localMetadataUrl)
             result.onSuccess { clientRes ->
                 context?.let { ctx ->
                     AssetsRepository.saveClientRes(ctx, clientRes)
@@ -315,6 +316,26 @@ private fun ReplayTabPage(
                     modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    GakuSwitch(
+                        text = stringResource(R.string.replay_settings_enable_custom_start_time),
+                        checked = config.value.enableSetArchiveStartTime,
+                        onCheckedChange = { value ->
+                            context?.onEnableSetArchiveStartTimeChanged(value)
+                        }
+                    )
+
+                    // Archive Start Time Input (enabled only if enableSetArchiveStartTime is true)
+                    GakuTextInput(
+                        value = config.value.archiveStartTime.toString(),
+                        onValueChange = { value ->
+                            val intValue = value.toIntOrNull() ?: 0
+                            context?.onArchiveStartTimeChanged(intValue)
+                        },
+                        label = {
+                            Text(text = stringResource(R.string.replay_settings_custom_start_time))
+                        }
+                    )
+
                     GakuSwitch(text = stringResource(R.string.config_legacy_title), checked = config.value.enableLegacyCompatibility) {
                             v -> context?.onEnableLegacyCompatibilityChanged(v)
                     }
@@ -330,6 +351,15 @@ private fun ReplayTabPage(
                         checked = config.value.enableMotionCaptureReplay,
                         onCheckedChange = { value ->
                             context?.onEnableMotionCaptureReplayChanged(value)
+                        }
+                    )
+
+                    GakuSwitch(
+                        text = stringResource(R.string.replay_settings_avoid_accidental_touch),
+                        checked = config.value.avoidAccidentalTouch,
+                        enabled = config.value.enableMotionCaptureReplay,
+                        onCheckedChange = { value ->
+                            context?.onAvoidAccidentalTouchChanged(value)
                         }
                     )
 

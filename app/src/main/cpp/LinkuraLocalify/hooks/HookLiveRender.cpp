@@ -72,6 +72,10 @@ namespace LinkuraLocal::HookLiveRender {
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
+        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::UpdateReceived) {
+            seconds = HookShare::Shareable::realtimeRenderingArchivePositionSeconds;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::Nothing;
+        }
 //        L4Camera::clearRenderSet();
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
@@ -80,8 +84,24 @@ namespace LinkuraLocal::HookLiveRender {
     DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
+        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::UpdateReceived) {
+            seconds = HookShare::Shareable::realtimeRenderingArchivePositionSeconds;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::Nothing;
+        }
 //        L4Camera::clearRenderSet();
         return LiveConnectMrsController_SetPlayPositionAsync_Orig(self, seconds);
+    }
+
+    // Config::isFirstYearVersion
+    DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync_Interface, (void* self, float seconds)) {
+        Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync_Interface HOOKED: seconds is %f", seconds);
+        HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
+        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::UpdateReceived) {
+            seconds = HookShare::Shareable::realtimeRenderingArchivePositionSeconds;
+            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::Nothing;
+        }
+//        L4Camera::clearRenderSet();
+        return LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig(self, seconds);
     }
 
     DEFINE_HOOK(void, LiveScreenOrientationModel_ctor, (void* self, int32_t liveOrientation, int32_t deviceOrientation)) {
@@ -134,10 +154,18 @@ namespace LinkuraLocal::HookLiveRender {
                         HookShare::Shareable::realtimeRenderingArchivePositionSeconds
                 );
             } else {
-                LiveConnectMrsController_SetPlayPositionAsync_Orig(
-                        HookShare::Shareable::realtimeRenderingArchiveControllerCache,
-                        HookShare::Shareable::realtimeRenderingArchivePositionSeconds
-                );
+                if (LiveConnectMrsController_SetPlayPositionAsync_Orig) {
+                    LiveConnectMrsController_SetPlayPositionAsync_Orig(
+                            HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                            HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+                    );
+                }
+                if (LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig) {
+                    LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig(
+                            HookShare::Shareable::realtimeRenderingArchiveControllerCache,
+                            HookShare::Shareable::realtimeRenderingArchivePositionSeconds
+                    );
+                }
             }
             HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
         }
@@ -224,11 +252,6 @@ namespace LinkuraLocal::HookLiveRender {
 
     void setArchivePosition(float seconds) {
         try {
-            if (HookShare::Shareable::realtimeRenderingArchiveControllerCache == nullptr) {
-                Log::Error("setArchivePosition: No cached archive controller available");
-                return;
-            }
-
             Log::DebugFmt("setArchivePosition: Setting position to %f seconds", seconds);
             HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::UpdateReceived;
             HookShare::Shareable::realtimeRenderingArchivePositionSeconds = seconds;
@@ -291,6 +314,10 @@ namespace LinkuraLocal::HookLiveRender {
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
         ADD_HOOK(LiveConnectMrsController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectMrsController", "SetPlayPositionAsync"));
+        ADD_HOOK(LiveConnectMrsController_SetPlayPositionAsync_Interface,
+                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
+                                               "LiveConnectMrsController",
+                                               "School.LiveMain.ILiveConnectContentsController.SetPlayPositionAsync"));
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));
 //        ADD_HOOK(FesConnectArchivePlayer_get_RunningTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_RunningTime"));

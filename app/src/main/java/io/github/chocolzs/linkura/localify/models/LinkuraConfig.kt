@@ -49,6 +49,9 @@ data class LinkuraConfig (
     var enableLegacyCompatibility: Boolean = false,
     var filterMotionCaptureReplay: Boolean = false,
     var filterPlayableMotionCapture: Boolean = false,
+    var enableSetArchiveStartTime: Boolean = false,
+    var archiveStartTime: Int = 0,
+    var avoidAccidentalTouch: Boolean = true,
 
 
     var pf: Boolean = false,

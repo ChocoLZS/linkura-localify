@@ -102,6 +102,9 @@ message ConfigUpdate {
   optional bool story_hide_effect = 36;
   optional bool filter_motion_capture_replay = 37;
   optional bool filter_playable_motion_capture = 38;
+  optional bool enable_set_archive_start_time = 39;
+  optional int32 archive_start_time = 40;
+  optional bool avoid_accidental_touch = 41;
 }
 
 // Overlay control actions
