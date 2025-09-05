@@ -27,12 +27,26 @@ namespace LinkuraLocal::HookDebug {
         if (Config::avoidCharacterExit) return;
         CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
     }
+    // old Config::enableLegacyCompatibility
+    DEFINE_HOOK(void, CharacterVisibleReceiver_UpdateAvatarVisibility, (Il2cppUtils::Il2CppObject* self, bool isVisible, void* method)) {
+        Log::DebugFmt("CharacterVisibleReceiver_UpdateAvatarVisibility HOOKED");
+        if (Config::avoidCharacterExit) isVisible = true;
+        CharacterVisibleReceiver_UpdateAvatarVisibility_Orig(self, isVisible, method);
+    }
 
     // old Config::enableLegacyCompatibility
     DEFINE_HOOK(void, MRS_AppsCoverScreen_SetActiveCoverImage, (Il2cppUtils::Il2CppObject* self, bool isActive, void* method)) {
         Log::DebugFmt("AppsCoverScreen_SetActiveCoverImage HOOKED");
         if (Config::removeRenderImageCover) isActive = false;
         MRS_AppsCoverScreen_SetActiveCoverImage_Orig(self, isActive, method);
+    }
+
+    DEFINE_HOOK(Il2cppString*, Hailstorm_AssetDownloadJob_get_UrlBase, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        auto base = Hailstorm_AssetDownloadJob_get_UrlBase_Orig(self, method);
+        if (!Config::assetsUrlPrefix.empty()) {
+            base = Il2cppString::New(HookShare::replaceUriHost(base->ToString(), Config::assetsUrlPrefix));
+        }
+        return base;
     }
 
     void Install(HookInstaller* hookInstaller) {
@@ -47,5 +61,7 @@ namespace LinkuraLocal::HookDebug {
 
         // 👀 old
         ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
+        ADD_HOOK(CharacterVisibleReceiver_UpdateAvatarVisibility, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.Character", "CharacterVisibleReceiver", "UpdateAvatarVisibility"));
+        ADD_HOOK(Hailstorm_AssetDownloadJob_get_UrlBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_UrlBase"));
     }
 }

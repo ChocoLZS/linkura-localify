@@ -47,6 +47,7 @@ namespace LinkuraLocal::Config {
     extern bool enableLegacyCompatibility;
     extern bool enableSetArchiveStartTime;
     extern int archiveStartTime;
+    extern std::string assetsUrlPrefix;
     /**
      * Only show the archive with motion captures
      */

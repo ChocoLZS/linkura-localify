@@ -18,6 +18,8 @@ namespace LinkuraLocal::Log {
     void InfoFmt(const char* fmt, ...);
     void Error(const char* msg);
     void ErrorFmt(const char* fmt, ...);
+    void Warn(const char* msg);
+    void WarnFmt(const char* fmt, ...);
     void Debug(const char* msg);
     void DebugFmt(const char* fmt, ...);
     void Verbose(const char* msg);

@@ -263,6 +263,20 @@ fun HomePage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.config_after_unlock_title), checked = config.value.unlockAfter) {
                             v -> context?.onUnlockAfterChanged(v)
                     }
+                    GakuTextInput(
+                        value = config.value.assetsUrlPrefix,
+                        onValueChange = { value ->
+                            context?.onAssetsUrlPrefixChanged(value)
+                        },
+                        label = {
+                            Text(text = stringResource(R.string.config_assets_update_assets_url_prefix))
+                        }
+                    )
+                    Text(
+                        text = stringResource(R.string.config_assets_update_assets_url_prefix_placeholder),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
             }
             Spacer(Modifier.height(6.dp))

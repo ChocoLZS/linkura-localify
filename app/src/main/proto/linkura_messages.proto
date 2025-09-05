@@ -105,6 +105,7 @@ message ConfigUpdate {
   optional bool enable_set_archive_start_time = 39;
   optional int32 archive_start_time = 40;
   optional bool avoid_accidental_touch = 41;
+  optional string assets_url_prefix = 42;
 }
 
 // Overlay control actions

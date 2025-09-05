@@ -66,6 +66,15 @@ namespace LinkuraLocal::Log {
         Error(result.c_str());
     }
 
+    void Warn(const char* msg) {
+        Log(ANDROID_LOG_WARN, msg);
+    }
+
+    void WarnFmt(const char* fmt, ...) {
+        GetParamStringResult(result);
+        Error(result.c_str());
+    }
+
     void Debug(const char* msg) {
         Log(ANDROID_LOG_DEBUG, msg);
     }

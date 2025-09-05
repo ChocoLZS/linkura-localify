@@ -68,6 +68,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.enableSetArchiveStartTime != null) enableSetArchiveStartTime = config.enableSetArchiveStartTime
                 if (config.archiveStartTime != null) archiveStartTime = config.archiveStartTime
                 if (config.avoidAccidentalTouch != null) avoidAccidentalTouch = config.avoidAccidentalTouch
+                if (config.assetsUrlPrefix != null) assetsUrlPrefix = config.assetsUrlPrefix
             }.build()
 
             serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

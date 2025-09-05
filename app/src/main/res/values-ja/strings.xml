@@ -376,6 +376,9 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="overlay.color_picker.cancel">キャンセル</string>
     <string name="overlay.color_picker.preset_colors">プリセット色</string>
 
+    <string name="config.assets.update_assets_url_prefix">ゲーム更新リソースのプレフィックス URL</string>
+    <string name="config.assets.update_assets_url_prefix.placeholder">必ず https で始まり、変更しない場合は空白のままにしてください</string>
+
     <string name="config.story.settings_title">活動記録設定</string>
     <string name="config.story.hide_background">背景を隠す</string>
     <string name="config.story.hide_transition">遷移を隠す</string>
