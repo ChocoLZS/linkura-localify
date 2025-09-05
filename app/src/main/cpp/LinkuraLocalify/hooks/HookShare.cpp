@@ -43,7 +43,7 @@ namespace LinkuraLocal::HookShare {
         RE2 re(pattern);
         
         if (!re.ok()) {
-            Log::DebugFmt("RE2 compile failed for pattern: %s, error: %s", pattern.c_str(), re.error().c_str());
+            Log::WarnFmt("RE2 compile failed for pattern: %s, error: %s", pattern.c_str(), re.error().c_str());
             return uri;
         }
         
@@ -59,7 +59,7 @@ namespace LinkuraLocal::HookShare {
                     result += path_part;
                 }
             }
-            Log::DebugFmt("URL replaced: %s -> %s", uri.c_str(), result.c_str());
+            Log::VerboseFmt("URL replaced: %s -> %s", uri.c_str(), result.c_str());
             return result;
         } else {
             std::string result = assets_url;
@@ -72,7 +72,7 @@ namespace LinkuraLocal::HookShare {
                     result += uri;
                 }
             }
-            Log::DebugFmt("Path combined with assets_url: %s -> %s", uri.c_str(), result.c_str());
+            Log::VerboseFmt("Path combined with assets_url: %s -> %s", uri.c_str(), result.c_str());
             return result;
         }
     }
