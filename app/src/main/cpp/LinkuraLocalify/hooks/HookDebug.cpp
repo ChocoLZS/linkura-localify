@@ -22,7 +22,7 @@ namespace LinkuraLocal::HookDebug {
         CoverImageCommandReceiver_Awake_Orig(self, method);
     }
     // 👀　work for both als and mrs
-    DEFINE_HOOK(void, CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self,void* character, void* method)) {
+    DEFINE_HOOK(void, CharacterVisibleReceiver_SetupExistCharacter, (Il2cppUtils::Il2CppObject* self,int character, void* method)) {
         Log::DebugFmt("CharacterVisibleReceiver_SetupExistCharacter HOOKED");
         if (Config::avoidCharacterExit) return;
         CharacterVisibleReceiver_SetupExistCharacter_Orig(self, character, method);
@@ -32,6 +32,17 @@ namespace LinkuraLocal::HookDebug {
         Log::DebugFmt("CharacterVisibleReceiver_UpdateAvatarVisibility HOOKED");
         if (Config::avoidCharacterExit) isVisible = true;
         CharacterVisibleReceiver_UpdateAvatarVisibility_Orig(self, isVisible, method);
+    }
+
+    DEFINE_HOOK(void, FootShadowManipulator_CreateFootShadow, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        Log::DebugFmt("FootShadowManipulator_CreateFootShadow HOOKED");
+        if (Config::removeCharacterShadow) return;
+        FootShadowManipulator_CreateFootShadow_Orig(self, method);
+    }
+
+    DEFINE_HOOK(void, ItemManipulator_OnInstantiate, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        Log::DebugFmt("ItemManipulator_OnInstantiate HOOKED, item id is");
+        ItemManipulator_OnInstantiate_Orig(self, method);
     }
 
     // old Config::enableLegacyCompatibility
@@ -58,7 +69,8 @@ namespace LinkuraLocal::HookDebug {
         // 👀
         ADD_HOOK(CoverImageCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "CoverImageCommandReceiver", "Awake"));
         ADD_HOOK(CharacterVisibleReceiver_SetupExistCharacter, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character", "CharacterVisibleReceiver", "SetupExistCharacter"));
-
+        ADD_HOOK(FootShadowManipulator_CreateFootShadow, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.FootShadow", "FootShadowManipulator", "CreateFootShadow"));
+        ADD_HOOK(ItemManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemManipulator", "OnInstantiate"));
         // 👀 old
         ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
         ADD_HOOK(CharacterVisibleReceiver_UpdateAvatarVisibility, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.Character", "CharacterVisibleReceiver", "UpdateAvatarVisibility"));
