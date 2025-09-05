@@ -673,9 +673,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                             loopCounter++
                             
                             // Log performance every 100 iterations for debugging
-                            if (loopCounter % 100 == 0L) {
-                                Log.v(TAG, "$name loop: ${loopCounter} iterations completed")
-                            }
+//                            if (loopCounter % 100 == 0L) {
+//                                Log.v(TAG, "$name loop: ${loopCounter} iterations completed")
+//                            }
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Error in $name loop (iteration $loopCounter)", e)

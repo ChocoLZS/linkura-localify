@@ -35,6 +35,15 @@ namespace LinkuraLocal::HookDebug {
         MRS_AppsCoverScreen_SetActiveCoverImage_Orig(self, isActive, method);
     }
 
+    DEFINE_HOOK(Il2cppString*, Hailstorm_AssetDownloadJob_get_UrlBase, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        auto base = Hailstorm_AssetDownloadJob_get_UrlBase_Orig(self, method);
+        Log::DebugFmt("Config::assetsUrlPrefix is %s", Config::assetsUrlPrefix.c_str());
+        if (!Config::assetsUrlPrefix.empty()) {
+            base = Il2cppString::New(HookShare::replaceUriHost(base->ToString(), Config::assetsUrlPrefix));
+        }
+        return base;
+    }
+
     void Install(HookInstaller* hookInstaller) {
         ADD_HOOK(Internal_LogException, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.DebugLogHandler::Internal_LogException(System.Exception,UnityEngine.Object)"));
@@ -47,5 +56,7 @@ namespace LinkuraLocal::HookDebug {
 
         // 👀 old
         ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
+
+        ADD_HOOK(Hailstorm_AssetDownloadJob_get_UrlBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_UrlBase"));
     }
 }

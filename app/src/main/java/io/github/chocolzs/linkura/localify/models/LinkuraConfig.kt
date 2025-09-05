@@ -52,6 +52,7 @@ data class LinkuraConfig (
     var enableSetArchiveStartTime: Boolean = false,
     var archiveStartTime: Int = 0,
     var avoidAccidentalTouch: Boolean = true,
+    var assetsUrlPrefix: String = "",
 
 
     var pf: Boolean = false,

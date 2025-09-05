@@ -52,6 +52,7 @@ namespace LinkuraLocal::Config {
     bool filterMotionCaptureReplay = false;
     bool filterPlayableMotionCapture = false;
     bool avoidAccidentalTouch = true;
+    std::string assetsUrlPrefix;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -114,6 +115,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(enableSetArchiveStartTime);
             GetConfigItem(archiveStartTime);
             GetConfigItem(avoidAccidentalTouch);
+            GetConfigItem(assetsUrlPrefix);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());
@@ -193,6 +195,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_enable_set_archive_start_time()) enableSetArchiveStartTime = configUpdate.enable_set_archive_start_time();
                 if (configUpdate.has_archive_start_time()) archiveStartTime = configUpdate.archive_start_time();
                 if (configUpdate.has_avoid_accidental_touch()) avoidAccidentalTouch = configUpdate.avoid_accidental_touch();
+                if (configUpdate.has_assets_url_prefix()) assetsUrlPrefix = configUpdate.assets_url_prefix();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

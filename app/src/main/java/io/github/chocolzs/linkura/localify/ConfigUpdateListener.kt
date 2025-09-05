@@ -57,6 +57,7 @@ interface ConfigListener {
     fun onEnableSetArchiveStartTimeChanged(value: Boolean)
     fun onArchiveStartTimeChanged(value: Int)
     fun onAvoidAccidentalTouchChanged(value: Boolean)
+    fun onAssetsUrlPrefixChanged(value: String)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -365,6 +366,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onAvoidAccidentalTouchChanged(value: Boolean) {
         config.avoidAccidentalTouch = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onAssetsUrlPrefixChanged(value: String) {
+        config.assetsUrlPrefix = value
         saveConfig()
         sendConfigUpdate(config)
     }

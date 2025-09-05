@@ -50,7 +50,7 @@ namespace LinkuraLocal::HookStory {
 
 namespace LinkuraLocal::HookShare {
     void Install(HookInstaller* hookInstaller);
-
+    std::string replaceUriHost(const std::string& external_link, const std::string& assets_url);
     namespace Shareable {
         struct ArchiveData {
             std::string id;

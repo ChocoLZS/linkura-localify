@@ -36,7 +36,7 @@ namespace LinkuraLocal::HookShare {
     }
 
     // URL替换函数：将external_link中的URL替换为assets_url
-    std::string replaceExternalLinkUrl(const std::string& external_link, const std::string& assets_url) {
+    std::string replaceUriHost(const std::string& uri, const std::string& assets_url) {
         // 使用RE2正则表达式匹配URL模式
         // 匹配 https://foo.example.org 这样的URL，并考虑路径部分
         std::string pattern = R"(^https://[^/]+(/.*)?$)";
@@ -44,11 +44,11 @@ namespace LinkuraLocal::HookShare {
         
         if (!re.ok()) {
             Log::DebugFmt("RE2 compile failed for pattern: %s, error: %s", pattern.c_str(), re.error().c_str());
-            return external_link;
+            return uri;
         }
         
         std::string path_part;
-        if (RE2::FullMatch(external_link, re, &path_part)) {
+        if (RE2::FullMatch(uri, re, &path_part)) {
             std::string result = assets_url;
             if (!path_part.empty()) {
                 if (!assets_url.empty() && assets_url.back() == '/' && path_part.front() == '/') {
@@ -59,20 +59,20 @@ namespace LinkuraLocal::HookShare {
                     result += path_part;
                 }
             }
-            Log::DebugFmt("URL replaced: %s -> %s", external_link.c_str(), result.c_str());
+            Log::DebugFmt("URL replaced: %s -> %s", uri.c_str(), result.c_str());
             return result;
         } else {
             std::string result = assets_url;
-            if (!external_link.empty()) {
-                if (!assets_url.empty() && assets_url.back() == '/' && external_link.front() == '/') {
-                    result += external_link.substr(1);
-                } else if (!assets_url.empty() && assets_url.back() != '/' && external_link.front() != '/') {
-                    result += "/" + external_link;
+            if (!uri.empty()) {
+                if (!assets_url.empty() && assets_url.back() == '/' && uri.front() == '/') {
+                    result += uri.substr(1);
+                } else if (!assets_url.empty() && assets_url.back() != '/' && uri.front() != '/') {
+                    result += "/" + uri;
                 } else {
-                    result += external_link;
+                    result += uri;
                 }
             }
-            Log::DebugFmt("Path combined with assets_url: %s -> %s", external_link.c_str(), result.c_str());
+            Log::DebugFmt("Path combined with assets_url: %s -> %s", uri.c_str(), result.c_str());
             return result;
         }
     }
@@ -146,14 +146,14 @@ namespace LinkuraLocal::HookShare {
             if (replay_type == 1) {
                 json.erase("video_url");
                 if (!external_link.empty()) {
-                    auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
+                    auto new_external_link = replaceUriHost(external_link, assets_url);
                     json["archive_url"] = new_external_link;
                 }
             }
             if (replay_type == 2) {
                 json.erase("video_url");
                 if (!external_fix_link.empty()) {
-                    auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
+                    auto new_external_fix_link = replaceUriHost(external_fix_link, assets_url);
                     json["archive_url"] = new_external_fix_link;
                 }
             }
@@ -191,14 +191,14 @@ namespace LinkuraLocal::HookShare {
             if (replay_type == 1) {
                 json.erase("video_url");
                 if (!external_link.empty()) {
-                    auto new_external_link = replaceExternalLinkUrl(external_link, assets_url);
+                    auto new_external_link = replaceUriHost(external_link, assets_url);
                     json["archive_url"] = new_external_link;
                 }
             }
             if (replay_type == 2) {
                 json.erase("video_url");
                 if (!external_fix_link.empty()) {
-                    auto new_external_fix_link = replaceExternalLinkUrl(external_fix_link, assets_url);
+                    auto new_external_fix_link = replaceUriHost(external_fix_link, assets_url);
                     json["archive_url"] = new_external_fix_link;
                 }
             }
@@ -558,7 +558,7 @@ namespace LinkuraLocal::HookShare {
             auto archive_config = it->second;
             auto replay_type = archive_config["replay_type"].get<uint>();
             if (replay_type == 1 || replay_type == 2) { // replay
-                auto new_result_str = replaceExternalLinkUrl(result_str, Config::motionCaptureResourceUrl);
+                auto new_result_str = replaceUriHost(result_str, Config::motionCaptureResourceUrl);
                 result = Il2cppUtils::Il2CppString::New(new_result_str);
             }
         }
