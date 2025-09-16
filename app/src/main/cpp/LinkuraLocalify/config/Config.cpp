@@ -54,6 +54,7 @@ namespace LinkuraLocal::Config {
     bool avoidAccidentalTouch = true;
     std::string assetsUrlPrefix;
     bool removeCharacterShadow = false;
+    bool removeLiveStreamItems = false;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;

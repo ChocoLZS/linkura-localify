@@ -49,6 +49,7 @@ namespace LinkuraLocal::Config {
     extern int archiveStartTime;
     extern std::string assetsUrlPrefix;
     extern bool removeCharacterShadow;
+    extern bool removeLiveStreamItems;
     /**
      * Only show the archive with motion captures
      */

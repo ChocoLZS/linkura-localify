@@ -59,6 +59,21 @@ namespace LinkuraLocal::HookMain {
 //        UnityResolve::Init(xdl_open(hookInstaller->m_il2cppLibraryPath.c_str(), RTLD_LAZY),
 //            UnityResolve::Mode::Il2Cpp, Config::lazyInit);
 
+        {
+            // test for search some assembly
+//            static auto CoreAssembly = UnityResolve::Get("Core.dll");
+//            auto pKlass = CoreAssembly->Get("LiveSceneController", "Inspix");
+//            Log::InfoFmt("CoreAssembly klass %p", pKlass);
+
+//            Log::InfoFmt("CoreAssembly: %p", CoreAssembly);
+//            const auto image = UnityResolve::Invoke<void*>("il2cpp_assembly_get_image", CoreAssembly->address);
+//            const auto count = UnityResolve::Invoke<int>("il2cpp_image_get_class_count", image);
+//            for (auto i = 0; i < count; i++) {
+//                const auto pClass = UnityResolve::Invoke<void*>("il2cpp_image_get_class", image, i);
+//                if (pClass == nullptr) continue;
+//                auto name = UnityResolve::Invoke<const char*>("il2cpp_class_get_name", pClass);
+//            }
+        }
         HookDebug::Install(hookInstaller);
         HookLiveRender::Install(hookInstaller);
         HookCamera::Install(hookInstaller);

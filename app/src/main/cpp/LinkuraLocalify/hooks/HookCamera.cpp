@@ -9,6 +9,17 @@
 #include <re2/re2.h>
 
 namespace LinkuraLocal::HookCamera {
+    template<typename Func>
+    void throttle(Func&& func, std::chrono::milliseconds interval) {
+        static std::chrono::steady_clock::time_point lastExecution = std::chrono::steady_clock::now() - interval;
+        auto now = std::chrono::steady_clock::now();
+        
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastExecution) >= interval) {
+            func();
+            lastExecution = now;
+        }
+    }
+
 #pragma region FreeCamera
     UnityResolve::UnityType::Camera* mainFreeCameraCache = nullptr;
     UnityResolve::UnityType::Camera* backgroundColorCameraCache = nullptr;
@@ -489,7 +500,7 @@ namespace LinkuraLocal::HookCamera {
         for (int i = 0;i < childCount; i++) {
             auto child = obj->GetChild(i);
             const auto childName = child->GetName();
-            Log::DebugFmt("%s child: %s", obj_name.c_str(), childName.c_str());
+            Log::VerboseFmt("%s child: %s", obj_name.c_str(), childName.c_str());
         }
     }
 
@@ -523,6 +534,12 @@ namespace LinkuraLocal::HookCamera {
         }
 
         auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
+        // {
+        //     auto rootTrans = spineTrans->GetRoot();
+        //     throttle([&]() {
+        //         printChildren(rootTrans, "root");
+        //     }, std::chrono::milliseconds(1000));
+        // }
         auto modelParent = spineTrans->GetParent();
         auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
                 [](const std::string& childName) {
