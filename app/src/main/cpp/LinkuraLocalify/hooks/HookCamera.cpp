@@ -158,6 +158,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, Unity_camera_set_backgroundColor_Injected, (UnityResolve::UnityType::Camera* self, UnityResolve::UnityType::Color* value)) {
+        Log::DebugFmt("Unity_camera_set_backgroundColor_Injected HOOKED");
         backgroundColorCameraCache = self;
         Unity_camera_set_backgroundColor_Injected_Orig(self, &L4Camera::backgroundColor);
     }

@@ -2,8 +2,6 @@
 <resources>
     <string name="abc_action_bar_home_description">ホームに戻る</string>
     <string name="abc_action_bar_up_description">前に戻る</string>
-    <string name="config.fesArchive.unlockTicket.title">Fes×LIVEアーカイブSチケットを解除</string>
-    <string name="config.after.unlock.title">解除After</string>
     <string name="config.render.highResolution.title">1080p/2k/4k 解像度</string>
     <string name="abc_action_menu_overflow_description">その他のオプション</string>
     <string name="abc_action_mode_done">完了</string>
@@ -492,6 +490,20 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="overlay.camera.sensitivity.floating_title">カメラ感度</string>
     <string name="overlay.camera.sensitivity.close">閉じる</string>
     <string name="overlay.camera.sensitivity.reset">デフォルトにリセット</string>
+
+    <!-- Motion Capture Settings -->
+    <string name="config.motion_capture.title">モーションキャプチャ設定</string>
+    <string name="config.motion_capture.hide_character_foot_shadow">キャラクターの足元の影を非表示にする</string>
+    <string name="config.motion_capture.hide_scene_items_level">シーン/オブジェクトを非表示にする</string>
+    <string name="config.motion_capture.hide_scene_items_level.0.description">何も隠さない</string>
+    <string name="config.motion_capture.hide_scene_items_level.1.description">ライブアイテム（ホワイトボード、ぬいぐるみなど）を隠すことができます</string>
+    <string name="config.motion_capture.hide_scene_items_level.2.description">With Meetsのシーンの大部分と一部の静的Fes Liveシーンを隠すことができます</string>
+    <string name="config.motion_capture.hide_scene_items_level.3.description">大部分のFes Liveシーンを隠すことができます</string>
+    <string name="config.motion_capture.hide_scene_items_level.4.description">すべてのFes Liveシーンを隠すことができます。ただし、ライティングプリセット、ダイナミックカメラ、キャラクターの位置移動などは無効になります</string>
+    <string name="config.motion_capture.hide_character_items">キャラクターのアイテムを非表示にする</string>
+    <string name="config.motion_capture.hide_character_items.description">キャラクターのアイテムを非表示にする（例：サングラス、頭に装着する耳など）</string>
+    <string name="config.motion_capture.archive.fes.unlock_ticket">Fes×LIVEアーカイブSチケットを解除</string>
+    <string name="config.motion_capture.after.unlock">解除After</string>
 
     <!-- Legacy Compatibility Settings -->
     <string name="config.legacy.title">レガシーバージョン互換性を有効にする（ホットリロード不可）</string>

@@ -30,6 +30,10 @@ namespace LinkuraLocal::HookCamera {
     void unregisterMainFreeCamera(bool cleanup);
     void unregisterCurrentCamera();
     void setCameraBackgroundColor(float red, float green, float blue, float alpha);
+
+    namespace Sharable {
+        extern std::unordered_set<UnityResolve::UnityType::Camera*> backgroundColorCameras;
+    }
 }
 
 namespace LinkuraLocal::HookLiveRender {

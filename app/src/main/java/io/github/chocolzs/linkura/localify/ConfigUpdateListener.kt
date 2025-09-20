@@ -58,6 +58,9 @@ interface ConfigListener {
     fun onArchiveStartTimeChanged(value: Int)
     fun onAvoidAccidentalTouchChanged(value: Boolean)
     fun onAssetsUrlPrefixChanged(value: String)
+    fun onHideCharacterShadowChanged(value: Boolean)
+    fun onHideLiveStreamSceneItemsLevel(value: Int)
+    fun onHideLiveStreamCharacterItems(value: Boolean)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -376,6 +379,23 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         sendConfigUpdate(config)
     }
 
+    override fun onHideCharacterShadowChanged(value: Boolean) {
+        config.hideCharacterShadow = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onHideLiveStreamSceneItemsLevel(value: Int) {
+        config.hideLiveStreamSceneItemsLevel = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onHideLiveStreamCharacterItems(value: Boolean) {
+        config.hideLiveStreamCharacterItems = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
     override fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         programConfig.transRemoteZipUrl = s.toString()
         saveProgramConfig()

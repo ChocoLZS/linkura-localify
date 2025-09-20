@@ -13,7 +13,7 @@ open class CollapsibleBoxViewModel(initiallyBreastExpanded: Boolean = false) : V
     open var expanded by mutableStateOf(initiallyBreastExpanded)
 }
 
-class BreastCollapsibleBoxViewModel(initiallyBreastExpanded: Boolean = false) : CollapsibleBoxViewModel(initiallyBreastExpanded) {
+class ToolbarCollapsibleBoxViewModel(initiallyBreastExpanded: Boolean = false) : CollapsibleBoxViewModel(initiallyBreastExpanded) {
     override var expanded by mutableStateOf(initiallyBreastExpanded)
 }
 
@@ -41,11 +41,15 @@ class CameraSettingsCollapsibleBoxViewModel(initiallyExpanded: Boolean = false) 
     override var expanded by mutableStateOf(initiallyExpanded)
 }
 
-class BreastCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
+class LiveStreamCollapsibleBoxViewModel(initiallyExpanded: Boolean = false) : CollapsibleBoxViewModel(initiallyExpanded) {
+    override var expanded by mutableStateOf(initiallyExpanded)
+}
+
+class ToolbarCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(BreastCollapsibleBoxViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(ToolbarCollapsibleBoxViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return BreastCollapsibleBoxViewModel(initiallyExpanded) as T
+            return ToolbarCollapsibleBoxViewModel(initiallyExpanded) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
@@ -106,6 +110,16 @@ class CameraSettingsCollapsibleBoxViewModelFactory(private val initiallyExpanded
         if (modelClass.isAssignableFrom(CameraSettingsCollapsibleBoxViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return CameraSettingsCollapsibleBoxViewModel(initiallyExpanded) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class LiveStreamCollapsibleBoxViewModelFactory(private val initiallyExpanded: Boolean) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(LiveStreamCollapsibleBoxViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return LiveStreamCollapsibleBoxViewModel(initiallyExpanded) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
