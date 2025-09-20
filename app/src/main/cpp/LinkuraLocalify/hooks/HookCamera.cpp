@@ -82,6 +82,7 @@ namespace LinkuraLocal::HookCamera {
     std::chrono::steady_clock::time_point namedCameraRegistrationTime;
 
     void registerCurrentCamera(UnityResolve::UnityType::Camera* currentCamera) {
+        Sharable::backgroundColorCameras.insert(currentCamera);
         currentCameraCache = currentCamera;
         if (currentCameraCache) currentCameraTransformCache = currentCameraCache->GetTransform();
         currentCameraRegistered = true;
