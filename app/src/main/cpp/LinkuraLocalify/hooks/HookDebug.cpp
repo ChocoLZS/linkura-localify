@@ -167,7 +167,7 @@ namespace LinkuraLocal::HookDebug {
                                 hideGameObjectRecursive(object, 0, 12);
                             }
                             break;
-                        case HideLiveStreamSceneItemMode::Strong:
+                        case HideLiveStreamSceneItemMode::Strong: // 也许可以通过循环实时隐藏，或者是根据阻止timeline显示对应的object
                         case HideLiveStreamSceneItemMode::Ultimate:
                             hideGameObjectRecursive(object, 0, 12);
                             break;
@@ -185,6 +185,7 @@ namespace LinkuraLocal::HookDebug {
 
     DEFINE_HOOK(void, TimelineCommandReceiver_Awake, (void* self, void* method)) {
         Log::DebugFmt("TimelineCommandReceiver_Awake HOOKED");
+        // 可以根据阻止timeline显示对应的object
         if (Config::hideLiveStreamSceneItemsLevel == HideLiveStreamSceneItemMode::Ultimate) return;
         TimelineCommandReceiver_Awake_Orig(self, method);
     }
