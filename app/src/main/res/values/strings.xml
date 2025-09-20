@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
-    <string name="config.fesArchive.unlockTicket.title">Unlock Fes×LIVE Archive S Ticket</string>
-    <string name="config.after.unlock.title">Unlock After</string>
     <string name="config.render.highResolution.title">1080p/2k/4k Resolution</string>
     <string name="enable_plugin">Enable Plugin (Not Hot Reloadable)</string>
     <string name="replace_font">Replace Font</string>
@@ -244,6 +242,20 @@
     <string name="overlay.camera.sensitivity.floating_title">Camera Sensitivity</string>
     <string name="overlay.camera.sensitivity.close">Close</string>
     <string name="overlay.camera.sensitivity.reset">Reset to Default</string>
+
+    <!-- Motion Capture Settings -->
+    <string name="config.motion_capture.title">Motion Capture Settings</string>
+    <string name="config.motion_capture.hide_character_foot_shadow">Hide Character Foot Shadow</string>
+    <string name="config.motion_capture.hide_scene_items_level">Hide Scene/Scene Objects</string>
+    <string name="config.motion_capture.hide_scene_items_level.0.description">Do not hide any scene objects</string>
+    <string name="config.motion_capture.hide_scene_items_level.1.description">Can hide live items, such as whiteboards, dolls, etc.</string>
+    <string name="config.motion_capture.hide_scene_items_level.2.description">Can hide most With Meets scenes and some static Fes Live scenes</string>
+    <string name="config.motion_capture.hide_scene_items_level.3.description">Can hide most Fes Live scenes</string>
+    <string name="config.motion_capture.hide_scene_items_level.4.description">Can hide all Fes Live scenes. However, lighting presets, dynamic shots, character displacement, etc. will be invalidated</string>
+    <string name="config.motion_capture.hide_character_items">Hide Character Items</string>
+    <string name="config.motion_capture.hide_character_items.description">Hide character items, such as sunglasses, head-mounted ears, etc.</string>
+    <string name="config.motion_capture.archive.fes.unlock_ticket">Unlock Fes×LIVE Archive S Ticket</string>
+    <string name="config.motion_capture.after.unlock">Unlock After</string>
 
     <!-- Legacy Compatibility Settings -->
     <string name="config.legacy.title">Enable Legacy Version Compatibility (Not Hot Reloadable)</string>

@@ -432,13 +432,12 @@ namespace LinkuraLocal::HookShare {
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
-//        IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
-//            if (Config::unlockAfter) {
-////                json["has_admission"] = "true";
-//                json["has_extra_admission"] = "true";
-//            }
-//            result = Il2cppUtils::FromJsonStr(json.dump(), type);
-//        }
+        IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::unlockAfter) {
+                json["has_extra_admission"] = "true";
+            }
+            result = Il2cppUtils::FromJsonStr(json.dump(), type);
+        }
 //        IF_CALLER_WITHIN(FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
 ////            if (Config::unlockAfter) {
 ////                json["has_admission"] = "true";

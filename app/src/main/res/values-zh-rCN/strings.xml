@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">Linkura Localify</string>
     <string name="linkura_localify">Linkura Localify</string>
-    <string name="config.fesArchive.unlockTicket.title">解锁Fes×LIVE回放S等级门票</string>
-    <string name="config.after.unlock.title">解锁After</string>
     <string name="config.render.highResolution.title">1080p/2k/4k 分辨率</string>
     <string name="enable_plugin">启用插件 (不可热重载)</string>
     <string name="replace_font">替换字体</string>
@@ -187,8 +185,7 @@
     <string name="replay.settings.filter_playable_motion_capture">仅显示可播放的动捕回放</string>
     <string name="replay.settings.enable_custom_start_time">自定义回放开始时间</string>
     <string name="replay.settings.custom_start_time">回放开始时间 (秒)</string>
-    <string name="replay.settings.avoid_accidental_touch">避免误触非兼容动捕回放</string>
-    
+    <string name="replay.settings.avoid_accidental_touch">避免误触非兼容动捕回放</string>    
 
     <!-- Archive Grid -->
     <string name="archive.loading">正在加载存档数据...</string>
@@ -246,6 +243,19 @@
     <string name="overlay.camera.sensitivity.close">关闭</string>
     <string name="overlay.camera.sensitivity.reset">重置为默认值</string>
 
+    <!-- Motion Capture Settings -->
+    <string name="config.motion_capture.title">动捕渲染设置</string>
+    <string name="config.motion_capture.hide_character_foot_shadow">隐藏角色脚部阴影</string>
+    <string name="config.motion_capture.hide_scene_items_level">隐藏场景/场景物体</string>
+    <string name="config.motion_capture.hide_scene_items_level.0.description">不隐藏任何场景物体</string>
+    <string name="config.motion_capture.hide_scene_items_level.1.description">能隐藏直播物品，如白板，玩偶等</string>
+    <string name="config.motion_capture.hide_scene_items_level.2.description">能隐藏绝大部分With Meets场景，部分静态Fes Live场景</string>
+    <string name="config.motion_capture.hide_scene_items_level.3.description">能隐藏大部分Fes Live场景</string>
+    <string name="config.motion_capture.hide_scene_items_level.4.description">能隐藏所有Fes Live场景。但灯光预设、动态镜头、角色位移等会失效</string>
+    <string name="config.motion_capture.hide_character_items">隐藏角色物品</string>
+    <string name="config.motion_capture.hide_character_items.description">隐藏角色物品，比如墨镜、头戴耳朵等</string>
+    <string name="config.motion_capture.archive.fes.unlock_ticket">解锁Fes×LIVE回放S等级门票</string>
+    <string name="config.motion_capture.after.unlock">解锁After</string>
     <!-- Compatibility -->
     <string name="config.legacy.title">启用旧版本兼容 (不可热重载)</string>
     <string name="config.legacy.description">启用此功能可允许旧版本客户端正常登录。请注意，该插件主要用于播放2025年5月29日之前录制的动捕数据，其他功能暂未进行兼容性适配。目前仅在3.1.0版本上完成测试，4.0.0及更早版本均支持播放旧格式动捕数据。</string>

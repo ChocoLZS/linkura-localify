@@ -53,6 +53,9 @@ data class LinkuraConfig (
     var archiveStartTime: Int = 0,
     var avoidAccidentalTouch: Boolean = true,
     var assetsUrlPrefix: String = "",
+    var hideCharacterShadow: Boolean = false,
+    var hideLiveStreamSceneItemsLevel: Int = 0,
+    var hideLiveStreamCharacterItems: Boolean = false,
 
 
     var pf: Boolean = false,

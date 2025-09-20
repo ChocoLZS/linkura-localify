@@ -964,7 +964,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             if (latestResVersion.isNotEmpty()) {
                 Log.i(TAG, "Loading latest version info only - Latest client: $latestClientVersion, latest res: $latestResVersion")
                 LogExporter.addLogEntry(TAG, "I", "Latest version only: client=$latestClientVersion, res=$latestResVersion")
-                loadClientResVersion("", "", latestClientVersion, latestResVersion)
+                loadClientResVersion(currentVersionName, "", latestClientVersion, latestResVersion)
             }
         }
     }

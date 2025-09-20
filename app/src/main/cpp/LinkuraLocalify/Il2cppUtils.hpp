@@ -538,6 +538,29 @@ namespace Il2cppUtils {
         return IsNativeObjectAliveMtd->Invoke<bool>(obj);
     }
 
+    static UnityResolve::UnityType::Component* GetMeshRenderer(UnityResolve::UnityType::Transform* transform) {
+        static auto get_component = reinterpret_cast<UnityResolve::UnityType::Component* (*)(UnityResolve::UnityType::GameObject*, void*)>(
+                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)"));
+        static auto get_enabled = reinterpret_cast<bool (*)(UnityResolve::UnityType::Component*)>(
+                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
+        static auto rendererType = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer");
+        if (!(transform && IsNativeObjectAlive(transform))) return nullptr;
+        auto gameObject = transform->GetGameObject();
+        if (!(gameObject && IsNativeObjectAlive(gameObject))) return nullptr;
+        return gameObject->GetComponent<UnityResolve::UnityType::Component*>(rendererType);
+    }
+
+    static void SetTransformRenderActive(UnityResolve::UnityType::Transform* transform, bool active, std::string debugName = "", bool debug = true) {
+        static auto set_enabled = reinterpret_cast<void (*)(UnityResolve::UnityType::Component*, bool)>(
+                Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::set_enabled(System.Boolean)"));
+        auto renderer =GetMeshRenderer(transform);
+        if (renderer && IsNativeObjectAlive(renderer)) {
+            set_enabled(renderer, active);
+        } else if (debug) {
+            LinkuraLocal::Log::VerboseFmt("No renderer found for %s", debugName.c_str());
+        }
+    }
+
     namespace Tools {
 
         template <typename T = void*>

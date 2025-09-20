@@ -106,6 +106,9 @@ message ConfigUpdate {
   optional int32 archive_start_time = 40;
   optional bool avoid_accidental_touch = 41;
   optional string assets_url_prefix = 42;
+  optional bool hide_character_shadow = 43;
+  optional int32 hide_live_stream_scene_items_level = 44;
+  optional bool hide_live_stream_character_items = 45;
 }
 
 // Overlay control actions

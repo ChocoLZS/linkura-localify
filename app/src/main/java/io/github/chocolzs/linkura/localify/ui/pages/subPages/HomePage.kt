@@ -257,12 +257,6 @@ fun HomePage(modifier: Modifier = Modifier,
         item {
             GakuGroupBox(modifier = modifier, "Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    GakuSwitch(modifier, stringResource(R.string.config_fesArchive_unlockTicket_title), checked = config.value.fesArchiveUnlockTicket) {
-                            v -> context?.onFesArchiveUnlockTicketChanged(v)
-                    }
-                    GakuSwitch(modifier, stringResource(R.string.config_after_unlock_title), checked = config.value.unlockAfter) {
-                            v -> context?.onUnlockAfterChanged(v)
-                    }
                     GakuTextInput(
                         value = config.value.assetsUrlPrefix,
                         onValueChange = { value ->

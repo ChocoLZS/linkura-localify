@@ -9,9 +9,22 @@
 #include <re2/re2.h>
 
 namespace LinkuraLocal::HookCamera {
+    namespace Sharable {
+        std::unordered_set<UnityResolve::UnityType::Camera*> backgroundColorCameras = {};
+    }
+    template<typename Func>
+    void throttle(Func&& func, std::chrono::milliseconds interval) {
+        static std::chrono::steady_clock::time_point lastExecution = std::chrono::steady_clock::now() - interval;
+        auto now = std::chrono::steady_clock::now();
+        
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastExecution) >= interval) {
+            func();
+            lastExecution = now;
+        }
+    }
+
 #pragma region FreeCamera
     UnityResolve::UnityType::Camera* mainFreeCameraCache = nullptr;
-    UnityResolve::UnityType::Camera* backgroundColorCameraCache = nullptr;
     UnityResolve::UnityType::Transform* freeCameraTransformCache = nullptr;
     UnityResolve::UnityType::Transform* cacheTrans = nullptr;
     UnityResolve::UnityType::Quaternion cacheRotation{};
@@ -69,6 +82,7 @@ namespace LinkuraLocal::HookCamera {
     std::chrono::steady_clock::time_point namedCameraRegistrationTime;
 
     void registerCurrentCamera(UnityResolve::UnityType::Camera* currentCamera) {
+        Sharable::backgroundColorCameras.insert(currentCamera);
         currentCameraCache = currentCamera;
         if (currentCameraCache) currentCameraTransformCache = currentCameraCache->GetTransform();
         currentCameraRegistered = true;
@@ -87,7 +101,7 @@ namespace LinkuraLocal::HookCamera {
         HookShare::Shareable::currentArchiveDuration = 0;
         HookShare::Shareable::currentArchiveId = "";
         initialCameraRendered = false;
-        backgroundColorCameraCache = nullptr;
+        Sharable::backgroundColorCameras.clear();
         namedCameraRegistered = false;
     }
 
@@ -147,7 +161,8 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, Unity_camera_set_backgroundColor_Injected, (UnityResolve::UnityType::Camera* self, UnityResolve::UnityType::Color* value)) {
-        backgroundColorCameraCache = self;
+        Log::DebugFmt("Unity_camera_set_backgroundColor_Injected HOOKED");
+        Sharable::backgroundColorCameras.insert(self);
         Unity_camera_set_backgroundColor_Injected_Orig(self, &L4Camera::backgroundColor);
     }
 
@@ -155,8 +170,10 @@ namespace LinkuraLocal::HookCamera {
         UnityResolve::UnityType::Color color{red, green, blue, alpha};
         auto storedColor = &L4Camera::backgroundColor;
         *storedColor = color;
-        if (backgroundColorCameraCache && !HookShare::Shareable::renderSceneIsNone()) {
-            Unity_camera_set_backgroundColor_Injected_Orig(backgroundColorCameraCache, &color);
+        if (!Sharable::backgroundColorCameras.empty() && !HookShare::Shareable::renderSceneIsNone()) {
+            for (auto& camera : Sharable::backgroundColorCameras) {
+                if (Il2cppUtils::IsNativeObjectAlive(camera)) Unity_camera_set_backgroundColor_Injected_Orig(camera, &color);
+            }
         }
     }
 
@@ -283,10 +300,12 @@ namespace LinkuraLocal::HookCamera {
     }
 
 
+    // legacy compatiblity
     DEFINE_HOOK(UnityResolve::UnityType::Camera*, BaseCamera_get_CameraComponent, (Il2cppUtils::Il2CppObject* self, void* method)) {
         static auto BaseCamera_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "BaseCamera");
         static auto BaseCamera_get_Name = BaseCamera_klass->Get<UnityResolve::Method>("get_Name");
         auto camera = BaseCamera_get_CameraComponent_Orig(self, method);
+        Sharable::backgroundColorCameras.insert(camera);
         if (Config::isLegacyMrsVersion() && !HookShare::Shareable::renderSceneIsFesLive()) {
             Log::DebugFmt("BaseCamera_get_CameraComponent HOOKED");
             auto name = BaseCamera_get_Name->Invoke<Il2cppUtils::Il2CppString*>(self);
@@ -398,8 +417,8 @@ namespace LinkuraLocal::HookCamera {
         registerMainFreeCamera(storyCamera);
         registerCurrentCamera(storyCamera);
         HookLiveRender::applyCameraGraphicSettings(storyCamera);
-        backgroundColorCameraCache = storyCamera;
-        Unity_camera_set_backgroundColor_Injected_Orig(backgroundColorCameraCache, &L4Camera::backgroundColor);
+        Sharable::backgroundColorCameras.insert(storyCamera);
+        Unity_camera_set_backgroundColor_Injected_Orig(storyCamera, &L4Camera::backgroundColor);
     }
     DEFINE_HOOK(void, StoryScene_OnFinalize, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("StoryScene_OnFinalize HOOKED");
@@ -489,7 +508,7 @@ namespace LinkuraLocal::HookCamera {
         for (int i = 0;i < childCount; i++) {
             auto child = obj->GetChild(i);
             const auto childName = child->GetName();
-            Log::DebugFmt("%s child: %s", obj_name.c_str(), childName.c_str());
+            Log::VerboseFmt("%s child: %s", obj_name.c_str(), childName.c_str());
         }
     }
 
@@ -523,6 +542,12 @@ namespace LinkuraLocal::HookCamera {
         }
 
         auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
+        // {
+        //     auto rootTrans = spineTrans->GetRoot();
+        //     throttle([&]() {
+        //         printChildren(rootTrans, "root");
+        //     }, std::chrono::milliseconds(1000));
+        // }
         auto modelParent = spineTrans->GetParent();
         auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
                 [](const std::string& childName) {

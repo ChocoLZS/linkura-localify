@@ -69,6 +69,9 @@ class ConfigUpdateManager private constructor() {
                 if (config.archiveStartTime != null) archiveStartTime = config.archiveStartTime
                 if (config.avoidAccidentalTouch != null) avoidAccidentalTouch = config.avoidAccidentalTouch
                 if (config.assetsUrlPrefix != null) assetsUrlPrefix = config.assetsUrlPrefix
+                if (config.hideCharacterShadow != null) hideCharacterShadow = config.hideCharacterShadow
+                if (config.hideLiveStreamSceneItemsLevel != null) hideLiveStreamSceneItemsLevel = config.hideLiveStreamSceneItemsLevel
+                if (config.hideLiveStreamCharacterItems != null) hideLiveStreamCharacterItems = config.hideLiveStreamCharacterItems
             }.build()
 
             serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

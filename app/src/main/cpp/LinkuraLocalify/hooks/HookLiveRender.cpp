@@ -71,6 +71,7 @@ namespace LinkuraLocal::HookLiveRender {
 
     DEFINE_HOOK(void* , RealtimeRenderingArchiveController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("RealtimeRenderingArchiveController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
+        HookCamera::Sharable::backgroundColorCameras.clear();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::UpdateReceived) {
             seconds = HookShare::Shareable::realtimeRenderingArchivePositionSeconds;
@@ -83,6 +84,7 @@ namespace LinkuraLocal::HookLiveRender {
     // Config::isLegacyMrsVersion
     DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync, (void* self, float seconds)) {
         Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync HOOKED: seconds is %f", seconds);
+        HookCamera::Sharable::backgroundColorCameras.clear();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::UpdateReceived) {
             seconds = HookShare::Shareable::realtimeRenderingArchivePositionSeconds;
@@ -95,6 +97,7 @@ namespace LinkuraLocal::HookLiveRender {
     // Config::isFirstYearVersion
     DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync_Interface, (void* self, float seconds)) {
         Log::DebugFmt("LiveConnectMrsController_SetPlayPositionAsync_Interface HOOKED: seconds is %f", seconds);
+        HookCamera::Sharable::backgroundColorCameras.clear();
         HookShare::Shareable::realtimeRenderingArchiveControllerCache = self;
         if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::UpdateReceived) {
             seconds = HookShare::Shareable::realtimeRenderingArchivePositionSeconds;
@@ -149,18 +152,21 @@ namespace LinkuraLocal::HookLiveRender {
                     HookCamera::unregisterMainFreeCamera(false);
                     HookCamera::unregisterCurrentCamera();
                 }
+                HookCamera::Sharable::backgroundColorCameras.clear();
                 RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
                         HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                         HookShare::Shareable::realtimeRenderingArchivePositionSeconds
                 );
             } else {
                 if (LiveConnectMrsController_SetPlayPositionAsync_Orig) {
+                    HookCamera::Sharable::backgroundColorCameras.clear();
                     LiveConnectMrsController_SetPlayPositionAsync_Orig(
                             HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                             HookShare::Shareable::realtimeRenderingArchivePositionSeconds
                     );
                 }
                 if (LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig) {
+                    HookCamera::Sharable::backgroundColorCameras.clear();
                     LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig(
                             HookShare::Shareable::realtimeRenderingArchiveControllerCache,
                             HookShare::Shareable::realtimeRenderingArchivePositionSeconds

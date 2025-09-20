@@ -75,29 +75,6 @@ namespace L4Camera {
             }
             return false;
         }
-
-        void setMeshRenderActive(UnityResolve::UnityType::Transform* transform, bool active, std::string str = "") {
-            static auto set_enabled = reinterpret_cast<void (*)(UnityResolve::UnityType::Component*, bool)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::set_enabled(System.Boolean)"));
-            auto renderer = getRenderer(transform);
-            if (renderer && Il2cppUtils::IsNativeObjectAlive(renderer)) {
-                set_enabled(renderer, active);
-            } else {
-                LinkuraLocal::Log::DebugFmt("No renderer found for %s", str.c_str());
-            }
-        }
-
-        UnityResolve::UnityType::Component* getRenderer(UnityResolve::UnityType::Transform* transform) {
-            static auto get_component = reinterpret_cast<UnityResolve::UnityType::Component* (*)(UnityResolve::UnityType::GameObject*, void*)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)"));
-            static auto get_enabled = reinterpret_cast<bool (*)(UnityResolve::UnityType::Component*)>(
-                    Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Renderer::get_enabled()"));
-            static auto rendererType = Il2cppUtils::GetClass("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer");
-            if (!(transform && Il2cppUtils::IsNativeObjectAlive(transform))) return nullptr;
-            auto gameObject = transform->GetGameObject();
-            if (!(gameObject && Il2cppUtils::IsNativeObjectAlive(gameObject))) return nullptr;
-            return gameObject->GetComponent<UnityResolve::UnityType::Component*>(rendererType);
-        }
     };
 
     template <typename T>
@@ -153,11 +130,11 @@ namespace L4Camera {
                 for (auto &pair: meshMap) {
 //                    LinkuraLocal::Log::DebugFmt("Trying to restore renderer for %s", pair.first.c_str());
                     auto transform = pair.second;
-                    CharacterMeshManager<T>::setMeshRenderActive(transform, true, pair.first);
+                    Il2cppUtils::SetTransformRenderActive(transform, true, pair.first);
                 }
                 if (LinkuraLocal::Config::firstPersonCameraHideHair) {
                     auto hair = CharacterMeshManager<T>::getCurrentHair();
-                    CharacterMeshManager<T>::setMeshRenderActive(hair, true, "hair");
+                    Il2cppUtils::SetTransformRenderActive(hair, true, "hair");
                 }
             }
         }
@@ -172,11 +149,11 @@ namespace L4Camera {
                 if (!currentIsRendered) return; // if current hair is not rendered, do not hide
                 for (auto& pair : meshMap) {
                     auto transform = pair.second;
-                    CharacterMeshManager<T>::setMeshRenderActive(transform, false, pair.first);
+                    Il2cppUtils::SetTransformRenderActive(transform, false, pair.first);
                 }
                 if (LinkuraLocal::Config::firstPersonCameraHideHair) {
                     auto hair = CharacterMeshManager<T>::getCurrentHair();
-                    CharacterMeshManager<T>::setMeshRenderActive(hair, false, "hair");
+                    Il2cppUtils::SetTransformRenderActive(hair, false, "hair");
                 }
             }
         }
@@ -258,8 +235,8 @@ namespace L4Camera {
                     if (childName.starts_with("Hair")) {
                         continue;
                     }
-                    CharacterMeshManager<T>::setMeshRenderActive(child, false, childName);
-                    auto renderer = CharacterMeshManager<T>::getRenderer(child);
+                    Il2cppUtils::SetTransformRenderActive(child, false, childName);
+                    auto renderer = Il2cppUtils::GetMeshRenderer(child);
                     renderSet.insert(renderer);
                 }
             }
