@@ -24,6 +24,9 @@ class OverlayToolbarUI {
     private var isCreated = false
     private var isExpanded = true // 默认展开状态
     private var isCameraMenuVisible = false
+    private var isArchiveOverlayVisible = false
+    private var gameActivity: Activity? = null
+    private val xposedArchiveOverlayUI = XposedArchiveOverlayUI()
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: FrameLayout
     private lateinit var toolbarContainer: LinearLayout
@@ -31,6 +34,7 @@ class OverlayToolbarUI {
     private lateinit var closeButton: ImageButton
     private lateinit var mainToolbar: LinearLayout
     private lateinit var cameraSecondaryMenu: LinearLayout
+    private lateinit var archiveButton: ImageButton
 
     private var initialX = 0
     private var initialY = 0
@@ -43,6 +47,12 @@ class OverlayToolbarUI {
         isCreated = true
 
         val activity = context as? Activity ?: return
+        gameActivity = activity
+
+        // Setup archive overlay callback
+        xposedArchiveOverlayUI.onOverlayHidden = {
+            setArchiveOverlayVisible(false)
+        }
 
         // Ensure we're on the main thread
         activity.runOnUiThread {
@@ -206,26 +216,17 @@ class OverlayToolbarUI {
             val verticalPadding = (8f * activity.resources.displayMetrics.density).toInt()
             setPadding(padding, verticalPadding, padding, verticalPadding)
 
-            // Connection status indicator (placeholder)
-            val connectionIndicator = View(activity).apply {
-                val size = (12f * activity.resources.displayMetrics.density).toInt()
-                layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                    rightMargin = (12f * activity.resources.displayMetrics.density).toInt()
-                }
-                setBackgroundColor(Color.GREEN) // 简化的连接状态指示器
-                background = createRoundedBackground(Color.GREEN, size / 2f)
-            }
-            addView(connectionIndicator)
-
             // Camera button
             addView(createMainToolButton(activity, SVGIcon.PhotoCamera::createDrawable, "Camera") {
                 toggleCameraMenu()
             })
 
             // Archive button
-            addView(createMainToolButton(activity, SVGIcon.PlayArrow::createDrawable, "Archive") {
+            archiveButton = createMainToolButton(activity, SVGIcon.PlayArrow::createDrawable, "Archive") {
                 Log.d(TAG, "Archive button clicked")
-            })
+                toggleArchiveOverlay()
+            }
+            addView(archiveButton)
 
             // Color picker button
             addView(createMainToolButton(activity, SVGIcon.Palette::createDrawable, "Color Picker") {
@@ -363,6 +364,12 @@ class OverlayToolbarUI {
         isExpanded = !isExpanded
         isCameraMenuVisible = false // 折叠时关闭二级菜单
 
+        // 折叠时关闭archive overlay
+        if (!isExpanded && isArchiveOverlayVisible) {
+            xposedArchiveOverlayUI.hide()
+            setArchiveOverlayVisible(false)
+        }
+
         // 重新创建UI以切换状态
         if (::toolbarContainer.isInitialized) {
             toolbarContainer.removeAllViews()
@@ -370,9 +377,18 @@ class OverlayToolbarUI {
             if (isExpanded) {
                 // 展开状态：显示完整工具栏
                 val activity = overlayView.context as Activity
+
+                // Recreate all components to avoid parent conflicts
+                createControlBar(activity)
+                createMainToolbar(activity)
+                createCameraSecondaryMenu(activity)
+
                 toolbarContainer.addView(createControlBarContainer(activity))
                 toolbarContainer.addView(createMainToolbarContainer(activity))
                 toolbarContainer.addView(cameraSecondaryMenu)
+
+                // Update archive button state after recreation
+                updateArchiveButtonState()
             } else {
                 // 折叠状态：只显示拖拽手柄和展开按钮
                 val activity = overlayView.context as Activity
@@ -435,6 +451,41 @@ class OverlayToolbarUI {
             Log.d(TAG, "Overlay toolbar removed")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to remove overlay toolbar", e)
+        }
+    }
+
+    private fun toggleArchiveOverlay() {
+        gameActivity?.let { activity ->
+            if (xposedArchiveOverlayUI.isOverlayVisible()) {
+                Log.d(TAG, "Hiding Xposed archive overlay")
+                xposedArchiveOverlayUI.hide()
+                setArchiveOverlayVisible(false)
+            } else {
+                Log.d(TAG, "Showing Xposed archive overlay")
+                xposedArchiveOverlayUI.show(activity)
+                setArchiveOverlayVisible(true)
+            }
+        }
+    }
+
+    fun setArchiveOverlayVisible(visible: Boolean) {
+        isArchiveOverlayVisible = visible
+        updateArchiveButtonState()
+    }
+
+    private fun updateArchiveButtonState() {
+        if (::archiveButton.isInitialized) {
+            val context = archiveButton.context
+            if (isArchiveOverlayVisible) {
+                // Selected state - blue background
+                val cornerRadius = 6f * context.resources.displayMetrics.density
+                archiveButton.background = createRoundedBackground(Color.parseColor("#FF67DAFC"), cornerRadius)
+                archiveButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 20f))
+            } else {
+                // Normal state - transparent background
+                archiveButton.setBackgroundColor(Color.TRANSPARENT)
+                archiveButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 20f))
+            }
         }
     }
 

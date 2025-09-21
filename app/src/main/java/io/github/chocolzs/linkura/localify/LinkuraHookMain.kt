@@ -172,11 +172,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 val archiveInfoRequest = ArchiveInfo.parseFrom(payload)
                 // Get archive info from native layer
                 val archiveInfoBytes = getCurrentArchiveInfo()
-                
+
                 if (archiveInfoBytes.isNotEmpty()) {
                     // Parse the archive info from native layer
                     val nativeArchiveInfo = ArchiveInfo.parseFrom(archiveInfoBytes)
-                    
+
+
                     if (aidlClient.isClientConnected()) {
                         val success = aidlClient.sendMessage(MessageType.ARCHIVE_INFO, nativeArchiveInfo)
                         if (success) {
@@ -190,7 +191,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     val emptyResponse = ArchiveInfo.newBuilder()
                         .setDuration(0L)
                         .build()
-                    
+
+
                     if (aidlClient.isClientConnected()) {
                         val success = aidlClient.sendMessage(MessageType.ARCHIVE_INFO, emptyResponse)
                         if (success) {
@@ -290,6 +292,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private fun onStartHandler() {
         aidlClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
     }
+
     
     /**
      * Setup broadcast receiver for log export requests
