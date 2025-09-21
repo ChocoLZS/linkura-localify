@@ -57,6 +57,8 @@ data class LinkuraConfig (
     var hideLiveStreamSceneItemsLevel: Int = 0,
     var hideLiveStreamCharacterItems: Boolean = false,
 
+    // In-game overlay toolbar settings
+    var enableInGameOverlayToolbar: Boolean = true,
 
     var pf: Boolean = false,
 

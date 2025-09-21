@@ -60,6 +60,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private val nativeLibName = "HasuKikaisann"
 
     private var l4DataInited = false
+    private var linkuraConfig: LinkuraConfig? = null
 
     private var getConfigError: Exception? = null
     private var externalFilesChecked: Boolean = false
@@ -526,8 +527,9 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     initLinkuraConfig(currActivity)
                 }
                 onStartHandler()
+                // load config
                 // Create overlay toolbar after initialization is complete
-                if (!overlayToolbarUI.isOverlayCreated()) {
+                if (!overlayToolbarUI.isOverlayCreated() && linkuraConfig?.enableInGameOverlayToolbar == true) {
                     Log.d(TAG, "Start overlay")
                     overlayToolbarUI.createOverlay(gameActivity!!)
                 }
@@ -861,6 +863,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             catch (e: Exception) {
                 null
             }
+            // Store the config for later access
+            linkuraConfig = initConfig
             val programConfig = try {
                 if (programData == null) {
                     ProgramConfig()

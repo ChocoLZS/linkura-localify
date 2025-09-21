@@ -90,6 +90,7 @@ class OverlayToolbarUI {
             setBackgroundColor(Color.TRANSPARENT)
             val containerPadding = (4f * activity.resources.displayMetrics.density).toInt()
             setPadding(containerPadding, containerPadding, containerPadding, containerPadding)
+            gravity = Gravity.CENTER_HORIZONTAL
         }
 
         // Create all UI components
@@ -179,7 +180,7 @@ class OverlayToolbarUI {
 
             val padding = (4f * activity.resources.displayMetrics.density).toInt()
             setPadding(padding, padding, padding, padding)
-            gravity = Gravity.CENTER_VERTICAL
+            gravity = Gravity.CENTER_VERTICAL or Gravity.CENTER_HORIZONTAL
 
             // Add components with spacing
             addView(dragHandle)
@@ -335,6 +336,7 @@ class OverlayToolbarUI {
 
             val padding = (4f * activity.resources.displayMetrics.density).toInt()
             setPadding(padding, padding, padding, padding)
+            gravity = Gravity.CENTER_VERTICAL or Gravity.CENTER_HORIZONTAL
 
             // Camera Info button
             cameraInfoButton = createSecondaryMenuButton(activity, SVGIcon.Info::createDrawable, "Camera Info") {}

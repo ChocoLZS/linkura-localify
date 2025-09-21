@@ -44,115 +44,98 @@ fun OverlayToolbarControl(
             }
         }
     }
-
-    GakuGroupBox(
-        title = stringResource(R.string.overlay_toolbar_title),
-        modifier = modifier,
-        onHeadClick = {
-            toolbarViewModel.expanded = !toolbarViewModel.expanded
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        CollapsibleBox(
-            modifier = modifier,
-            expandState = toolbarViewModel.expanded,
-            collapsedHeight = 0.dp,
-            showExpand = false
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+        Text(
+            text = stringResource(R.string.overlay_toolbar_description),
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        if (!hasPermission) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.overlay_toolbar_permission_required),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Text(
+                        text = stringResource(R.string.overlay_toolbar_permission_description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    GakuButton(
+                        text = stringResource(R.string.overlay_toolbar_grant_permission),
+                        onClick = {
+                            Log.d(TAG, "Grant Permission button clicked")
+                            Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
+                            try {
+                                OverlayManager.requestOverlayPermission(context)
+                                Log.d(TAG, "Permission request completed")
+                            } catch (e: Exception) { Log.e(TAG, "Error requesting permission", e)
+                            }
+                        }
+                    )
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.overlay_toolbar_description),
+                    text = if (isOverlayEnabled) stringResource(R.string.overlay_toolbar_status_active) else stringResource(R.string.overlay_toolbar_status_inactive),
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                if (!hasPermission) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.overlay_toolbar_permission_required),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Text(
-                                text = stringResource(R.string.overlay_toolbar_permission_description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            GakuButton(
-                                text = stringResource(R.string.overlay_toolbar_grant_permission),
-                                onClick = {
-                                    Log.d(TAG, "Grant Permission button clicked")
-                                    Log.d(TAG, "Context type: ${context.javaClass.simpleName}")
-                                    try {
-                                        OverlayManager.requestOverlayPermission(context)
-                                        Log.d(TAG, "Permission request completed")
-                                    } catch (e: Exception) {
-                                        Log.e(TAG, "Error requesting permission", e)
-                                    }
-                                }
-                            )
+                GakuButton(
+                    text = if (isOverlayEnabled) stringResource(R.string.overlay_toolbar_stop) else stringResource(R.string.overlay_toolbar_start),
+                    onClick = {
+                        try {
+                            val newState = OverlayManager.toggleOverlay(context)
+
+                            isOverlayEnabled = newState
+                        } catch (e: Exception) {
+                            Log.e(TAG, "=== EXCEPTION IN OVERLAY TOGGLE ===", e)
+                            Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")
+                            Log.e(TAG, "Exception message: ${e.message}")
+                            Log.e(TAG, "Exception cause: ${e.cause}")
+                            Log.e(TAG, "Stack trace: ${e.stackTrace.contentToString()}")
                         }
                     }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (isOverlayEnabled) stringResource(R.string.overlay_toolbar_status_active) else stringResource(R.string.overlay_toolbar_status_inactive),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                )
+            }
+        }
 
-                        GakuButton(
-                            text = if (isOverlayEnabled) stringResource(R.string.overlay_toolbar_stop) else stringResource(R.string.overlay_toolbar_start),
-                            onClick = {
-                                try {
-                                    val newState = OverlayManager.toggleOverlay(context)
-
-                                    isOverlayEnabled = newState
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "=== EXCEPTION IN OVERLAY TOGGLE ===", e)
-                                    Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")
-                                    Log.e(TAG, "Exception message: ${e.message}")
-                                    Log.e(TAG, "Exception cause: ${e.cause}")
-                                    Log.e(TAG, "Stack trace: ${e.stackTrace.contentToString()}")
-                                }
-                            }
-                        )
-                    }
-                }
-
-                    if (isOverlayEnabled) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(12.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.overlay_toolbar_crash_warning),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                    }
+        if (isOverlayEnabled) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.overlay_toolbar_crash_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
-            Spacer(Modifier.height(6.dp))
         }
     }
+}
+

@@ -356,7 +356,8 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     
     <!-- toolbar Overlay -->
     <string name="overlay.toolbar.title">ツールバーフローティングウィンドウ</string>
-    <string name="overlay.toolbar.description">カメラパラメータのリアルタイム表示、レンダリング再生の進行状況調整、グリーンスクリーン機能を可能にします</string>
+     translate the english to japanese
+    <string name="overlay.toolbar.description">カメラパラメータのリアルタイム表示、レンダリング再生の進行状況調整、グリーンスクリーン機能を可能にします。注意：このレガシーオーバーレイには互換性の問題があり、更新は行われません。代わりに新しいゲーム内オーバーレイツールバー機能を使用してください。</string>
     <string name="overlay.toolbar.permission_required">権限が必要</string>
     <string name="overlay.toolbar.permission_description">アプリが他のアプリの上にオーバーレイを表示するための権限が必要です。</string>
     <string name="overlay.toolbar.grant_permission">権限を付与</string>
@@ -366,6 +367,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="overlay.toolbar.stop">オーバーレイ停止</string>
     <string name="overlay.toolbar.crash_warning">注意：With×MEETS再生中にフリーカメラを使用し、カメラ情報表示を有効にしている場合、チャプタージャンプやカスタム時間ジャンプでクラッシュする可能性があります。</string>
     <string name="overlay.archive.no_rendering_running">現在実行中のレンダリングはありません</string>
+    <string name="overlay.toolbar.in_game_toolbar.title">ゲーム内オーバーレイツールバー</string>
 
     <!-- Color Picker -->
     <string name="overlay.color_picker.title">背景色選択</string>

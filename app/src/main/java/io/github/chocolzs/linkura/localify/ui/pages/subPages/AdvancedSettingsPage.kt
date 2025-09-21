@@ -230,7 +230,25 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
     ) {
         // Floating Window Section (moved to top)
         item {
-            OverlayToolbarControl(modifier = modifier)
+            GakuGroupBox(
+                title = stringResource(R.string.overlay_toolbar_title),
+                modifier = modifier,
+                onHeadClick = {
+                    toolbarViewModel.expanded = !toolbarViewModel.expanded
+                }
+            ) {
+                CollapsibleBox(
+                    modifier = modifier,
+                    expandState = toolbarViewModel.expanded,
+                    collapsedHeight = 0.dp,
+                    showExpand = false
+                ) {
+                    OverlayToolbarControl(modifier = modifier)
+                    GakuSwitch(modifier, stringResource(R.string.overlay_toolbar_in_game_toolbar_title), checked = config.value.enableInGameOverlayToolbar) {
+                            v -> context?.onEnableInGameOverlayToolbar(v)
+                    }
+                }
+            }
             Spacer(Modifier.height(6.dp))
         }
 
