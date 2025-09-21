@@ -16,7 +16,6 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.graphics.drawable.GradientDrawable
 import io.github.chocolzs.linkura.localify.TAG
 
@@ -35,6 +34,7 @@ class OverlayToolbarUI {
     private lateinit var cameraSecondaryMenu: LinearLayout
     private lateinit var archiveButton: ImageButton
     private lateinit var cameraInfoButton: ImageButton
+    private lateinit var cameraSensitivityButton: ImageButton
 
     private var initialX = 0
     private var initialY = 0
@@ -237,6 +237,31 @@ class OverlayToolbarUI {
                 updateCameraInfoButtonVisual(button, isSelected)
             }
 
+            // Override click listener to also close camera menu
+            cameraInfoButton.setOnClickListener {
+                Log.d(TAG, "Camera info clicked")
+                isCameraMenuVisible = false
+                updateToolbarVisibility()
+                overlayManager.toggleOverlay("camera_info") { button, isSelected ->
+                    updateCameraInfoButtonVisual(button, isSelected)
+                }
+            }
+
+            // Bind camera sensitivity button to overlay manager
+            overlayManager.bindButton(cameraSensitivityButton, "camera_sensitivity") { button, isSelected ->
+                updateCameraSensitivityButtonVisual(button, isSelected)
+            }
+
+            // Override click listener to also close camera menu
+            cameraSensitivityButton.setOnClickListener {
+                Log.d(TAG, "Camera sensitivity clicked")
+                isCameraMenuVisible = false
+                updateToolbarVisibility()
+                overlayManager.toggleOverlay("camera_sensitivity") { button, isSelected ->
+                    updateCameraSensitivityButtonVisual(button, isSelected)
+                }
+            }
+
             // Color picker button
             addView(createMainToolButton(activity, SVGIcon.Palette::createDrawable, "Color Picker") {
                 Log.d(TAG, "Color picker button clicked")
@@ -284,19 +309,12 @@ class OverlayToolbarUI {
             setPadding(padding, padding, padding, padding)
 
             // Camera Info button
-            cameraInfoButton = createSecondaryMenuButton(activity, SVGIcon.Info::createDrawable, "Camera Info") {
-                Log.d(TAG, "Camera info clicked")
-                isCameraMenuVisible = false
-                updateToolbarVisibility()
-                // Let overlay manager handle the toggle
-            }
+            cameraInfoButton = createSecondaryMenuButton(activity, SVGIcon.Info::createDrawable, "Camera Info") {}
             addView(cameraInfoButton)
 
             // Camera Sensitivity button
-            addView(createSecondaryMenuButton(activity, SVGIcon.Settings::createDrawable, "Camera Sensitivity") {
-                Log.d(TAG, "Camera sensitivity clicked")
-                isCameraMenuVisible = false
-            })
+            cameraSensitivityButton = createSecondaryMenuButton(activity, SVGIcon.Settings::createDrawable, "Camera Sensitivity") {}
+            addView(cameraSensitivityButton)
 
             // Free Camera Control button
             addView(createSecondaryMenuButton(activity, SVGIcon.Gamepad::createDrawable, "Free Camera Control") {
@@ -405,6 +423,29 @@ class OverlayToolbarUI {
                 overlayManager.bindButton(cameraInfoButton, "camera_info") { button, isSelected ->
                     updateCameraInfoButtonVisual(button, isSelected)
                 }
+
+                // Override click listener to also close camera menu
+                cameraInfoButton.setOnClickListener {
+                    Log.d(TAG, "Camera info clicked")
+                    isCameraMenuVisible = false
+                    updateToolbarVisibility()
+                    overlayManager.toggleOverlay("camera_info") { button, isSelected ->
+                        updateCameraInfoButtonVisual(button, isSelected)
+                    }
+                }
+                overlayManager.bindButton(cameraSensitivityButton, "camera_sensitivity") { button, isSelected ->
+                    updateCameraSensitivityButtonVisual(button, isSelected)
+                }
+
+                // Override click listener to also close camera menu
+                cameraSensitivityButton.setOnClickListener {
+                    Log.d(TAG, "Camera sensitivity clicked")
+                    isCameraMenuVisible = false
+                    updateToolbarVisibility()
+                    overlayManager.toggleOverlay("camera_sensitivity") { button, isSelected ->
+                        updateCameraSensitivityButtonVisual(button, isSelected)
+                    }
+                }
             } else {
                 // 折叠状态：只显示拖拽手柄和展开按钮
                 val activity = overlayView.context as Activity
@@ -460,12 +501,16 @@ class OverlayToolbarUI {
 
     private fun setupOverlays() {
         // Register archive overlay
-        val archiveOverlay = XposedArchiveOverlayUI()
+        val archiveOverlay = ArchiveOverlayUI()
         overlayManager.registerOverlay(archiveOverlay)
 
         // Register camera info overlay
-        val cameraInfoOverlay = XposedCameraInfoOverlayUI()
+        val cameraInfoOverlay = CameraInfoOverlayUI()
         overlayManager.registerOverlay(cameraInfoOverlay)
+
+        // Register camera sensitivity overlay
+        val cameraSensitivityOverlay = CameraSensitivityOverlayUI()
+        overlayManager.registerOverlay(cameraSensitivityOverlay)
 
         // Add more overlays here in the future:
         // val customOverlay = XposedCustomOverlayUI()
@@ -510,6 +555,20 @@ class OverlayToolbarUI {
             // Normal state - transparent background
             button.setBackgroundColor(Color.TRANSPARENT)
             button.setImageDrawable(SVGIcon.Info.createDrawable(context, Color.WHITE, 16f))
+        }
+    }
+
+    private fun updateCameraSensitivityButtonVisual(button: ImageButton, isSelected: Boolean) {
+        val context = button.context
+        if (isSelected) {
+            // Selected state - blue background
+            val cornerRadius = 6f * context.resources.displayMetrics.density
+            button.background = createRoundedBackground(Color.parseColor("#FF67DAFC"), cornerRadius)
+            button.setImageDrawable(SVGIcon.Settings.createDrawable(context, Color.WHITE, 16f))
+        } else {
+            // Normal state - transparent background
+            button.setBackgroundColor(Color.TRANSPARENT)
+            button.setImageDrawable(SVGIcon.Settings.createDrawable(context, Color.WHITE, 16f))
         }
     }
 

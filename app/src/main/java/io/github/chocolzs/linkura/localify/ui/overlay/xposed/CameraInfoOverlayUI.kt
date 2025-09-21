@@ -19,13 +19,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import io.github.chocolzs.linkura.localify.LinkuraHookMain
-import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.TAG
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 
-class XposedCameraInfoOverlayUI : BaseOverlay {
+class CameraInfoOverlayUI : BaseOverlay {
     override val overlayId = "camera_info"
     override val displayName = "Camera Info"
 

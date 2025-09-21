@@ -18,10 +18,8 @@ import android.widget.TextView
 import io.github.chocolzs.linkura.localify.TAG
 import io.github.chocolzs.linkura.localify.LinkuraHookMain
 import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
-import kotlin.math.max
-import kotlin.math.min
 
-class XposedArchiveOverlayUI : BaseOverlay {
+class ArchiveOverlayUI : BaseOverlay {
     override val overlayId = "archive"
     override val displayName = "Archive Control"
 
