@@ -44,6 +44,7 @@ import io.github.chocolzs.linkura.localify.mainUtils.json
 import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
+import io.github.chocolzs.linkura.localify.ui.overlay.xposed.OverlayToolbarUI
 
 import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlClient
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
@@ -522,7 +523,11 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     initLinkuraConfig(currActivity)
                 }
                 onStartHandler()
-                
+                // Create overlay toolbar after initialization is complete
+                if (!overlayToolbarUI.isOverlayCreated()) {
+                    Log.d(TAG, "Start overlay")
+                    overlayToolbarUI.createOverlay(gameActivity!!)
+                }
                 // Setup log export broadcast receiver
                 setupLogExportBroadcastReceiver(currActivity)
             }
@@ -607,6 +612,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     // Main loop tasks - runs at 30fps
     private var lastFrameStartInit = NativeInitProgress.startInit
     private val initProgressUI = InitProgressUI()
+    private val overlayToolbarUI = OverlayToolbarUI()
     
     private fun executeMainLoopTasks() {
         val returnValue = pluginCallbackLooper()  // plugin main thread loop
