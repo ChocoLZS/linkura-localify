@@ -24,9 +24,8 @@ class OverlayToolbarUI {
     private var isCreated = false
     private var isExpanded = true // 默认展开状态
     private var isCameraMenuVisible = false
-    private var isArchiveOverlayVisible = false
     private var gameActivity: Activity? = null
-    private val xposedArchiveOverlayUI = XposedArchiveOverlayUI()
+    private val overlayManager = OverlayManager()
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: FrameLayout
     private lateinit var toolbarContainer: LinearLayout
@@ -35,6 +34,7 @@ class OverlayToolbarUI {
     private lateinit var mainToolbar: LinearLayout
     private lateinit var cameraSecondaryMenu: LinearLayout
     private lateinit var archiveButton: ImageButton
+    private lateinit var cameraInfoButton: ImageButton
 
     private var initialX = 0
     private var initialY = 0
@@ -49,10 +49,9 @@ class OverlayToolbarUI {
         val activity = context as? Activity ?: return
         gameActivity = activity
 
-        // Setup archive overlay callback
-        xposedArchiveOverlayUI.onOverlayHidden = {
-            setArchiveOverlayVisible(false)
-        }
+        // Setup overlay manager
+        overlayManager.setGameActivity(activity)
+        setupOverlays()
 
         // Ensure we're on the main thread
         activity.runOnUiThread {
@@ -224,9 +223,19 @@ class OverlayToolbarUI {
             // Archive button
             archiveButton = createMainToolButton(activity, SVGIcon.PlayArrow::createDrawable, "Archive") {
                 Log.d(TAG, "Archive button clicked")
-                toggleArchiveOverlay()
+                // Let overlay manager handle the toggle
             }
             addView(archiveButton)
+
+            // Bind archive button to overlay manager
+            overlayManager.bindButton(archiveButton, "archive") { button, isSelected ->
+                updateArchiveButtonVisual(button, isSelected)
+            }
+
+            // Bind camera info button to overlay manager
+            overlayManager.bindButton(cameraInfoButton, "camera_info") { button, isSelected ->
+                updateCameraInfoButtonVisual(button, isSelected)
+            }
 
             // Color picker button
             addView(createMainToolButton(activity, SVGIcon.Palette::createDrawable, "Color Picker") {
@@ -275,10 +284,13 @@ class OverlayToolbarUI {
             setPadding(padding, padding, padding, padding)
 
             // Camera Info button
-            addView(createSecondaryMenuButton(activity, SVGIcon.Info::createDrawable, "Camera Info") {
+            cameraInfoButton = createSecondaryMenuButton(activity, SVGIcon.Info::createDrawable, "Camera Info") {
                 Log.d(TAG, "Camera info clicked")
                 isCameraMenuVisible = false
-            })
+                updateToolbarVisibility()
+                // Let overlay manager handle the toggle
+            }
+            addView(cameraInfoButton)
 
             // Camera Sensitivity button
             addView(createSecondaryMenuButton(activity, SVGIcon.Settings::createDrawable, "Camera Sensitivity") {
@@ -364,10 +376,9 @@ class OverlayToolbarUI {
         isExpanded = !isExpanded
         isCameraMenuVisible = false // 折叠时关闭二级菜单
 
-        // 折叠时关闭archive overlay
-        if (!isExpanded && isArchiveOverlayVisible) {
-            xposedArchiveOverlayUI.hide()
-            setArchiveOverlayVisible(false)
+        // 折叠时关闭所有overlay
+        if (!isExpanded) {
+            overlayManager.hideAllOverlays()
         }
 
         // 重新创建UI以切换状态
@@ -387,8 +398,13 @@ class OverlayToolbarUI {
                 toolbarContainer.addView(createMainToolbarContainer(activity))
                 toolbarContainer.addView(cameraSecondaryMenu)
 
-                // Update archive button state after recreation
-                updateArchiveButtonState()
+                // Rebind buttons after recreation
+                overlayManager.bindButton(archiveButton, "archive") { button, isSelected ->
+                    updateArchiveButtonVisual(button, isSelected)
+                }
+                overlayManager.bindButton(cameraInfoButton, "camera_info") { button, isSelected ->
+                    updateCameraInfoButtonVisual(button, isSelected)
+                }
             } else {
                 // 折叠状态：只显示拖拽手柄和展开按钮
                 val activity = overlayView.context as Activity
@@ -442,50 +458,58 @@ class OverlayToolbarUI {
         }
     }
 
+    private fun setupOverlays() {
+        // Register archive overlay
+        val archiveOverlay = XposedArchiveOverlayUI()
+        overlayManager.registerOverlay(archiveOverlay)
+
+        // Register camera info overlay
+        val cameraInfoOverlay = XposedCameraInfoOverlayUI()
+        overlayManager.registerOverlay(cameraInfoOverlay)
+
+        // Add more overlays here in the future:
+        // val customOverlay = XposedCustomOverlayUI()
+        // overlayManager.registerOverlay(customOverlay)
+    }
+
     fun removeOverlay() {
         if (!isCreated) return
         isCreated = false
 
         try {
             windowManager.removeView(overlayView)
+            overlayManager.destroy()
             Log.d(TAG, "Overlay toolbar removed")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to remove overlay toolbar", e)
         }
     }
 
-    private fun toggleArchiveOverlay() {
-        gameActivity?.let { activity ->
-            if (xposedArchiveOverlayUI.isOverlayVisible()) {
-                Log.d(TAG, "Hiding Xposed archive overlay")
-                xposedArchiveOverlayUI.hide()
-                setArchiveOverlayVisible(false)
-            } else {
-                Log.d(TAG, "Showing Xposed archive overlay")
-                xposedArchiveOverlayUI.show(activity)
-                setArchiveOverlayVisible(true)
-            }
+    private fun updateArchiveButtonVisual(button: ImageButton, isSelected: Boolean) {
+        val context = button.context
+        if (isSelected) {
+            // Selected state - blue background
+            val cornerRadius = 6f * context.resources.displayMetrics.density
+            button.background = createRoundedBackground(Color.parseColor("#FF67DAFC"), cornerRadius)
+            button.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 20f))
+        } else {
+            // Normal state - transparent background
+            button.setBackgroundColor(Color.TRANSPARENT)
+            button.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 20f))
         }
     }
 
-    fun setArchiveOverlayVisible(visible: Boolean) {
-        isArchiveOverlayVisible = visible
-        updateArchiveButtonState()
-    }
-
-    private fun updateArchiveButtonState() {
-        if (::archiveButton.isInitialized) {
-            val context = archiveButton.context
-            if (isArchiveOverlayVisible) {
-                // Selected state - blue background
-                val cornerRadius = 6f * context.resources.displayMetrics.density
-                archiveButton.background = createRoundedBackground(Color.parseColor("#FF67DAFC"), cornerRadius)
-                archiveButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 20f))
-            } else {
-                // Normal state - transparent background
-                archiveButton.setBackgroundColor(Color.TRANSPARENT)
-                archiveButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 20f))
-            }
+    private fun updateCameraInfoButtonVisual(button: ImageButton, isSelected: Boolean) {
+        val context = button.context
+        if (isSelected) {
+            // Selected state - blue background
+            val cornerRadius = 6f * context.resources.displayMetrics.density
+            button.background = createRoundedBackground(Color.parseColor("#FF67DAFC"), cornerRadius)
+            button.setImageDrawable(SVGIcon.Info.createDrawable(context, Color.WHITE, 16f))
+        } else {
+            // Normal state - transparent background
+            button.setBackgroundColor(Color.TRANSPARENT)
+            button.setImageDrawable(SVGIcon.Info.createDrawable(context, Color.WHITE, 16f))
         }
     }
 

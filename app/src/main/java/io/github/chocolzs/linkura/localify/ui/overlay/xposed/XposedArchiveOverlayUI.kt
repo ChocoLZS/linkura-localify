@@ -21,8 +21,13 @@ import io.github.chocolzs.linkura.localify.ipc.LinkuraMessages.*
 import kotlin.math.max
 import kotlin.math.min
 
-class XposedArchiveOverlayUI {
-    var onOverlayHidden: (() -> Unit)? = null
+class XposedArchiveOverlayUI : BaseOverlay {
+    override val overlayId = "archive"
+    override val displayName = "Archive Control"
+
+    override var onOverlayHidden: (() -> Unit)? = null
+    override var onVisibilityChanged: ((Boolean) -> Unit)? = null
+
     private var isCreated = false
     private var isVisible = false
     private lateinit var windowManager: WindowManager
@@ -55,7 +60,7 @@ class XposedArchiveOverlayUI {
     private var thumbSize = 0
 
     @SuppressLint("ClickableViewAccessibility")
-    fun show(context: Context) {
+    override fun show(context: Context) {
         if (isVisible) return
 
         val activity = context as? Activity ?: return
@@ -65,13 +70,14 @@ class XposedArchiveOverlayUI {
             requestArchiveInfo()
             createOverlay(activity)
             isVisible = true
+            onVisibilityChanged?.invoke(true)
             Log.d(TAG, "Xposed archive overlay shown")
         } catch (e: Exception) {
             Log.e(TAG, "Error showing Xposed archive overlay", e)
         }
     }
 
-    fun hide() {
+    override fun hide() {
         if (!isVisible) return
 
         try {
@@ -79,8 +85,9 @@ class XposedArchiveOverlayUI {
                 windowManager.removeView(overlayView)
             }
             isVisible = false
-            Log.d(TAG, "Xposed archive overlay hidden")
+            onVisibilityChanged?.invoke(false)
             onOverlayHidden?.invoke()
+            Log.d(TAG, "Xposed archive overlay hidden")
         } catch (e: Exception) {
             Log.e(TAG, "Error hiding Xposed archive overlay", e)
         }
@@ -527,6 +534,6 @@ class XposedArchiveOverlayUI {
         return formatted
     }
 
-    fun isOverlayCreated(): Boolean = isCreated
-    fun isOverlayVisible(): Boolean = isVisible
+    override fun isCreated(): Boolean = isCreated
+    override fun isVisible(): Boolean = isVisible
 }
