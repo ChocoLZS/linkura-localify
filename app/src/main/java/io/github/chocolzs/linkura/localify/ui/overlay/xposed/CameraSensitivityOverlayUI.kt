@@ -3,6 +3,7 @@ package io.github.chocolzs.linkura.localify.ui.overlay.xposed
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PixelFormat
@@ -40,7 +41,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
     // UI Components
     private lateinit var titleText: TextView
     private lateinit var closeButton: ImageButton
-    private lateinit var resetButton: Button
+    private lateinit var resetButton: ImageButton
     private lateinit var controlsContainer: LinearLayout
 
     // Sensitivity controls
@@ -64,6 +65,15 @@ class CameraSensitivityOverlayUI : BaseOverlay {
     // Handler for UI updates
     private val handler = Handler(Looper.getMainLooper())
 
+    // SharedPreferences keys
+    companion object {
+        private const val PREFS_NAME = "camera_sensitivity_settings"
+        private const val KEY_MOVEMENT_SENSITIVITY = "movement_sensitivity"
+        private const val KEY_VERTICAL_SENSITIVITY = "vertical_sensitivity"
+        private const val KEY_FOV_SENSITIVITY = "fov_sensitivity"
+        private const val KEY_ROTATION_SENSITIVITY = "rotation_sensitivity"
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun show(context: Context) {
         if (isVisible) return
@@ -71,7 +81,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
         val activity = context as? Activity ?: return
 
         try {
-            loadCurrentSensitivityValues()
+            loadCurrentSensitivityValues(activity)
             createOverlay(activity)
             isVisible = true
             onVisibilityChanged?.invoke(true)
@@ -100,14 +110,40 @@ class CameraSensitivityOverlayUI : BaseOverlay {
     override fun isCreated(): Boolean = isCreated
     override fun isVisible(): Boolean = isVisible
 
-    private fun loadCurrentSensitivityValues() {
-        // TODO: Load from preferences or native layer
-        // For now, use default values
-        movementSensitivity = 1.0f
-        verticalSensitivity = 1.0f
-        fovSensitivity = 1.0f
-        rotationSensitivity = 1.0f
-        Log.d(TAG, "Loaded sensitivity values: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
+    private fun loadCurrentSensitivityValues(context: Context) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+            movementSensitivity = prefs.getFloat(KEY_MOVEMENT_SENSITIVITY, 1.0f)
+            verticalSensitivity = prefs.getFloat(KEY_VERTICAL_SENSITIVITY, 1.0f)
+            fovSensitivity = prefs.getFloat(KEY_FOV_SENSITIVITY, 1.0f)
+            rotationSensitivity = prefs.getFloat(KEY_ROTATION_SENSITIVITY, 1.0f)
+
+            Log.d(TAG, "Loaded sensitivity values: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading sensitivity values, using defaults", e)
+            // Use default values
+            movementSensitivity = 1.0f
+            verticalSensitivity = 1.0f
+            fovSensitivity = 1.0f
+            rotationSensitivity = 1.0f
+        }
+    }
+
+    private fun saveCurrentSensitivityValues(context: Context) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().apply {
+                putFloat(KEY_MOVEMENT_SENSITIVITY, movementSensitivity)
+                putFloat(KEY_VERTICAL_SENSITIVITY, verticalSensitivity)
+                putFloat(KEY_FOV_SENSITIVITY, fovSensitivity)
+                putFloat(KEY_ROTATION_SENSITIVITY, rotationSensitivity)
+                apply()
+            }
+            Log.d(TAG, "Saved sensitivity values: movement=$movementSensitivity, vertical=$verticalSensitivity, fov=$fovSensitivity, rotation=$rotationSensitivity")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving sensitivity values", e)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -199,17 +235,12 @@ class CameraSensitivityOverlayUI : BaseOverlay {
         titleBar.addView(titleText)
 
         // Reset button
-        resetButton = Button(activity).apply {
-            text = "↻"
-            setTextColor(Color.WHITE)
-            textSize = 14f
-            layoutParams = LinearLayout.LayoutParams(
-                (32f * density).toInt(),
-                (32f * density).toInt()
-            ).apply {
-                rightMargin = (4f * density).toInt()
-            }
+        resetButton = ImageButton(activity).apply {
+            val size = (32f * density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size)
             background = createRoundedBackground(Color.parseColor("#66FFFFFF"), 4f * density)
+            setImageDrawable(SVGIcon.Refresh.createDrawable(activity, Color.WHITE, 14f))
+            scaleType = android.widget.ImageView.ScaleType.CENTER
             setOnClickListener { resetAllToDefault() }
         }
         titleBar.addView(resetButton)
@@ -270,6 +301,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             movementSensitivityControl = SensitivityControlView(activity, "Movement", movementSensitivity) { newValue ->
                 movementSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                     rightMargin = (6f * density).toInt()
@@ -279,6 +311,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             verticalSensitivityControl = SensitivityControlView(activity, "Vertical", verticalSensitivity) { newValue ->
                 verticalSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                     leftMargin = (6f * density).toInt()
@@ -300,6 +333,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             fovSensitivityControl = SensitivityControlView(activity, "FOV", fovSensitivity) { newValue ->
                 fovSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                     rightMargin = (6f * density).toInt()
@@ -309,6 +343,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             rotationSensitivityControl = SensitivityControlView(activity, "Rotation", rotationSensitivity) { newValue ->
                 rotationSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                     leftMargin = (6f * density).toInt()
@@ -325,6 +360,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             movementSensitivityControl = SensitivityControlView(activity, "Movement", movementSensitivity) { newValue ->
                 movementSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -335,6 +371,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             verticalSensitivityControl = SensitivityControlView(activity, "Vertical", verticalSensitivity) { newValue ->
                 verticalSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -345,6 +382,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             fovSensitivityControl = SensitivityControlView(activity, "FOV", fovSensitivity) { newValue ->
                 fovSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -355,6 +393,7 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             rotationSensitivityControl = SensitivityControlView(activity, "Rotation", rotationSensitivity) { newValue ->
                 rotationSensitivity = newValue
                 sendSensitivityUpdateToNative()
+                saveCurrentSensitivityValues(activity)
             }.apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -408,6 +447,12 @@ class CameraSensitivityOverlayUI : BaseOverlay {
         }
 
         sendSensitivityUpdateToNative()
+
+        // Save the reset values
+        if (::overlayView.isInitialized) {
+            saveCurrentSensitivityValues(overlayView.context)
+        }
+
         Log.d(TAG, "Reset all sensitivity values to default")
     }
 
@@ -503,6 +548,15 @@ class CameraSensitivityOverlayUI : BaseOverlay {
                 background = createRoundedBackground(Color.parseColor("#CC666666"), 4f * density)
                 setOnClickListener { decreaseValue() }
                 setOnLongClickListener { startLongPress(false); true }
+                setOnTouchListener { _, event ->
+                    when (event.action) {
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                            stopLongPress()
+                            false
+                        }
+                        else -> false
+                    }
+                }
             }
 
             // Value display
@@ -532,6 +586,15 @@ class CameraSensitivityOverlayUI : BaseOverlay {
                 background = createRoundedBackground(Color.parseColor("#CC666666"), 4f * density)
                 setOnClickListener { increaseValue() }
                 setOnLongClickListener { startLongPress(true); true }
+                setOnTouchListener { _, event ->
+                    when (event.action) {
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                            stopLongPress()
+                            false
+                        }
+                        else -> false
+                    }
+                }
             }
 
             controlsRow.addView(decreaseButton)
@@ -539,13 +602,6 @@ class CameraSensitivityOverlayUI : BaseOverlay {
             controlsRow.addView(increaseButton)
             addView(controlsRow)
 
-            // Set up touch listeners to stop long press
-            setOnTouchListener { _, event ->
-                if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
-                    stopLongPress()
-                }
-                false
-            }
         }
 
         private fun decreaseValue() {

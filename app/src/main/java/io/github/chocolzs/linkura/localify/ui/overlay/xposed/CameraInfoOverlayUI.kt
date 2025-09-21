@@ -473,7 +473,7 @@ class CameraInfoOverlayUI : BaseOverlay {
             // Note: Using a generic warning message since we don't have access to R.string
             Toast.makeText(
                 context,
-                "Camera mode warning: This may cause crashes with live scenes",
+                "This may cause crash when using free camera.",
                 Toast.LENGTH_LONG
             ).show()
         }
