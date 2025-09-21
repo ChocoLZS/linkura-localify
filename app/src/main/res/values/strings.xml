@@ -109,7 +109,7 @@
     
     <!-- Camera Overlay -->
     <string name="overlay.toolbar.title">Toolbar Floating Window</string>
-    <string name="overlay.toolbar.description">Allows real-time viewing of camera parameters, adjusting rendering playback progress, green screen functionality</string>
+    <string name="overlay.toolbar.description">Allows real-time viewing of camera parameters, adjusting rendering playback progress, green screen functionality. Note: This legacy overlay has compatibility issues and will not receive updates. Please use the new In-Game Overlay Toolbar feature instead.</string>
     <string name="overlay.toolbar.permission_required">Permission Required</string>
     <string name="overlay.toolbar.permission_description">The app needs permission to display overlays on other apps.</string>
     <string name="overlay.toolbar.grant_permission">Grant Permission</string>
@@ -118,8 +118,9 @@
     <string name="overlay.toolbar.start">Start Overlay</string>
     <string name="overlay.toolbar.stop">Stop Overlay</string>
     <string name="overlay.toolbar.crash_warning">Warning: When using free camera with camera info display enabled during With×MEETS playback, chapter jumps and custom time jumps may cause crashes.</string>
-    <string name="overlay.archive.no_rendering_running">No live stream is currently running</string>
-    
+    <string name="overlay.archive.no_rendering_running">No live stream is currently running</string>    <!-- In-Game Overlay Toolbar -->
+    <string name="overlay.toolbar.in_game_toolbar.title">In-Game Overlay Toolbar</string>
+
     <!-- Color Picker -->
     <string name="overlay.color_picker.title">Background Color</string>
     <string name="overlay.color_picker.presets">Presets</string>

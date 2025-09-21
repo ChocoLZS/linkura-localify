@@ -28,8 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.ControlPoint
+import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -283,7 +282,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.DragHandle,
+                                imageVector = Icons.Default.DragIndicator,
                                 contentDescription = "Drag to move",
                                 tint = Color.White.copy(alpha = 0.7f),
                                 modifier = Modifier.size(14.dp)
@@ -337,7 +336,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.DragHandle,
+                                    imageVector = Icons.Default.DragIndicator,
                                     contentDescription = "Drag to move",
                                     tint = Color.White.copy(alpha = 0.7f),
                                     modifier = Modifier.size(14.dp)

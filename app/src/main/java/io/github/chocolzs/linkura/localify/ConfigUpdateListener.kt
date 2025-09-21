@@ -61,6 +61,7 @@ interface ConfigListener {
     fun onHideCharacterShadowChanged(value: Boolean)
     fun onHideLiveStreamSceneItemsLevel(value: Int)
     fun onHideLiveStreamCharacterItems(value: Boolean)
+    fun onEnableInGameOverlayToolbar(value: Boolean)
 
 
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -395,6 +396,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         config.hideLiveStreamCharacterItems = value
         saveConfig()
         sendConfigUpdate(config)
+    }
+
+    override fun onEnableInGameOverlayToolbar(value: Boolean) {
+        config.enableInGameOverlayToolbar = value
+        saveConfig()
+        // do not send update, useless
     }
     override fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         programConfig.transRemoteZipUrl = s.toString()

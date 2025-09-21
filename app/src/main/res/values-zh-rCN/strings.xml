@@ -109,7 +109,7 @@
     
     <!-- toobar Overlay -->
     <string name="overlay.toolbar.title">工具栏悬浮窗</string>
-    <string name="overlay.toolbar.description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能</string>
+    <string name="overlay.toolbar.description">允许实时查看相机参数，调整渲染回放时的进度，绿幕功能. 注意：此遗留悬浮窗存在兼容性问题，将不再接收更新。请改用新的游戏内悬浮工具栏功能。</string>
     <string name="overlay.toolbar.permission_required">需要权限</string>
     <string name="overlay.toolbar.permission_description">应用需要悬浮窗权限才能在其他应用上方显示内容。</string>
     <string name="overlay.toolbar.grant_permission">授予权限</string>
@@ -119,6 +119,7 @@
     <string name="overlay.toolbar.stop">停止悬浮窗</string>
     <string name="overlay.toolbar.crash_warning">注意，当在 With×MEETS 回放中使用自由相机并打开相机信息显示，章节跳转与自定义时间跳转可能会造成闪退。</string>
     <string name="overlay.archive.no_rendering_running">当前没有正在运行的渲染</string>
+    <string name="overlay.toolbar.in_game_toolbar.title">游戏内悬浮工具栏</string>
     
     <!-- Color Picker -->
     <string name="overlay.color_picker.title">背景颜色选择</string>

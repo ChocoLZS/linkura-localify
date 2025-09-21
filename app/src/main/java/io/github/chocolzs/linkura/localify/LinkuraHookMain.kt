@@ -44,6 +44,7 @@ import io.github.chocolzs.linkura.localify.mainUtils.json
 import io.github.chocolzs.linkura.localify.models.NativeInitProgress
 import io.github.chocolzs.linkura.localify.models.ProgramConfig
 import io.github.chocolzs.linkura.localify.ui.game_attach.InitProgressUI
+import io.github.chocolzs.linkura.localify.ui.overlay.xposed.OverlayToolbarUI
 
 import io.github.chocolzs.linkura.localify.ipc.LinkuraAidlClient
 import io.github.chocolzs.linkura.localify.ipc.MessageRouter
@@ -59,6 +60,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private val nativeLibName = "HasuKikaisann"
 
     private var l4DataInited = false
+    private var linkuraConfig: LinkuraConfig? = null
 
     private var getConfigError: Exception? = null
     private var externalFilesChecked: Boolean = false
@@ -171,11 +173,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 val archiveInfoRequest = ArchiveInfo.parseFrom(payload)
                 // Get archive info from native layer
                 val archiveInfoBytes = getCurrentArchiveInfo()
-                
+
                 if (archiveInfoBytes.isNotEmpty()) {
                     // Parse the archive info from native layer
                     val nativeArchiveInfo = ArchiveInfo.parseFrom(archiveInfoBytes)
-                    
+
+
                     if (aidlClient.isClientConnected()) {
                         val success = aidlClient.sendMessage(MessageType.ARCHIVE_INFO, nativeArchiveInfo)
                         if (success) {
@@ -189,7 +192,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     val emptyResponse = ArchiveInfo.newBuilder()
                         .setDuration(0L)
                         .build()
-                    
+
+
                     if (aidlClient.isClientConnected()) {
                         val success = aidlClient.sendMessage(MessageType.ARCHIVE_INFO, emptyResponse)
                         if (success) {
@@ -289,6 +293,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     private fun onStartHandler() {
         aidlClient.sendMessage(MessageType.CAMERA_OVERLAY_REQUEST, CameraOverlayRequest.newBuilder().build());
     }
+
     
     /**
      * Setup broadcast receiver for log export requests
@@ -522,7 +527,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     initLinkuraConfig(currActivity)
                 }
                 onStartHandler()
-                
+                // load config
+                // Create overlay toolbar after initialization is complete
+                if (!overlayToolbarUI.isOverlayCreated() && linkuraConfig?.enableInGameOverlayToolbar == true) {
+                    Log.d(TAG, "Start overlay")
+                    overlayToolbarUI.createOverlay(gameActivity!!)
+                }
                 // Setup log export broadcast receiver
                 setupLogExportBroadcastReceiver(currActivity)
             }
@@ -607,6 +617,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
     // Main loop tasks - runs at 30fps
     private var lastFrameStartInit = NativeInitProgress.startInit
     private val initProgressUI = InitProgressUI()
+    private val overlayToolbarUI = OverlayToolbarUI()
     
     private fun executeMainLoopTasks() {
         val returnValue = pluginCallbackLooper()  // plugin main thread loop
@@ -852,6 +863,8 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             catch (e: Exception) {
                 null
             }
+            // Store the config for later access
+            linkuraConfig = initConfig
             val programConfig = try {
                 if (programData == null) {
                     ProgramConfig()
