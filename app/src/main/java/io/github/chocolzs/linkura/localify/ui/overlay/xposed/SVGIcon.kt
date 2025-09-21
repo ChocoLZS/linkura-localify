@@ -84,37 +84,79 @@ object SVGIcon {
         }
     }
 
-    object Camera {
+    object CopyTemplate {
         fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
-            val pathData = "M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M9,2L7.17,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4H16.83L15,2H9Z"
+            val pathData = ""
             return createSVGDrawable(context, pathData, tintColor, sizeDp)
         }
     }
 
-    object Settings {
+    object Info {
         fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
-            val pathData = "M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
+            val pathData = "M11 17h2v-6h-2zm1-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"
             return createSVGDrawable(context, pathData, tintColor, sizeDp)
         }
     }
 
-    object Menu {
+    object PlayArrow {
         fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
-            val pathData = "M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"
+            val pathData = "M8 19V5l11 7z"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
+
+    object Palette {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "M12 22q-2.05 0-3.875-.788t-3.187-2.15t-2.15-3.187T2 12q0-2.075.813-3.9t2.2-3.175T8.25 2.788T12.2 2q2 0 3.775.688t3.113 1.9t2.125 2.875T22 11.05q0 2.875-1.75 4.413T16 17h-1.85q-.225 0-.312.125t-.088.275q0 .3.375.863t.375 1.287q0 1.25-.687 1.85T12 22m-5.5-9q.65 0 1.075-.425T8 11.5t-.425-1.075T6.5 10t-1.075.425T5 11.5t.425 1.075T6.5 13m3-4q.65 0 1.075-.425T11 7.5t-.425-1.075T9.5 6t-1.075.425T8 7.5t.425 1.075T9.5 9m5 0q.65 0 1.075-.425T16 7.5t-.425-1.075T14.5 6t-1.075.425T13 7.5t.425 1.075T14.5 9m3 4q.65 0 1.075-.425T19 11.5t-.425-1.075T17.5 10t-1.075.425T16 11.5t.425 1.075T17.5 13"
             return createSVGDrawable(context, pathData, tintColor, sizeDp)
         }
     }
 
     object Close {
         fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
-            val pathData = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
+            val pathData = "M6.4 19L5 17.6l5.6-5.6L5 6.4L6.4 5l5.6 5.6L17.6 5L19 6.4L13.4 12l5.6 5.6l-1.4 1.4l-5.6-5.6z"
             return createSVGDrawable(context, pathData, tintColor, sizeDp)
         }
     }
 
-    object Tool {
+    object KeyboardArrowRight {
         fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
-            val pathData = "M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"
+            val pathData = "M12.6 12L8 7.4L9.4 6l6 6l-6 6L8 16.6z"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
+
+    object KeyboardArrowLeft {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "m14 18l-6-6l6-6l1.4 1.4l-4.6 4.6l4.6 4.6z"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
+
+    object PhotoCamera {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "M12 17.5q1.875 0 3.188-1.312T16.5 13t-1.312-3.187T12 8.5T8.813 9.813T7.5 13t1.313 3.188T12 17.5m0-2q-1.05 0-1.775-.725T9.5 13t.725-1.775T12 10.5t1.775.725T14.5 13t-.725 1.775T12 15.5M4 21q-.825 0-1.412-.587T2 19V7q0-.825.588-1.412T4 5h3.15L9 3h6l1.85 2H20q.825 0 1.413.588T22 7v12q0 .825-.587 1.413T20 21z"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
+
+    object Settings {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "m9.25 22l-.4-3.2q-.325-.125-.612-.3t-.563-.375L4.7 19.375l-2.75-4.75l2.575-1.95Q4.5 12.5 4.5 12.338v-.675q0-.163.025-.338L1.95 9.375l2.75-4.75l2.975 1.25q.275-.2.575-.375t.6-.3l.4-3.2h5.5l.4 3.2q.325.125.613.3t.562.375l2.975-1.25l2.75 4.75l-2.575 1.95q.025.175.025.338v.674q0 .163-.05.338l2.575 1.95l-2.75 4.75l-2.95-1.25q-.275.2-.575.375t-.6.3l-.4 3.2zm2.8-6.5q1.45 0 2.475-1.025T15.55 12t-1.025-2.475T12.05 8.5q-1.475 0-2.488 1.025T8.55 12t1.013 2.475T12.05 15.5"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
+
+    object DragIndicator {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "M9 20q-.825 0-1.412-.587T7 18t.588-1.412T9 16t1.413.588T11 18t-.587 1.413T9 20m6 0q-.825 0-1.412-.587T13 18t.588-1.412T15 16t1.413.588T17 18t-.587 1.413T15 20m-6-6q-.825 0-1.412-.587T7 12t.588-1.412T9 10t1.413.588T11 12t-.587 1.413T9 14m6 0q-.825 0-1.412-.587T13 12t.588-1.412T15 10t1.413.588T17 12t-.587 1.413T15 14M9 8q-.825 0-1.412-.587T7 6t.588-1.412T9 4t1.413.588T11 6t-.587 1.413T9 8m6 0q-.825 0-1.412-.587T13 6t.588-1.412T15 4t1.413.588T17 6t-.587 1.413T15 8"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
+
+    object Gamepad {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "m12 10.5l-3-3V2h6v5.5zm4.5 4.5l-3-3l3-3H22v6zM2 15V9h5.5l3 3l-3 3zm7 7v-5.5l3-3l3 3V22z"
             return createSVGDrawable(context, pathData, tintColor, sizeDp)
         }
     }

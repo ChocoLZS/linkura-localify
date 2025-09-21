@@ -17,16 +17,20 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.graphics.drawable.GradientDrawable
 import io.github.chocolzs.linkura.localify.TAG
 
 class OverlayToolbarUI {
     private var isCreated = false
-    private var isExpanded = false
+    private var isExpanded = true // 默认展开状态
+    private var isCameraMenuVisible = false
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: FrameLayout
     private lateinit var toolbarContainer: LinearLayout
-    private lateinit var toggleButton: ImageButton
-    private lateinit var expandedContent: LinearLayout
+    private lateinit var dragHandle: ImageView
+    private lateinit var closeButton: ImageButton
+    private lateinit var mainToolbar: LinearLayout
+    private lateinit var cameraSecondaryMenu: LinearLayout
 
     private var initialX = 0
     private var initialY = 0
@@ -63,7 +67,7 @@ class OverlayToolbarUI {
             )
         }
 
-        // Create toolbar container with transparent background
+        // Create main toolbar container
         toolbarContainer = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = FrameLayout.LayoutParams(
@@ -71,49 +75,27 @@ class OverlayToolbarUI {
                 FrameLayout.LayoutParams.WRAP_CONTENT
             )
             setBackgroundColor(Color.TRANSPARENT)
-            setPadding(8, 8, 8, 8)
+            val containerPadding = (4f * activity.resources.displayMetrics.density).toInt()
+            setPadding(containerPadding, containerPadding, containerPadding, containerPadding)
         }
 
-        // Create toggle button (always visible)
-        val toggleButtonSize = (70f * activity.resources.displayMetrics.density).toInt()
-        val toggleButtonPadding = (12f * activity.resources.displayMetrics.density).toInt()
+        // Create all UI components
+        createControlBar(activity)
+        createMainToolbar(activity)
+        createCameraSecondaryMenu(activity)
 
-        toggleButton = ImageButton(activity).apply {
-            layoutParams = LinearLayout.LayoutParams(toggleButtonSize, toggleButtonSize)
-            setBackgroundColor(Color.parseColor("#80000000")) // Semi-transparent black
-            scaleType = ImageView.ScaleType.CENTER
-            setPadding(toggleButtonPadding, toggleButtonPadding, toggleButtonPadding, toggleButtonPadding)
+        // Add components to container
+        toolbarContainer.addView(createControlBarContainer(activity))
+        toolbarContainer.addView(createMainToolbarContainer(activity))
+        toolbarContainer.addView(cameraSecondaryMenu)
 
-            // Set menu icon
-            setImageDrawable(SVGIcon.Menu.createDrawable(activity, Color.WHITE, 32f))
-
-            setOnClickListener {
-                toggleExpansion()
-            }
-        }
-
-        // Create expanded content (initially hidden)
-        expandedContent = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            setBackgroundColor(Color.parseColor("#CC000000")) // More opaque background for content
-            setPadding(16, 16, 16, 16)
-            visibility = View.GONE
-        }
-
-        // Add sample content to expanded area
-        addSampleContent(activity)
-
-        // Add views to container
-        toolbarContainer.addView(toggleButton)
-        toolbarContainer.addView(expandedContent)
         overlayView.addView(toolbarContainer)
 
         // Set up touch handling for dragging
         setupTouchHandling()
+
+        // Update initial visibility
+        updateToolbarVisibility()
 
         // Add overlay to window manager
         val layoutParams = WindowManager.LayoutParams().apply {
@@ -123,9 +105,9 @@ class OverlayToolbarUI {
             flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
             format = PixelFormat.TRANSLUCENT
-            gravity = Gravity.TOP or Gravity.START
-            x = 100
-            y = 200
+            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            x = 0
+            y = 100
         }
 
         try {
@@ -137,77 +119,218 @@ class OverlayToolbarUI {
         }
     }
 
-    private fun addSampleContent(activity: Activity) {
-        // Add some sample buttons/content with icons
-        val button1 = createToolButton(
-            activity,
-            SVGIcon.Camera::createDrawable,
-            "Camera",
-            Color.parseColor("#FF4CAF50")
-        ) {
-            Log.d(TAG, "Camera tool clicked")
+    private fun createControlBar(activity: Activity) {
+        // Create drag handle
+        dragHandle = ImageView(activity).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                (24f * activity.resources.displayMetrics.density).toInt(),
+                (24f * activity.resources.displayMetrics.density).toInt()
+            )
+            setImageDrawable(SVGIcon.DragIndicator.createDrawable(activity, Color.argb(179, 255, 255, 255), 14f))
+            scaleType = ImageView.ScaleType.CENTER
         }
 
-        val button2 = createToolButton(
-            activity,
-            SVGIcon.Settings::createDrawable,
-            "Settings",
-            Color.parseColor("#FF2196F3")
-        ) {
-            Log.d(TAG, "Settings tool clicked")
-        }
+        // Create close button
+        closeButton = ImageButton(activity).apply {
+            val size = (24f * activity.resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size)
+            setBackgroundColor(Color.TRANSPARENT)
+            setImageDrawable(SVGIcon.Close.createDrawable(activity, Color.WHITE, 14f))
+            scaleType = ImageView.ScaleType.CENTER
 
-        val button3 = createToolButton(
-            activity,
-            SVGIcon.Tool::createDrawable,
-            "Tools",
-            Color.parseColor("#FFFF9800")
-        ) {
-            Log.d(TAG, "Tools clicked")
+            setOnClickListener {
+                Log.d(TAG, "Close button clicked - should stop service")
+                // TODO: 发送关闭信号到主应用
+            }
         }
-
-        expandedContent.addView(button1)
-        expandedContent.addView(button2)
-        expandedContent.addView(button3)
     }
 
-    private fun createToolButton(
-        activity: Activity,
-        iconCreator: (Context, Int, Float) -> Drawable,
-        text: String,
-        backgroundColor: Int,
-        onClick: () -> Unit
-    ): LinearLayout {
+    private fun createControlBarContainer(activity: Activity): LinearLayout {
         return LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                bottomMargin = 8
+                bottomMargin = (8f * activity.resources.displayMetrics.density).toInt()
             }
+            setBackgroundColor(Color.parseColor("#CC000000"))
+
+            val cornerRadius = 12f * activity.resources.displayMetrics.density
+            background = createRoundedBackground(Color.parseColor("#CC000000"), cornerRadius)
+
+            val padding = (4f * activity.resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            gravity = Gravity.CENTER_VERTICAL
+
+            // Add components with spacing
+            addView(dragHandle)
+
+            // Add spacer
+            val spacer = View(activity).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    (4f * activity.resources.displayMetrics.density).toInt(),
+                    0
+                )
+            }
+            addView(spacer)
+            addView(closeButton)
+        }
+    }
+
+    private fun createMainToolbar(activity: Activity) {
+        mainToolbar = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(backgroundColor)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            gravity = Gravity.CENTER_VERTICAL
+        }
+    }
 
-            val containerPadding = (8f * activity.resources.displayMetrics.density).toInt()
-            setPadding(containerPadding, containerPadding, containerPadding, containerPadding)
-            gravity = Gravity.CENTER
-
-            // Add icon
-            val iconSize = (28f * activity.resources.displayMetrics.density).toInt()
-            val containerSize = (40f * activity.resources.displayMetrics.density).toInt()
-
-            val iconView = ImageView(activity).apply {
-                layoutParams = LinearLayout.LayoutParams(containerSize, containerSize).apply {
-                    gravity = Gravity.CENTER
-                }
-                scaleType = ImageView.ScaleType.CENTER
-
-                setImageDrawable(iconCreator(activity, Color.WHITE, 28f))
+    private fun createMainToolbarContainer(activity: Activity): LinearLayout {
+        return LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = (8f * activity.resources.displayMetrics.density).toInt()
             }
 
-            addView(iconView)
+            val cornerRadius = 20f * activity.resources.displayMetrics.density
+            background = createRoundedBackground(Color.parseColor("#CC000000"), cornerRadius)
+
+            val padding = (12f * activity.resources.displayMetrics.density).toInt()
+            val verticalPadding = (8f * activity.resources.displayMetrics.density).toInt()
+            setPadding(padding, verticalPadding, padding, verticalPadding)
+
+            // Connection status indicator (placeholder)
+            val connectionIndicator = View(activity).apply {
+                val size = (12f * activity.resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                    rightMargin = (12f * activity.resources.displayMetrics.density).toInt()
+                }
+                setBackgroundColor(Color.GREEN) // 简化的连接状态指示器
+                background = createRoundedBackground(Color.GREEN, size / 2f)
+            }
+            addView(connectionIndicator)
+
+            // Camera button
+            addView(createMainToolButton(activity, SVGIcon.PhotoCamera::createDrawable, "Camera") {
+                toggleCameraMenu()
+            })
+
+            // Archive button
+            addView(createMainToolButton(activity, SVGIcon.PlayArrow::createDrawable, "Archive") {
+                Log.d(TAG, "Archive button clicked")
+            })
+
+            // Color picker button
+            addView(createMainToolButton(activity, SVGIcon.Palette::createDrawable, "Color Picker") {
+                Log.d(TAG, "Color picker button clicked")
+            })
+
+            // Collapse button
+            addView(createMainToolButton(activity, SVGIcon.KeyboardArrowRight::createDrawable, "Collapse") {
+                toggleExpansion()
+            })
+        }
+    }
+
+    private fun createMainToolButton(
+        activity: Activity,
+        iconCreator: (Context, Int, Float) -> Drawable,
+        contentDescription: String,
+        onClick: () -> Unit
+    ): ImageButton {
+        return ImageButton(activity).apply {
+            val size = (40f * activity.resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                rightMargin = (12f * activity.resources.displayMetrics.density).toInt()
+            }
+            setBackgroundColor(Color.TRANSPARENT)
+            setImageDrawable(iconCreator(activity, Color.WHITE, 20f))
+            scaleType = ImageView.ScaleType.CENTER
 
             setOnClickListener { onClick() }
+        }
+    }
+
+    private fun createCameraSecondaryMenu(activity: Activity) {
+        cameraSecondaryMenu = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            visibility = View.GONE
+
+            val cornerRadius = 8f * activity.resources.displayMetrics.density
+            background = createRoundedBackground(Color.parseColor("#CC000000"), cornerRadius)
+
+            val padding = (4f * activity.resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+
+            // Camera Info button
+            addView(createSecondaryMenuButton(activity, SVGIcon.Info::createDrawable, "Camera Info") {
+                Log.d(TAG, "Camera info clicked")
+                isCameraMenuVisible = false
+            })
+
+            // Camera Sensitivity button
+            addView(createSecondaryMenuButton(activity, SVGIcon.Settings::createDrawable, "Camera Sensitivity") {
+                Log.d(TAG, "Camera sensitivity clicked")
+                isCameraMenuVisible = false
+            })
+
+            // Free Camera Control button
+            addView(createSecondaryMenuButton(activity, SVGIcon.Gamepad::createDrawable, "Free Camera Control") {
+                Log.d(TAG, "Free camera control clicked")
+                isCameraMenuVisible = false
+            })
+        }
+    }
+
+    private fun createSecondaryMenuButton(
+        activity: Activity,
+        iconCreator: (Context, Int, Float) -> Drawable,
+        contentDescription: String,
+        onClick: () -> Unit
+    ): ImageButton {
+        return ImageButton(activity).apply {
+            val size = (32f * activity.resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                rightMargin = (4f * activity.resources.displayMetrics.density).toInt()
+            }
+            setBackgroundColor(Color.TRANSPARENT)
+            val cornerRadius = 6f * activity.resources.displayMetrics.density
+            background = createRoundedBackground(Color.TRANSPARENT, cornerRadius)
+            setImageDrawable(iconCreator(activity, Color.WHITE, 16f))
+            scaleType = ImageView.ScaleType.CENTER
+
+            setOnClickListener { onClick() }
+        }
+    }
+
+    private fun createRoundedBackground(color: Int, cornerRadius: Float): GradientDrawable {
+        return GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(color)
+            setCornerRadius(cornerRadius)
+        }
+    }
+
+    private fun toggleCameraMenu() {
+        isCameraMenuVisible = !isCameraMenuVisible
+        updateToolbarVisibility()
+        Log.d(TAG, "Camera menu visibility: $isCameraMenuVisible")
+    }
+
+    private fun updateToolbarVisibility() {
+        if (::cameraSecondaryMenu.isInitialized) {
+            cameraSecondaryMenu.visibility = if (isCameraMenuVisible && isExpanded) View.VISIBLE else View.GONE
         }
     }
 
@@ -238,34 +361,68 @@ class OverlayToolbarUI {
 
     private fun toggleExpansion() {
         isExpanded = !isExpanded
-        expandedContent.visibility = if (isExpanded) View.VISIBLE else View.GONE
+        isCameraMenuVisible = false // 折叠时关闭二级菜单
 
-        // Update toggle button icon based on expansion state
-        val context = toggleButton.context
-        val iconDrawable = if (isExpanded) {
-            SVGIcon.Close.createDrawable(context, Color.WHITE, 32f)
-        } else {
-            SVGIcon.Menu.createDrawable(context, Color.WHITE, 32f)
-        }
-        toggleButton.setImageDrawable(iconDrawable)
+        // 重新创建UI以切换状态
+        if (::toolbarContainer.isInitialized) {
+            toolbarContainer.removeAllViews()
 
-        // Update window layout params to handle click-through when collapsed
-        val layoutParams = overlayView.layoutParams as WindowManager.LayoutParams
-        if (!isExpanded) {
-            // When collapsed, allow click-through for areas outside the toggle button
-            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        } else {
-            // When expanded, capture touches for the expanded area
-            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            if (isExpanded) {
+                // 展开状态：显示完整工具栏
+                val activity = overlayView.context as Activity
+                toolbarContainer.addView(createControlBarContainer(activity))
+                toolbarContainer.addView(createMainToolbarContainer(activity))
+                toolbarContainer.addView(cameraSecondaryMenu)
+            } else {
+                // 折叠状态：只显示拖拽手柄和展开按钮
+                val activity = overlayView.context as Activity
+                toolbarContainer.addView(createCollapsedContainer(activity))
+            }
         }
 
-        try {
-            windowManager.updateViewLayout(overlayView, layoutParams)
-            Log.d(TAG, "Toolbar ${if (isExpanded) "expanded" else "collapsed"}")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to update overlay layout", e)
+        updateToolbarVisibility()
+        Log.d(TAG, "Toolbar ${if (isExpanded) "expanded" else "collapsed"}")
+    }
+
+    private fun createCollapsedContainer(activity: Activity): LinearLayout {
+        return LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+            val cornerRadius = 16f * activity.resources.displayMetrics.density
+            background = createRoundedBackground(Color.parseColor("#CC000000"), cornerRadius)
+
+            val padding = (6f * activity.resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            gravity = Gravity.CENTER_VERTICAL
+
+            // Drag handle for collapsed state
+            val dragHandle = ImageView(activity).apply {
+                val size = (24f * activity.resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                    rightMargin = (4f * activity.resources.displayMetrics.density).toInt()
+                }
+                setImageDrawable(SVGIcon.DragIndicator.createDrawable(activity, Color.argb(179, 255, 255, 255), 14f))
+                scaleType = ImageView.ScaleType.CENTER
+            }
+            addView(dragHandle)
+
+            // Expand button
+            val expandButton = ImageButton(activity).apply {
+                val size = (24f * activity.resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(size, size)
+                setBackgroundColor(Color.TRANSPARENT)
+                setImageDrawable(SVGIcon.KeyboardArrowLeft.createDrawable(activity, Color.WHITE, 16f))
+                scaleType = ImageView.ScaleType.CENTER
+
+                setOnClickListener {
+                    toggleExpansion()
+                }
+            }
+            addView(expandButton)
         }
     }
 
