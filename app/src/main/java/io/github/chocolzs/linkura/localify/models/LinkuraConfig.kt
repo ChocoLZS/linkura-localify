@@ -60,6 +60,8 @@ data class LinkuraConfig (
     // In-game overlay toolbar settings
     var enableInGameOverlayToolbar: Boolean = true,
 
+    var localeCode: String = "ja-JP",
+
     var pf: Boolean = false,
 
 )

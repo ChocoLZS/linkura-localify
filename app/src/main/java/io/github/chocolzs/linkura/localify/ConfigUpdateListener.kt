@@ -62,14 +62,20 @@ interface ConfigListener {
     fun onHideLiveStreamSceneItemsLevel(value: Int)
     fun onHideLiveStreamCharacterItems(value: Boolean)
     fun onEnableInGameOverlayToolbar(value: Boolean)
+    fun onLocaleCodeChanged(value: String)
 
-
+    fun onPCheckBuiltInAssetsChanged(value: Boolean)
+    fun onPUseRemoteAssetsChanged(value: Boolean)
+    fun onPCleanLocalAssetsChanged(value: Boolean)
+    fun onPDelRemoteAfterUpdateChanged(value: Boolean)
     fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainPageAssetsViewDataUpdate(downloadAbleState: Boolean? = null,
                                      downloadProgressState: Float? = null,
                                      localResourceVersionState: String? = null,
                                      errorString: String? = null,
                                      localAPIResourceVersion: String? = null)
+    fun onPUseAPIAssetsChanged(value: Boolean)
+    fun onPUseAPIAssetsURLChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainUIConfirmStatUpdate(isShow: Boolean? = null, title: String? = null,
                                 content: String? = null,
                                 onConfirm: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) },
@@ -403,6 +409,43 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         saveConfig()
         // do not send update, useless
     }
+    override fun onLocaleCodeChanged(value: String) {
+        config.localeCode = value
+        saveConfig()
+    }
+
+    override fun onPCheckBuiltInAssetsChanged(value: Boolean) {
+        programConfig.checkBuiltInAssets = value
+        if (value) {
+            programConfig.cleanLocalAssets = false
+        }
+        saveProgramConfig()
+    }
+
+    override fun onPUseRemoteAssetsChanged(value: Boolean) {
+        programConfig.useRemoteAssets = value
+        if (value) {
+            programConfig.checkBuiltInAssets = false
+            programConfig.cleanLocalAssets = false
+            programConfig.useAPIAssets = false
+        }
+        saveProgramConfig()
+    }
+
+    override fun onPCleanLocalAssetsChanged(value: Boolean) {
+        programConfig.cleanLocalAssets = value
+        if (value) {
+            programConfig.useRemoteAssets = false
+            programConfig.useAPIAssets = false
+            programConfig.checkBuiltInAssets = false
+        }
+        saveProgramConfig()
+    }
+
+    override fun onPDelRemoteAfterUpdateChanged(value: Boolean) {
+        programConfig.delRemoteAfterUpdate = value
+        saveProgramConfig()
+    }
     override fun onPTransRemoteZipUrlChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         programConfig.transRemoteZipUrl = s.toString()
         saveProgramConfig()
@@ -417,7 +460,20 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         errorString?.let{ programConfigViewModel.errorStringState.value = it }
         localAPIResourceVersion?.let{ programConfigViewModel.localAPIResourceVersionState.value = it }
     }
+    override fun onPUseAPIAssetsChanged(value: Boolean) {
+        programConfig.useAPIAssets = value
+        if (value) {
+            programConfig.checkBuiltInAssets = false
+            programConfig.useRemoteAssets = false
+            programConfig.cleanLocalAssets = false
+        }
+        saveProgramConfig()
+    }
 
+    override fun onPUseAPIAssetsURLChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+        programConfig.useAPIAssetsURL = s.toString()
+        saveProgramConfig()
+    }
     override fun mainUIConfirmStatUpdate(isShow: Boolean?, title: String?, content: String?,
         onConfirm: (() -> Unit)?, onCancel: (() -> Unit)?
     ) {
