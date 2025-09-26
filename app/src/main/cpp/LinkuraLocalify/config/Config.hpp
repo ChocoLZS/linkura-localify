@@ -60,6 +60,7 @@ namespace LinkuraLocal::Config {
      */
     extern bool filterPlayableMotionCapture;
     extern bool avoidAccidentalTouch;
+    extern std::string localeCode;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     extern VersionCompatibility::Version currentClientVersion;

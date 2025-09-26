@@ -88,6 +88,25 @@ jobs:
           git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
         continue-on-error: true
 
+      # - name: Pull Assets
+      #   run: |
+      #     git clone https://${{ secrets.ACCESS_TOKEN_GITHUB }}@github.com/DreamGallery/Campus-adv-txts.git app/src/main/assets/gakumas-local/gakumas-raw-txts
+      #     mv app/src/main/assets/gakumas-local/gakumas-raw-txts/Resource app/src/main/assets/gakumas-local/raw
+      #     rm -rf app/src/main/assets/gakumas-local/gakumas-raw-txts
+      #   continue-on-error: true
+
+      - name: Build Assets
+        run: |
+          # mv app/src/main/assets/gakumas-local/GakumasPreTranslation/.env.sample app/src/main/assets/gakumas-local/GakumasPreTranslation/.env
+          cd app/src/main/assets/linkura-local && make build-resource
+        continue-on-error: true
+
+      - name: Write branch and commit info
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          hash=$(git rev-parse --short=8 HEAD)
+          echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -160,6 +179,25 @@ jobs:
         run: |
           git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
         continue-on-error: true
+
+      # - name: Pull Assets
+      #   run: |
+      #     git clone https://${{ secrets.ACCESS_TOKEN_GITHUB }}@github.com/DreamGallery/Campus-adv-txts.git app/src/main/assets/gakumas-local/gakumas-raw-txts
+      #     mv app/src/main/assets/gakumas-local/gakumas-raw-txts/Resource app/src/main/assets/gakumas-local/raw
+      #     rm -rf app/src/main/assets/gakumas-local/gakumas-raw-txts
+      #   continue-on-error: true
+  
+      - name: Build Assets
+        run: |
+          # mv app/src/main/assets/gakumas-local/GakumasPreTranslation/.env.sample app/src/main/assets/gakumas-local/GakumasPreTranslation/.env
+          cd app/src/main/assets/linkura-local && make build-resource
+        continue-on-error: true
+  
+      - name: Write branch and commit info
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          hash=$(git rev-parse --short=8 HEAD)
+          echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

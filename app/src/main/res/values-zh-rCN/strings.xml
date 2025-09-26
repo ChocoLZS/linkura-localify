@@ -105,7 +105,7 @@
     <string name="patch_finished">修补完成，是否开始安装？</string>
 
     <string name="about_contributors_asset_file">about_contributors_zh_cn.json</string>
-    <string name="default_assets_check_api">https://uma.chinosk6.cn/api/gkms_trans_data</string>
+    <string name="default_assets_check_api">https://cf-proxy.chocoie.com/api/linkura-localify-assets</string>
     
     <!-- toobar Overlay -->
     <string name="overlay.toolbar.title">工具栏悬浮窗</string>
@@ -171,7 +171,9 @@
 
     <!-- Resource Management -->
     <string name="resource_management">资源管理</string>
-    <string name="resource_management_replay">回放</string>
+    <string name="resource_management.locale">汉化</string>
+    <string name="resource_management.locale.language">语言</string>
+    <string name="resource_management.replay">回放</string>
     
     <!-- Replay Settings -->
     <string name="replay.settings.title">回放设置</string>

@@ -105,7 +105,7 @@
     <string name="patch_finished">Patch finished. Start installing?</string>
 
     <string name="about_contributors_asset_file">about_contributors_en.json</string>
-    <string name="default_assets_check_api">https://api.github.com/repos/NatsumeLS/Gakumas-Translation-Data-EN/releases/latest</string>
+    <string name="default_assets_check_api">https://api.github.com/repos/ChocoLZS/linkura-localify-assets/releases/latest</string>
     
     <!-- Camera Overlay -->
     <string name="overlay.toolbar.title">Toolbar Floating Window</string>
@@ -171,7 +171,9 @@
 
     <!-- Resource Management -->
     <string name="resource_management">Resource Management</string>
-    <string name="resource_management_replay">Replay</string>
+    <string name="resource_management.locale">Locale</string>
+    <string name="resource_management.locale.language">Language</string>
+    <string name="resource_management.replay">Replay</string>
     
     <!-- Replay Settings -->
     <string name="replay.settings.title">Replay Settings</string>

@@ -92,3 +92,6 @@ namespace LinkuraLocal::HookShare {
         }
     }
 }
+namespace LinkuraLocal::HookTranslation {
+    void Install(HookInstaller *hookInstaller);
+}

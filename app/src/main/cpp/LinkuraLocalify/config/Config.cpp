@@ -56,6 +56,7 @@ namespace LinkuraLocal::Config {
     bool hideCharacterShadow = false;
     int hideLiveStreamSceneItemsLevel = 0;
     bool hideLiveStreamCharacterItems = false;
+    std::string localeCode = "ja-JP";
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -122,6 +123,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(hideCharacterShadow);
             GetConfigItem(hideLiveStreamSceneItemsLevel);
             GetConfigItem(hideLiveStreamCharacterItems);
+            GetConfigItem(localeCode);
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());

@@ -17,7 +17,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 12
-        versionName "v0.7.0-alpha1"
+        versionName "v1.0.0-alpha1"
         buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -88,10 +88,12 @@ android {
     applicationVariants.configureEach { variant ->
         variant.mergeAssetsProvider.configure { mergeAssetsTask ->
             mergeAssetsTask.doLast {
-//                delete(fileTree(dir: mergeAssetsTask.outputDir, includes: ['gakumas-local/gakuen-adapted-translation-data/**',
-//                                                                           'gakumas-local/GakumasPreTranslation/**',
-//                                                                           'gakumas-local/gakumas-generic-strings-translation/**',
-//                                                                           'gakumas-local/raw/**']))
+               delete(fileTree(dir: mergeAssetsTask.outputDir, includes: [
+                                                                        //   'linkura-local/gakuen-adapted-translation-data/**',
+                                                                           'linkura-local/linkura-msater-translation/**',
+                                                                           'linkura-local/linkura-generic-strings-translation/**',
+                                                                           'linkura-local/live-data/**'
+                                                                          ]))
             }
         }
     }

@@ -45,6 +45,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.chocolzs.linkura.localify.models.LocaleItem
+import io.github.chocolzs.linkura.localify.ui.components.GakuSelector
+import java.io.IOException
+import kotlinx.serialization.json.Json
 import io.github.chocolzs.linkura.localify.MainActivity
 import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.TAG
@@ -56,6 +60,7 @@ import io.github.chocolzs.linkura.localify.getProgramDownloadState
 import io.github.chocolzs.linkura.localify.getProgramLocalResourceVersionState
 import io.github.chocolzs.linkura.localify.getProgramLocalAPIResourceVersionState
 import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
+import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.FileDownloader
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.TimeUtils
@@ -68,6 +73,7 @@ import io.github.chocolzs.linkura.localify.ui.components.GakuProgressBar
 import io.github.chocolzs.linkura.localify.ui.components.GakuRadio
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
+import io.github.chocolzs.linkura.localify.ui.components.base.AutoSizeText
 import java.io.File
 
 
@@ -78,14 +84,6 @@ fun HomePage(modifier: Modifier = Modifier,
              bottomSpacerHeight: Dp = 120.dp,
              screenH: Dp = 1080.dp) {
     val config = getConfigState(context, previewData)
-    val programConfig = getProgramConfigState(context)
-
-    val downloadProgress by getProgramDownloadState(context)
-    val downloadAble by getProgramDownloadAbleState(context)
-    val localResourceVersion by getProgramLocalResourceVersionState(context)
-    val localAPIResourceVersion by getProgramLocalAPIResourceVersionState(context)
-    val downloadErrorString by getProgramDownloadErrorStringState(context)
-    var isFirstTimeInThisPage by rememberSaveable { mutableStateOf(true) }
 
     // val scrollState = rememberScrollState()
     val keyboardOptionsNumber = remember {
@@ -93,138 +91,6 @@ fun HomePage(modifier: Modifier = Modifier,
     }
     val keyBoardOptionsDecimal = remember {
         KeyboardOptions(keyboardType = KeyboardType.Decimal)
-    }
-
-    val resourceSettingsViewModel: ResourceCollapsibleBoxViewModel =
-        viewModel(factory = ResourceCollapsibleBoxViewModelFactory(initiallyExpanded = false))
-
-
-    fun zipResourceDownload() {
-        val (_, newUrl) = FileDownloader.checkAndChangeDownloadURL(programConfig.value.transRemoteZipUrl)
-        context?.onPTransRemoteZipUrlChanged(newUrl, 0, 0, 0)
-        FileDownloader.downloadFile(
-            newUrl,
-            checkContentTypes = listOf("application/zip", "application/octet-stream"),
-            onDownload = { progress, _, _ ->
-                context?.mainPageAssetsViewDataUpdate(downloadProgressState = progress)
-            },
-
-            onSuccess = { byteArray ->
-                context?.mainPageAssetsViewDataUpdate(
-                    downloadAbleState = true,
-                    errorString = "",
-                    downloadProgressState = -1f
-                )
-                val file = File(context?.filesDir, "update_trans.zip")
-                file.writeBytes(byteArray)
-                val newFileVersion = FileHotUpdater.getZipResourceVersion(file.absolutePath)
-                if (newFileVersion != null) {
-                    context?.mainPageAssetsViewDataUpdate(
-                        localResourceVersionState = newFileVersion
-                    )
-                }
-                else {
-                    context?.mainPageAssetsViewDataUpdate(
-                        localResourceVersionState = context.getString(
-                            R.string.invalid_zip_file
-                        ),
-                        errorString = context.getString(R.string.invalid_zip_file_warn)
-                    )
-                }
-            },
-
-            onFailed = { code, reason ->
-                context?.mainPageAssetsViewDataUpdate(
-                    downloadAbleState = true,
-                    errorString = reason,
-                )
-            })
-    }
-
-    fun onClickDownload(isZipResource: Boolean, isHumanClick: Boolean = true) {
-        context?.mainPageAssetsViewDataUpdate(
-            downloadAbleState = false,
-            errorString = "",
-            downloadProgressState = -1f
-        )
-        if (isZipResource) {
-            zipResourceDownload()
-        }
-        else {
-            RemoteAPIFilesChecker.checkUpdateLocalAssets(context!!,
-                programConfig.value.useAPIAssetsURL,
-                onFailed = { _, reason ->
-                    context.mainPageAssetsViewDataUpdate(
-                        downloadAbleState = true,
-                        errorString = "",
-                        downloadProgressState = -1f
-                    )
-                    context.mainUIConfirmStatUpdate(true, "Error", reason)
-                },
-                onResult = { data, localVersion ->
-                    if (!isHumanClick) {
-                        if (data.tag_name == localVersion) {
-                            context.mainPageAssetsViewDataUpdate(
-                                downloadAbleState = true,
-                                errorString = "",
-                                downloadProgressState = -1f
-                            )
-                            return@checkUpdateLocalAssets
-                        }
-                    }
-                    context.mainUIConfirmStatUpdate(true, context.getString(R.string.translation_resource_update),
-                        "${data.name}\n$localVersion -> ${data.tag_name}\n${data.body}\n\n${TimeUtils.convertIsoToLocalTime(data.published_at)}",
-                        onConfirm = {
-                            resourceSettingsViewModel.expanded = true
-                            RemoteAPIFilesChecker.updateLocalAssets(context, programConfig.value.useAPIAssetsURL,
-                                onDownload = { progress, _, _ ->
-                                    context.mainPageAssetsViewDataUpdate(downloadProgressState = progress)
-                                },
-                                onFailed = { _, reason -> context.mainPageAssetsViewDataUpdate(
-                                    downloadAbleState = true,
-                                    errorString = reason,
-                                )},
-                                onSuccess = { saveFile, releaseVersion ->
-                                    context.mainPageAssetsViewDataUpdate(
-                                        downloadAbleState = true,
-                                        errorString = "",
-                                        downloadProgressState = -1f
-                                    )
-                                    context.mainPageAssetsViewDataUpdate(
-                                        localAPIResourceVersion = RemoteAPIFilesChecker.getLocalVersion(context)
-                                    )
-                                    context.saveProgramConfig()
-                                    Log.d(TAG, "saved: $releaseVersion $saveFile")
-                                })
-                        },
-                        onCancel = {
-                            context.mainPageAssetsViewDataUpdate(
-                                downloadAbleState = true,
-                                errorString = "",
-                                downloadProgressState = -1f
-                            )
-                        }
-                        )
-                })
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        try {
-            if (context == null) return@LaunchedEffect
-            val localAPIResVer = RemoteAPIFilesChecker.getLocalVersion(context)
-            context.mainPageAssetsViewDataUpdate(
-                localAPIResourceVersion = localAPIResVer
-            )
-            if (isFirstTimeInThisPage) {
-                if (programConfig.value.useAPIAssets && programConfig.value.useAPIAssetsURL.isNotEmpty()) {
-                    onClickDownload(false, false)
-                }
-            }
-        }
-        finally {
-            isFirstTimeInThisPage = false
-        }
     }
 
     LazyColumn(modifier = modifier
@@ -235,25 +101,21 @@ fun HomePage(modifier: Modifier = Modifier,
         .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-//        item {
-//            GakuGroupBox(modifier = modifier, stringResource(R.string.basic_settings)) {
-//                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-//                    GakuSwitch(modifier, stringResource(R.string.enable_plugin), checked = config.value.enabled) {
-//                            v -> context?.onEnabledChanged(v)
-//                    }
-//
-//                    GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
-//                            v -> context?.onLazyInitChanged(v)
-//                    }
-//
-//                    GakuSwitch(modifier, stringResource(R.string.replace_font), checked = config.value.replaceFont) {
-//                            v -> context?.onReplaceFontChanged(v)
-//                    }
-//
-//                }
-//            }
-//            Spacer(Modifier.height(6.dp))
-//        }
+        item {
+            GakuGroupBox(modifier = modifier, stringResource(R.string.basic_settings)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    GakuSwitch(modifier, stringResource(R.string.enable_plugin), checked = config.value.enabled) {
+                            v -> context?.onEnabledChanged(v)
+                    }
+
+                    GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
+                            v -> context?.onLazyInitChanged(v)
+                    }
+
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+        }
         item {
             GakuGroupBox(modifier = modifier, "Settings") {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -275,235 +137,6 @@ fun HomePage(modifier: Modifier = Modifier,
             }
             Spacer(Modifier.height(6.dp))
         }
-//        item {
-//            GakuGroupBox(modifier, stringResource(R.string.resource_settings),
-//                contentPadding = 0.dp,
-//                onHeadClick = {
-//                    resourceSettingsViewModel.expanded = !resourceSettingsViewModel.expanded
-//                }) {
-//                CollapsibleBox(modifier = modifier,
-//                    viewModel = resourceSettingsViewModel
-//                ) {
-//                    LazyColumn(modifier = modifier
-//                        // .padding(8.dp)
-//                        .sizeIn(maxHeight = screenH),
-//                        // verticalArrangement = Arrangement.spacedBy(12.dp)
-//                    ) {
-//                        item {
-//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp),
-//                                checked = programConfig.value.checkBuiltInAssets,
-//                                text = stringResource(id = R.string.check_built_in_resource)
-//                            ) { v -> context?.onPCheckBuiltInAssetsChanged(v) }
-//                        }
-//                        item {
-//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-//                                checked = programConfig.value.cleanLocalAssets,
-//                                text = stringResource(id = R.string.delete_plugin_resource)
-//                            ) { v -> context?.onPCleanLocalAssetsChanged(v) }
-//                        }
-//
-//                        item {
-//                            HorizontalDivider(
-//                                thickness = 1.dp,
-//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-//                            )
-//                        }
-//
-//                        item {
-//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-//                                checked = programConfig.value.useAPIAssets,
-//                                text = stringResource(R.string.check_resource_from_api)
-//                            ) { v -> context?.onPUseAPIAssetsChanged(v) }
-//
-//                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
-//                                expandState = programConfig.value.useAPIAssets,
-//                                collapsedHeight = 0.dp,
-//                                innerPaddingLeftRight = 8.dp,
-//                                showExpand = false
-//                            ) {
-//                                GakuSwitch(modifier = modifier,
-//                                    checked = programConfig.value.delRemoteAfterUpdate,
-//                                    text = stringResource(id = R.string.del_remote_after_update)
-//                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
-//
-//                                LazyColumn(modifier = modifier
-//                                    // .padding(8.dp)
-//                                    .sizeIn(maxHeight = screenH),
-//                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-//                                ) {
-//                                    item {
-//                                        Row(modifier = modifier.fillMaxWidth(),
-//                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-//                                            verticalAlignment = Alignment.CenterVertically) {
-//
-//                                            GakuTextInput(modifier = modifier
-//                                                .height(45.dp)
-//                                                .padding(end = 8.dp)
-//                                                .fillMaxWidth()
-//                                                .weight(1f),
-//                                                fontSize = 14f,
-//                                                value = programConfig.value.useAPIAssetsURL,
-//                                                onValueChange = { c -> context?.onPUseAPIAssetsURLChanged(c, 0, 0, 0)},
-//                                                label = { Text(stringResource(R.string.api_addr)) }
-//                                            )
-//
-//                                            if (downloadAble) {
-//                                                GakuButton(modifier = modifier
-//                                                    .height(40.dp)
-//                                                    .sizeIn(minWidth = 80.dp),
-//                                                    text = stringResource(R.string.check_update),
-//                                                    onClick = { onClickDownload(false) })
-//                                            }
-//                                            else {
-//                                                GakuButton(modifier = modifier
-//                                                    .height(40.dp)
-//                                                    .sizeIn(minWidth = 80.dp),
-//                                                    text = stringResource(id = R.string.cancel), onClick = {
-//                                                        FileDownloader.cancel()
-//                                                    })
-//                                            }
-//
-//                                        }
-//                                    }
-//
-//                                    if (downloadProgress >= 0) {
-//                                        item {
-//                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
-//                                        }
-//                                    }
-//
-//                                    if (downloadErrorString.isNotEmpty()) {
-//                                        item {
-//                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
-//                                        }
-//                                    }
-//
-//                                    item {
-//                                        Text(modifier = Modifier
-//                                            .fillMaxWidth()
-//                                            .clickable {
-//                                                context?.mainPageAssetsViewDataUpdate(
-//                                                    localAPIResourceVersion = RemoteAPIFilesChecker.getLocalVersion(
-//                                                        context
-//                                                    )
-//                                                )
-//                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localAPIResourceVersion")
-//                                    }
-//
-//                                    item {
-//                                        Spacer(Modifier.height(0.dp))
-//                                    }
-//
-//                                }
-//
-//                            }
-//                        }
-//
-//                        item {
-//                            HorizontalDivider(
-//                                thickness = 1.dp,
-//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-//                            )
-//                        }
-//
-//                        item {
-//                            GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-//                                checked = programConfig.value.useRemoteAssets,
-//                                text = stringResource(id = R.string.use_remote_zip_resource)
-//                            ) { v -> context?.onPUseRemoteAssetsChanged(v) }
-//
-//                            CollapsibleBox(modifier = modifier.graphicsLayer(clip = false),
-//                                expandState = programConfig.value.useRemoteAssets,
-//                                collapsedHeight = 0.dp,
-//                                innerPaddingLeftRight = 8.dp,
-//                                showExpand = false
-//                            ) {
-//                                GakuSwitch(modifier = modifier,
-//                                    checked = programConfig.value.delRemoteAfterUpdate,
-//                                    text = stringResource(id = R.string.del_remote_after_update)
-//                                ) { v -> context?.onPDelRemoteAfterUpdateChanged(v) }
-//
-//                                LazyColumn(modifier = modifier
-//                                    // .padding(8.dp)
-//                                    .sizeIn(maxHeight = screenH),
-//                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-//                                ) {
-//                                    item {
-//                                        Row(modifier = modifier.fillMaxWidth(),
-//                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-//                                            verticalAlignment = Alignment.CenterVertically) {
-//
-//                                            GakuTextInput(modifier = modifier
-//                                                .height(45.dp)
-//                                                .padding(end = 8.dp)
-//                                                .fillMaxWidth()
-//                                                .weight(1f),
-//                                                fontSize = 14f,
-//                                                value = programConfig.value.transRemoteZipUrl,
-//                                                onValueChange = { c -> context?.onPTransRemoteZipUrlChanged(c, 0, 0, 0)},
-//                                                label = { Text(stringResource(id = R.string.resource_url)) }
-//                                            )
-//
-//                                            if (downloadAble) {
-//                                                GakuButton(modifier = modifier
-//                                                    .height(40.dp)
-//                                                    .sizeIn(minWidth = 80.dp),
-//                                                    text = stringResource(id = R.string.download),
-//                                                    onClick = { onClickDownload(true) })
-//                                            }
-//                                            else {
-//                                                GakuButton(modifier = modifier
-//                                                    .height(40.dp)
-//                                                    .sizeIn(minWidth = 80.dp),
-//                                                    text = stringResource(id = R.string.cancel), onClick = {
-//                                                        FileDownloader.cancel()
-//                                                    })
-//                                            }
-//
-//                                        }
-//                                    }
-//
-//                                    if (downloadProgress >= 0) {
-//                                        item {
-//                                            GakuProgressBar(progress = downloadProgress, isError = downloadErrorString.isNotEmpty())
-//                                        }
-//                                    }
-//
-//                                    if (downloadErrorString.isNotEmpty()) {
-//                                        item {
-//                                            Text(text = downloadErrorString, color = Color(0xFFE2041B))
-//                                        }
-//                                    }
-//
-//                                    item {
-//                                        Text(modifier = Modifier
-//                                            .fillMaxWidth()
-//                                            .clickable {
-//                                                val file =
-//                                                    File(context?.filesDir, "update_trans.zip")
-//                                                context?.mainPageAssetsViewDataUpdate(
-//                                                    localResourceVersionState = FileHotUpdater
-//                                                        .getZipResourceVersion(file.absolutePath)
-//                                                        .toString()
-//                                                )
-//                                            }, text = "${stringResource(R.string.downloaded_resource_version)}: $localResourceVersion")
-//                                    }
-//
-//                                    item {
-//                                        Spacer(Modifier.height(0.dp))
-//                                    }
-//
-//                                }
-//
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            Spacer(Modifier.height(6.dp))
-//        }
-
         item {
             GakuGroupBox(modifier = modifier, contentPadding = 12.dp, title = stringResource(R.string.graphic_settings)) {
                 LazyColumn(modifier = Modifier
@@ -599,81 +232,41 @@ fun HomePage(modifier: Modifier = Modifier,
                                     shortSideText = currentShort.toString()
                                 }
 
-                                Text(stringResource(R.string.config_render_texture_resolution_label))
-                                
+                                val presetOptions = listOf(
+                                    stringResource(R.string.config_render_texture_preset_8k) to "8k",
+                                    stringResource(R.string.config_render_texture_preset_4k) to "4k",
+                                    stringResource(R.string.config_render_texture_preset_2k) to "2k",
+                                    stringResource(R.string.config_render_texture_preset_1080p) to "1080p",
+                                    stringResource(R.string.config_render_texture_preset_720p) to "720p",
+                                    stringResource(R.string.config_render_texture_preset_360p) to "360p",
+                                    stringResource(R.string.config_render_texture_preset_custom) to "custom"
+                                )
                                 Row(modifier = modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically) {
-                                    
-                                    // Preset dropdown
-                                    OutlinedButton(
-                                        modifier = Modifier.weight(1.2f).height(32.dp),
-                                        onClick = { isDropdownExpanded = true }
-                                    ) {
-                                        Text(
-                                            fontSize = 12.sp,
-                                            text = when(selectedPreset) {
-                                                "8k" -> stringResource(R.string.config_render_texture_preset_8k)
-                                                "4k" -> stringResource(R.string.config_render_texture_preset_4k)
-                                                "2k" -> stringResource(R.string.config_render_texture_preset_2k)
-                                                "1080p" -> stringResource(R.string.config_render_texture_preset_1080p)
-                                                "720p" -> stringResource(R.string.config_render_texture_preset_720p)
-                                                "360p" -> stringResource(R.string.config_render_texture_preset_360p)
-                                                else -> stringResource(R.string.config_render_texture_preset_custom)
-                                            },
-                                            modifier = Modifier.weight(1f),
-                                            color = MaterialTheme.colorScheme.onPrimary,
+                                    GakuSelector(
+                                        options = presetOptions,
+                                        selectedValue = selectedPreset,
+                                        onValueSelected = { preset ->
+                                            selectedPreset = preset
 
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Filled.ArrowDropDown,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .padding(start = 4.dp)
-                                                .rotate(arrowRotation),
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                    
-                                    DropdownMenu(
-                                        expanded = isDropdownExpanded,
-                                        onDismissRequest = { isDropdownExpanded = false }
-                                    ) {
-                                        listOf("8k", "4k", "2k", "1080p", "720p", "360p", "custom").forEach { preset ->
-                                            DropdownMenuItem(
-                                                text = { Text(when(preset) {
-                                                    "8k" -> stringResource(R.string.config_render_texture_preset_8k)
-                                                    "4k" -> stringResource(R.string.config_render_texture_preset_4k)
-                                                    "2k" -> stringResource(R.string.config_render_texture_preset_2k)
-                                                    "1080p" -> stringResource(R.string.config_render_texture_preset_1080p)
-                                                    "720p" -> stringResource(R.string.config_render_texture_preset_720p)
-                                                    "360p" -> stringResource(R.string.config_render_texture_preset_360p)
-                                                    else -> stringResource(R.string.config_render_texture_preset_custom)
-                                                }) },
-                                                onClick = {
-                                                    selectedPreset = preset
-                                                    isDropdownExpanded = false
-                                                    
-                                                    // Update resolution based on preset
-                                                    val (newLong, newShort) = when(preset) {
-                                                        "8k" -> Pair(7680, 4320)
-                                                        "4k" -> Pair(3840, 2160)
-                                                        "2k" -> Pair(2560, 1440)
-                                                        "1080p" -> Pair(1920, 1080)
-                                                        "720p" -> Pair(1280, 720)
-                                                        "360p" -> Pair(640, 360)
-                                                        else -> Pair(longSideText.toIntOrNull() ?: 3840, shortSideText.toIntOrNull() ?: 2160)
-                                                    }
-                                                    
-                                                    if (preset != "custom") {
-                                                        longSideText = newLong.toString()
-                                                        shortSideText = newShort.toString()
-                                                        context?.onRenderTextureResolutionChanged(newLong, newShort)
-                                                    }
-                                                }
-                                            )
+                                            val (newLong, newShort) = when(preset) {
+                                                "8k" -> Pair(7680, 4320)
+                                                "4k" -> Pair(3840, 2160)
+                                                "2k" -> Pair(2560, 1440)
+                                                "1080p" -> Pair(1920, 1080)
+                                                "720p" -> Pair(1280, 720)
+                                                "360p" -> Pair(640, 360)
+                                                else -> Pair(longSideText.toIntOrNull() ?: 3840, shortSideText.toIntOrNull() ?: 2160)
+                                            }
+
+                                            if (preset != "custom") {
+                                                longSideText = newLong.toString()
+                                                shortSideText = newShort.toString()
+                                                context?.onRenderTextureResolutionChanged(newLong, newShort)
+                                            }
                                         }
-                                    }
+                                    )
 
                                     // Resolution inputs: longSide x shortSide
                                     GakuTextInput(modifier = Modifier
@@ -699,7 +292,7 @@ fun HomePage(modifier: Modifier = Modifier,
                                         .weight(.8f),
                                         fontSize = 12f,
                                         value = shortSideText,
-                                        onValueChange = { newValue ->  
+                                        onValueChange = { newValue ->
                                             shortSideText = newValue
                                             val shortSide = newValue.toIntOrNull()
                                             if (shortSide != null && shortSide > 0) {

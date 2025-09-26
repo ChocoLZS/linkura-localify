@@ -563,7 +563,7 @@ namespace LinkuraLocal::MasterLocal {
 
         void LoadData() {
             masterLocalData.clear();
-            static auto masterDir = Local::GetBasePath() / "local-files" / "masterTrans";
+            static auto masterDir = Local::GetBasePath() / "local-files" / Config::localeCode / "masterTrans";
             if (!std::filesystem::is_directory(masterDir)) {
                 Log::ErrorFmt("LoadData: not found: %s", masterDir.string().c_str());
                 return;

@@ -5,6 +5,8 @@ import android.net.Uri
 import android.util.Log
 import io.github.chocolzs.linkura.localify.LinkuraHookMain
 import io.github.chocolzs.linkura.localify.TAG
+import io.github.chocolzs.linkura.localify.models.LocaleItem
+import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -135,6 +137,39 @@ object FileHotUpdater {
             null
         }
     }
+
+    private fun getZipI18nData(zipFile: InputStream, basePath: String): List<LocaleItem> {
+        return try {
+            val i18nDataFilePath = File(basePath, "local-files/i18n.json").canonicalPath
+            val zipIn = ZipInputStream(zipFile)
+            var entry = zipIn.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory && "/${entry.name}" == i18nDataFilePath) {
+                    val jsonString = zipIn.bufferedReader().use { it.readText() }
+                    return Json.decodeFromString<List<LocaleItem>>(jsonString)
+                }
+                zipIn.closeEntry()
+                entry = zipIn.nextEntry
+            }
+            zipIn.close()
+            emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun getZipI18nData(zipFile: String, basePath: String): List<LocaleItem> {
+        return getZipI18nData(FileInputStream(zipFile), basePath)
+    }
+
+   fun getZipI18nData(zipFile: String): List<LocaleItem> {
+        return try {
+            val basePath = getZipResourcePath(FileInputStream(zipFile))
+            basePath?.let { getZipI18nData(zipFile, it) } ?: emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+   }
 
     fun updateFilesFromZip(activity: Activity, zipFileUri: Uri, filesDir: File, deleteAfterUpdate: Boolean) {
         try {

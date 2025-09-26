@@ -79,6 +79,7 @@ namespace LinkuraLocal::HookMain {
         HookCamera::Install(hookInstaller);
         HookShare::Install(hookInstaller);
         HookStory::Install(hookInstaller);
+        HookTranslation::Install(hookInstaller);
     }
     // 77 2640 5000
 
@@ -118,6 +119,9 @@ namespace LinkuraLocal::HookMain {
             UnityResolveProgress::classProgress.total = 1;
             UnityResolveProgress::classProgress.current = 0;
         }
+
+        Local::LoadData();
+//        MasterLocal::LoadData();
 
         UnityResolveProgress::startInit = false;
 
