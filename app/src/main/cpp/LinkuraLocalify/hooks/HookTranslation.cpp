@@ -37,7 +37,7 @@ namespace LinkuraLocal::HookTranslation {
         return newFont;
     }
     std::unordered_set<void*> updatedFontPtrs{};
-    void UpdateFont(void* TMP_Textself) {
+    void UpdateTMPFont(void* TMP_Textself) {
         if (!Config::replaceFont) return;
         static auto get_font = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",
                                                       "TMPro", "TMP_Text", "get_font");
@@ -77,6 +77,7 @@ namespace LinkuraLocal::HookTranslation {
 //        set_fontMaterial->Invoke<void>(TMP_Textself, fontMaterial);
 //        ForceMeshUpdate->Invoke<void>(TMP_Textself, false, false);
     }
+
     DEFINE_HOOK(void, TMP_Text_PopulateTextBackingArray, (void* self, UnityResolve::UnityType::String* text, int start, int length)) {
         if (!text) {
             return TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
@@ -89,18 +90,17 @@ namespace LinkuraLocal::HookTranslation {
         std::string transText;
         if (Local::GetGenericText(origText, &transText)) {
             const auto newText = UnityResolve::UnityType::String::New(transText);
-            UpdateFont(self);
+            UpdateTMPFont(self);
             return TMP_Text_PopulateTextBackingArray_Orig(self, newText, 0, newText->length);
         }
 
         if (Config::textTest) {
-            Log::DebugFmt("[TP] %s", text->ToString().c_str());
+            Log::VerboseFmt("[TP] %s", text->ToString().c_str());
             TMP_Text_PopulateTextBackingArray_Orig(self, UnityResolve::UnityType::String::New("[TP]" + text->ToString()), start, length + 4);
-        }
-        else {
+        } else {
             TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
         }
-        UpdateFont(self);
+        UpdateTMPFont(self);
     }
 
     DEFINE_HOOK(void, TMP_Text_SetText_2, (void* self, Il2cppString* sourceText, bool syncTextInputBox, void* mtd)) {
@@ -111,17 +111,16 @@ namespace LinkuraLocal::HookTranslation {
         std::string transText;
         if (Local::GetGenericText(origText, &transText)) {
             const auto newText = UnityResolve::UnityType::String::New(transText);
-            UpdateFont(self);
+            UpdateTMPFont(self);
             return TMP_Text_SetText_2_Orig(self, newText, syncTextInputBox, mtd);
         }
         if (Config::textTest) {
-            Log::DebugFmt("[TS] %s", sourceText->ToString().c_str());
+            Log::VerboseFmt("[TS] %s", sourceText->ToString().c_str());
             TMP_Text_SetText_2_Orig(self, UnityResolve::UnityType::String::New("[TS]" + sourceText->ToString()), syncTextInputBox, mtd);
-        }
-        else {
+        } else {
             TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
         }
-        UpdateFont(self);
+        UpdateTMPFont(self);
     }
 
     DEFINE_HOOK(void, TextMeshProUGUI_Awake, (void* self, void* method)) {
@@ -136,25 +135,22 @@ namespace LinkuraLocal::HookTranslation {
             //Log::InfoFmt("TextMeshProUGUI_Awake: %s", currText->ToString().c_str());
             std::string transText;
             if (Local::GetGenericText(currText->ToString(), &transText)) {
-                if (Config::textTest) {
-                    Log::DebugFmt("[TA] %s", currText->ToString().c_str());
-                    set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New("[TA]" + transText));
-                }
-                else {
-                    set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New(transText));
-                }
+                set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New(transText));
+                UpdateTMPFont(self);
+                TextMeshProUGUI_Awake_Orig(self, method);
+                return;
             }
-//            if (Config::textTest) {
-//                Log::DebugFmt("[TA] %s", currText->ToString().c_str());
-//                set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New("[TA]" + currText->ToString()));
-//            }
-//            else {
-//                set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New(currText->ToString()));
-//            }
+            if (Config::textTest) {
+                Log::VerboseFmt("[TA] %s", currText->ToString().c_str());
+                set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New("[TA]" + currText->ToString()));
+            }
+            else {
+                set_Text_method->Invoke<void>(self, UnityResolve::UnityType::String::New(currText->ToString()));
+            }
         }
 
         // set_font->Invoke<void>(self, font);
-        UpdateFont(self);
+        UpdateTMPFont(self);
         TextMeshProUGUI_Awake_Orig(self, method);
     }
 
@@ -165,16 +161,16 @@ namespace LinkuraLocal::HookTranslation {
         std::string transText;
         if (Local::GetGenericText(origText, &transText)) {
             const auto newText = UnityResolve::UnityType::String::New(transText);
-            UpdateFont(self);
             return Text_set_text_Orig(self, newText, mtd);
         }
         if (Config::textTest) {
-            Log::DebugFmt("[TU] %s", sourceText->ToString().c_str());
+            Log::VerboseFmt("[TU] %s", sourceText->ToString().c_str());
             Text_set_text_Orig(self,  UnityResolve::UnityType::String::New("[TU]" + sourceText->ToString()), mtd);
         }
         else {
             Text_set_text_Orig(self, sourceText, mtd);
         }
+//        UpdateFont(self);
     }
 
     // TODO 文本未hook完整

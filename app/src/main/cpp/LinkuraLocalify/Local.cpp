@@ -24,6 +24,7 @@ namespace LinkuraLocal::Local {
     std::unordered_map<std::string, std::string> i18nData{};
     std::unordered_map<std::string, std::string> i18nDumpData{};
     std::unordered_map<std::string, std::string> genericText{};
+    std::unordered_map<std::string, std::string> masterText{};
     std::unordered_map<std::string, std::string> genericSplitText{};
     std::unordered_map<std::string, std::string> genericFmtText{};
     std::vector<std::string> genericTextDumpData{};
@@ -84,7 +85,7 @@ namespace LinkuraLocal::Local {
 
     void LoadJsonDataToMap(const std::filesystem::path& filePath, std::unordered_map<std::string, std::string>& dict,
                            const bool insertToTranslated = false, const bool needClearDict = true,
-                           const bool needCheckSplitPrefix = false) {
+                           const bool needCheckSplitPrefix = false, const bool needRemoveDollarExtra = false) {
         if (!exists(filePath)) return;
         try {
             if (needClearDict) {
@@ -99,8 +100,8 @@ namespace LinkuraLocal::Local {
             file.close();
             auto fileData = nlohmann::json::parse(fileContent);
             for (auto& i : fileData.items()) {
-                const auto& key = i.key();
-                const std::string value = i.value();
+                std::string key = i.key();
+                std::string value = i.value();
                 if (needCheckSplitPrefix && key.starts_with(splitTextPrefix) && value.starts_with(splitTextPrefix)) {
                     static const auto splitTextPrefixLength = splitTextPrefix.size();
                     const auto splitValue = value.substr(splitTextPrefixLength);
@@ -109,6 +110,28 @@ namespace LinkuraLocal::Local {
                 }
                 else {
                     dict[key] = value;
+                    if (needRemoveDollarExtra && key.find('$') != std::string::npos && value.find('$') != std::string::npos) {
+                        std::string modifiedKey = key;
+                        std::string modifiedValue = value;
+                        modifiedKey.erase(std::remove(modifiedKey.begin(), modifiedKey.end(), '$'), modifiedKey.end());
+                        modifiedValue.erase(std::remove(modifiedValue.begin(), modifiedValue.end(), '$'), modifiedValue.end());
+                        dict[modifiedKey] = modifiedValue;
+                        std::string coloredKey = key;
+                        std::string coloredValue = value;
+                        // 处理key中的$符号
+                        for (size_t pos = 0, count = 0; (pos = coloredKey.find('$', pos)) != std::string::npos; count++) {
+                            coloredKey.replace(pos, 1, (count % 2 == 0) ? "<color=#FF008D>" : "</color>");
+                            pos += (count % 2 == 0) ? 15 : 8; // 跳过替换后的字符串长度
+                        }
+
+                        // 处理value中的$符号
+                        for (size_t pos = 0, count = 0; (pos = coloredValue.find('$', pos)) != std::string::npos; count++) {
+                            coloredValue.replace(pos, 1, (count % 2 == 0) ? "<color=#FF008D>" : "</color>");
+                            pos += (count % 2 == 0) ? 15 : 8; // 跳过替换后的字符串长度
+                        }
+//                        Log::DebugFmt("coloredKey key: %s, coloredValue value: %s\n", coloredKey.c_str(), coloredValue.c_str());
+                        dict[coloredKey] = coloredValue;
+                    }
                     if (insertToTranslated) translatedText.emplace(value);
                 }
             }
@@ -371,16 +394,17 @@ namespace LinkuraLocal::Local {
     }
 
     void LoadData() {
-        static auto localizationFile = GetBasePath() / "local-files" / "localization.json";
-        static auto genericFile = GetBasePath() / "local-files" / "generic.json";
-        static auto genericSplitFile = GetBasePath() / "local-files" / "generic.split.json";
-        static auto genericDir = GetBasePath() / "local-files" / "genericTrans";
+        static auto localizationFile = GetBasePath() / "local-files"/ Config::localeCode / "localization.json";
+        static auto genericFile = GetBasePath() / "local-files"/ Config::localeCode / "generic.json";
+        static auto genericSplitFile = GetBasePath() / "local-files"/ Config::localeCode / "generic.split.json";
+        static auto genericDir = GetBasePath() / "local-files"/ Config::localeCode / "genericTrans";
+        static auto masterDir = GetBasePath() / "local-files"/ Config::localeCode / "masterTrans";
 
-        if (!std::filesystem::is_regular_file(localizationFile)) {
-            Log::ErrorFmt("localizationFile: %s not found.", localizationFile.c_str());
-            return;
-        }
-        LoadJsonDataToMap(localizationFile, i18nData, true);
+//        if (!std::filesystem::is_regular_file(localizationFile)) {
+//            Log::ErrorFmt("localizationFile: %s not found.", localizationFile.c_str());
+//            return;
+//        }
+//        LoadJsonDataToMap(localizationFile, i18nData, true);
         Log::InfoFmt("%ld localization items loaded.", i18nData.size());
 
         LoadJsonDataToMap(genericFile, genericText, true, true, true);
@@ -405,8 +429,24 @@ namespace LinkuraLocal::Local {
                 }
             }
         }
+
+        if (std::filesystem::exists(masterDir) || std::filesystem::is_directory(masterDir)) {
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(masterDir)) {
+                if (std::filesystem::is_regular_file(entry.path())) {
+                    const auto& currFile = entry.path();
+                    if (to_lower(currFile.extension().string()) == ".json") {
+                        if (currFile.filename().string().ends_with("CardSkills.json")) {
+                            LoadJsonDataToMap(currFile, masterText, true, false, true, true);
+                        }
+                        else LoadJsonDataToMap(currFile, masterText, true, false, true);
+                    }
+                }
+            }
+        }
+
         ProcessGenericTextLabels();
         Log::InfoFmt("%ld generic text items loaded.", genericText.size());
+        Log::InfoFmt("%ld master text items loaded.", masterText.size());
 
         static auto dumpBasePath = GetBasePath() / "dump-files";
         static auto dumpFilePath = dumpBasePath / "localization.json";
@@ -523,6 +563,11 @@ namespace LinkuraLocal::Local {
     bool GetGenericText(const std::string& origText, std::string* newStr) {
         // 完全匹配
         if (const auto iter = genericText.find(origText); iter != genericText.end()) {
+            *newStr = iter->second;
+            return true;
+        }
+        // TODO tmp masterText
+        if (const auto iter = masterText.find(origText); iter != masterText.end()) {
             *newStr = iter->second;
             return true;
         }
