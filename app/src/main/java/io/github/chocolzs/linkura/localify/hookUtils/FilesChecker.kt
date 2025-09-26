@@ -141,30 +141,33 @@ object FilesChecker {
         val pluginBasePath = File(filesDir, localizationFilesDir)
         val localFilesDir = File(pluginBasePath, "local-files")
 
-        val fontFile = File(localFilesDir, "gkamsZHFontMIX.otf")
-        val resourceDir = File(localFilesDir, "resource")
-        val genericTransDir = File(localFilesDir, "genericTrans")
-        val genericTransFile = File(localFilesDir, "generic.json")
-        val i18nFile = File(localFilesDir, "localization.json")
-        val masterTransDir = File(localFilesDir, "masterTrans")
+//        val fontFile = File(localFilesDir, "gkamsZHFontMIX.otf")
+//        val resourceDir = File(localFilesDir, "resource")
+//        val genericTransDir = File(localFilesDir, "genericTrans")
+//        val genericTransFile = File(localFilesDir, "generic.json")
+//        val i18nFile = File(localFilesDir, "localization.json")
+//        val masterTransDir = File(localFilesDir, "masterTrans")
 
-        if (fontFile.exists()) {
-            fontFile.delete()
+        if (deleteRecursively(localFilesDir)) {
+            localFilesDir.mkdirs()
         }
-        if (deleteRecursively(resourceDir)) {
-            resourceDir.mkdirs()
-        }
-        if (deleteRecursively(genericTransDir)) {
-            genericTransDir.mkdirs()
-        }
-        if (deleteRecursively(masterTransDir)) {
-            masterTransDir.mkdirs()
-        }
-        if (genericTransFile.exists()) {
-            genericTransFile.writeText("{}")
-        }
-        if (i18nFile.exists()) {
-            i18nFile.writeText("{}")
-        }
+//        if (fontFile.exists()) {
+//            fontFile.delete()
+//        }
+//        if (deleteRecursively(resourceDir)) {
+//            resourceDir.mkdirs()
+//        }
+//        if (deleteRecursively(genericTransDir)) {
+//            genericTransDir.mkdirs()
+//        }
+//        if (deleteRecursively(masterTransDir)) {
+//            masterTransDir.mkdirs()
+//        }
+//        if (genericTransFile.exists()) {
+//            genericTransFile.writeText("{}")
+//        }
+//        if (i18nFile.exists()) {
+//            i18nFile.writeText("{}")
+//        }
     }
 }
