@@ -72,7 +72,7 @@ namespace LinkuraLocal::Log {
 
     void WarnFmt(const char* fmt, ...) {
         GetParamStringResult(result);
-        Error(result.c_str());
+        Warn(result.c_str());
     }
 
     void Debug(const char* msg) {

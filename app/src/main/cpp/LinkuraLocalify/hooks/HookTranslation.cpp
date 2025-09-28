@@ -4,7 +4,7 @@
 
 #include "../HookMain.h"
 #include "../Local.h"
-
+#include <re2/re2.h>
 
 namespace LinkuraLocal::HookTranslation {
     using Il2cppString = UnityResolve::UnityType::String;
@@ -156,8 +156,10 @@ namespace LinkuraLocal::HookTranslation {
 
     DEFINE_HOOK(void, Text_set_text, (void* self, Il2cppString* sourceText, void* mtd)) {
 //        Log::DebugFmt("Text_set_text: %s", sourceText->ToString().c_str());
-        Text_set_text_Orig(self, sourceText, mtd);
+        // 特判时间
         std::string origText = sourceText->ToString();
+        RE2 time(R"((\d{1,2}:\d{1,2})|\d+)");
+        if (RE2::FullMatch(origText, time)) return Text_set_text_Orig(self, sourceText, mtd);
         std::string transText;
         if (Local::GetGenericText(origText, &transText)) {
             const auto newText = UnityResolve::UnityType::String::New(transText);
@@ -166,8 +168,7 @@ namespace LinkuraLocal::HookTranslation {
         if (Config::textTest) {
             Log::VerboseFmt("[TU] %s", sourceText->ToString().c_str());
             Text_set_text_Orig(self,  UnityResolve::UnityType::String::New("[TU]" + sourceText->ToString()), mtd);
-        }
-        else {
+        } else {
             Text_set_text_Orig(self, sourceText, mtd);
         }
 //        UpdateFont(self);
