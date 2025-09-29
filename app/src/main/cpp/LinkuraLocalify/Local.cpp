@@ -103,10 +103,10 @@ namespace LinkuraLocal::Local {
             }
         }
 
-        // 将简单的占位符替换为正则表达式：{数字}、{数字:f}、{数字:f2}、{数字:N0} 等
+        // 将简单的占位符替换为正则表达式：{数字}、{数字:f}、{数字:F1}、{数字:N0} 等
         // 直接使用占位符右边的第一个字符来构建 [^字符]+ 模式
         std::string tempPattern = pattern;
-        static const std::regex placeholderRegex(R"(\{(\d+)(?::[fNd]\d*|\:f)?\})");
+        static const std::regex placeholderRegex(R"(\{(\d+)(?::[fFNndDpPcCgGxX]\d*)?\})");
 
         std::string result = "";
         std::string::const_iterator searchStart(tempPattern.cbegin());
@@ -297,7 +297,7 @@ namespace LinkuraLocal::Local {
 
         // 确保key和value的段落数量相同
         if (keySegments.size() > 1 && keySegments.size() == valueSegments.size()) {
-//            Log::InfoFmt("Processing %zu segment pairs", keySegments.size());
+            Log::InfoFmt("Processing %zu segment pairs", keySegments.size());
             for (size_t i = 0; i < keySegments.size(); ++i) {
                 std::string keySegment = keySegments[i];
                 std::string valueSegment = valueSegments[i];
@@ -319,7 +319,7 @@ namespace LinkuraLocal::Local {
                 if (!keySegment.empty() && !valueSegment.empty()) {
                     // 将分割后的段落对应存入字典
                     dict[keySegment] = valueSegment;
-//                    Log::InfoFmt("BeginnerMissionsHint split segment %zu: [%s] -> [%s]", i, keySegment.c_str(), valueSegment.c_str());
+                    Log::InfoFmt("BeginnerMissionsHint split segment %zu: [%s] -> [%s]", i, keySegment.c_str(), valueSegment.c_str());
                 } else {
                     Log::WarnFmt("Skipping empty segment %zu (key empty: %s, value empty: %s)", i, keySegment.empty() ? "YES" : "NO", valueSegment.empty() ? "YES" : "NO");
                 }
@@ -936,9 +936,6 @@ namespace LinkuraLocal::Local {
         }
 //        Log::VerboseFmt("Try to get generic text from regex: %s", origText.c_str());
         for (const auto& regexItem : regexText) {
-//            if (origText == "大沢 瑠璃乃を編成して105期第6シーズンのライブグランプリをプレイする時、最終獲得グランプリPt.量<color=#F68FB8>x100.00％</color>") {
-//                Log::VerboseFmt("Try to hit generic regex: template is %s, regex is %s, text is %s", regexItem.originalKey.c_str(), regexItem.originalPattern.c_str());
-//            }
             if (regexItem.regex && regexItem.regex->ok()) {
                 // Log::VerboseFmt("Debug log in match regex");
 
