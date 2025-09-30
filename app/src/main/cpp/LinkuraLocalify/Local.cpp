@@ -171,25 +171,25 @@ namespace LinkuraLocal::Local {
     std::vector<std::string> SplitByMentions(const std::string& text) {
         std::vector<std::string> segments;
 
-        Log::InfoFmt("SplitByMentions input text: [%s]", text.c_str());
+//        Log::InfoFmt("SplitByMentions input text: [%s]", text.c_str());
 
         // 使用 RE2::GlobalReplace 的思路，先找到所有分割点
         static const RE2 splitPattern(R"(\[@\d+\])");
-        Log::InfoFmt("Using regex pattern: \\[@\\d+\\]");
+//        Log::InfoFmt("Using regex pattern: \\[@\\d+\\]");
 
         // 先测试正则表达式是否有效
         if (!splitPattern.ok()) {
-            Log::ErrorFmt("Regex pattern compilation failed: %s", splitPattern.error().c_str());
+//            Log::ErrorFmt("Regex pattern compilation failed: %s", splitPattern.error().c_str());
             segments.push_back(text);
             return segments;
         }
 
         // 测试简单匹配
-        if (RE2::PartialMatch(text, splitPattern)) {
-            Log::InfoFmt("PartialMatch found [@数字] pattern in text");
-        } else {
-            Log::InfoFmt("PartialMatch did NOT find [@数字] pattern in text");
-        }
+//        if (RE2::PartialMatch(text, splitPattern)) {
+//            Log::InfoFmt("PartialMatch found [@数字] pattern in text");
+//        } else {
+//            Log::InfoFmt("PartialMatch did NOT find [@数字] pattern in text");
+//        }
 
         // 手动查找所有匹配位置，使用标准的字符串查找
         std::vector<std::pair<size_t, size_t>> matches; // (start_pos, length)
@@ -214,7 +214,7 @@ namespace LinkuraLocal::Local {
                 std::string found_pattern = text.substr(start_pos, match_length);
 
                 matches.push_back({start_pos, match_length});
-                Log::InfoFmt("Found [@数字] pattern: [%s] at position %zu", found_pattern.c_str(), start_pos);
+//                Log::InfoFmt("Found [@数字] pattern: [%s] at position %zu", found_pattern.c_str(), start_pos);
 
                 pos++; // 跳过 ]，继续搜索
             } else {
@@ -225,12 +225,12 @@ namespace LinkuraLocal::Local {
 
         // 按位置排序匹配结果
         std::sort(matches.begin(), matches.end());
-        Log::InfoFmt("Total [@数字] patterns found: %zu", matches.size());
+//        Log::InfoFmt("Total [@数字] patterns found: %zu", matches.size());
 
         if (matches.empty()) {
             // 没有找到分割点，返回整个文本
             segments.push_back(text);
-            Log::InfoFmt("No [@数字] patterns found, returning whole text");
+//            Log::InfoFmt("No [@数字] patterns found, returning whole text");
             return segments;
         }
 
@@ -246,7 +246,7 @@ namespace LinkuraLocal::Local {
                 std::string segment = text.substr(last_pos, match_start - last_pos);
                 if (!segment.empty()) {
                     segments.push_back(segment);
-                    Log::InfoFmt("Added segment: [%s]", segment.c_str());
+//                    Log::InfoFmt("Added segment: [%s]", segment.c_str());
                 }
             }
 
@@ -259,11 +259,11 @@ namespace LinkuraLocal::Local {
             std::string segment = text.substr(last_pos);
             if (!segment.empty()) {
                 segments.push_back(segment);
-                Log::InfoFmt("Added final segment: [%s]", segment.c_str());
+//                Log::InfoFmt("Added final segment: [%s]", segment.c_str());
             }
         }
 
-        Log::InfoFmt("Total segments created: %zu", segments.size());
+//        Log::InfoFmt("Total segments created: %zu", segments.size());
         return segments;
     }
 
@@ -297,7 +297,7 @@ namespace LinkuraLocal::Local {
 
         // 确保key和value的段落数量相同
         if (keySegments.size() > 1 && keySegments.size() == valueSegments.size()) {
-            Log::InfoFmt("Processing %zu segment pairs", keySegments.size());
+//            Log::InfoFmt("Processing %zu segment pairs", keySegments.size());
             for (size_t i = 0; i < keySegments.size(); ++i) {
                 std::string keySegment = keySegments[i];
                 std::string valueSegment = valueSegments[i];
@@ -319,15 +319,15 @@ namespace LinkuraLocal::Local {
                 if (!keySegment.empty() && !valueSegment.empty()) {
                     // 将分割后的段落对应存入字典
                     dict[keySegment] = valueSegment;
-                    Log::InfoFmt("BeginnerMissionsHint split segment %zu: [%s] -> [%s]", i, keySegment.c_str(), valueSegment.c_str());
+//                    Log::InfoFmt("BeginnerMissionsHint split segment %zu: [%s] -> [%s]", i, keySegment.c_str(), valueSegment.c_str());
                 } else {
-                    Log::WarnFmt("Skipping empty segment %zu (key empty: %s, value empty: %s)", i, keySegment.empty() ? "YES" : "NO", valueSegment.empty() ? "YES" : "NO");
+//                    Log::WarnFmt("Skipping empty segment %zu (key empty: %s, value empty: %s)", i, keySegment.empty() ? "YES" : "NO", valueSegment.empty() ? "YES" : "NO");
                 }
             }
         } else if (keySegments.size() > 1) {
-            Log::WarnFmt("BeginnerMissionsHint: key and value segment count mismatch (key: %zu, value: %zu)", keySegments.size(), valueSegments.size());
+//            Log::WarnFmt("BeginnerMissionsHint: key and value segment count mismatch (key: %zu, value: %zu)", keySegments.size(), valueSegments.size());
         } else {
-            Log::InfoFmt("Key has only %zu segments, not splitting", keySegments.size());
+//            Log::InfoFmt("Key has only %zu segments, not splitting", keySegments.size());
         }
     }
 
@@ -347,6 +347,35 @@ namespace LinkuraLocal::Local {
         else {
             return "";
         }
+    }
+
+    void ReplaceDollarWithColorTag(std::unordered_map<std::string, std::string>& dict, const std::string& key, const std::string& value, const std::string& color) {
+        if (key.find('$') == std::string::npos || value.find('$') == std::string::npos) {
+            return;
+        }
+        std::string modifiedKey = key;
+        std::string modifiedValue = value;
+        modifiedKey.erase(std::remove(modifiedKey.begin(), modifiedKey.end(), '$'), modifiedKey.end());
+        modifiedValue.erase(std::remove(modifiedValue.begin(), modifiedValue.end(), '$'), modifiedValue.end());
+        dict[modifiedKey] = modifiedValue;
+        std::string coloredKey = key;
+        std::string coloredValue = value;
+        std::string color_tag = "<color=";
+        color_tag += color;
+        color_tag += ">";
+        // <color=#FF008D>
+        // 处理key中的$符号
+        for (size_t pos = 0, count = 0; (pos = coloredKey.find('$', pos)) != std::string::npos; count++) {
+
+            coloredKey.replace(pos, 1, (count % 2 == 0) ? color_tag : "</color>");
+            pos += (count % 2 == 0) ? 15 : 8; // 跳过替换后的字符串长度
+        }
+        // 处理value中的$符号
+        for (size_t pos = 0, count = 0; (pos = coloredValue.find('$', pos)) != std::string::npos; count++) {
+            coloredValue.replace(pos, 1, (count % 2 == 0) ? color_tag : "</color>");
+            pos += (count % 2 == 0) ? 15 : 8; // 跳过替换后的字符串长度
+        }
+        dict[coloredKey] = coloredValue;
     }
 
     enum class DumpStrStat {
@@ -417,35 +446,16 @@ namespace LinkuraLocal::Local {
                         ProcessBeginnerMissionsHint(dict, key, value);
                     }
 
-                    bool needRemoveDollarExtra = filename.ends_with("CardSkills.json") || filename.ends_with("RhythmGameSkills.json") || filename.ends_with("CenterSkills.json");
-                    std::string color = "#FFFFFF";
-                    if (filename.ends_with("CardSkills.json")) color = "#FF008D";
-                    if (filename.ends_with("RhythmGameSkills.json") || filename.ends_with("CenterSkills.json")) color = "#FFFFFF";
-                    if (needRemoveDollarExtra && key.find('$') != std::string::npos && value.find('$') != std::string::npos) {
-                        std::string modifiedKey = key;
-                        std::string modifiedValue = value;
-                        modifiedKey.erase(std::remove(modifiedKey.begin(), modifiedKey.end(), '$'), modifiedKey.end());
-                        modifiedValue.erase(std::remove(modifiedValue.begin(), modifiedValue.end(), '$'), modifiedValue.end());
-                        dict[modifiedKey] = modifiedValue;
-                        std::string coloredKey = key;
-                        std::string coloredValue = value;
-                        std::string color_tag = "<color=";
-                        color_tag += color;
-                        color_tag += ">";
-                        // <color=#FF008D>
-                        // 处理key中的$符号
-                        for (size_t pos = 0, count = 0; (pos = coloredKey.find('$', pos)) != std::string::npos; count++) {
-
-                            coloredKey.replace(pos, 1, (count % 2 == 0) ? color_tag : "</color>");
-                            pos += (count % 2 == 0) ? 15 : 8; // 跳过替换后的字符串长度
-                        }
-                        // 处理value中的$符号
-                        for (size_t pos = 0, count = 0; (pos = coloredValue.find('$', pos)) != std::string::npos; count++) {
-                            coloredValue.replace(pos, 1, (count % 2 == 0) ? color_tag : "</color>");
-                            pos += (count % 2 == 0) ? 15 : 8; // 跳过替换后的字符串长度
-                        }
-//                        Log::DebugFmt("coloredKey key: %s, coloredValue value: %s\n", coloredKey.c_str(), coloredValue.c_str());
-                        dict[coloredKey] = coloredValue;
+                    if (filename.ends_with("CardSkills.json")) {
+                        ReplaceDollarWithColorTag(dict, key, value, "#FF008D");
+                    }
+                    if (filename.ends_with("RhythmGameSkills.json")) {
+                        ReplaceDollarWithColorTag(dict, key, value, "#FFFFFF");
+                        ReplaceDollarWithColorTag(dict, key, value, "#FD5B91");
+                    }
+                    if (filename.ends_with("CenterSkills.json")) {
+                        ReplaceDollarWithColorTag(dict, key, value, "#FFFFFF");
+                        ReplaceDollarWithColorTag(dict, key, value, "#FD5B91");
                     }
                     if (insertToTranslated) translatedText.emplace(value);
                 }
