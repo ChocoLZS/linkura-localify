@@ -25,9 +25,9 @@
 
 > TODO
 
-<!-- # Star History
+# Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=chinosk6/gakuen-imas-localify&type=Date)](https://star-history.com/#chinosk6/gakuen-imas-localify&Date) -->
+[![Star History Chart](https://api.star-history.com/svg?repos=ChocoLZS/linkura-localify&type=Date)](https://star-history.com/#ChocoLZS/linkura-localify&Date)
 
 # Special Thanks
 

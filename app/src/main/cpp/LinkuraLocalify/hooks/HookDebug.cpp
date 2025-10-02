@@ -189,6 +189,20 @@ namespace LinkuraLocal::HookDebug {
         if (Config::hideLiveStreamSceneItemsLevel == HideLiveStreamSceneItemMode::Ultimate) return;
         TimelineCommandReceiver_Awake_Orig(self, method);
     }
+
+    DEFINE_HOOK(int32_t, ManagerParams_get_SeatsCount, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        auto result = ManagerParams_get_SeatsCount_Orig(self, method);
+        Log::DebugFmt("ManagerParams_get_SeatsCount HOOKED: %d", result);
+        switch ((HideLiveStreamSceneItemMode) Config::hideLiveStreamSceneItemsLevel) {
+            case HideLiveStreamSceneItemMode::Strong: // 也许可以通过循环实时隐藏，或者是根据阻止timeline显示对应的object
+            case HideLiveStreamSceneItemMode::Ultimate:
+                result = 0;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
 #pragma region draft
     DEFINE_HOOK(void, LiveSceneController_InitializeSceneAsync, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("LiveSceneController_InitializeSceneAsync HOOKED");
@@ -786,6 +800,8 @@ namespace LinkuraLocal::HookDebug {
         ADD_HOOK(SceneManager_GetSceneByName, Il2cppUtils::GetMethodPointer("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetSceneByName"));
 
         ADD_HOOK(TimelineCommandReceiver_Awake, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "TimelineCommandReceiver", "Awake"));
+
+        ADD_HOOK(ManagerParams_get_SeatsCount, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Audience.IndirectRendering", "ManagerParams", "get_SeatsCount"));
 #pragma region draft_hook
 //        ADD_HOOK(LiveSceneController_InitializeSceneAsync, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix", "LiveSceneController", "InitializeSceneAsync"));
 //        ADD_HOOK(SceneControllerBase_GetSceneView, Il2cppUtils::GetMethodPointer("Core.dll", "", "SceneControllerBase`1", "SetSceneParam"));
