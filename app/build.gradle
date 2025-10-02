@@ -90,7 +90,7 @@ android {
             mergeAssetsTask.doLast {
                delete(fileTree(dir: mergeAssetsTask.outputDir, includes: [
                                                                         //   'linkura-local/gakuen-adapted-translation-data/**',
-                                                                           'linkura-local/linkura-msater-translation/**',
+                                                                           'linkura-local/linkura-master-translation/**',
                                                                            'linkura-local/linkura-generic-strings-translation/**',
                                                                            'linkura-local/live-data/**'
                                                                           ]))
