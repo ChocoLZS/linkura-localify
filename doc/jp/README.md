@@ -19,6 +19,7 @@
 - これはXPosedプラグインです。Root化済みユーザーは [LSPosed](https://github.com/LSPosed/LSPosed) を、Root化していないユーザーは [LSPatch](https://github.com/LSPosed/LSPatch) を使用できます。
 - Android 15以上のユーザーは、[JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) または [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch) を使用してください。オリジナル版は更新が停止されているためです。
 - エミュレーターの選択については、[エミュレーター参考資料](simulator.md) をご覧ください。
+- 本地化データリポジトリは、[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets) です。
 
 # 開発
 

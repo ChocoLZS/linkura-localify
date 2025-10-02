@@ -19,6 +19,7 @@ Secondary development based on the overall framework of [**`Gakuen Idolmaster Lo
 - This is an XPosed plugin. Rooted users can use [LSPosed](https://github.com/LSPosed/LSPosed), while non-rooted users can use [LSPatch](https://github.com/LSPosed/LSPatch).
 - For Android 15 and above users, please use [JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) or [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch), as the original versions have stopped updating.
 - For emulator selection, please refer to [Emulator Reference](simulator.md).
+- Localization data repository: [linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
 
 # Development
 
