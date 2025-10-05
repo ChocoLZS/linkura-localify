@@ -79,9 +79,8 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, TMP_Text_PopulateTextBackingArray, (void* self, UnityResolve::UnityType::String* text, int start, int length)) {
-        if (!text) {
-            return TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
-        }
+        if (!Config::enableLocale) return TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
+        if (!text) TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
 
         static auto Substring = Il2cppUtils::GetMethod("mscorlib.dll", "System", "String", "Substring",
                                                        {"System.Int32", "System.Int32"});
@@ -104,6 +103,7 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, TMP_Text_SetText_2, (void* self, Il2cppString* sourceText, bool syncTextInputBox, void* mtd)) {
+        if (!Config::enableLocale) return TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
         if (!sourceText) {
             return TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
         }
@@ -124,6 +124,7 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, TextMeshProUGUI_Awake, (void* self, void* method)) {
+        if (!Config::enableLocale) return TextMeshProUGUI_Awake_Orig(self, method);
         // Log::InfoFmt("TextMeshProUGUI_Awake at %p, self at %p", TextMeshProUGUI_Awake_Orig, self);
 
         const auto TMP_Text_klass = Il2cppUtils::GetClass("Unity.TextMeshPro.dll",
@@ -155,7 +156,7 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, Text_set_text, (void* self, Il2cppString* sourceText, void* mtd)) {
-//        Log::DebugFmt("Text_set_text: %s", sourceText->ToString().c_str());
+        if (!Config::enableLocale) return Text_set_text_Orig(self, sourceText, mtd);
         // 特判时间
         std::string origText = sourceText->ToString();
         RE2 time(R"((\d{1,2}:\d{1,2})|\d+)");

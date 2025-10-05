@@ -65,6 +65,7 @@ namespace LinkuraLocal::Config {
     std::string currentResVersion;
     VersionCompatibility::Version latestClientVersion;
     std::string latestResVersion;
+    bool enableLocale = false;
     
     // cache
     bool isLegacyVersionCached = false;
@@ -124,6 +125,9 @@ namespace LinkuraLocal::Config {
             GetConfigItem(hideLiveStreamSceneItemsLevel);
             GetConfigItem(hideLiveStreamCharacterItems);
             GetConfigItem(localeCode);
+            if (localeCode != "ja-JP") {
+                enableLocale = true;
+            }
         }
         catch (std::exception& e) {
             Log::ErrorFmt("LoadConfig error: %s", e.what());

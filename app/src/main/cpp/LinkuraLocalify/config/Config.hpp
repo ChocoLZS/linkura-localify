@@ -68,6 +68,8 @@ namespace LinkuraLocal::Config {
     extern VersionCompatibility::Version latestClientVersion;
     extern std::string latestResVersion;
 
+    extern bool enableLocale;
+
     void LoadConfig(const std::string& configStr);
     void LoadArchiveConfig(const std::string& configStr);
     void SaveConfig(const std::string& configPath);
