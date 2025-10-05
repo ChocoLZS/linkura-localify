@@ -79,7 +79,7 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, TMP_Text_PopulateTextBackingArray, (void* self, UnityResolve::UnityType::String* text, int start, int length)) {
-        if (!Config::enableLocale) return TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
+        // if (!Config::enableLocale) return TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
         if (!text) TMP_Text_PopulateTextBackingArray_Orig(self, text, start, length);
 
         static auto Substring = Il2cppUtils::GetMethod("mscorlib.dll", "System", "String", "Substring",
@@ -103,7 +103,7 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, TMP_Text_SetText_2, (void* self, Il2cppString* sourceText, bool syncTextInputBox, void* mtd)) {
-        if (!Config::enableLocale) return TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
+        // if (!Config::enableLocale) return TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
         if (!sourceText) {
             return TMP_Text_SetText_2_Orig(self, sourceText, syncTextInputBox, mtd);
         }
@@ -124,7 +124,7 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, TextMeshProUGUI_Awake, (void* self, void* method)) {
-        if (!Config::enableLocale) return TextMeshProUGUI_Awake_Orig(self, method);
+        // if (!Config::enableLocale) return TextMeshProUGUI_Awake_Orig(self, method);
         // Log::InfoFmt("TextMeshProUGUI_Awake at %p, self at %p", TextMeshProUGUI_Awake_Orig, self);
 
         const auto TMP_Text_klass = Il2cppUtils::GetClass("Unity.TextMeshPro.dll",
@@ -156,11 +156,14 @@ namespace LinkuraLocal::HookTranslation {
     }
 
     DEFINE_HOOK(void, Text_set_text, (void* self, Il2cppString* sourceText, void* mtd)) {
-        if (!Config::enableLocale) return Text_set_text_Orig(self, sourceText, mtd);
+        // if (!Config::enableLocale) return Text_set_text_Orig(self, sourceText, mtd);
+        Log::DebugFmt("Text_set_text Hooked, %s", sourceText->ToString().c_str());
         // 特判时间
         std::string origText = sourceText->ToString();
         RE2 time(R"((\d{1,2}:\d{1,2})|\d+)");
+        Log::DebugFmt("Ready to match");
         if (RE2::FullMatch(origText, time)) return Text_set_text_Orig(self, sourceText, mtd);
+        Log::DebugFmt("Trying to get translation");
         std::string transText;
         if (Local::GetGenericText(origText, &transText)) {
             const auto newText = UnityResolve::UnityType::String::New(transText);
