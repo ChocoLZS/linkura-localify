@@ -157,6 +157,7 @@ namespace LinkuraLocal::HookTranslation {
 
     DEFINE_HOOK(void, Text_set_text, (void* self, Il2cppString* sourceText, void* mtd)) {
         // if (!Config::enableLocale) return Text_set_text_Orig(self, sourceText, mtd);
+        if (!sourceText) return Text_set_text_Orig(self, sourceText, mtd);
         Log::DebugFmt("Text_set_text Hooked, %s", sourceText->ToString().c_str());
         // 特判时间
         std::string origText = sourceText->ToString();
