@@ -70,6 +70,7 @@
     <string name="translation_repository">Translation Repository</string>
     <string name="resource_settings">Resource Settings</string>
     <string name="check_built_in_resource">Check Built-in Assets Update</string>
+    <string name="use_plugin_built_in_resource">Use Plugin Built-in Resources</string>
     <string name="delete_plugin_resource">Delete Plugin Resource</string>
     <string name="use_remote_zip_resource">Use Remote ZIP Resource</string>
     <string name="resource_url">Resource URL</string>
@@ -83,7 +84,7 @@
     <string name="warning">Warning</string>
     <string name="install">Install</string>
     <string name="installing">Installing</string>
-    <string name="check_resource_from_api">Check Resource Update From API</string>
+    <string name="check_resource_from_api">Use Resource Update From API</string>
     <string name="api_addr">API Address（Github Latest Release API）</string>
     <string name="check_update">Check</string>
     <string name="translation_resource_update">Translation Resource Update</string>

@@ -70,7 +70,7 @@
     <string name="character_counter_overflowed_content_description">文字制限が %2$d 文字中、 %1$d 文字を超えています</string>
     <string name="character_counter_pattern">%1$d/%2$d</string>
     <string name="check_built_in_resource">内蔵アセットの更新を確認</string>
-    <string name="check_resource_from_api">リソースの更新を API から確認</string>
+    <string name="check_resource_from_api">API からリソースの更新を使用する</string>
     <string name="check_update">確認</string>
     <string name="clear_text_end_icon_content_description">テキストを消去</string>
     <string name="close_drawer">ナビゲーションメニューを閉じる</string>
@@ -96,6 +96,7 @@
     <string name="fab_transformation_scrim_behavior">com.google.android.material.transformation.FabTransformationScrimBehavior</string>
     <string name="fab_transformation_sheet_behavior">com.google.android.material.transformation.FabTransformationSheetBehavior</string>
     <string name="force_export_resource">リソースの更新を強制する</string>
+    <string name="use_plugin_built_in_resource">プラグイン内蔵リソースを使用する</string>
     <string name="linkura_localify">Linkura Localify</string>
     <string name="game_patch">ゲームパッチ</string>
     <string name="graphic_settings">グラフィック設定</string>

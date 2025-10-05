@@ -538,15 +538,11 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
 //                    GakuSwitch(modifier, stringResource(R.string.export_text), checked = config.value.dumpText) {
 //                            v -> context?.onDumpTextChanged(v)
 //                    }
-
-                    GakuSwitch(modifier, stringResource(R.string.force_export_resource), checked = config.value.forceExportResource) {
-                            v -> context?.onForceExportResourceChanged(v)
-                    }
-                    Text(
-                        text = "用于开发时实时动态更新资源",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+//                    Text(
+//                        text = "用于开发时实时动态更新资源",
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+//                    )
 
 //                    GakuSwitch(modifier, stringResource(R.string.login_as_ios), checked = config.value.loginAsIOS) {
 //                            v -> context?.onLoginAsIOSChanged(v)

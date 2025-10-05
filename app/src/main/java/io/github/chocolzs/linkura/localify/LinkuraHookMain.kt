@@ -38,6 +38,8 @@ import java.io.File
 import java.util.Locale
 import kotlin.system.measureTimeMillis
 import io.github.chocolzs.linkura.localify.hookUtils.FileHotUpdater
+import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker.getInstalledVersion
+import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker.getPluginVersion
 import io.github.chocolzs.linkura.localify.hookUtils.FilesChecker.localizationFilesDir
 import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.json
@@ -881,18 +883,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                 FilesChecker.cleanAssets()
             }
 
-            // 检查 files 版本和 assets 版本并更新
-            if (programConfig?.checkBuiltInAssets == true) {
-                FilesChecker.initAndCheck(activity.filesDir, modulePath)
-            }
-
-            // 强制导出 assets 文件
-            if (initConfig?.forceExportResource == true) {
+            // 强制使用插件版本的 assets 文件，并覆盖至目标应用，对开发很有用
+            if (programConfig?.usePluginBuiltInAssets == true) {
                 FilesChecker.updateFiles()
             }
-
             // 使用热更新文件
-            if ((programConfig?.useRemoteAssets == true) || (programConfig?.useAPIAssets == true)) {
+            if (programConfig?.useRemoteAssets == true || programConfig?.useAPIAssets == true) {
                 // val dataUri = intent.data
                 val dataUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra("resource_file", Uri::class.java)
@@ -900,7 +896,6 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     @Suppress("DEPRECATION")
                     intent.getParcelableExtra<Uri>("resource_file")
                 }
-
                 if (dataUri != null) {
                     if (!externalFilesChecked) {
                         externalFilesChecked = true
@@ -910,8 +905,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
                     }
                 }
                 else if (programConfig.useAPIAssets) {
-                    if (!File(activity.filesDir, localizationFilesDir).exists() &&
-                        (initConfig?.forceExportResource == false)) {
+                    if (!File(activity.filesDir, localizationFilesDir).exists()) {
                         // 使用 API 资源，不检查内置，API 资源无效，且游戏内没有插件数据时，释放内置数据
                         FilesChecker.initAndCheck(activity.filesDir, modulePath)
                     }

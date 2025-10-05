@@ -18,8 +18,13 @@ data class ProgramConfig(
     var useRemoteAssets: Boolean = false,
     var useAPIAssets: Boolean = true,
     var useAPIAssetsURL: String = "",
-    var delRemoteAfterUpdate: Boolean = true,
+    var delRemoteAfterUpdate: Boolean = false,
+    /**
+     * @deprecated
+     */
     var cleanLocalAssets: Boolean = false,
+
+    var usePluginBuiltInAssets: Boolean = false,
 
     // var localAPIAssetsVersion: String = "",
     var p: Boolean = false

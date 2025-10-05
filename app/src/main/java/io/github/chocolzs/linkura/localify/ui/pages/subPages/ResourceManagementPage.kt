@@ -922,17 +922,15 @@ private fun LocaleTabPage(
                     }
                     item {
                         GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp),
-                            checked = programConfig.value.checkBuiltInAssets,
-                            text = stringResource(id = R.string.check_built_in_resource)
-                        ) { v -> context?.onPCheckBuiltInAssetsChanged(v) }
+                            checked = programConfig.value.usePluginBuiltInAssets,
+                            text = stringResource(id = R.string.use_plugin_built_in_resource)
+                        ) { v -> context?.onPUsePluginBuiltInAssetsChanged(v) }
+                        Text(
+                            text = "Useful for development",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
                     }
-                    item {
-                        GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
-                            checked = programConfig.value.cleanLocalAssets,
-                            text = stringResource(id = R.string.delete_plugin_resource)
-                        ) { v -> context?.onPCleanLocalAssetsChanged(v) }
-                    }
-
                     item {
                         HorizontalDivider(
                             thickness = 1.dp,
@@ -1136,6 +1134,18 @@ private fun LocaleTabPage(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                         )
                     }
+//                    item {
+//                        GakuSwitch(modifier = modifier.padding(start = 8.dp, end = 8.dp),
+//                            checked = programConfig.value.cleanLocalAssets,
+//                            text = stringResource(id = R.string.delete_plugin_resource)
+//                        ) { v -> context?.onPCleanLocalAssetsChanged(v) }
+//                    }
+//                    item {
+//                        HorizontalDivider(
+//                            thickness = 1.dp,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+//                        )
+//                    }
                     item {
                         Row(
                             modifier = modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),

@@ -12,6 +12,9 @@ data class LinkuraConfig (
     var replaceFont: Boolean = true,
     var textTest: Boolean = false,
     var dumpText: Boolean = false,
+    /**
+     * @deprecated Use [ProgramConfig.usePluginBuiltInAssets] instead.
+     */
     var forceExportResource: Boolean = false,
     var enableFreeCamera: Boolean = false,
     var targetFrameRate: Int = 0,

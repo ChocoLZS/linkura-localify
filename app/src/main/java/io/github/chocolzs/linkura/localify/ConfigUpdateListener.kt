@@ -64,7 +64,6 @@ interface ConfigListener {
     fun onEnableInGameOverlayToolbar(value: Boolean)
     fun onLocaleCodeChanged(value: String)
 
-    fun onPCheckBuiltInAssetsChanged(value: Boolean)
     fun onPUseRemoteAssetsChanged(value: Boolean)
     fun onPCleanLocalAssetsChanged(value: Boolean)
     fun onPDelRemoteAfterUpdateChanged(value: Boolean)
@@ -74,6 +73,7 @@ interface ConfigListener {
                                      localResourceVersionState: String? = null,
                                      errorString: String? = null,
                                      localAPIResourceVersion: String? = null)
+    fun onPUsePluginBuiltInAssetsChanged(value: Boolean)
     fun onPUseAPIAssetsChanged(value: Boolean)
     fun onPUseAPIAssetsURLChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainUIConfirmStatUpdate(isShow: Boolean? = null, title: String? = null,
@@ -414,10 +414,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         saveConfig()
     }
 
-    override fun onPCheckBuiltInAssetsChanged(value: Boolean) {
-        programConfig.checkBuiltInAssets = value
+    override fun onPUsePluginBuiltInAssetsChanged(value: Boolean) {
+        programConfig.usePluginBuiltInAssets = value
         if (value) {
             programConfig.cleanLocalAssets = false
+            programConfig.useRemoteAssets = false
+            programConfig.useAPIAssets = false
         }
         saveProgramConfig()
     }
@@ -425,7 +427,7 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     override fun onPUseRemoteAssetsChanged(value: Boolean) {
         programConfig.useRemoteAssets = value
         if (value) {
-            programConfig.checkBuiltInAssets = false
+            programConfig.usePluginBuiltInAssets = false
             programConfig.cleanLocalAssets = false
             programConfig.useAPIAssets = false
         }
@@ -437,7 +439,7 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         if (value) {
             programConfig.useRemoteAssets = false
             programConfig.useAPIAssets = false
-            programConfig.checkBuiltInAssets = false
+            programConfig.usePluginBuiltInAssets = false
         }
         saveProgramConfig()
     }
@@ -463,7 +465,7 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     override fun onPUseAPIAssetsChanged(value: Boolean) {
         programConfig.useAPIAssets = value
         if (value) {
-            programConfig.checkBuiltInAssets = false
+            programConfig.usePluginBuiltInAssets = false
             programConfig.useRemoteAssets = false
             programConfig.cleanLocalAssets = false
         }
