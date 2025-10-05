@@ -58,6 +58,13 @@ jobs:
         branch=$(git rev-parse --abbrev-ref HEAD)
         hash=$(git rev-parse --short=8 HEAD)
         echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
+
+    - name: Update version name with commit hash
+      run: |
+        hash=$(git rev-parse --short=8 HEAD)
+        sed -i "s/versionName \"v\([0-9.]*\)\"/versionName \"v\1-$hash\"/" app/build.gradle
+        echo "Updated version name in build.gradle"
+        grep versionName app/build.gradle
               
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -90,5 +97,95 @@ jobs:
       with:
         name: LinkuraLocalify-Signed-apk
         path: ${{steps.sign_app.outputs.signedReleaseFile}}
+      continue-on-error: true
+
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4.2.1
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Setup Android Development Environment
+      uses: android-actions/setup-android@v3
+
+    - name: install dependencies
+      run: |
+        sdkmanager --install "cmake;3.22.1"
+        echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" > local.properties
+        echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+
+    - name: Update Submodules
+      run: |
+        git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
+      continue-on-error: true
+
+    - name: Build Assets
+      run: |
+        cd app/src/main/assets/linkura-local && make build-resource
+      continue-on-error: true
+
+    - name: Write branch and commit info
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        hash=$(git rev-parse --short=8 HEAD)
+        echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
+
+    - name: Update version name with commit hash
+      run: |
+        hash=$(git rev-parse --short=8 HEAD)
+        sed -i "s/versionName \"v\([0-9.]*\)\"/versionName \"v\1-$hash\"/" app/build.gradle
+        echo "Updated version name in build.gradle"
+        grep versionName app/build.gradle
+              
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+
+    - name: Sign Release APK
+      uses: r0adkll/sign-android-release@v1
+      id: sign_release
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.KEYSTOREB64 }}
+        alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      env:
+        BUILD_TOOLS_VERSION: "34.0.0"
+      continue-on-error: true
+
+    - name: Get version info for naming
+      id: version_info
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        hash=$(git rev-parse --short=8 HEAD)
+        echo "branch=$branch" >> $GITHUB_OUTPUT
+        echo "hash=$hash" >> $GITHUB_OUTPUT
+
+    - name: Rename Release APK
+      id: rename_release_apk
+      run: |
+        branch="${{ steps.version_info.outputs.branch }}"
+        hash="${{ steps.version_info.outputs.hash }}"
+        apk_name="linkura-localify-${branch}-${hash}-release-arm64-v8a.apk"
+        cp "${{ steps.sign_release.outputs.signedReleaseFile }}" "$apk_name"
+        echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
+      continue-on-error: true
+
+    - uses: actions/upload-artifact@v4
+      id: upload_release_apk
+      with:
+        name: LinkuraLocalify-Release-apk
+        path: ${{ steps.rename_release_apk.outputs.apk_path }}
       continue-on-error: true
 
