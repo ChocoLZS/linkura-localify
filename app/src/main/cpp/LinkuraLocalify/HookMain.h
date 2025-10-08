@@ -46,6 +46,10 @@ namespace LinkuraLocal::HookLiveRender {
     void setArchivePosition(float seconds);
     void applyCameraGraphicSettings(UnityResolve::UnityType::Camera* mainCamera);
     void applyRenderTextureGraphicSettings(void* renderTexture);
+    void toggleArchivePlay(bool triggeredByJava = false);
+    namespace Shareable {
+        extern bool isPlaying;
+    }
 }
 
 namespace LinkuraLocal::HookStory {

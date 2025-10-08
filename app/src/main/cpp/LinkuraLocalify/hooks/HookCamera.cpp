@@ -397,6 +397,8 @@ namespace LinkuraLocal::HookCamera {
         Log::DebugFmt("LiveSceneController_FinalizeSceneAsync HOOKED");
         onRenderExit();
         HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
+        HookShare::Shareable::realtimeRenderingArchiveControllerCache = nullptr;
+        HookLiveRender::Shareable::isPlaying = false;
         return LiveSceneController_FinalizeSceneAsync_Orig(self, token, method);
     }
 

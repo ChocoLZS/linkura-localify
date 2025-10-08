@@ -278,6 +278,13 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_setArchivePosition(JNIE
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_toggleArchivePlay(JNIEnv *env, jclass clazz,
+                                                                            jboolean play) {
+    LinkuraLocal::HookLiveRender::toggleArchivePlay(true);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_updateConfig(JNIEnv *env, jclass clazz,
                                                                      jbyteArray config_update_data) {
     try {

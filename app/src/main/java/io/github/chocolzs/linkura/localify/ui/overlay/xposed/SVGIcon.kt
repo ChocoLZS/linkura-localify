@@ -167,4 +167,11 @@ object SVGIcon {
             return createSVGDrawable(context, pathData, tintColor, sizeDp)
         }
     }
+
+    object Pause {
+        fun createDrawable(context: Context, tintColor: Int = Color.WHITE, sizeDp: Float = 24f): Drawable {
+            val pathData = "M14 19V5h4v14zm-8 0V5h4v14z"
+            return createSVGDrawable(context, pathData, tintColor, sizeDp)
+        }
+    }
 }

@@ -32,6 +32,7 @@ class ArchiveOverlayUI : BaseOverlay {
     private lateinit var overlayView: FrameLayout
     private lateinit var contentContainer: LinearLayout
     private lateinit var titleText: TextView
+    private lateinit var playPauseButton: android.widget.ImageButton
     private lateinit var currentTimeText: TextView
     private lateinit var totalTimeText: TextView
     private lateinit var seekTimeText: TextView
@@ -45,6 +46,7 @@ class ArchiveOverlayUI : BaseOverlay {
     private var isDragging = false
     private var tempPosition = 0f // Temporary position while dragging
     private var lastDraggedPosition = 0f // Remember last dragged position
+    private var isPlaying = true // Playback state (true = playing, false = paused)
 
     // Touch handling for window dragging
     private var initialX = 0
@@ -201,6 +203,18 @@ class ArchiveOverlayUI : BaseOverlay {
     private fun createUI(activity: Activity) {
         val density = activity.resources.displayMetrics.density
 
+        // Title row with play/pause button
+        val titleRow = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                progressBarWidth,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = (8f * density).toInt()
+            }
+            gravity = Gravity.CENTER_VERTICAL
+        }
+
         // Title
         titleText = TextView(activity).apply {
             text = "Archive Progress"
@@ -208,13 +222,28 @@ class ArchiveOverlayUI : BaseOverlay {
             textSize = 12f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             layoutParams = LinearLayout.LayoutParams(
+                0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = (8f * density).toInt()
+                1f
+            )
+        }
+        titleRow.addView(titleText)
+
+        // Play/Pause button (using SVG icons)
+        playPauseButton = android.widget.ImageButton(activity).apply {
+            val buttonSize = (32f * density).toInt()
+            layoutParams = LinearLayout.LayoutParams(buttonSize, buttonSize)
+            background = createRoundedBackground(Color.parseColor("#4DCCCCCC"), 4f * density)
+            scaleType = android.widget.ImageView.ScaleType.CENTER
+            // Start with Pause icon (when playing)
+            setImageDrawable(SVGIcon.Pause.createDrawable(activity, Color.WHITE, 18f))
+            setOnClickListener {
+                togglePlayPause()
             }
         }
-        contentContainer.addView(titleText)
+        titleRow.addView(playPauseButton) // this will cause crash
+
+        contentContainer.addView(titleRow)
 
         // Time display row
         val timeRow = LinearLayout(activity).apply {
@@ -438,11 +467,46 @@ class ArchiveOverlayUI : BaseOverlay {
         }
     }
 
+    private fun togglePlayPause() {
+        if (archiveDuration == 0L) {
+            Log.d(TAG, "Cannot toggle play/pause: no archive running")
+            return
+        }
+
+        isPlaying = !isPlaying
+
+        // Update button icon based on state
+        val context = playPauseButton.context
+        if (isPlaying) {
+            // Show Pause icon when playing
+            playPauseButton.setImageDrawable(SVGIcon.Pause.createDrawable(context, Color.WHITE, 18f))
+        } else {
+            // Show Play icon when paused
+            playPauseButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 18f))
+        }
+
+        // Call native function to toggle playback
+        try {
+            LinkuraHookMain.toggleArchivePlay(isPlaying)
+            Log.d(TAG, "Archive playback toggled: playing=$isPlaying")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error toggling archive playback", e)
+            // Revert state on error
+            isPlaying = !isPlaying
+            if (isPlaying) {
+                playPauseButton.setImageDrawable(SVGIcon.Pause.createDrawable(context, Color.WHITE, 18f))
+            } else {
+                playPauseButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 18f))
+            }
+        }
+    }
+
     private fun updateUI() {
         Log.d(TAG, "updateUI called with archiveDuration: ${archiveDuration}ms")
         if (archiveDuration == 0L) {
             // Show message when no archive is running
             titleText.text = "No Archive Running"
+            playPauseButton.visibility = View.GONE
             currentTimeText.visibility = View.GONE
             totalTimeText.visibility = View.GONE
             progressContainer.visibility = View.GONE
@@ -452,6 +516,14 @@ class ArchiveOverlayUI : BaseOverlay {
         } else {
             // Show progress bar
             titleText.text = "Archive Progress"
+            playPauseButton.visibility = View.VISIBLE
+            // Update button icon to reflect current state
+            val context = playPauseButton.context
+            if (isPlaying) {
+                playPauseButton.setImageDrawable(SVGIcon.Pause.createDrawable(context, Color.WHITE, 18f))
+            } else {
+                playPauseButton.setImageDrawable(SVGIcon.PlayArrow.createDrawable(context, Color.WHITE, 18f))
+            }
             currentTimeText.visibility = View.VISIBLE
             totalTimeText.visibility = View.VISIBLE
             progressContainer.visibility = View.VISIBLE

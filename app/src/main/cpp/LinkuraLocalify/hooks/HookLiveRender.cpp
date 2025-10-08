@@ -7,7 +7,9 @@
 #include <re2/re2.h>
 
 namespace LinkuraLocal::HookLiveRender {
-
+    namespace Shareable {
+        bool isPlaying = false;
+    }
     /**
      * @brief apply graphic settings for camera,
      * but will crash for with live camera,
@@ -80,6 +82,14 @@ namespace LinkuraLocal::HookLiveRender {
 //        L4Camera::clearRenderSet();
         return RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(self, seconds);
     }
+    DEFINE_HOOK(void , RealtimeRenderingArchiveController_Play, (void* self)) {
+        Log::DebugFmt("RealtimeRenderingArchiveController_Play HOOKED");
+        RealtimeRenderingArchiveController_Play_Orig(self);
+    }
+    DEFINE_HOOK(void , RealtimeRenderingArchiveController_Pause, (void* self)) {
+        Log::DebugFmt("RealtimeRenderingArchiveController_Pause HOOKED");
+        RealtimeRenderingArchiveController_Pause_Orig(self);
+    }
 
     // Config::isLegacyMrsVersion
     DEFINE_HOOK(void*, LiveConnectMrsController_SetPlayPositionAsync, (void* self, float seconds)) {
@@ -105,6 +115,23 @@ namespace LinkuraLocal::HookLiveRender {
         }
 //        L4Camera::clearRenderSet();
         return LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig(self, seconds);
+    }
+
+    DEFINE_HOOK(void, LiveConnectMrsController_Pause, (void* self)) {
+        Log::DebugFmt("LiveConnectMrsController_Pause HOOKED");
+        LiveConnectMrsController_Pause_Orig(self);
+    }
+    DEFINE_HOOK(void, LiveConnectMrsController_Play, (void* self)) {
+        Log::DebugFmt("LiveConnectMrsController_Play HOOKED");
+        LiveConnectMrsController_Play_Orig(self);
+    }
+    DEFINE_HOOK(void, LiveConnectMrsController_Pause_Interface, (void* self)) {
+        Log::DebugFmt("LiveConnectMrsController_Pause_Interface HOOKED");
+        LiveConnectMrsController_Pause_Interface_Orig(self);
+    }
+    DEFINE_HOOK(void, LiveConnectMrsController_Play_Interface, (void* self)) {
+        Log::DebugFmt("LiveConnectMrsController_Play_Interface HOOKED");
+        LiveConnectMrsController_Play_Interface_Orig(self);
     }
 
     DEFINE_HOOK(void, LiveScreenOrientationModel_ctor, (void* self, int32_t liveOrientation, int32_t deviceOrientation)) {
@@ -138,43 +165,7 @@ namespace LinkuraLocal::HookLiveRender {
             }
             result = (u_int64_t)(height << 32 | width);
         }
-        if (HookShare::Shareable::setPlayPositionState == HookShare::Shareable::SetPlayPosition_State::UpdateReceived && HookShare::Shareable::realtimeRenderingArchiveControllerCache) {
-            if (!Config::isLegacyMrsVersion()) {
-                L4Camera::clearRenderSet();
-                if (HookShare::Shareable::renderSceneIsWithLive()) {
-                    auto cameraMode = L4Camera::GetCameraMode();
-                    if (cameraMode == L4Camera::CameraMode::FOLLOW || cameraMode == L4Camera::CameraMode::FIRST_PERSON) {
-                        // Log::DebugFmt("set camera mode to FREE");
-                        L4Camera::SetCameraMode(L4Camera::CameraMode::FREE);
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                    }
-                    HookShare::Shareable::resetRenderScene();
-                    HookCamera::unregisterMainFreeCamera(false);
-                    HookCamera::unregisterCurrentCamera();
-                }
-                HookCamera::Sharable::backgroundColorCameras.clear();
-                RealtimeRenderingArchiveController_SetPlayPositionAsync_Orig(
-                        HookShare::Shareable::realtimeRenderingArchiveControllerCache,
-                        HookShare::Shareable::realtimeRenderingArchivePositionSeconds
-                );
-            } else {
-                if (LiveConnectMrsController_SetPlayPositionAsync_Orig) {
-                    HookCamera::Sharable::backgroundColorCameras.clear();
-                    LiveConnectMrsController_SetPlayPositionAsync_Orig(
-                            HookShare::Shareable::realtimeRenderingArchiveControllerCache,
-                            HookShare::Shareable::realtimeRenderingArchivePositionSeconds
-                    );
-                }
-                if (LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig) {
-                    HookCamera::Sharable::backgroundColorCameras.clear();
-                    LiveConnectMrsController_SetPlayPositionAsync_Interface_Orig(
-                            HookShare::Shareable::realtimeRenderingArchiveControllerCache,
-                            HookShare::Shareable::realtimeRenderingArchivePositionSeconds
-                    );
-                }
-            }
-            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::Nothing;
-        }
+        toggleArchivePlay(false);
         return result;
     }
 
@@ -257,12 +248,51 @@ namespace LinkuraLocal::HookLiveRender {
     }
 
     void setArchivePosition(float seconds) {
-        try {
-            Log::DebugFmt("setArchivePosition: Setting position to %f seconds", seconds);
-            HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::UpdateReceived;
-            HookShare::Shareable::realtimeRenderingArchivePositionSeconds = seconds;
-        } catch (const std::exception& e) {
-            Log::ErrorFmt("Error in setArchivePosition: %s", e.what());
+        HookShare::Shareable::setPlayPositionState = HookShare::Shareable::SetPlayPosition_State::UpdateReceived;
+        HookShare::Shareable::realtimeRenderingArchivePositionSeconds = seconds;
+    }
+
+    void toggleArchivePlay(bool triggeredByJava) {
+        if (!HookShare::Shareable::realtimeRenderingArchiveControllerCache) return;
+        if (triggeredByJava && !Config::isLegacyMrsVersion()) { // alst
+            if (Config::localeCode == "zh-CN") {
+                Log::ShowToast("25-05-29之后的回放请使用画质设置进行暂停/播放切换");
+            }
+            if (Config::localeCode == "ja-JP") {
+                Log::ShowToast("25-05-29以降のアーカイブは画質設定で一時停止/再生を切り替えてください");
+            }
+            if (Config::localeCode == "en") {
+                Log::ShowToast("For archive after 25-05-29, please use quality settings to toggle pause/play");
+            }
+            return;
+        }
+        std::function<void(void*)> function_ptr = nullptr;
+        if (Shareable::isPlaying) {
+            if (Config::isLegacyMrsVersion()) { // mrs
+                if (Config::isFirstYearVersion()) {
+                    function_ptr = LiveConnectMrsController_Play_Interface_Orig;
+                } else {
+                    function_ptr = LiveConnectMrsController_Play_Orig;
+                }
+            } else { // alst
+                function_ptr = RealtimeRenderingArchiveController_Play_Orig;
+            }
+            Shareable::isPlaying = false;
+        } else {
+            if (Config::isLegacyMrsVersion()) { // mrs
+                if (Config::isFirstYearVersion()) {
+                    function_ptr = LiveConnectMrsController_Pause_Interface_Orig;
+                } else {
+                    function_ptr = LiveConnectMrsController_Pause_Orig;
+                }
+            } else { // alst
+                function_ptr = RealtimeRenderingArchiveController_Pause_Orig;
+            }
+            Shareable::isPlaying = true;
+        }
+        
+        if (function_ptr) {
+            function_ptr(HookShare::Shareable::realtimeRenderingArchiveControllerCache);
         }
     }
 
@@ -317,13 +347,25 @@ namespace LinkuraLocal::HookLiveRender {
 //        ADD_HOOK(LiveScreenOrientationModel_ctor, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveScreenOrientationModel", ".ctor"));
 
         ADD_HOOK(RealtimeRenderingArchiveController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "SetPlayPositionAsync"));
+        ADD_HOOK(RealtimeRenderingArchiveController_Pause, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "Pause"));
+        ADD_HOOK(RealtimeRenderingArchiveController_Play, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "RealtimeRenderingArchiveController", "Play"));
         ADD_HOOK(Unity_set_targetFrameRate, Il2cppUtils::il2cpp_resolve_icall(
                 "UnityEngine.Application::set_targetFrameRate(System.Int32)"));
         ADD_HOOK(LiveConnectMrsController_SetPlayPositionAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectMrsController", "SetPlayPositionAsync"));
+        ADD_HOOK(LiveConnectMrsController_Pause, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectMrsController", "Pause"));
+        ADD_HOOK(LiveConnectMrsController_Play, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "LiveConnectMrsController", "Play"));
         ADD_HOOK(LiveConnectMrsController_SetPlayPositionAsync_Interface,
                  Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
                                                "LiveConnectMrsController",
                                                "School.LiveMain.ILiveConnectContentsController.SetPlayPositionAsync"));
+        ADD_HOOK(LiveConnectMrsController_Pause_Interface,
+                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
+                                               "LiveConnectMrsController",
+                                               "School.LiveMain.ILiveConnectContentsController.Pause"));
+        ADD_HOOK(LiveConnectMrsController_Play_Interface,
+                 Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain",
+                                               "LiveConnectMrsController",
+                                               "School.LiveMain.ILiveConnectContentsController.Play"));
         // FesConnectArchivePlayer
 //        ADD_HOOK(FesConnectArchivePlayer_get_CurrentTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_CurrentTime"));
 //        ADD_HOOK(FesConnectArchivePlayer_get_RunningTime, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "School.LiveMain", "FesConnectArchivePlayer", "get_RunningTime"));

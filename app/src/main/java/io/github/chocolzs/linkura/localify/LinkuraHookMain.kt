@@ -1184,7 +1184,10 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         
         @JvmStatic
         external fun setCameraBackgroundColor(red: Float, green: Float, blue: Float, alpha: Float)
-        
+
+        @JvmStatic
+        external fun toggleArchivePlay(play: Boolean)
+
         @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic
         fun pauseCameraInfoLoop(delayMillis: Long = 3000) {
