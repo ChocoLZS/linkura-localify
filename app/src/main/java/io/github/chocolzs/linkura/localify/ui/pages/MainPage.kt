@@ -41,6 +41,7 @@ import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupConfirm
 import io.github.chocolzs.linkura.localify.ui.components.ConnectionStatusIndicator
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
+import com.mikepenz.markdown.m3.Markdown
 
 
 @Composable
@@ -116,7 +117,7 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
                 Modifier.sizeIn(maxHeight = (screenH.value * 0.45f).dp)
                     .fillMaxWidth()) {
                     item {
-                        Text(confirmState.content)
+                        Markdown(confirmState.content)
                     }
                 }
             }
