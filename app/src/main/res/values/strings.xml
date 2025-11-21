@@ -107,7 +107,8 @@
 
     <string name="about_contributors_asset_file">about_contributors_en.json</string>
     <string name="default_assets_check_api">https://api.github.com/repos/ChocoLZS/linkura-localify-assets/releases/latest</string>
-    
+    <string name="default_app_check_api">https://api.github.com/repos/ChocoLZS/linkura-localify/releases/latest</string>
+
     <!-- Camera Overlay -->
     <string name="overlay.toolbar.title">Toolbar Floating Window</string>
     <string name="overlay.toolbar.description">Allows real-time viewing of camera parameters, adjusting rendering playback progress, green screen functionality. Note: This legacy overlay has compatibility issues and will not receive updates. Please use the new In-Game Overlay Toolbar feature instead.</string>
@@ -268,5 +269,11 @@
     <!-- Android 15+ Patch Warning -->
     <string name="patch_android15_warning">Android 15+ users cannot use the built-in patch feature. Please use LSPatch 0.7+ for patching.</string>
     <string name="patch_android15_button">Download LSPatch 0.7+</string>
+
+    <!-- App Update Check -->
+    <string name="app_update_check">Check for App Updates</string>
+    <string name="app_update_available">App Update Available</string>
+    <string name="app_update_ignore">Ignore</string>
+    <string name="app_update_install">Install</string>
 
 </resources>

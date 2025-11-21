@@ -79,6 +79,7 @@
     <string name="damping">ダンプ中</string>
     <string name="debug_settings">デバッグ設定</string>
     <string name="default_assets_check_api">https://api.github.com/repos/ChocoLZS/linkura-localify-assets/releases/latest</string>
+    <string name="default_app_check_api">https://api.github.com/repos/ChocoLZS/linkura-localify/releases/latest</string>
     <string name="default_error_message">入力が無効です</string>
     <string name="default_popup_window_title">ポップアップウィンドウ</string>
     <string name="del_remote_after_update">キャッシュファイルを更新後に削除</string>
@@ -517,5 +518,11 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <!-- Android 15+ Patch Warning -->
     <string name="patch_android15_warning">Android 15以上のユーザーは内蔵パッチ機能を使用できません。LSPatch 0.7+を使用してパッチを適用してください。</string>
     <string name="patch_android15_button">LSPatch 0.7+をダウンロード</string>
+
+    <!-- App Update Check -->
+    <string name="app_update_check">アプリの更新を確認</string>
+    <string name="app_update_available">アプリの更新があります</string>
+    <string name="app_update_ignore">無視</string>
+    <string name="app_update_install">インストール</string>
 
 </resources>

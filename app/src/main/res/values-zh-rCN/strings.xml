@@ -107,6 +107,7 @@
 
     <string name="about_contributors_asset_file">about_contributors_zh_cn.json</string>
     <string name="default_assets_check_api">https://cf-proxy.chocoie.com/api/linkura-localify-assets</string>
+    <string name="default_app_check_api">https://cf-proxy.chocoie.com/api/linkura-localify</string>
     
     <!-- toobar Overlay -->
     <string name="overlay.toolbar.title">工具栏悬浮窗</string>
@@ -267,5 +268,11 @@
     <!-- Android 15+ Patch Warning -->
     <string name="patch_android15_warning">安卓15及以上的用户无法使用插件内置修补功能，请使用LSPatch 0.7+版本进行修补</string>
     <string name="patch_android15_button">下载 LSPatch 0.7+</string>
+
+    <!-- App Update Check -->
+    <string name="app_update_check">检查应用更新</string>
+    <string name="app_update_available">应用更新可用</string>
+    <string name="app_update_ignore">忽略</string>
+    <string name="app_update_install">安装</string>
 
 </resources>

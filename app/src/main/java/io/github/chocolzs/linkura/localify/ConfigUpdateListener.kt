@@ -74,12 +74,15 @@ interface ConfigListener {
                                      errorString: String? = null,
                                      localAPIResourceVersion: String? = null)
     fun onPUsePluginBuiltInAssetsChanged(value: Boolean)
+    fun onPCheckAppUpdateChanged(value: Boolean)
     fun onPUseAPIAssetsChanged(value: Boolean)
     fun onPUseAPIAssetsURLChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun mainUIConfirmStatUpdate(isShow: Boolean? = null, title: String? = null,
                                 content: String? = null,
                                 onConfirm: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) },
-                                onCancel: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) })
+                                onCancel: (() -> Unit)? = { mainUIConfirmStatUpdate(isShow = false) },
+                                confirmText: String? = null,
+                                cancelText: String? = null)
 }
 
 class UserConfigViewModelFactory(private val initialValue: LinkuraConfig) : ViewModelProvider.Factory {
@@ -424,6 +427,11 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         saveProgramConfig()
     }
 
+    override fun onPCheckAppUpdateChanged(value: Boolean) {
+        programConfig.checkAppUpdate = value
+        saveProgramConfig()
+    }
+
     override fun onPUseRemoteAssetsChanged(value: Boolean) {
         programConfig.useRemoteAssets = value
         if (value) {
@@ -477,7 +485,8 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         saveProgramConfig()
     }
     override fun mainUIConfirmStatUpdate(isShow: Boolean?, title: String?, content: String?,
-        onConfirm: (() -> Unit)?, onCancel: (() -> Unit)?
+        onConfirm: (() -> Unit)?, onCancel: (() -> Unit)?,
+        confirmText: String?, cancelText: String?
     ) {
         val orig = programConfigViewModel.mainUIConfirmState.value
         isShow?.let {
@@ -488,6 +497,8 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         }
         title?.let { orig.title = it }
         content?.let { orig.content = it }
+        confirmText?.let { orig.confirmText = it }
+        cancelText?.let { orig.cancelText = it }
         onConfirm?.let { orig.onConfirm = {
             try {
                 it()

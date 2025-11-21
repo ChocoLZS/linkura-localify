@@ -108,6 +108,8 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
                 title = confirmState.title,
                 onCancel = { confirmState.onCancel() },
                 onConfirm = { confirmState.onConfirm() },
+                confirmText = confirmState.confirmText,
+                cancelText = confirmState.cancelText,
                 contentHeightForAnimation = screenH.value * 1.8f
             ) {
                 LazyColumn(modifier =
