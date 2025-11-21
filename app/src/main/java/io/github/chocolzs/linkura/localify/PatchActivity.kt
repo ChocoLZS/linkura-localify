@@ -44,6 +44,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermissions
+import java.util.Arrays
 import java.util.concurrent.CountDownLatch
 
 
@@ -73,26 +74,47 @@ open class PatchLogger : Logger() {
 }
 
 
-class LSPatchExt(outputDir: String, isDebuggable: Boolean, localMode: Boolean, logger: Logger) : LSPatch(logger, "123.apk --debuggable --manager -l 2") {
+class LSPatchExt(outputDir: String, isDebuggable: Boolean, localMode: Boolean, logger: Logger, context: android.content.Context) : LSPatch(logger, "123.apk --debuggable --manager -l 2") {
     init {
         val parentClass = LSPatch::class.java
-        // val apkPathsField = parentClass.getDeclaredField("apkPaths")
         val outputPathField = parentClass.getDeclaredField("outputPath")
         val forceOverwriteField = parentClass.getDeclaredField("forceOverwrite")
         val debuggableFlagField = parentClass.getDeclaredField("debuggableFlag")
         val useManagerField = parentClass.getDeclaredField("useManager")
+        val keystoreArgsField = parentClass.getDeclaredField("keystoreArgs")
+        val injectDexField = parentClass.getDeclaredField("injectDex")
 
-        // apkPathsField.isAccessible = true
         outputPathField.isAccessible = true
         forceOverwriteField.isAccessible = true
         debuggableFlagField.isAccessible = true
         useManagerField.isAccessible = true
+        keystoreArgsField.isAccessible = true
+        injectDexField.isAccessible = true
 
-        // apkPathsField.set(this, apkPaths)
         forceOverwriteField.set(this, true)
         outputPathField.set(this, outputDir)
         debuggableFlagField.set(this, isDebuggable)
         useManagerField.set(this, localMode)
+        injectDexField.set(this, false)
+
+        // Extract pre-converted BKS keystore from jar
+        val keystorePath = LSPatch::class.java.classLoader
+            ?.getResourceAsStream("assets/keystore.bks")
+            ?.use { input ->
+                val bksFile = File(context.cacheDir, "lspatch.bks")
+                FileOutputStream(bksFile).use { output ->
+                    input.copyTo(output)
+                }
+                Log.d(patchTag, "Using pre-converted BKS keystore: ${bksFile.absolutePath}")
+                bksFile.absolutePath
+            }
+
+        if (keystorePath == null) {
+            Log.w(patchTag, "BKS keystore not found, patch will likely fail")
+        }
+
+        // Set keystoreArgs: [keystorePath, password, alias, keyPassword]
+        keystoreArgsField.set(this, Arrays.asList(keystorePath, "123456", "key0", "123456"))
     }
 
     fun setModules(modules: List<String>) {
@@ -425,7 +447,7 @@ class PatchActivity : ComponentActivity() {
                             callback.onLog(msg, true)
                         }
                     }
-                })
+                }, this@PatchActivity)
 
                 if (!isLocalMode) {
                     lspatch.setModules(listOf(applicationInfo.sourceDir))

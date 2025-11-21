@@ -2,4 +2,5 @@ mkdir tmp && cd tmp
 jar xf ../lspatch.jar
 cp -rfp assets/lspatch/so ../../src/main/assets/lspatch
 python ../rm_duplicate.py
+python ../convert_keystore.py
 jar cf ../lspatch_cleaned.jar .

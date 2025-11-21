@@ -153,82 +153,86 @@ fun PatchPage(modifier: Modifier = Modifier,
                 .align(Alignment.TopCenter)
         )
 
-        Column(
+        LazyColumn(
             modifier = modifier
                 .fillMaxWidth()
+                .sizeIn(maxHeight = screenH)
                 .padding(10.dp, 10.dp, 10.dp, 0.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(modifier = modifier.fillMaxWidth()
-                .padding(10.dp, 10.dp, 10.dp, 0.dp)) {
-                Text(text = "Linkura Localify Patcher", fontSize = 18.sp)
-                Text(text = "LSPatch version: ${LSPConfig.instance.VERSION_NAME} (${LSPConfig.instance.VERSION_CODE})", fontSize = 13.sp)
-                Text(text = "Framework version: ${LSPConfig.instance.CORE_VERSION_NAME} (${LSPConfig.instance.CORE_VERSION_CODE}), API ${LSPConfig.instance.API_CODE}", fontSize = 13.sp)
-                // Text(text = "Shuzuku: ${ShizukuApi.isBinderAvailable} ${ShizukuApi.isPermissionGranted}", fontSize = 13.sp)
+            item {
+                Column(modifier = modifier.fillMaxWidth()
+                    .padding(10.dp, 10.dp, 10.dp, 0.dp)) {
+                    Text(text = "Linkura Localify Patcher", fontSize = 18.sp)
+                    Text(text = "LSPatch version: ${LSPConfig.instance.VERSION_NAME} (${LSPConfig.instance.VERSION_CODE})", fontSize = 13.sp)
+                    Text(text = "Framework version: ${LSPConfig.instance.CORE_VERSION_NAME} (${LSPConfig.instance.CORE_VERSION_CODE}), API ${LSPConfig.instance.API_CODE}", fontSize = 13.sp)
+                    // Text(text = "Shuzuku: ${ShizukuApi.isBinderAvailable} ${ShizukuApi.isPermissionGranted}", fontSize = 13.sp)
+                }
+                Spacer(Modifier.height(6.dp))
             }
 
-            Spacer(Modifier.height(6.dp))
-
-            GakuGroupBox(modifier = modifier, "Shizuku", contentPadding = 0.dp) {
-                ElevatedCard(
-                    shape = RoundedCornerShape(
-                        bottomStart = 16.dp,
-                        bottomEnd = 8.dp
-                    ),
-                    colors = CardDefaults.elevatedCardColors(containerColor = run {
-                        if (ShizukuApi.isPermissionGranted) MaterialTheme.colorScheme.background
-                        else MaterialTheme.colorScheme.errorContainer
-                    })
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
-                                    Shizuku.requestPermission(114514)
-                                }
-                            }
-                            .padding(18.dp, 10.dp, 18.dp, 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+            item {
+                GakuGroupBox(modifier = modifier, "Shizuku", contentPadding = 0.dp) {
+                    ElevatedCard(
+                        shape = RoundedCornerShape(
+                            bottomStart = 16.dp,
+                            bottomEnd = 8.dp
+                        ),
+                        colors = CardDefaults.elevatedCardColors(containerColor = run {
+                            if (ShizukuApi.isPermissionGranted) MaterialTheme.colorScheme.background
+                            else MaterialTheme.colorScheme.errorContainer
+                        })
                     ) {
-                        if (ShizukuApi.isPermissionGranted) {
-                            Icon(Icons.Outlined.CheckCircle, stringResource(R.string.shizuku_available))
-                            Column(Modifier.padding(start = 20.dp)) {
-                                Text(
-                                    text = stringResource(R.string.shizuku_available),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = "API " + Shizuku.getVersion(),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        } else {
-                            Icon(Icons.Outlined.Warning, stringResource(R.string.shizuku_unavailable))
-                            Column(Modifier.padding(start = 20.dp)) {
-                                Text(
-                                    text = stringResource(R.string.shizuku_unavailable),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.home_shizuku_warning),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
+                                        Shizuku.requestPermission(114514)
+                                    }
+                                }
+                                .padding(18.dp, 10.dp, 18.dp, 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (ShizukuApi.isPermissionGranted) {
+                                Icon(Icons.Outlined.CheckCircle, stringResource(R.string.shizuku_available))
+                                Column(Modifier.padding(start = 20.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.shizuku_available),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = "API " + Shizuku.getVersion(),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            } else {
+                                Icon(Icons.Outlined.Warning, stringResource(R.string.shizuku_unavailable))
+                                Column(Modifier.padding(start = 20.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.shizuku_unavailable),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.home_shizuku_warning),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
                         }
                     }
                 }
-
             }
 
-            Spacer(Modifier.height(6.dp))
+            item {
+                Spacer(Modifier.height(6.dp))
+            }
 
-            Box(modifier = Modifier.weight(1f)) {
+            item {
                 GakuGroupBox(modifier = modifier, stringResource(R.string.game_patch)) {
-
                     Column(modifier = Modifier,
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
 
@@ -279,13 +283,15 @@ fun PatchPage(modifier: Modifier = Modifier,
 
                         CollapsibleBox(modifier = modifier,
                             expandState = true,
-                            collapsedHeight = 0.dp,
-                            showExpand = false
+                            collapsedHeight = 2.dp,
+                            showExpand = true
                         ) {
-                            Box(modifier = Modifier) {
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)) {
                                 LazyColumn(modifier = Modifier
                                     .fillMaxWidth()
-                                    .sizeIn(maxHeight = screenH),
+                                    .fillMaxSize(),
                                     reverseLayout = true) {
                                     logMsgList.asReversed().forEach { logText ->
                                         item {
@@ -305,7 +311,9 @@ fun PatchPage(modifier: Modifier = Modifier,
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            item {
+                Spacer(Modifier.height(12.dp))
+            }
         }
 
         FloatingActionButton(
