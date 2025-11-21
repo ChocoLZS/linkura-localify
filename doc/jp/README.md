@@ -16,7 +16,6 @@
 
 # 使用方法
 
-- **プラグインには[JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch)のパッチングフレームワークが統合されており、Android 9以上で正常に動作します。**
 - これはXPosedプラグインです。Root化済みユーザーは [LSPosed](https://github.com/LSPosed/LSPosed) を、Root化していないユーザーは [LSPatch](https://github.com/LSPosed/LSPatch) を使用できます。
 - Android 15以上のユーザーは、[JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) または [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch) を使用してください。オリジナル版は更新が停止されているためです。
 - エミュレーターの選択については、[エミュレーター参考資料](simulator.md) をご覧ください。

@@ -16,7 +16,6 @@ Secondary development based on the overall framework of [**`Gakuen Idolmaster Lo
 
 # Usage
 
-- **The plugin has integrated the patching framework of [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch), and it works properly on Android 9 and above.**
 - This is an XPosed plugin. Rooted users can use [LSPosed](https://github.com/LSPosed/LSPosed), while non-rooted users can use [LSPatch](https://github.com/LSPosed/LSPatch).
 - For Android 15 and above users, please use [JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) or [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch), as the original versions have stopped updating.
 - For emulator selection, please refer to [Emulator Reference](simulator.md).

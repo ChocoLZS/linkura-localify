@@ -265,4 +265,8 @@
     <string name="config.legacy.title">Enable Legacy Version Compatibility (Not Hot Reloadable)</string>
     <string name="config.legacy.description">Enabling this allows older client versions to log in normally. Please note that this plugin is primarily used for playing motion capture replay before May 29, 2025, and other features have not yet been adapted for compatibility. Currently only tested on version 3.1.0, both version 4.0.0 and earlier versions support playing old format motion capture data.</string>
 
+    <!-- Android 15+ Patch Warning -->
+    <string name="patch_android15_warning">Android 15+ users cannot use the built-in patch feature. Please use LSPatch 0.7+ for patching.</string>
+    <string name="patch_android15_button">Download LSPatch 0.7+</string>
+
 </resources>
