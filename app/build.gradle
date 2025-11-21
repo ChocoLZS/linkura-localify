@@ -17,7 +17,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 12
-        versionName "v1.1.0"
+        versionName "v1.1.1"
         buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -204,6 +204,10 @@ dependencies {
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+
+    // Markdown renderer
+    implementation("com.mikepenz:multiplatform-markdown-renderer:0.29.0")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.29.0")
 
     implementation(libs.xdl)
     implementation(libs.shadowhook)

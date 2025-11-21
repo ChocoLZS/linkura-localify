@@ -41,6 +41,7 @@ import io.github.chocolzs.linkura.localify.models.LinkuraConfig
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupConfirm
 import io.github.chocolzs.linkura.localify.ui.components.ConnectionStatusIndicator
 import io.github.chocolzs.linkura.localify.ui.theme.LocalifyTheme
+import com.mikepenz.markdown.m3.Markdown
 
 
 @Composable
@@ -108,13 +109,15 @@ fun MainUI(modifier: Modifier = Modifier, context: MainActivity? = null,
                 title = confirmState.title,
                 onCancel = { confirmState.onCancel() },
                 onConfirm = { confirmState.onConfirm() },
+                confirmText = confirmState.confirmText,
+                cancelText = confirmState.cancelText,
                 contentHeightForAnimation = screenH.value * 1.8f
             ) {
                 LazyColumn(modifier =
                 Modifier.sizeIn(maxHeight = (screenH.value * 0.45f).dp)
                     .fillMaxWidth()) {
                     item {
-                        Text(confirmState.content)
+                        Markdown(confirmState.content)
                     }
                 }
             }

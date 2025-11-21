@@ -12,7 +12,7 @@
 [**`学園アイドルマスター ローカライゼーションプラグイン`**](https://github.com/chinosk6/gakuen-imas-localify) の全体フレームワークをベースとした二次開発
 
 - リンクラ(リンクラ) ローカライゼーションプラグイン
-- **開発中**
+- もし、より多くの機能を追加するためのアイデアやニーズがある場合は、issue/discussionセクションで自由に議論してください。
 
 # 使用方法
 
@@ -21,15 +21,36 @@
 - エミュレーターの選択については、[エミュレーター参考資料](simulator.md) をご覧ください。
 - 本地化データリポジトリは、[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets) です。
 
+# スター履歴
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ChocoLZS/linkura-localify&type=Date)](https://star-history.com/#ChocoLZS/linkura-localify&Date)
+
 # 開発
 
-> TODO
+## 1. **このリポジトリをクローンする**
 
-<!-- # Star History
+```bash
+git clone https://github.com/ChocoLZS/linkura-localify.git
+```
 
-[![Star History Chart](https://api.star-history.com/svg?repos=chinosk6/gakuen-imas-localify&type=Date)](https://star-history.com/#chinosk6/gakuen-imas-localify&Date) -->
+## 2. **最新バージョンのAndroid Studioをダウンロードしてインストールする**
+> バージョンは >= 2024.1.1 である必要があります
 
-# 特別な感謝
+a. [公式ドキュメント](https://developer.android.com/studioinstall) に従ってAndroid Studioをダウンロードしてインストールします。
+
+b. Android SDK > SDK Tools で以下を確認します：
+- 通常、Android Studioは自動的にSDKの問題を処理します
+- `CMake` がチェックされており、バージョンは >= 3.22.1
+- `NDK` がチェックされており、バージョンは >= 26.3
+- `Android SD Build-Tools` がチェックされており、バージョンは >= 29、推奨は34。
+
+## 3. **Android Studioを使用してこのリポジトリを開く**
+
+1. Android Studioの依存関係のダウンロード
+2. Android Studioのインデックス作成
+3. 手動でのコンパイル
+
+# Special Thanks
 
 - [gkmasToolkit](https://github.com/kishidanatsumi/gkmasToolkit)
 - [UmaPyogin-Android](https://github.com/akemimadoka/UmaPyogin-Android)

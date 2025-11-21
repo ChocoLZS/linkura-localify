@@ -84,6 +84,7 @@ fun HomePage(modifier: Modifier = Modifier,
              bottomSpacerHeight: Dp = 120.dp,
              screenH: Dp = 1080.dp) {
     val config = getConfigState(context, previewData)
+    val programConfig = getProgramConfigState(context)
 
     // val scrollState = rememberScrollState()
     val keyboardOptionsNumber = remember {
@@ -110,6 +111,10 @@ fun HomePage(modifier: Modifier = Modifier,
 
                     GakuSwitch(modifier, stringResource(R.string.lazy_init), checked = config.value.lazyInit) {
                             v -> context?.onLazyInitChanged(v)
+                    }
+
+                    GakuSwitch(modifier, stringResource(R.string.app_update_check), checked = programConfig.value.checkAppUpdate) {
+                            v -> context?.onPCheckAppUpdateChanged(v)
                     }
 
                 }

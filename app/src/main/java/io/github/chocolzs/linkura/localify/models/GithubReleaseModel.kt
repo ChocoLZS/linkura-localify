@@ -52,7 +52,7 @@ data class GithubReleaseModel(
     val body: String,
 //    val created_at: String,
 //    val draft: Boolean,
-//    val html_url: String,
+    val html_url: String,
 //    val id: Int,
     val name: String?,
 //    val node_id: String,

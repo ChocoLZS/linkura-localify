@@ -26,6 +26,8 @@ data class ProgramConfig(
 
     var usePluginBuiltInAssets: Boolean = false,
 
+    var checkAppUpdate: Boolean = true,
+
     // var localAPIAssetsVersion: String = "",
     var p: Boolean = false
 )

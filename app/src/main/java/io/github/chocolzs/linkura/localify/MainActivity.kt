@@ -21,6 +21,7 @@ import io.github.chocolzs.linkura.localify.mainUtils.AssetsRepository
 import io.github.chocolzs.linkura.localify.mainUtils.LogExporter
 import io.github.chocolzs.linkura.localify.mainUtils.RemoteAPIFilesChecker
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
+import io.github.chocolzs.linkura.localify.mainUtils.TimeUtils
 import io.github.chocolzs.linkura.localify.mainUtils.json
 import io.github.chocolzs.linkura.localify.models.ConfirmStateModel
 import io.github.chocolzs.linkura.localify.models.LinkuraConfig
@@ -145,7 +146,7 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
                 try {
 
                     val result = AssetsRepository.fetchAndSaveArchiveData(this@MainActivity, savedMetadataUrl)
-                    
+
                     result.onSuccess { fetchedList ->
                         LogExporter.addLogEntry("MainActivity", "I", "Archive refresh successful: ${fetchedList.size} items")
                     }.onFailure { error ->
@@ -168,7 +169,7 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
                 } catch (e: Exception) {
                     LogExporter.addLogEntry("MainActivity", "E", "Client resources refresh error: ${e.message}")
                 }
-                
+
                 // Update preferences
                 prefs.edit()
                     .putBoolean("is_first_launch", false)
@@ -176,6 +177,223 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
                     .apply()
             }
         }
+    }
+
+    /**
+     * Check for localization resource updates on app startup
+     */
+    private fun checkLocalizationResourceUpdate() {
+        if (!programConfig.useAPIAssets || programConfig.useAPIAssetsURL.isEmpty()) {
+            LogExporter.addLogEntry("MainActivity", "I", "Localization update check skipped - API assets not enabled")
+            return
+        }
+
+        LogExporter.addLogEntry("MainActivity", "I", "Checking localization resource updates")
+
+        CoroutineScope(Dispatchers.IO).launch {
+            RemoteAPIFilesChecker.checkUpdateLocalAssets(
+                this@MainActivity,
+                programConfig.useAPIAssetsURL,
+                onFailed = { _, reason ->
+                    LogExporter.addLogEntry("MainActivity", "E", "Localization update check failed: $reason")
+                },
+                onResult = { data, localVersion ->
+                    LogExporter.addLogEntry("MainActivity", "I", "Localization update check result: ${data.tag_name} (local: $localVersion)")
+
+                    // Only show dialog if there's a new version
+                    if (data.tag_name != localVersion) {
+                        runOnUiThread {
+                            mainUIConfirmStatUpdate(
+                                true,
+                                getString(R.string.translation_resource_update),
+                                "${data.name}\n$localVersion -> ${data.tag_name}\n${data.body}\n\n${TimeUtils.convertIsoToLocalTime(data.published_at)}",
+                                onConfirm = {
+                                    LogExporter.addLogEntry("MainActivity", "I", "User confirmed localization update")
+                                    downloadLocalizationUpdate()
+                                },
+                                onCancel = {
+                                    LogExporter.addLogEntry("MainActivity", "I", "User cancelled localization update")
+                                }
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    /**
+     * Download localization resource update
+     */
+    private fun downloadLocalizationUpdate() {
+        LogExporter.addLogEntry("MainActivity", "I", "Starting localization resource download")
+
+        mainPageAssetsViewDataUpdate(
+            downloadAbleState = false,
+            errorString = "",
+            downloadProgressState = -1f
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            RemoteAPIFilesChecker.updateLocalAssets(
+                this@MainActivity,
+                programConfig.useAPIAssetsURL,
+                onDownload = { progress, _, _ ->
+                    mainPageAssetsViewDataUpdate(downloadProgressState = progress)
+                    LogExporter.addLogEntry("MainActivity", "D", "Download progress: $progress")
+                },
+                onFailed = { _, reason ->
+                    LogExporter.addLogEntry("MainActivity", "E", "Localization download failed: $reason")
+                    mainPageAssetsViewDataUpdate(
+                        downloadAbleState = true,
+                        errorString = reason,
+                        downloadProgressState = -1f
+                    )
+                    runOnUiThread {
+                        showToast(getString(R.string.log_export_failed))
+                    }
+                },
+                onSuccess = { saveFile, releaseVersion ->
+                    LogExporter.addLogEntry("MainActivity", "I", "Localization download successful: $releaseVersion")
+
+                    // Update local version
+                    val newVersion = RemoteAPIFilesChecker.getLocalVersion(this@MainActivity)
+                    mainPageAssetsViewDataUpdate(
+                        downloadAbleState = true,
+                        errorString = "",
+                        downloadProgressState = -1f,
+                        localAPIResourceVersion = newVersion ?: "unknown"
+                    )
+
+                    saveProgramConfig()
+
+                    runOnUiThread {
+                        showToast(getString(R.string.log_export_success))
+                    }
+                }
+            )
+        }
+    }
+
+    /**
+     * Check for app updates on startup
+     */
+    private fun checkAppUpdate() {
+        if (!programConfig.checkAppUpdate) {
+            LogExporter.addLogEntry("MainActivity", "I", "App update check skipped - disabled in settings")
+            return
+        }
+
+        LogExporter.addLogEntry("MainActivity", "I", "Checking for app updates")
+
+        val apiUrl = getString(R.string.default_app_check_api)
+        if (apiUrl.isEmpty()) {
+            LogExporter.addLogEntry("MainActivity", "E", "App update API URL is empty")
+            return
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                val request = okhttp3.Request.Builder()
+                    .url(apiUrl)
+                    .build()
+
+                io.github.chocolzs.linkura.localify.mainUtils.FileDownloader.requestGet(request, object : okhttp3.Callback {
+                    override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                        LogExporter.addLogEntry("MainActivity", "E", "App update check failed: ${e.message}")
+                    }
+
+                    override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                        runCatching {
+                            response.use {
+                                if (!response.isSuccessful) {
+                                    LogExporter.addLogEntry("MainActivity", "E", "App update check failed: HTTP ${response.code}")
+                                    return
+                                }
+
+                                val responseBody = response.body?.string()
+                                if (responseBody != null) {
+                                    val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                                    val releaseData = json.decodeFromString<io.github.chocolzs.linkura.localify.models.GithubReleaseModel>(responseBody)
+
+                                    // Compare versions
+                                    val currentVersion = BuildConfig.VERSION_NAME
+                                    val remoteVersion = releaseData.tag_name
+
+                                    LogExporter.addLogEntry("MainActivity", "I", "Current version: $currentVersion, Remote version: $remoteVersion")
+
+                                    if (isNewerVersion(remoteVersion, currentVersion)) {
+                                        runOnUiThread {
+                                            showAppUpdateDialog(releaseData)
+                                        }
+                                    } else {
+                                        LogExporter.addLogEntry("MainActivity", "I", "App is up to date")
+                                    }
+                                } else {
+                                    LogExporter.addLogEntry("MainActivity", "E", "App update check failed: Response body is null")
+                                }
+                            }
+                        }.onFailure { e ->
+                            LogExporter.addLogEntry("MainActivity", "E", "App update check failed: ${e.message}")
+                        }
+                    }
+                })
+            }.onFailure { e ->
+                LogExporter.addLogEntry("MainActivity", "E", "App update check failed: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Compare version strings to determine if remote version is newer
+     * Supports formats like "v1.1.1", "1.1.1", etc.
+     */
+    private fun isNewerVersion(remoteVersion: String, currentVersion: String): Boolean {
+        try {
+            // Remove 'v' prefix if present
+            val remote = remoteVersion.removePrefix("v").split(".")
+            val current = currentVersion.removePrefix("v").split(".")
+
+            val maxLength = maxOf(remote.size, current.size)
+
+            for (i in 0 until maxLength) {
+                val remotePart = remote.getOrNull(i)?.toIntOrNull() ?: 0
+                val currentPart = current.getOrNull(i)?.toIntOrNull() ?: 0
+
+                when {
+                    remotePart > currentPart -> return true
+                    remotePart < currentPart -> return false
+                }
+            }
+
+            return false
+        } catch (e: Exception) {
+            LogExporter.addLogEntry("MainActivity", "E", "Version comparison failed: ${e.message}")
+            return false
+        }
+    }
+
+    /**
+     * Show app update dialog with release information
+     */
+    private fun showAppUpdateDialog(releaseData: io.github.chocolzs.linkura.localify.models.GithubReleaseModel) {
+        val title = releaseData.name ?: getString(R.string.app_update_available)
+        val content = "${TimeUtils.convertIsoToLocalTime(releaseData.published_at)}\n\n${releaseData.body}"
+
+        mainUIConfirmStatUpdate(
+            true,
+            title,
+            content,
+            onConfirm = {
+                LogExporter.addLogEntry("MainActivity", "I", "User chose to install app update")
+                openUrl(releaseData.html_url)
+            },
+            onCancel = {
+                LogExporter.addLogEntry("MainActivity", "I", "User ignored app update")
+            },
+            confirmText = getString(R.string.app_update_install),
+            cancelText = getString(R.string.app_update_ignore)
+        )
     }
 
     override fun pushKeyEvent(event: KeyEvent): Boolean {
@@ -210,12 +428,18 @@ class MainActivity : ComponentActivity(), ConfigUpdateListener, IConfigurableAct
         programConfigViewModel = ViewModelProvider(this, programConfigFactory)[ProgramConfigViewModel::class.java]
 
         ShizukuApi.init()
-        
+
         // Initialize global camera sensitivity state
         CameraSensitivityState.initialize(this)
 
         // Auto-refresh archive data on first launch
         performFirstLaunchArchiveRefresh()
+
+        // Check for localization resource updates on startup
+        checkLocalizationResourceUpdate()
+
+        // Check for app updates on startup
+        checkAppUpdate()
 
         // Start AIDL service
         try {

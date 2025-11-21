@@ -143,6 +143,8 @@ data class ConfirmStateModel(
     var content: String = "GakuConfirm Content",
     var onConfirm: () -> Unit = {},
     var onCancel: () -> Unit = {},
+    var confirmText: String? = null,
+    var cancelText: String? = null,
     var p: Boolean = false
 )
 

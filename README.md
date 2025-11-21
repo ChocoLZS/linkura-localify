@@ -13,7 +13,7 @@
 基于 [**`学园偶像大师 本地化插件`**](https://github.com/chinosk6/gakuen-imas-localify) 的整体框架 二次开发
 
 - 林库拉(リンクラ) 本地化插件
-- **开发中**
+- 如果您有添加更多功能的想法/需求，欢迎在issue/discussion板块中进行讨论。
 
 # Usage
 
@@ -22,13 +22,35 @@
 - 关于模拟器的选择，请参考 [模拟器参考](doc/zh/simulator.md)。
 - 本地化数据仓库，[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
 
-# Development
-
-> TODO
-
 # Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ChocoLZS/linkura-localify&type=Date)](https://star-history.com/#ChocoLZS/linkura-localify&Date)
+
+# Development
+
+## 1. **clone本仓库**
+
+```bash
+git clone https://github.com/ChocoLZS/linkura-localify.git
+```
+
+## 2. **下载并安装好最新版Android Studio**
+> 版本至少需要 >= 2024.1.1
+
+a. 根据[官方文档](https://developer.android.com/studioinstall)下载并安装android studio
+
+b. 确保Android SDK > SDK Tools 中：
+- 通常情况 Android Studio 会自动帮你处理SDK问题
+- `CMake` 勾选并且版本 >= 3.22.1
+- `NDK` 勾选并且版本 >= 26.3
+- `Android SD Build-Tools` 勾选并且版本 >= 29, 推荐34。
+
+## 3. **使用Android Studio 打开此仓库**
+
+1. Android Studio 依赖下载
+2. Android Studio 建立索引
+3. 手动点击编译
+
 
 # Special Thanks
 

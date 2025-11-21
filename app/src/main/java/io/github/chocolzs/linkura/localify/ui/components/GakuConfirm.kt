@@ -73,6 +73,8 @@ fun GakuGroupConfirm(
     onHeadClick: () -> Unit = {},
     onConfirm: () -> Unit = {},
     onCancel: () -> Unit = {},
+    confirmText: String? = null,
+    cancelText: String? = null,
     contentHeightForAnimation: Float = 400f,
     initIsVisible: Boolean = false,
     baseModifier: Modifier = Modifier,
@@ -191,7 +193,7 @@ fun GakuGroupConfirm(
                             GakuButton(modifier = Modifier
                                 .height(40.dp)
                                 .sizeIn(minWidth = 100.dp),
-                                text = stringResource(R.string.cancel),
+                                text = cancelText ?: stringResource(R.string.cancel),
                                 bgColors = listOf(Color(0xFFF9F9F9), Color(0xFFF0F0F0)),
                                 textColor = Color(0xFF111111),
                                 onClick = { scoop.launch {
@@ -208,7 +210,7 @@ fun GakuGroupConfirm(
                             GakuButton(modifier = Modifier
                                 .height(40.dp)
                                 .sizeIn(minWidth = 100.dp),
-                                text = stringResource(R.string.ok),
+                                text = confirmText ?: stringResource(R.string.ok),
                                 onClick = { scoop.launch {
                                     isVisible = false
                                     delay(ANIMATION_TIME.toLong())
