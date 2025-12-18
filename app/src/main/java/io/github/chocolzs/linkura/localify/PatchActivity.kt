@@ -3,7 +3,6 @@ package io.github.chocolzs.linkura.localify
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.media.MediaScannerConnection
@@ -110,12 +109,6 @@ class PatchActivity : ComponentActivity() {
     private var mOutFiles: List<File> = listOf()
     private var reservePatchFiles: Boolean = false
     var patchCallback: PatchCallback? = null
-
-    fun openUrl(url: String) {
-        val webpage = Uri.parse(url)
-        val intent = Intent(Intent.ACTION_VIEW, webpage)
-        startActivity(intent)
-    }
 
     private val writePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -266,9 +259,7 @@ class PatchActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 var installing by remember { mutableStateOf(false) }
 
-                PatchPage(
-                    onOpenUrl = { url -> openUrl(url) }
-                ) { apks, isPatchLocalMode, isPatchDebuggable, isReservePatchFiles, onFinish, onLog ->
+                PatchPage() { apks, isPatchLocalMode, isPatchDebuggable, isReservePatchFiles, onFinish, onLog ->
                     reservePatchFiles = isReservePatchFiles
 
                     onClickPatch(apks, isPatchLocalMode, isPatchDebuggable, object : PatchCallback {

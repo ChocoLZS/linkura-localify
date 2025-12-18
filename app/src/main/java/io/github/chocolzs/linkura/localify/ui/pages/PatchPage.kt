@@ -3,7 +3,6 @@ package io.github.chocolzs.linkura.localify.ui.pages
 import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,15 +48,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.activity.ComponentActivity
 import io.github.chocolzs.linkura.localify.R
 import io.github.chocolzs.linkura.localify.TAG
 import io.github.chocolzs.linkura.localify.mainUtils.ShizukuApi
-import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupConfirm
 import io.github.chocolzs.linkura.localify.ui.components.GakuRadio
@@ -90,7 +86,6 @@ val LogTextListSaver = Saver<SnapshotStateList<LogText>, List<String>>(
 
 @Composable
 fun PatchPage(modifier: Modifier = Modifier,
-              onOpenUrl: ((String) -> Unit)? = null,
               content: (@Composable () -> Unit)? = null,
               onClickPatch: (selectFiles: List<Uri>, isLocalMode: Boolean, isDebuggable: Boolean,
                              reservePatchFiles: Boolean,
@@ -158,26 +153,24 @@ fun PatchPage(modifier: Modifier = Modifier,
                 .align(Alignment.TopCenter)
         )
 
-        LazyColumn(
+        Column(
             modifier = modifier
                 .fillMaxWidth()
-                .sizeIn(maxHeight = screenH)
                 .padding(10.dp, 10.dp, 10.dp, 0.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            item {
-                Column(modifier = modifier.fillMaxWidth()
-                    .padding(10.dp, 10.dp, 10.dp, 0.dp)) {
-                    Text(text = "Linkura Localify Patcher", fontSize = 18.sp)
-                    Text(text = "LSPatch version: ${LSPConfig.instance.VERSION_NAME} (${LSPConfig.instance.VERSION_CODE})", fontSize = 13.sp)
-                    Text(text = "Framework version: ${LSPConfig.instance.CORE_VERSION_NAME} (${LSPConfig.instance.CORE_VERSION_CODE}), API ${LSPConfig.instance.API_CODE}", fontSize = 13.sp)
-                }
-                Spacer(Modifier.height(6.dp))
+            Column(modifier = modifier.fillMaxWidth()
+                .padding(10.dp, 10.dp, 10.dp, 0.dp)) {
+                Text(text = "Linkura Localify Patcher", fontSize = 18.sp)
+                Text(text = "LSPatch version: ${LSPConfig.instance.VERSION_NAME} (${LSPConfig.instance.VERSION_CODE})", fontSize = 13.sp)
+                Text(text = "Framework version: ${LSPConfig.instance.CORE_VERSION_NAME} (${LSPConfig.instance.CORE_VERSION_CODE}), API ${LSPConfig.instance.API_CODE}", fontSize = 13.sp)
+                // Text(text = "Shuzuku: ${ShizukuApi.isBinderAvailable} ${ShizukuApi.isPermissionGranted}", fontSize = 13.sp)
             }
 
-            item {
-                GakuGroupBox(modifier = modifier, "Shizuku", contentPadding = 0.dp) {
+            Spacer(Modifier.height(6.dp))
+
+            GakuGroupBox(modifier = modifier, "Shizuku", contentPadding = 0.dp) {
                 ElevatedCard(
                     shape = RoundedCornerShape(
                         bottomStart = 16.dp,
@@ -228,11 +221,12 @@ fun PatchPage(modifier: Modifier = Modifier,
                         }
                     }
                 }
-                }
-                Spacer(Modifier.height(6.dp))
+
             }
 
-            item {
+            Spacer(Modifier.height(6.dp))
+
+            Box(modifier = Modifier.weight(1f)) {
                 GakuGroupBox(modifier = modifier, stringResource(R.string.game_patch)) {
 
                     Column(modifier = Modifier,
@@ -255,38 +249,6 @@ fun PatchPage(modifier: Modifier = Modifier,
                                 text = stringResource(R.string.patch_integrated), selected = !isPatchLocalMode,
                                 onClick = { isPatchLocalMode = false })
 
-                        }
-
-                        // Android 15+ Warning
-                        if (Build.VERSION.SDK_INT >= 35) {
-                            Spacer(Modifier.height(8.dp))
-                            ElevatedCard(
-                                colors = CardDefaults.elevatedCardColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.patch_android15_warning),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                    GakuButton(
-                                        text = stringResource(R.string.patch_android15_button),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = {
-                                            onOpenUrl?.invoke("https://github.com/JingMatrix/LSPatch")
-                                        }
-                                    )
-                                }
-                            }
                         }
 
                         CollapsibleBox(modifier = modifier,
@@ -341,12 +303,9 @@ fun PatchPage(modifier: Modifier = Modifier,
                         Spacer(Modifier.height(0.dp))
                     }
                 }
-                Spacer(Modifier.height(12.dp))
             }
 
-            item {
-                Spacer(modifier = modifier.height(120.dp))
-            }
+            Spacer(Modifier.height(12.dp))
         }
 
         FloatingActionButton(
