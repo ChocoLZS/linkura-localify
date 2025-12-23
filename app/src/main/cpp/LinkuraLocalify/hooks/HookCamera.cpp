@@ -74,6 +74,85 @@ namespace LinkuraLocal::HookCamera {
         Log::DebugFmt("Unregister main camera");
     }
 
+    // 计算从 position 看向 lookAt 的水平角和垂直角
+    static void CalculateAnglesFromLookAt(
+            const UnityResolve::UnityType::Vector3& position,
+            const UnityResolve::UnityType::Vector3& lookAt,
+            float& outVerticalAngle,
+            float& outHorizontalAngle) {
+        // 计算方向向量
+        float dx = lookAt.x - position.x;
+        float dy = lookAt.y - position.y;
+        float dz = lookAt.z - position.z;
+
+        // 计算水平距离
+        float horizontalDist = std::sqrt(dx * dx + dz * dz);
+
+        // verticalAngle (yaw): 水平旋转角度
+        // 基于 baseCamera 的坐标系，-z 是前方，+x 是右方
+        outVerticalAngle = std::atan2(dx, -dz) * 180.0f / M_PI;
+
+        // horizontalAngle (pitch): 垂直旋转角度
+        if (horizontalDist > 0.0001f) {
+            outHorizontalAngle = std::atan2(dy, horizontalDist) * 180.0f / M_PI;
+        } else {
+            outHorizontalAngle = (dy > 0) ? 89.99f : -89.99f;
+        }
+    }
+}
+
+namespace L4Camera {
+    // 从当前 FirstPerson/Follow 模式同步相机状态到 FreeCamera
+    void SyncBaseCameraFromCurrentMode() {
+        if (LinkuraLocal::Config::memorizeFreeCameraPos) return;
+        using namespace LinkuraLocal::HookCamera;
+        using Vector3 = UnityResolve::UnityType::Vector3;
+
+        auto currentMode = GetCameraMode();
+        if (currentMode != CameraMode::FIRST_PERSON && currentMode != CameraMode::FOLLOW) {
+            return; // 只在 FirstPerson 或 Follow 模式下有效
+        }
+
+        // 检查缓存是否有效
+        if (!cacheTrans || !Il2cppUtils::IsNativeObjectAlive(cacheTrans)) {
+            LinkuraLocal::Log::DebugFmt("SyncBaseCameraFromCurrentMode: cacheTrans invalid");
+            return;
+        }
+
+        Vector3 cameraPos;
+        Vector3 cameraLookAt;
+
+        if (currentMode == CameraMode::FIRST_PERSON) {
+            // FirstPerson 模式: 使用缓存的头部位置和朝向计算相机位置
+            cameraPos = CalcFirstPersonPosition(cachePosition, cacheForward, firstPersonPosOffset);
+            cameraLookAt = cacheLookAt;
+        } else {
+            // Follow 模式: 使用跟随计算
+            auto lookAtPos = CalcFollowModeLookAt(cachePosition, followPosOffset, false);
+            cameraPos = CalcPositionFromLookAt(lookAtPos, followPosOffset);
+            cameraLookAt = lookAtPos;
+        }
+
+        // 设置 baseCamera 的位置和 lookAt
+        baseCamera.pos = cameraPos;
+        baseCamera.lookAt = cameraLookAt;
+
+        // 计算并设置角度
+        float vertAngle, horiAngle;
+        CalculateAnglesFromLookAt(cameraPos, cameraLookAt, vertAngle, horiAngle);
+        baseCamera.verticalAngle = vertAngle;
+        baseCamera.horizontalAngle = horiAngle;
+
+        // FOV 保持当前值 (baseCamera.fov 在各模式下共享)
+
+        LinkuraLocal::Log::InfoFmt("SyncBaseCameraFromCurrentMode: pos(%.2f, %.2f, %.2f) lookAt(%.2f, %.2f, %.2f) angles(v:%.1f, h:%.1f)",
+            cameraPos.x, cameraPos.y, cameraPos.z,
+            cameraLookAt.x, cameraLookAt.y, cameraLookAt.z,
+            vertAngle, horiAngle);
+    }
+}
+
+namespace LinkuraLocal::HookCamera {
     UnityResolve::UnityType::Camera* currentCameraCache = nullptr;
     UnityResolve::UnityType::Transform* currentCameraTransformCache = nullptr;
     bool currentCameraRegistered = false;

@@ -18,6 +18,7 @@ namespace LinkuraLocal::Config {
     extern bool textTest;
     extern bool dumpText;
     extern bool enableFreeCamera;
+    extern bool memorizeFreeCameraPos;
     extern int targetFrameRate;
     extern bool removeRenderImageCover;
     extern bool avoidCharacterExit;
@@ -28,6 +29,7 @@ namespace LinkuraLocal::Config {
     extern bool storyHideEffect;
     extern float storyNovelVocalTextDurationRate;
     extern float storyNovelNonVocalTextDurationRate;
+    extern std::string storyReplaceContent;
     extern bool firstPersonCameraHideHead;
     extern bool firstPersonCameraHideHair;
     extern bool enableMotionCaptureReplay;
@@ -88,4 +90,5 @@ namespace LinkuraLocal::Config {
     // Version check functions (now using enhanced compatibility checker)
     bool isLegacyMrsVersion();
     bool isFirstYearVersion();
+    bool isLatestVersion();
 }

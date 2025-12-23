@@ -6,6 +6,8 @@
     <string name="replace_font">替换字体</string>
     <string name="lazy_init">快速初始化（懒加载配置）</string>
     <string name="enable_free_camera">启用自由视角 (需使用实体键盘)</string>
+    <string name="config.free_camera.memorize_pos">保持自由相机坐标</string>
+    <string name="config.free_camera.memorize_pos_description">开启后，从第一人称/跟随模式切换到自由相机时，将保持自由相机原有的坐标，而不是继承当前视角的位置</string>
     <string name="start_game">以上述配置启动游戏/重载配置</string>
     <string name="setFpsTitle">最大 FPS (0 为保持游戏原设置)</string>
     <string name="unlockAllLive">解锁所有 Live</string>
@@ -141,6 +143,14 @@
     <string name="config.story.hide_effect">隐藏特效</string>
     <string name="config.story.vocal_text_duration_rate">小说声音文本持续倍率</string>
     <string name="config.story.non_vocal_text_duration_rate">小说旁白文本持续倍率</string>
+    <string name="config.story.replace_content_button">自定义活动记录脚本</string>
+    <string name="config.story.replace_content_title">编辑活动记录脚本</string>
+    <string name="config.story.replace_content_empty_hint">未设置自定义脚本</string>
+    <string name="config.story.replace_content_has_content">已配置自定义脚本</string>
+    <string name="config.story.replace_content_chars">字符</string>
+    <string name="config.story.replace_content_placeholder">在此粘贴或输入活动记录脚本内容...\n\n此内容将在播放活动记录时完全替换原始脚本。</string>
+    <string name="config.story.replace_content_clear">清空</string>
+    <string name="config.story.replace_content_paste">粘贴</string>
 
     <!-- First Person Camera Settings -->
     <string name="config.first_person_camera.hide_head">第一人称隐藏头部</string>

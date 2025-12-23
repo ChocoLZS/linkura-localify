@@ -41,6 +41,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.textTest != null) textTest = config.textTest
                 if (config.dumpText != null) dumpText = config.dumpText
                 if (config.enableFreeCamera != null) enableFreeCamera = config.enableFreeCamera
+                if (config.memorizeFreeCameraPos != null) memorizeFreeCameraPos = config.memorizeFreeCameraPos
                 if (config.targetFrameRate != null) targetFrameRate = config.targetFrameRate
                 if (config.removeRenderImageCover != null) removeRenderImageCover = config.removeRenderImageCover
                 if (config.avoidCharacterExit != null) avoidCharacterExit = config.avoidCharacterExit

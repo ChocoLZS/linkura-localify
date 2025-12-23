@@ -61,6 +61,19 @@ import androidx.compose.ui.text.style.TextAlign
 import io.github.chocolzs.linkura.localify.models.LiveStreamCollapsibleBoxViewModel
 import io.github.chocolzs.linkura.localify.models.LiveStreamCollapsibleBoxViewModelFactory
 import io.github.chocolzs.linkura.localify.utils.CameraSensitivityState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.TextStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -270,6 +283,15 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.enable_free_camera), checked = config.value.enableFreeCamera) {
                             v -> context?.onEnableFreeCameraChanged(v)
                     }
+                    GakuSwitch(modifier, stringResource(R.string.config_free_camera_memorize_pos), checked = config.value.memorizeFreeCameraPos) {
+                            v -> context?.onMemorizeFreeCameraPosChanged(v)
+                    }
+                    Text(
+                        text = stringResource(R.string.config_free_camera_memorize_pos_description),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = modifier.padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
                     GakuSwitch(modifier, stringResource(R.string.config_character_render_head_only_title), checked = config.value.hideCharacterBody) {
                             v -> context?.onHideCharacterBodyChanged(v)
                     }
@@ -467,8 +489,14 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
             Spacer(Modifier.height(6.dp))
         }
         item {
+            // State for the inline story replace content editor
+            var storyEditorExpanded by remember { mutableStateOf(false) }
+            var storyEditText by remember(config.value.storyReplaceContent) {
+                mutableStateOf(config.value.storyReplaceContent)
+            }
+
             GakuGroupBox(
-                modifier, 
+                modifier,
                 stringResource(R.string.config_story_settings_title),
                 onHeadClick = {
                     storySettingsViewModel.expanded = !storySettingsViewModel.expanded
@@ -480,6 +508,156 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     collapsedHeight = 0.dp,
                     showExpand = false
                 ) {
+                    // Story Replace Content - Collapsible Editor
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.config_story_replace_content_button),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = if (config.value.storyReplaceContent.isEmpty()) {
+                                    stringResource(R.string.config_story_replace_content_empty_hint)
+                                } else {
+                                    stringResource(R.string.config_story_replace_content_has_content) +
+                                            " (${config.value.storyReplaceContent.length} " +
+                                            stringResource(R.string.config_story_replace_content_chars) + ")"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        IconButton(
+                            onClick = { storyEditorExpanded = !storyEditorExpanded }
+                        ) {
+                            Icon(
+                                imageVector = if (storyEditorExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.config_story_replace_content_button),
+                                tint = if (storyEditorExpanded) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else if (config.value.storyReplaceContent.isEmpty()) {
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimary
+                                }
+                            )
+                        }
+                    }
+
+                    // Collapsible Editor Area
+                    CollapsibleBox(
+                        modifier = modifier,
+                        expandState = storyEditorExpanded,
+                        collapsedHeight = 0.dp,
+                        showExpand = false
+                    ) {
+                        val clipboardManager = LocalClipboardManager.current
+
+                        Column(
+                            modifier = Modifier.padding(top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            // Action buttons row
+                            val buttonColor = MaterialTheme.colorScheme.onPrimary
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Paste from clipboard button
+                                TextButton(
+                                    onClick = {
+                                        clipboardManager.getText()?.text?.let { clipText ->
+                                            storyEditText = clipText
+                                            context?.onStoryReplaceContentChanged(clipText)
+                                        }
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ContentPaste,
+                                        contentDescription = stringResource(R.string.config_story_replace_content_paste),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = buttonColor
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.config_story_replace_content_paste),
+                                        fontSize = 11.sp,
+                                        color = buttonColor
+                                    )
+                                }
+
+                                // Clear button
+                                TextButton(
+                                    onClick = {
+                                        storyEditText = ""
+                                        context?.onStoryReplaceContentChanged("")
+                                    },
+                                    enabled = storyEditText.isNotEmpty(),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    val clearColor = if (storyEditText.isNotEmpty()) buttonColor
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.config_story_replace_content_clear),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = clearColor
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.config_story_replace_content_clear),
+                                        fontSize = 11.sp,
+                                        color = clearColor
+                                    )
+                                }
+                            }
+
+                            // Text Area
+                            OutlinedTextField(
+                                value = storyEditText,
+                                onValueChange = { newText ->
+                                    storyEditText = newText
+                                    context?.onStoryReplaceContentChanged(newText)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 150.dp, max = 300.dp),
+                                textStyle = TextStyle(
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = stringResource(R.string.config_story_replace_content_placeholder),
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    )
+                                },
+                                shape = RoundedCornerShape(8.dp)
+                            )
+
+                            // Character count
+                            Text(
+                                text = "${storyEditText.length} ${stringResource(R.string.config_story_replace_content_chars)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.align(Alignment.End)
+                            )
+                        }
+                    }
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    )
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     GakuSwitch(modifier, stringResource(R.string.config_story_hide_background), checked = config.value.storyHideBackground) {
                             v -> context?.onStoryHideBackgroundChanged(v)
@@ -496,12 +674,12 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                     GakuSwitch(modifier, stringResource(R.string.config_story_hide_effect), checked = config.value.storyHideEffect) {
                             v -> context?.onStoryHideEffectChanged(v)
                     }
-                    
+
                     HorizontalDivider(
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                     )
-                    
+
                     GakuSlider(
                         modifier = modifier,
                         text = stringResource(R.string.config_story_vocal_text_duration_rate),
@@ -509,7 +687,7 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                         valueRange = 0.5f..10.0f,
                         onValueChange = { v -> context?.onStoryNovelVocalTextDurationRateChanged(v) }
                     )
-                    
+
                     GakuSlider(
                         modifier = modifier,
                         text = stringResource(R.string.config_story_non_vocal_text_duration_rate),

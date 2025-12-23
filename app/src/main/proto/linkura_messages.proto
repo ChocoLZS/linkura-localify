@@ -109,6 +109,8 @@ message ConfigUpdate {
   optional bool hide_character_shadow = 43;
   optional int32 hide_live_stream_scene_items_level = 44;
   optional bool hide_live_stream_character_items = 45;
+  optional string story_replace_content = 46;
+  optional bool memorize_free_camera_pos = 47;
 }
 
 // Overlay control actions

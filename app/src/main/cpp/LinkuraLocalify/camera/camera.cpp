@@ -191,9 +191,9 @@ namespace L4Camera {
                 LinkuraLocal::Log::Info("CameraMode: FIRST_PERSON");
             } break;
             case CameraMode::FIRST_PERSON: {
+                SyncBaseCameraFromCurrentMode();
                 cameraMode = CameraMode::FREE;
                 LinkuraLocal::Log::Info("CameraMode: FREE");
-
             } break;
         }
         L4Camera::followCharaSet.onCameraModeChange(cameraMode);
@@ -358,9 +358,9 @@ namespace L4Camera {
                 ShowToast("First-person Mode");
             } break;
             case CameraMode::FIRST_PERSON: {
+                SyncBaseCameraFromCurrentMode();
                 cameraMode = CameraMode::FREE;
                 ShowToast("Free Mode");
-
             } break;
         }
     }

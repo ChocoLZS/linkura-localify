@@ -89,6 +89,8 @@
     <string name="dropdown_menu">ドロップダウンメニュー</string>
     <string name="enable_breast_param">胸のパラメーターを有効化</string>
     <string name="enable_free_camera">フリーカメラを有効化</string>
+    <string name="config.free_camera.memorize_pos">フリーカメラ座標を保持</string>
+    <string name="config.free_camera.memorize_pos_description">有効にすると、一人称/フォローモードからフリーカメラに切り替える際、現在の視点位置を継承せず、フリーカメラの元の座標を保持します</string>
     <string name="enable_plugin">プラグイン有効化 (ホットリロードなし)</string>
     <string name="error_a11y_label">エラー: 無効</string>
     <string name="error_icon_content_description">エラー</string>
@@ -389,6 +391,14 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.story.hide_effect">エフェクトを隠す</string>
     <string name="config.story.vocal_text_duration_rate">小説音声テキスト持続倍率</string>
     <string name="config.story.non_vocal_text_duration_rate">小説ナレーションテキスト持続倍率</string>
+    <string name="config.story.replace_content_button">カスタム活動記録スクリプト</string>
+    <string name="config.story.replace_content_title">活動記録スクリプトを編集</string>
+    <string name="config.story.replace_content_empty_hint">カスタムスクリプトは設定されていません</string>
+    <string name="config.story.replace_content_has_content">カスタムスクリプトが設定済み</string>
+    <string name="config.story.replace_content_chars">文字</string>
+    <string name="config.story.replace_content_placeholder">活動記録スクリプトの内容をここに貼り付けまたは入力してください...\n\n活動記録を再生する際、この内容が元のスクリプトを完全に置き換えます。</string>
+    <string name="config.story.replace_content_clear">クリア</string>
+    <string name="config.story.replace_content_paste">貼り付け</string>
 
     <!-- First Person Camera Settings -->
     <string name="config.first_person_camera.hide_head">一人称で頭を隠す</string>

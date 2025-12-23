@@ -20,6 +20,7 @@ namespace LinkuraLocal::Config {
     bool textTest = false;
     bool dumpText = false;
     bool enableFreeCamera = false;
+    bool memorizeFreeCameraPos = false;
     int targetFrameRate = 0;
     bool removeRenderImageCover = false;
     bool avoidCharacterExit = false;
@@ -30,6 +31,7 @@ namespace LinkuraLocal::Config {
     bool storyHideEffect = false;
     float storyNovelVocalTextDurationRate = 1.0f;
     float storyNovelNonVocalTextDurationRate = 1.0f;
+    std::string storyReplaceContent;
     bool firstPersonCameraHideHead = true;
     bool firstPersonCameraHideHair = true;
     bool enableMotionCaptureReplay = true;
@@ -89,6 +91,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(dumpText);
             GetConfigItem(targetFrameRate);
             GetConfigItem(enableFreeCamera);
+            GetConfigItem(memorizeFreeCameraPos);
             GetConfigItem(removeRenderImageCover);
             GetConfigItem(avoidCharacterExit);
             GetConfigItem(storyHideBackground);
@@ -98,6 +101,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(storyHideEffect);
             GetConfigItem(storyNovelVocalTextDurationRate);
             GetConfigItem(storyNovelNonVocalTextDurationRate);
+            GetConfigItem(storyReplaceContent);
             GetConfigItem(firstPersonCameraHideHead);
             GetConfigItem(firstPersonCameraHideHair);
             GetConfigItem(enableMotionCaptureReplay);
@@ -176,6 +180,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_text_test()) textTest = configUpdate.text_test();
                 if (configUpdate.has_dump_text()) dumpText = configUpdate.dump_text();
                 if (configUpdate.has_enable_free_camera()) enableFreeCamera = configUpdate.enable_free_camera();
+                if (configUpdate.has_memorize_free_camera_pos()) memorizeFreeCameraPos = configUpdate.memorize_free_camera_pos();
                 if (configUpdate.has_target_frame_rate()) targetFrameRate = configUpdate.target_frame_rate();
                 if (configUpdate.has_remove_render_image_cover()) removeRenderImageCover = configUpdate.remove_render_image_cover();
                 if (configUpdate.has_avoid_character_exit()) avoidCharacterExit = configUpdate.avoid_character_exit();
@@ -211,6 +216,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_hide_character_shadow()) hideCharacterShadow = configUpdate.hide_character_shadow();
                 if (configUpdate.has_hide_live_stream_scene_items_level()) hideLiveStreamSceneItemsLevel = configUpdate.hide_live_stream_scene_items_level();
                 if (configUpdate.has_hide_live_stream_character_items()) hideLiveStreamCharacterItems = configUpdate.hide_live_stream_character_items();
+                if (configUpdate.has_story_replace_content()) storyReplaceContent = configUpdate.story_replace_content();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());
@@ -300,5 +306,9 @@ namespace LinkuraLocal::Config {
         Log::DebugFmt("First year version check: %s < 2.0.0 = %s",
                       currentClientVersion.toString().c_str(), isFirstYearVersionResult ? "true" : "false");
         return isFirstYearVersionResult;
+    }
+
+    bool isLatestVersion() {
+        return currentResVersion == latestResVersion;
     }
 }
