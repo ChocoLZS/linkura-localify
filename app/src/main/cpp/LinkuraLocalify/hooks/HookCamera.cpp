@@ -513,101 +513,162 @@ namespace LinkuraLocal::HookCamera {
             Log::VerboseFmt("%s child: %s", obj_name.c_str(), childName.c_str());
         }
     }
+    // noinline 函数：查找 Mesh 子节点
+    __attribute__((noinline))
+    static UnityResolve::UnityType::Transform* findMeshInParent(UnityResolve::UnityType::Transform* parent) {
+        if (!parent) return nullptr;
+        for (int i = 0; i < parent->GetChildCount(); i++) {
+            auto child = parent->GetChild(i);
+            if (child && std::string(child->GetName()) == "Mesh") {
+                return child;
+            }
+        }
+        return nullptr;
+    }
+
+    // noinline 函数：查找 Hair 子节点
+    // 路径: costume -> SCSch* -> Model -> Mesh -> Hair* (或 Body -> Hair*)
+    __attribute__((noinline))
+    static UnityResolve::UnityType::Transform* findHairInCostume(UnityResolve::UnityType::Transform* costume) {
+        if (!costume) return nullptr;
+
+        for (int i = 0; i < costume->GetChildCount(); i++) {
+            auto scsch = costume->GetChild(i);
+            if (!scsch) continue;
+            std::string scschName = scsch->GetName();
+            if (scschName.rfind("SCSch", 0) != 0) continue;
+
+            for (int j = 0; j < scsch->GetChildCount(); j++) {
+                auto model = scsch->GetChild(j);
+                if (!model || std::string(model->GetName()) != "Model") continue;
+
+                for (int k = 0; k < model->GetChildCount(); k++) {
+                    auto mesh = model->GetChild(k);
+                    if (!mesh || std::string(mesh->GetName()) != "Mesh") continue;
+
+                    // 先尝试直接在 Mesh 下找 Hair*
+                    for (int l = 0; l < mesh->GetChildCount(); l++) {
+                        auto hair = mesh->GetChild(l);
+                        if (hair) {
+                            std::string hairName = hair->GetName();
+                            if (hairName.rfind("Hair", 0) == 0) {
+                                return hair;
+                            }
+                        }
+                    }
+
+                    // 如果没找到，尝试在 Mesh -> Body 下找 Hair*
+                    for (int l = 0; l < mesh->GetChildCount(); l++) {
+                        auto body = mesh->GetChild(l);
+                        if (!body || std::string(body->GetName()) != "Body") continue;
+
+                        for (int m = 0; m < body->GetChildCount(); m++) {
+                            auto hair = body->GetChild(m);
+                            if (hair) {
+                                std::string hairName = hair->GetName();
+                                if (hairName.rfind("Hair", 0) == 0) {
+                                    return hair;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return nullptr;
+    }
 
     DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
-        return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
-        static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
-        static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
         if (!L4Camera::charaRenderSet.contains(self)) {
             L4Camera::charaRenderSet.add(self);
         }
         if (Config::hideCharacterBody) {
             L4Camera::charaRenderSet.hide(self);
         }
-        if (!Config::enableFreeCamera || (L4Camera::GetCameraMode() == L4Camera::CameraMode::FREE)) {
-            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        }
+        if (Config::enableFreeCamera // for follow camera & first person camera logic
+            && (L4Camera::GetCameraMode() == L4Camera::CameraMode::FOLLOW
+                || L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON)) {
+            if (!L4Camera::followCharaSet.contains(self)) {
+                L4Camera::followCharaSet.add(self);
+            }
 
-        if (!L4Camera::followCharaSet.contains(self)) {
-            L4Camera::followCharaSet.add(self);
-        }
-
-        auto currentFace = L4Camera::followCharaSet.getCurrentValue();
-        if (!currentFace) {
-            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        }
-
-        {
-            auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
-            if (!headTrans || !Il2cppUtils::IsNativeObjectAlive(headTrans)) {
+            auto currentFace = L4Camera::followCharaSet.getCurrentValue();
+            if (!currentFace) {
                 return FaceBonesCopier_LastUpdate_Orig(self, mtd);
             }
-            cacheTrans = headTrans;
-            cacheRotation = cacheTrans->GetRotation();
-            cachePosition = cacheTrans->GetPosition();
-            cacheForward = cacheTrans->GetUp();
-            cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
-        }
-
-        auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
-        if (!spineTrans || !Il2cppUtils::IsNativeObjectAlive(spineTrans)) {
-            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        }
-        // {
-        //     auto rootTrans = spineTrans->GetRoot();
-        //     throttle([&]() {
-        //         printChildren(rootTrans, "root");
-        //     }, std::chrono::milliseconds(1000));
-        // }
-        auto modelParent = spineTrans->GetParent();
-        if (!modelParent) {
-            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        }
-        auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
-                [](const std::string& childName) {
-                    return childName == "Mesh";
+            static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
+            static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
+            static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
+            {
+                auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+                if (!headTrans || !Il2cppUtils::IsNativeObjectAlive(headTrans)) {
+                    return FaceBonesCopier_LastUpdate_Orig(self, mtd);
                 }
-        });
-        if (!faceMeshes.empty()) {
-            auto faceHolder = faceMeshes[0];
-            recursiveAddFaceMesh(faceHolder, L4Camera::followCharaSet);
-        }
+                cacheTrans = headTrans;
+                cacheRotation = cacheTrans->GetRotation();
+                cachePosition = cacheTrans->GetPosition();
+                cacheForward = cacheTrans->GetUp();
+                cacheLookAt = cacheTrans->GetPosition() + cacheForward * 3;
+            }
 
-        // modelParent -> parent1 -> parent2 -> costume
-        auto parent1 = modelParent->GetParent();
-        auto parent2 = parent1 ? parent1->GetParent() : nullptr;
-        auto costume = parent2 ? parent2->GetParent() : nullptr;
-        if (!costume) {
-            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
-        }
-        // costume -> SCSch* -> Model -> Mesh
-        auto hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
-                [](const std::string& name) { return name.starts_with("SCSch"); },
-                [](const std::string& name) { return name == "Model"; },
-                [](const std::string& name) { return name == "Mesh"; },
-                [](const std::string& name) { return name.starts_with("Hair"); }
-        });
-        if (hairResult.empty()) {
-            hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
-                    [](const std::string &name) { return name.starts_with("SCSch"); },
-                    [](const std::string &name) { return name == "Model"; },
-                    [](const std::string& name) { return name == "Mesh"; },
-                    [](const std::string& name) { return name == "Body"; },
-                    [](const std::string& name) { return name.starts_with("Hair"); }
-            });
-        }
+            auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
+            if (!spineTrans || !Il2cppUtils::IsNativeObjectAlive(spineTrans)) {
+                return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+            }
+            // {
+            //     auto rootTrans = spineTrans->GetRoot();
+            //     throttle([&]() {
+            //         printChildren(rootTrans, "root");
+            //     }, std::chrono::milliseconds(1000));
+            // }
+            auto modelParent = spineTrans->GetParent();
+            if (!modelParent) {
+                return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+            }
 
-        if (!hairResult.empty()) {
-            L4Camera::followCharaSet.addCharaHair(hairResult[0]);
-        }
+            // 使用链式调用查找 Mesh 子节点
+            auto faseMeshChild = Il2cppUtils::Transform::Find(modelParent).exact("Mesh").first();
+            if (faseMeshChild) {
+                recursiveAddFaceMesh(faseMeshChild, L4Camera::followCharaSet);
+            }
 
-        if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
-            if (L4Camera::followCharaSet.currentHairIsRendered()) {
-                L4Camera::followCharaSet.hideCurrentCharaMeshes();
+            // modelParent -> parent1 -> parent2 -> costume
+            auto parent1 = modelParent->GetParent();
+            auto parent2 = parent1 ? parent1->GetParent() : nullptr;
+            auto costume = parent2 ? parent2->GetParent() : nullptr;
+            if (!costume) {
+                return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+            }
+
+            // 路径1: costume -> SCSch* -> Model -> Mesh -> Hair*
+            auto hairResult = Il2cppUtils::Transform::Find(costume)
+                .startsWith("SCSch")
+                .exact("Model")
+                .exact("Mesh")
+                .startsWith("Hair")
+                .first();
+
+            // 路径2: 如果没找到，尝试 costume -> SCSch* -> Model -> Mesh -> Body -> Hair*
+            if (!hairResult) {
+                hairResult = Il2cppUtils::Transform::Find(costume)
+                    .startsWith("SCSch")
+                    .exact("Model")
+                    .exact("Mesh")
+                    .exact("Body")
+                    .startsWith("Hair")
+                    .first();
+            }
+
+            if (hairResult) {
+                L4Camera::followCharaSet.addCharaHair(hairResult);
+            }
+
+            if (L4Camera::GetCameraMode() == L4Camera::CameraMode::FIRST_PERSON) {
+                if (L4Camera::followCharaSet.currentHairIsRendered()) {
+                    L4Camera::followCharaSet.hideCurrentCharaMeshes();
+                }
             }
         }
-
         return FaceBonesCopier_LastUpdate_Orig(self, mtd);
     }
 

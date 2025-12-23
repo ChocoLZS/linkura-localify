@@ -464,42 +464,172 @@ namespace Il2cppUtils {
         return FromJsonStr(il2cppJsonString, targetType);
     }
 
-    static std::vector<UnityResolve::UnityType::Transform*> GetNestedTransformChildren(
-            UnityResolve::UnityType::Transform* parent,
-            const std::vector<std::function<bool(const std::string&)>>& predicates
-            ) {
-        std::vector<UnityResolve::UnityType::Transform*> currentLevel;
+    // Transform 工具类：提供多种查找子节点的方法
+    //
+    // 方法1: 链式调用 (推荐，避免 lambda)
+    //   auto result = Il2cppUtils::Transform::Find(parent)
+    //       .startsWith("SCSch").exact("Model").exact("Mesh").get();
+    //
+    // 方法2: 模板版本 (使用 lambda，可能有兼容性问题)
+    //   auto result = Il2cppUtils::Transform::GetNestedChildren(parent,
+    //       [](const std::string& n) { return n == "Mesh"; });
+    //
+    // 方法3: std::function 版本 (可能有静态初始化问题)
+    //   auto result = Il2cppUtils::Transform::GetNestedChildrenFunc(parent, {...});
+    //
+    class Transform {
+    public:
+        using TransformPtr = UnityResolve::UnityType::Transform*;
+        using TransformVec = std::vector<TransformPtr>;
 
-        if (parent) {
-            currentLevel.push_back(parent);
+        // =====================================================================
+        // 方法1: 链式调用 Builder（完全避免 lambda 和 std::function）
+        // =====================================================================
+        class Finder {
+        private:
+            TransformVec current_;
+            enum class MatchType { EXACT, STARTS_WITH, ENDS_WITH, CONTAINS };
+
+            void applyMatch(const std::string& pattern, MatchType type) {
+                if (current_.empty()) return;
+
+                TransformVec next;
+                for (auto* transform : current_) {
+                    if (!transform) continue;
+                    for (int i = 0; i < transform->GetChildCount(); i++) {
+                        auto child = transform->GetChild(i);
+                        if (!child) continue;
+
+                        const std::string childName = child->GetName();
+                        bool match = false;
+                        switch (type) {
+                            case MatchType::EXACT:
+                                match = (childName == pattern);
+                                break;
+                            case MatchType::STARTS_WITH:
+                                match = (childName.rfind(pattern, 0) == 0);
+                                break;
+                            case MatchType::ENDS_WITH:
+                                match = (childName.size() >= pattern.size() &&
+                                         childName.compare(childName.size() - pattern.size(), pattern.size(), pattern) == 0);
+                                break;
+                            case MatchType::CONTAINS:
+                                match = (childName.find(pattern) != std::string::npos);
+                                break;
+                        }
+                        if (match) {
+                            next.push_back(child);
+                        }
+                    }
+                }
+                current_ = std::move(next);
+            }
+
+        public:
+            explicit Finder(TransformPtr root) {
+                if (root) current_.push_back(root);
+            }
+
+            Finder& exact(const std::string& name) {
+                applyMatch(name, MatchType::EXACT);
+                return *this;
+            }
+
+            Finder& startsWith(const std::string& prefix) {
+                applyMatch(prefix, MatchType::STARTS_WITH);
+                return *this;
+            }
+
+            Finder& endsWith(const std::string& suffix) {
+                applyMatch(suffix, MatchType::ENDS_WITH);
+                return *this;
+            }
+
+            Finder& contains(const std::string& substr) {
+                applyMatch(substr, MatchType::CONTAINS);
+                return *this;
+            }
+
+            TransformVec get() { return current_; }
+            TransformPtr first() { return current_.empty() ? nullptr : current_[0]; }
+            bool empty() const { return current_.empty(); }
+        };
+
+        static Finder Find(TransformPtr parent) {
+            return Finder(parent);
         }
 
-        for (const auto& predicate : predicates) {
-            std::vector<UnityResolve::UnityType::Transform*> nextLevel;
+        // =====================================================================
+        // 方法2: 模板版本（使用 lambda）
+        // =====================================================================
+    private:
+        static TransformVec GetNestedChildrenImpl(TransformVec currentLevel) {
+            return currentLevel;
+        }
 
+        template<typename Predicate, typename... Rest>
+        static TransformVec GetNestedChildrenImpl(
+                TransformVec currentLevel,
+                Predicate&& predicate,
+                Rest&&... rest
+        ) {
+            if (currentLevel.empty()) return currentLevel;
+
+            TransformVec nextLevel;
             for (auto* transform : currentLevel) {
                 if (!transform) continue;
-
                 for (int i = 0; i < transform->GetChildCount(); i++) {
                     auto child = transform->GetChild(i);
                     if (!child) continue;
-
-                    const auto childName = child->GetName();
-                    if (predicate(childName)) {
+                    if (predicate(child->GetName())) {
                         nextLevel.push_back(child);
                     }
                 }
             }
-
-            currentLevel = std::move(nextLevel);
-
-            // 如果某一层没有找到任何匹配的子对象，提前退出
-            if (currentLevel.empty()) {
-                break;
-            }
+            return GetNestedChildrenImpl(std::move(nextLevel), std::forward<Rest>(rest)...);
         }
 
-        return currentLevel;
+    public:
+        template<typename... Predicates>
+        static TransformVec GetNestedChildren(TransformPtr parent, Predicates&&... predicates) {
+            TransformVec initial;
+            if (parent) initial.push_back(parent);
+            return GetNestedChildrenImpl(std::move(initial), std::forward<Predicates>(predicates)...);
+        }
+
+        // =====================================================================
+        // 方法3: std::function 版本（可能有静态初始化问题）
+        // =====================================================================
+        static TransformVec GetNestedChildrenFunc(
+                TransformPtr parent,
+                const std::vector<std::function<bool(const std::string&)>>& predicates
+        ) {
+            TransformVec currentLevel;
+            if (parent) currentLevel.push_back(parent);
+
+            for (const auto& predicate : predicates) {
+                TransformVec nextLevel;
+                for (auto* transform : currentLevel) {
+                    if (!transform) continue;
+                    for (int i = 0; i < transform->GetChildCount(); i++) {
+                        auto child = transform->GetChild(i);
+                        if (!child) continue;
+                        if (predicate(child->GetName())) {
+                            nextLevel.push_back(child);
+                        }
+                    }
+                }
+                currentLevel = std::move(nextLevel);
+                if (currentLevel.empty()) break;
+            }
+            return currentLevel;
+        }
+    };
+
+    // 保持向后兼容的别名
+    using TransformFinder = Transform::Finder;
+    static Transform::Finder FindChildren(UnityResolve::UnityType::Transform* parent) {
+        return Transform::Find(parent);
     }
 
     static void il2cpp_SetGameObjectActive(UnityResolve::UnityType::GameObject* gameObject, bool active) {
