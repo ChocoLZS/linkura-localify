@@ -515,6 +515,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
+        return FaceBonesCopier_LastUpdate_Orig(self, mtd);
         static auto FaceBonesCopier_klass = Il2cppUtils::GetClass("Core.dll", "Inspix", "FaceBonesCopier");
         static auto head_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("head");
         static auto spine03_field = FaceBonesCopier_klass->Get<UnityResolve::Field>("spine03");
@@ -533,9 +534,15 @@ namespace LinkuraLocal::HookCamera {
         }
 
         auto currentFace = L4Camera::followCharaSet.getCurrentValue();
+        if (!currentFace) {
+            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+        }
 
         {
             auto headTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, head_field);
+            if (!headTrans || !Il2cppUtils::IsNativeObjectAlive(headTrans)) {
+                return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+            }
             cacheTrans = headTrans;
             cacheRotation = cacheTrans->GetRotation();
             cachePosition = cacheTrans->GetPosition();
@@ -544,6 +551,9 @@ namespace LinkuraLocal::HookCamera {
         }
 
         auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(currentFace, spine03_field);
+        if (!spineTrans || !Il2cppUtils::IsNativeObjectAlive(spineTrans)) {
+            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+        }
         // {
         //     auto rootTrans = spineTrans->GetRoot();
         //     throttle([&]() {
@@ -551,6 +561,9 @@ namespace LinkuraLocal::HookCamera {
         //     }, std::chrono::milliseconds(1000));
         // }
         auto modelParent = spineTrans->GetParent();
+        if (!modelParent) {
+            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+        }
         auto faceMeshes = Il2cppUtils::GetNestedTransformChildren(modelParent, {
                 [](const std::string& childName) {
                     return childName == "Mesh";
@@ -561,7 +574,13 @@ namespace LinkuraLocal::HookCamera {
             recursiveAddFaceMesh(faceHolder, L4Camera::followCharaSet);
         }
 
-        auto costume = modelParent->GetParent()->GetParent()->GetParent();
+        // modelParent -> parent1 -> parent2 -> costume
+        auto parent1 = modelParent->GetParent();
+        auto parent2 = parent1 ? parent1->GetParent() : nullptr;
+        auto costume = parent2 ? parent2->GetParent() : nullptr;
+        if (!costume) {
+            return FaceBonesCopier_LastUpdate_Orig(self, mtd);
+        }
         // costume -> SCSch* -> Model -> Mesh
         auto hairResult = Il2cppUtils::GetNestedTransformChildren(costume, {
                 [](const std::string& name) { return name.starts_with("SCSch"); },

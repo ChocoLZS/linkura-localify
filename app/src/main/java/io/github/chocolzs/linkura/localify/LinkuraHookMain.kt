@@ -937,7 +937,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         val clientResList = allClientRes[currentVersionName]
         
         // Find the latest client version (highest version key in the map)
-        val latestClientVersion = allClientRes.keys.maxOrNull() ?: currentVersionName
+        val latestClientVersion = allClientRes.keys.firstOrNull() ?: currentVersionName
         val latestClientResList = allClientRes[latestClientVersion]
         val latestResVersion = latestClientResList?.lastOrNull() ?: ""
         

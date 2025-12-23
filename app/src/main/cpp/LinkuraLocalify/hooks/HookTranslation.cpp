@@ -38,7 +38,7 @@ namespace LinkuraLocal::HookTranslation {
     }
     std::unordered_set<void*> updatedFontPtrs{};
     void UpdateTMPFont(void* TMP_Textself) {
-        if (!Config::replaceFont) return;
+        if (!Config::replaceFont || !TMP_Textself) return;
         static auto get_font = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",
                                                       "TMPro", "TMP_Text", "get_font");
         static auto set_font = Il2cppUtils::GetMethod("Unity.TextMeshPro.dll",

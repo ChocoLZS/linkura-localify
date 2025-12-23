@@ -208,7 +208,12 @@ namespace L4Camera {
             if (!value || hidden[value]) return;
             LinkuraLocal::Log::DebugFmt("Trying to hide the meshes for %p", value);
             auto spineTrans = Il2cppUtils::ClassGetFieldValue<UnityResolve::UnityType::Transform*>(value, spine03_field);
-            auto costume = spineTrans->GetParent()->GetParent()->GetParent()->GetParent();
+            if (!spineTrans) return;
+            auto p1 = spineTrans->GetParent();
+            auto p2 = p1 ? p1->GetParent() : nullptr;
+            auto p3 = p2 ? p2->GetParent() : nullptr;
+            auto costume = p3 ? p3->GetParent() : nullptr;
+            if (!costume) return;
             auto meshResult = Il2cppUtils::GetNestedTransformChildren(costume, {
                     [](const std::string& name) { return name.starts_with("SCSch"); },
                     [](const std::string& name) { return name == "Model"; },
@@ -231,13 +236,14 @@ namespace L4Camera {
                 auto childCount = meshRoot->GetChildCount();
                 for (int i = 0; i < childCount; i++) {
                     auto child = meshRoot->GetChild(i);
+                    if (!child) continue;
                     const auto childName = child->GetName();
                     if (childName.starts_with("Hair")) {
                         continue;
                     }
                     Il2cppUtils::SetTransformRenderActive(child, false, childName);
                     auto renderer = Il2cppUtils::GetMeshRenderer(child);
-                    renderSet.insert(renderer);
+                    if (renderer) renderSet.insert(renderer);
                 }
             }
             hidden.insert_or_assign(value, true);
