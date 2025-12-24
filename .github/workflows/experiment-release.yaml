@@ -1,0 +1,232 @@
+name: Experimental Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - experimental
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      release_id: ${{ steps.create_release.outputs.id }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from build.gradle
+        id: get_tag
+        run: |
+          version=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+          echo "tag_name=${version}-experimental" >> $GITHUB_OUTPUT
+
+      - name: Prepare Release Body
+        id: prepare_release_body
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+
+          # Read the template and replace placeholders
+          template_content=$(cat .github/release_template.md)
+          release_body="${template_content//VERSION/$tag_name}"
+
+          # Save to output
+          echo "release_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$release_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Delete existing experimental release
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+          # Delete existing release if exists
+          gh release delete "$tag_name" --yes || true
+          # Delete existing tag if exists
+          git push origin ":refs/tags/$tag_name" || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag_name }}
+          name: Release ${{ steps.get_tag.outputs.tag_name }}
+          body: ${{ steps.prepare_release_body.outputs.release_body }}
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-release-apk:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      apk_path: ${{ steps.rename_apk.outputs.apk_path }}
+      apk_name: ${{ steps.rename_apk.outputs.apk_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android Development Environment
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: |
+          sdkmanager --install "cmake;3.22.1"
+          echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" > local.properties
+          echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+
+      - name: Update Submodules
+        run: |
+          git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
+        continue-on-error: true
+
+      - name: Build Assets
+        run: |
+          cd app/src/main/assets/linkura-local && make build-resource
+        continue-on-error: true
+
+      - name: Write branch and commit info
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          hash=$(git rev-parse --short=8 HEAD)
+          echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Sign app APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTOREB64 }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Get version from build.gradle
+        id: get_tag
+        run: |
+          version=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+          echo "tag_name=${version}-experimental" >> $GITHUB_OUTPUT
+
+      - name: Rename APK
+        id: rename_apk
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+          apk_name="linkura-localify-${tag_name}-release-arm64-v8a.apk"
+          cp "${{ steps.sign_app.outputs.signedReleaseFile }}" "$apk_name"
+          echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
+          echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rename_apk.outputs.apk_name }}
+          path: ${{ steps.rename_apk.outputs.apk_path }}
+
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      apk_path: ${{ steps.rename_apk.outputs.apk_path }}
+      apk_name: ${{ steps.rename_apk.outputs.apk_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android Development Environment
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: |
+          sdkmanager --install "cmake;3.22.1"
+          echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" > local.properties
+          echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+
+      - name: Update Submodules
+        run: |
+          git submodule foreach --recursive 'git pull --rebase origin main --allow-unrelated-histories'
+        continue-on-error: true
+
+      - name: Build Assets
+        run: |
+          cd app/src/main/assets/linkura-local && make build-resource
+        continue-on-error: true
+
+      - name: Write branch and commit info
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          hash=$(git rev-parse --short=8 HEAD)
+          echo "$branch.$hash" > app/src/main/assets/linkura-local/version.txt
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Get version from build.gradle
+        id: get_tag
+        run: |
+          version=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+          echo "tag_name=${version}-experimental" >> $GITHUB_OUTPUT
+
+      - name: Rename APK
+        id: rename_apk
+        run: |
+          tag_name="${{ steps.get_tag.outputs.tag_name }}"
+          apk_name="linkura-localify-${tag_name}-debug-arm64-v8a.apk"
+          cp "app/build/outputs/apk/debug/app-debug.apk" "$apk_name"
+          echo "apk_path=$apk_name" >> $GITHUB_OUTPUT
+          echo "apk_name=$apk_name" >> $GITHUB_OUTPUT
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rename_apk.outputs.apk_name }}
+          path: ${{ steps.rename_apk.outputs.apk_path }}
+
+  upload-to-release:
+    needs: [create-release, build-release-apk, build-debug-apk]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+
+      - name: Find and Upload APK to Release
+        run: |
+          find . -name "*.apk" -type f
+          apk_file=$(find . -name "*.apk" -type f | head -1)
+          echo "Found APK: $apk_file"
+
+      - name: Upload APK to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag_name }}
+          files: "**/*.apk"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -658,6 +658,7 @@ namespace LinkuraLocal::HookCamera {
     }
 
     DEFINE_HOOK(void, FaceBonesCopier_LastUpdate, (void* self, void* mtd)) {
+        return FaceBonesCopier_LastUpdate_Orig(self, mtd);
         if (!L4Camera::charaRenderSet.contains(self)) {
             L4Camera::charaRenderSet.add(self);
         }
