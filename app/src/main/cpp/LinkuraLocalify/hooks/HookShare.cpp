@@ -362,6 +362,10 @@ namespace LinkuraLocal::HookShare {
     std::unordered_set<int64_t> advSeriesIdExistsCache;
     std::unordered_set<int64_t> advSeriesIdNotExistsCache;
 
+    void* advDatasMasterInstance = nullptr;
+    std::unordered_set<int64_t> advDataIdExistsCache;
+    std::unordered_set<int64_t> advDataIdNotExistsCache;
+
     DEFINE_HOOK(void, Silverflame_SFL_AdvSeriesMaster_ctor, (void* self, void* conn)) {
         Log::DebugFmt("Silverflame_SFL_AdvSeriesMaster_ctor HOOKED, instance=%p", self);
         advSeriesMasterInstance = self;
@@ -373,6 +377,20 @@ namespace LinkuraLocal::HookShare {
 
     DEFINE_HOOK(void*, Silverflame_SFL_AdvSeriesMaster_Fetch, (void* self, int64_t id)) {
         void* result = Silverflame_SFL_AdvSeriesMaster_Fetch_Orig(self, id);
+        return result;
+    }
+
+    DEFINE_HOOK(void, Silverflame_SFL_AdvDatasMaster_ctor, (void* self, void* conn)) {
+        Log::DebugFmt("Silverflame_SFL_AdvDatasMaster_ctor HOOKED, instance=%p", self);
+        advDatasMasterInstance = self;
+        // 清空缓存
+        advDataIdExistsCache.clear();
+        advDataIdNotExistsCache.clear();
+        return Silverflame_SFL_AdvDatasMaster_ctor_Orig(self, conn);
+    }
+
+    DEFINE_HOOK(void*, Silverflame_SFL_AdvDatasMaster_Fetch, (void* self, int64_t id)) {
+        void* result = Silverflame_SFL_AdvDatasMaster_Fetch_Orig(self, id);
         return result;
     }
 
@@ -400,6 +418,64 @@ namespace LinkuraLocal::HookShare {
         }
 
         return exists;
+    }
+
+    bool isAdvDataIdExists(int64_t id) {
+        if (advDataIdExistsCache.count(id)) {
+            return true;
+        }
+        if (advDataIdNotExistsCache.count(id)) {
+            return false;
+        }
+
+        if (!advDatasMasterInstance) {
+            Log::WarnFmt("AdvDatasMaster instance is null, cannot check id=%lld", id);
+            return true; // 如果实例不存在，默认返回 true 不过滤
+        }
+        void* result = Silverflame_SFL_AdvDatasMaster_Fetch_Orig(advDatasMasterInstance, id);
+        bool exists = result != nullptr;
+
+        if (exists) {
+            advDataIdExistsCache.insert(id);
+        } else {
+            advDataIdNotExistsCache.insert(id);
+            Log::DebugFmt("adv_data_id=%lld not found in local database", id);
+        }
+
+        return exists;
+    }
+
+    template<typename Predicate>
+    void json_erase_if(nlohmann::json& arr, Predicate pred) {
+        arr.erase(std::remove_if(arr.begin(), arr.end(), pred), arr.end());
+    }
+
+    void filterActivityRecordMonthlyInfoList(nlohmann::json& json) {
+        if (!json.contains("activity_record_monthly_info_list") || !json["activity_record_monthly_info_list"].is_array()) {
+            return;
+        }
+        auto& info_list = json["activity_record_monthly_info_list"];
+
+        json_erase_if(info_list, [](const nlohmann::json& info_item) {
+            auto adv_series_id = info_item.value("adv_series_id", 0LL);
+            if (adv_series_id && !isAdvSeriesIdExists(adv_series_id)) {
+                Log::DebugFmt("Filtering out adv_series_id=%lld", adv_series_id);
+                return true;
+            }
+            return false;
+        });
+
+        for (auto& info_item : info_list) {
+            if (!info_item.contains("adv_info_list") || !info_item["adv_info_list"].is_array()) continue;
+            json_erase_if(info_item["adv_info_list"], [](const nlohmann::json& adv_info) {
+                auto adv_data_id = adv_info.value("adv_data_id", 0LL);
+                if (adv_data_id && !isAdvDataIdExists(adv_data_id)) {
+                    Log::DebugFmt("Filtering out adv_data_id=%lld", adv_data_id);
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
     uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
@@ -494,24 +570,8 @@ namespace LinkuraLocal::HookShare {
 //        }
         IF_CALLER_WITHIN(ActivityRecordGetTopWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
             if (Config::enableLegacyCompatibility && !Config::isLatestVersion()) {
-                // 过滤掉在旧版本本地数据库中不存在的 adv_series_id
-
-                if (json.contains("activity_record_monthly_info_list") && json["activity_record_monthly_info_list"].is_array()) {
-                    auto& info_list = json["activity_record_monthly_info_list"];
-                    info_list.erase(
-                            std::remove_if(info_list.begin(), info_list.end(),
-                                           [](const nlohmann::json& info_item) {
-                                               if (!info_item.contains("adv_series_id")) return false;
-                                               int64_t adv_series_id = info_item["adv_series_id"].get<int64_t>();
-                                               if (!isAdvSeriesIdExists(adv_series_id)) {
-                                                   Log::DebugFmt("Filtering out adv_series_id=%lld (not found in local AdvSeriesMaster)", adv_series_id);
-                                                   return true; // 过滤掉
-                                               }
-                                               return false;
-                                           }),
-                            info_list.end());
-                    result = Il2cppUtils::FromJsonStr(json.dump(), type);
-                }
+                filterActivityRecordMonthlyInfoList(json);
+                result = Il2cppUtils::FromJsonStr(json.dump(), type);
             }
         }
         return result;
@@ -853,6 +913,8 @@ namespace LinkuraLocal::HookShare {
 //        }
         ADD_HOOK(Silverflame_SFL_AdvSeriesMaster_ctor, Il2cppUtils::GetMethodPointer("Core.dll", "Silverflame.SFL", "AdvSeriesMaster", ".ctor"));
         ADD_HOOK(Silverflame_SFL_AdvSeriesMaster_Fetch, Il2cppUtils::GetMethodPointer("Core.dll", "Silverflame.SFL", "AdvSeriesMaster", "Fetch"));
+        ADD_HOOK(Silverflame_SFL_AdvDatasMaster_ctor, Il2cppUtils::GetMethodPointer("Core.dll", "Silverflame.SFL", "AdvDatasMaster", ".ctor"));
+        ADD_HOOK(Silverflame_SFL_AdvDatasMaster_Fetch, Il2cppUtils::GetMethodPointer("Core.dll", "Silverflame.SFL", "AdvDatasMaster", "Fetch"));
 #pragma endregion
     }
 }
