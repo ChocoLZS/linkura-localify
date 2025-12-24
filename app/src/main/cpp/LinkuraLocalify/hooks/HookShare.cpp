@@ -357,6 +357,51 @@ namespace LinkuraLocal::HookShare {
         }
         return json;
     }
+
+    void* advSeriesMasterInstance = nullptr;
+    std::unordered_set<int64_t> advSeriesIdExistsCache;
+    std::unordered_set<int64_t> advSeriesIdNotExistsCache;
+
+    DEFINE_HOOK(void, Silverflame_SFL_AdvSeriesMaster_ctor, (void* self, void* conn)) {
+        Log::DebugFmt("Silverflame_SFL_AdvSeriesMaster_ctor HOOKED, instance=%p", self);
+        advSeriesMasterInstance = self;
+        // 清空缓存
+        advSeriesIdExistsCache.clear();
+        advSeriesIdNotExistsCache.clear();
+        return Silverflame_SFL_AdvSeriesMaster_ctor_Orig(self, conn);
+    }
+
+    DEFINE_HOOK(void*, Silverflame_SFL_AdvSeriesMaster_Fetch, (void* self, int64_t id)) {
+        void* result = Silverflame_SFL_AdvSeriesMaster_Fetch_Orig(self, id);
+        return result;
+    }
+
+    // 辅助函数：检查 adv_series_id 是否存在于本地数据库（带缓存）
+    bool isAdvSeriesIdExists(int64_t id) {
+        if (advSeriesIdExistsCache.count(id)) {
+            return true;
+        }
+        if (advSeriesIdNotExistsCache.count(id)) {
+            return false;
+        }
+
+        if (!advSeriesMasterInstance) {
+            Log::WarnFmt("AdvSeriesMaster instance is null, cannot check id=%lld", id);
+            return true; // 如果实例不存在，默认返回 true 不过滤
+        }
+        void* result = Silverflame_SFL_AdvSeriesMaster_Fetch_Orig(advSeriesMasterInstance, id);
+        bool exists = result != nullptr;
+
+        if (exists) {
+            advSeriesIdExistsCache.insert(id);
+        } else {
+            advSeriesIdNotExistsCache.insert(id);
+            Log::DebugFmt("adv_series_id=%lld not found in local database", id);
+        }
+
+        return exists;
+    }
+
     uintptr_t ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveGetWithArchiveDataWithHttpInfoAsync_MoveNext_Addr = 0;
     /**
@@ -374,6 +419,8 @@ namespace LinkuraLocal::HookShare {
     uintptr_t WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t FesliveApi_FesliveLiveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
     uintptr_t ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
+
+    uintptr_t ActivityRecordGetTopWithHttpInfoAsync_MoveNext_Addr = 0;
     // http response modify
     DEFINE_HOOK(void* , ApiClient_Deserialize, (void* self, void* response, void* type, void* method_info)) {
         auto result = ApiClient_Deserialize_Orig(self, response, type, method_info);
@@ -435,6 +482,7 @@ namespace LinkuraLocal::HookShare {
         IF_CALLER_WITHIN(WithliveApi_WithliveLiveInfoWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
             if (Config::unlockAfter) {
                 json["has_extra_admission"] = "true";
+//                json["has_admission"] = "true";
             }
             result = Il2cppUtils::FromJsonStr(json.dump(), type);
         }
@@ -444,6 +492,28 @@ namespace LinkuraLocal::HookShare {
 ////            }
 //            result = Il2cppUtils::FromJsonStr(json.dump(), type);
 //        }
+        IF_CALLER_WITHIN(ActivityRecordGetTopWithHttpInfoAsync_MoveNext_Addr, caller, 3000) {
+            if (Config::enableLegacyCompatibility && !Config::isLatestVersion()) {
+                // 过滤掉在旧版本本地数据库中不存在的 adv_series_id
+
+                if (json.contains("activity_record_monthly_info_list") && json["activity_record_monthly_info_list"].is_array()) {
+                    auto& info_list = json["activity_record_monthly_info_list"];
+                    info_list.erase(
+                            std::remove_if(info_list.begin(), info_list.end(),
+                                           [](const nlohmann::json& info_item) {
+                                               if (!info_item.contains("adv_series_id")) return false;
+                                               int64_t adv_series_id = info_item["adv_series_id"].get<int64_t>();
+                                               if (!isAdvSeriesIdExists(adv_series_id)) {
+                                                   Log::DebugFmt("Filtering out adv_series_id=%lld (not found in local AdvSeriesMaster)", adv_series_id);
+                                                   return true; // 过滤掉
+                                               }
+                                               return false;
+                                           }),
+                            info_list.end());
+                    result = Il2cppUtils::FromJsonStr(json.dump(), type);
+                }
+            }
+        }
         return result;
     }
 
@@ -746,6 +816,17 @@ namespace LinkuraLocal::HookShare {
             }
         }
 #pragma endregion
+#pragma region ActivityTopApi
+        auto ActivityTopApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ActivityRecordApi");
+        method = (Il2cppUtils::MethodInfo*) nullptr;
+        if (ActivityTopApi_klass) {
+            auto ActivityRecordGetTopWithHttpInfoAsync_klass = Il2cppUtils::find_nested_class_from_name(
+                    ActivityTopApi_klass, "<ActivityRecordGetTopWithHttpInfoAsync>d__18");
+            method = Il2cppUtils::GetMethodIl2cpp(ActivityRecordGetTopWithHttpInfoAsync_klass, "MoveNext", 0);
+            if (method) {
+                ActivityRecordGetTopWithHttpInfoAsync_MoveNext_Addr = method->methodPointer;
+            }
+        }
 
 #pragma region RenderScene
         ADD_HOOK(AlstArchiveDirectory_GetLocalFullPathFromFileName, Il2cppUtils::GetMethodPointer("Core.dll", "Alstromeria", "AlstArchiveDirectory", "GetRemoteUriFromFileName"));
@@ -770,6 +851,8 @@ namespace LinkuraLocal::HookShare {
 //                ADD_HOOK(AssetManager_SynchronizeResourceVersion_MoveNext, method->methodPointer);
 //            }
 //        }
+        ADD_HOOK(Silverflame_SFL_AdvSeriesMaster_ctor, Il2cppUtils::GetMethodPointer("Core.dll", "Silverflame.SFL", "AdvSeriesMaster", ".ctor"));
+        ADD_HOOK(Silverflame_SFL_AdvSeriesMaster_Fetch, Il2cppUtils::GetMethodPointer("Core.dll", "Silverflame.SFL", "AdvSeriesMaster", "Fetch"));
 #pragma endregion
     }
 }
