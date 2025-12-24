@@ -25,6 +25,7 @@ interface ConfigListener {
     fun onReplaceFontChanged(value: Boolean)
     fun onLazyInitChanged(value: Boolean)
     fun onEnableFreeCameraChanged(value: Boolean)
+    fun onMemorizeFreeCameraPosChanged(value: Boolean)
     fun onTargetFpsChanged(s: CharSequence, start: Int, before: Int, count: Int)
     fun onDumpTextChanged(value: Boolean)
     fun onRemoveRenderImageCoverChanged(value: Boolean)
@@ -36,6 +37,7 @@ interface ConfigListener {
     fun onStoryHideEffectChanged(value: Boolean)
     fun onStoryNovelVocalTextDurationRateChanged(value: Float)
     fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
+    fun onStoryReplaceContentChanged(value: String)
     fun onFirstPersonCameraHideHeadChanged(value: Boolean)
     fun onFirstPersonCameraHideHairChanged(value: Boolean)
     fun onEnableMotionCaptureReplayChanged(value: Boolean)
@@ -187,6 +189,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         sendConfigUpdate(config)
     }
 
+    override fun onMemorizeFreeCameraPosChanged(value: Boolean) {
+        config.memorizeFreeCameraPos = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
     override fun onTargetFpsChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         try {
             val valueStr = s.toString()
@@ -252,6 +260,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     }
     override fun onStoryNovelNonVocalTextDurationRateChanged(value: Float) {
         config.storyNovelNonVocalTextDurationRate = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onStoryReplaceContentChanged(value: String) {
+        config.storyReplaceContent = value
         saveConfig()
         sendConfigUpdate(config)
     }

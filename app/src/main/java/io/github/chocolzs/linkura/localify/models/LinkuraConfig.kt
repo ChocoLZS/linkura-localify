@@ -17,6 +17,7 @@ data class LinkuraConfig (
      */
     var forceExportResource: Boolean = false,
     var enableFreeCamera: Boolean = false,
+    var memorizeFreeCameraPos: Boolean = false,
     var targetFrameRate: Int = 0,
     var removeRenderImageCover: Boolean = false,
     var avoidCharacterExit: Boolean = false,
@@ -28,6 +29,7 @@ data class LinkuraConfig (
     var storyHideEffect: Boolean = false,
     var storyNovelVocalTextDurationRate: Float = 1.0f,
     var storyNovelNonVocalTextDurationRate: Float = 1.0f,
+    var storyReplaceContent: String = "",
 
     var firstPersonCameraHideHead: Boolean = true,
     var firstPersonCameraHideHair: Boolean = true,

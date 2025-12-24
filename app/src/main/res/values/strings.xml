@@ -6,6 +6,8 @@
     <string name="replace_font">Replace Font</string>
     <string name="lazy_init">Fast Initialization (Lazy loading)</string>
     <string name="enable_free_camera">Enable Free Camera</string>
+    <string name="config.free_camera.memorize_pos">Keep Free Camera Position</string>
+    <string name="config.free_camera.memorize_pos_description">When enabled, switching from First Person/Follow mode to Free Camera will keep the original Free Camera position instead of inheriting the current view position</string>
     <string name="start_game">Start Game / Hot Reload Config</string>
     <string name="setFpsTitle">Max FPS (0 is Use Original Settings)</string>
     <string name="unlockAllLive">Unlock All Live</string>
@@ -141,6 +143,14 @@
     <string name="config.story.hide_effect">Hide Effects</string>
     <string name="config.story.vocal_text_duration_rate">Novel Vocal Text Duration Rate</string>
     <string name="config.story.non_vocal_text_duration_rate">Novel Narration Text Duration Rate</string>
+    <string name="config.story.replace_content_button">Custom Story Script</string>
+    <string name="config.story.replace_content_title">Edit Story Script</string>
+    <string name="config.story.replace_content_empty_hint">No custom script set</string>
+    <string name="config.story.replace_content_has_content">Custom script configured</string>
+    <string name="config.story.replace_content_chars">characters</string>
+    <string name="config.story.replace_content_placeholder">Paste or type story script content here...\n\nThis will completely replace the original story script when playing activity records.</string>
+    <string name="config.story.replace_content_clear">Clear</string>
+    <string name="config.story.replace_content_paste">Paste</string>
 
     <!-- First Person Camera Settings -->
     <string name="config.first_person_camera.hide_head">Hide Head in First Person</string>

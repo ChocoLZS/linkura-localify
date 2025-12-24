@@ -22,6 +22,7 @@ namespace LinkuraLocal::HookStory {
         Log::DebugFmt("StoryScene_LoadStoryData HOOKED, %s", fileName->ToString().c_str());
         auto content = StoryScene_LoadStoryData_Orig(fileName, mtd);
         auto content_str = content->ToString();
+
         if (Config::storyHideBackground) {
             content_str = regex_replace(content_str, "#?\\[?背景(表示|移動|回転)[^\\n]*\\n", "");
             content_str = regex_replace(content_str, "[^\\n]*runbg[^\\n]*\\n", "");
@@ -42,6 +43,10 @@ namespace LinkuraLocal::HookStory {
 
         if (Config::storyHideEffect) {
             content_str = regex_replace(content_str, "\\[?プリセットポストエフェクト[^\\n]*\\n", "");
+        }
+
+        if (!Config::storyReplaceContent.empty()) {
+            content_str = Config::storyReplaceContent;
         }
 
         content = Il2cppUtils::Il2CppString::New(content_str);

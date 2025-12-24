@@ -214,23 +214,22 @@ namespace L4Camera {
             auto p3 = p2 ? p2->GetParent() : nullptr;
             auto costume = p3 ? p3->GetParent() : nullptr;
             if (!costume) return;
-            auto meshResult = Il2cppUtils::GetNestedTransformChildren(costume, {
-                    [](const std::string& name) { return name.starts_with("SCSch"); },
-                    [](const std::string& name) { return name == "Model"; },
-                    [](const std::string& name) { return name == "Mesh"; },
-                    });
-            UnityResolve::UnityType::Transform* meshRoot = nullptr;
-            if (!meshResult.empty()) {
-                meshRoot = meshResult[0];
-            }
-            auto bodyResult = Il2cppUtils::GetNestedTransformChildren(costume, {
-                    [](const std::string &name) { return name.starts_with("SCSch"); },
-                    [](const std::string &name) { return name == "Model"; },
-                    [](const std::string& name) { return name == "Mesh"; },
-                    [](const std::string& name) { return name == "Body"; }
-            });
-            if (!bodyResult.empty()) {
-                meshRoot = bodyResult[0];
+            // costume -> SCSch* -> Model -> Mesh (-> Body)
+            // 先尝试找 Body
+            auto meshRoot = Il2cppUtils::Transform::Find(costume)
+                .startsWith("SCSch")
+                .exact("Model")
+                .exact("Mesh")
+                .exact("Body")
+                .first();
+
+            // 如果没找到 Body，则使用 Mesh
+            if (!meshRoot) {
+                meshRoot = Il2cppUtils::Transform::Find(costume)
+                    .startsWith("SCSch")
+                    .exact("Model")
+                    .exact("Mesh")
+                    .first();
             }
             if (meshRoot) {
                 auto childCount = meshRoot->GetChildCount();
@@ -312,8 +311,12 @@ namespace L4Camera {
     };
 
     extern CameraInfo currentCameraInfo;
-    void UpdateCameraInfo(const UnityResolve::UnityType::Vector3& pos, 
-                         const UnityResolve::UnityType::Quaternion& rot, 
+    void UpdateCameraInfo(const UnityResolve::UnityType::Vector3& pos,
+                         const UnityResolve::UnityType::Quaternion& rot,
                          float fieldOfView);
     CameraInfo GetCurrentCameraInfo();
+
+    // 从当前 FirstPerson/Follow 模式的缓存值同步到 FreeCamera
+    // 在切换到 FREE 模式前调用，使 FreeCamera 继承当前相机状态
+    void SyncBaseCameraFromCurrentMode();
 }
