@@ -940,6 +940,26 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         val latestClientVersion = allClientRes.keys.firstOrNull() ?: currentVersionName
         val latestClientResList = allClientRes[latestClientVersion]
         val latestResVersion = latestClientResList?.lastOrNull() ?: ""
+
+        var targetClientVersion = currentVersionName
+        var targetResVersion = clientResList?.lastOrNull() ?: ""
+
+        if (linkuraConfig != null) {
+            when (linkuraConfig!!.resourceVersionMode) {
+                1 -> { // Latest
+                    targetClientVersion = latestClientVersion
+                    targetResVersion = latestResVersion
+                }
+                2 -> { // Custom
+                    if (linkuraConfig!!.customClientVersion.isNotEmpty()) {
+                        targetClientVersion = linkuraConfig!!.customClientVersion
+                    }
+                    if (linkuraConfig!!.customResVersion.isNotEmpty()) {
+                        targetResVersion = linkuraConfig!!.customResVersion
+                    }
+                }
+            }
+        }
         
         if (clientResList != null && clientResList.isNotEmpty()) {
             Log.i(TAG, "Found ${clientResList.size} client resources for current version $currentVersionName")
@@ -950,11 +970,13 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             if (currentResVersion != null) {
                 Log.i(TAG, "Current client: $currentVersionName, current res: $currentResVersion")
                 Log.i(TAG, "Latest client: $latestClientVersion, latest res: $latestResVersion")
+                Log.i(TAG, "Target client: $targetClientVersion, target res: $targetResVersion")
                 LogExporter.addLogEntry(TAG, "I", "Current: client=$currentVersionName, res=$currentResVersion")
                 LogExporter.addLogEntry(TAG, "I", "Latest: client=$latestClientVersion, res=$latestResVersion")
+                LogExporter.addLogEntry(TAG, "I", "Target: client=$targetClientVersion, res=$targetResVersion")
                 
                 // Call native function to store all version information
-                loadClientResVersion(currentVersionName, currentResVersion, latestClientVersion, latestResVersion)
+                loadClientResVersion(targetClientVersion, targetResVersion, latestClientVersion, latestResVersion)
             } else {
                 Log.w(TAG, "Client resources list is empty for version $currentVersionName")
                 LogExporter.addLogEntry(TAG, "W", "Empty client resources list for $currentVersionName")
@@ -971,7 +993,7 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
             if (latestResVersion.isNotEmpty()) {
                 Log.i(TAG, "Loading latest version info only - Latest client: $latestClientVersion, latest res: $latestResVersion")
                 LogExporter.addLogEntry(TAG, "I", "Latest version only: client=$latestClientVersion, res=$latestResVersion")
-                loadClientResVersion(currentVersionName, "", latestClientVersion, latestResVersion)
+                loadClientResVersion(targetClientVersion, targetResVersion, latestClientVersion, latestResVersion)
             }
         }
     }

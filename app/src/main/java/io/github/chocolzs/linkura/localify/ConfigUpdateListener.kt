@@ -65,6 +65,9 @@ interface ConfigListener {
     fun onHideLiveStreamCharacterItems(value: Boolean)
     fun onEnableInGameOverlayToolbar(value: Boolean)
     fun onLocaleCodeChanged(value: String)
+    fun onResourceVersionModeChanged(value: Int)
+    fun onCustomClientVersionChanged(value: String)
+    fun onCustomResVersionChanged(value: String)
 
     fun onPUseRemoteAssetsChanged(value: Boolean)
     fun onPCleanLocalAssetsChanged(value: Boolean)
@@ -428,6 +431,21 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     }
     override fun onLocaleCodeChanged(value: String) {
         config.localeCode = value
+        saveConfig()
+    }
+
+    override fun onResourceVersionModeChanged(value: Int) {
+        config.resourceVersionMode = value
+        saveConfig()
+    }
+
+    override fun onCustomClientVersionChanged(value: String) {
+        config.customClientVersion = value
+        saveConfig()
+    }
+
+    override fun onCustomResVersionChanged(value: String) {
+        config.customResVersion = value
         saveConfig()
     }
 
