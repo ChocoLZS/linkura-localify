@@ -89,6 +89,7 @@ import io.github.chocolzs.linkura.localify.ui.components.ArchiveWaterfallGrid
 import io.github.chocolzs.linkura.localify.ui.components.GakuButton
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupBox
 import io.github.chocolzs.linkura.localify.ui.components.GakuProgressBar
+import io.github.chocolzs.linkura.localify.ui.components.GakuRadio
 import io.github.chocolzs.linkura.localify.ui.components.GakuSelector
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTabRow
@@ -376,6 +377,95 @@ private fun ReplayTabPage(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
+
+                    if (config.value.enableLegacyCompatibility) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(stringResource(R.string.config_legacy_resource_mode_title))
+                            Row(modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                val radioModifier = Modifier.height(40.dp).weight(1f)
+
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_legacy_resource_mode_default), selected = config.value.resourceVersionMode == 0,
+                                    onClick = { context?.onResourceVersionModeChanged(0) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_legacy_resource_mode_latest), selected = config.value.resourceVersionMode == 1,
+                                    onClick = { context?.onResourceVersionModeChanged(1) })
+                                GakuRadio(modifier = radioModifier,
+                                    text = stringResource(R.string.config_legacy_resource_mode_custom), selected = config.value.resourceVersionMode == 2,
+                                    onClick = { context?.onResourceVersionModeChanged(2) })
+                            }
+
+                            if (config.value.resourceVersionMode == 2) {
+                                var clientResMap by remember { mutableStateOf<Map<String, List<String>>>(emptyMap()) }
+                                LaunchedEffect(Unit) {
+                                    context?.let { ctx ->
+                                        val loaded = AssetsRepository.loadClientRes(ctx)
+                                        if (loaded != null) clientResMap = loaded
+                                    }
+                                }
+
+                                if (clientResMap.isNotEmpty()) {
+                                    val clientVersions = clientResMap.keys.toList()
+                                    val selectedClientVer = if (config.value.customClientVersion.isNotEmpty() && clientResMap.containsKey(config.value.customClientVersion)) {
+                                        config.value.customClientVersion
+                                    } else {
+                                        clientVersions.firstOrNull() ?: ""
+                                    }
+
+                                    // Update if empty
+                                    if (config.value.customClientVersion.isEmpty() && selectedClientVer.isNotEmpty()) {
+                                        context?.onCustomClientVersionChanged(selectedClientVer)
+                                    }
+
+                                    val resVersions = clientResMap[selectedClientVer] ?: emptyList()
+                                    val selectedResVer = if (config.value.customResVersion.isNotEmpty() && resVersions.contains(config.value.customResVersion)) {
+                                        config.value.customResVersion
+                                    } else {
+                                        resVersions.lastOrNull() ?: ""
+                                    }
+                                    
+                                    // Update if empty
+                                    if (config.value.customResVersion.isEmpty() && selectedResVer.isNotEmpty()) {
+                                        context?.onCustomResVersionChanged(selectedResVer)
+                                    }
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(stringResource(R.string.config_legacy_resource_mode_custom_client_ver))
+                                        GakuSelector(
+                                            options = clientVersions.map { it to it },
+                                            selectedValue = selectedClientVer,
+                                            onValueSelected = { ver ->
+                                                context?.onCustomClientVersionChanged(ver)
+                                                // Auto select last res version when client ver changes
+                                                val newResList = clientResMap[ver]
+                                                if (!newResList.isNullOrEmpty()) {
+                                                    context?.onCustomResVersionChanged(newResList.last())
+                                                }
+                                            }
+                                        )
+
+                                        Text(stringResource(R.string.config_legacy_resource_mode_custom_res_ver))
+                                        GakuSelector(
+                                            options = resVersions.map { it to it },
+                                            selectedValue = selectedResVer,
+                                            onValueSelected = { ver ->
+                                                context?.onCustomResVersionChanged(ver)
+                                            }
+                                        )
+                                    }
+                                } else {
+                                    Text("No client resource data found. Please refresh archive data.")
+                                }
+                            }
+                        }
+                        
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                        )
+                    }
+
                     // Enable Motion Capture Replay Switch
                     GakuSwitch(
                         text = stringResource(R.string.replay_settings_enable_motion_capture),

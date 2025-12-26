@@ -67,6 +67,10 @@ data class LinkuraConfig (
 
     var localeCode: String = "ja-JP",
 
+    var resourceVersionMode: Int = 0,
+    var customClientVersion: String = "",
+    var customResVersion: String = "",
+
     var pf: Boolean = false,
 
 )
