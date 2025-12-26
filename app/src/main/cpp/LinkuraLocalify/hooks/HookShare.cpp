@@ -757,9 +757,18 @@ namespace LinkuraLocal::HookShare {
     DEFINE_HOOK(void* , Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
         Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
         if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("requestedVersion is changed from %s to %s", requestedVersion->ToString().c_str(), Config::currentResVersion.c_str());
             requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
         }
         return Core_SynchronizeResourceVersion_Orig(self, requestedVersion, mtd);
+    }
+    DEFINE_HOOK(Il2cppUtils::Il2CppString*, Application_get_version, ()) {
+        Il2cppUtils::Il2CppString* result = Application_get_version_Orig();
+        if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("Application_get_version HOOKED, version is changed from %s to %s", result->ToString().c_str(), Config::currentClientVersion.toString().c_str());
+            result = Il2cppUtils::Il2CppString::New(Config::currentClientVersion.toString());
+        }
+        return result;
     }
 #pragma region
 
@@ -901,6 +910,7 @@ namespace LinkuraLocal::HookShare {
         ADD_HOOK(Configuration_set_UserAgent, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_UserAgent"));
 //        ADD_HOOK(AssetManager_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetManager", "SynchronizeResourceVersion"));
         ADD_HOOK(Core_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "", "Core", "SynchronizeResourceVersion"));
+        ADD_HOOK(Application_get_version, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Application::get_version"));
         ADD_HOOK(ArchiveApi_ArchiveGetWithTimelineDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithTimelineDataWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetFesTimelineDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesTimelineDataWithHttpInfoAsync"));
         //        auto AssetManager_klass = Il2cppUtils::GetClassIl2cpp("Core.dll", "Hailstorm", "AssetManager");

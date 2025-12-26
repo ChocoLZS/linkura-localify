@@ -524,6 +524,14 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <!-- Legacy Compatibility Settings -->
     <string name="config.legacy.title">レガシーバージョン互換性を有効にする（ホットリロード不可）</string>
     <string name="config.legacy.description">この機能を有効にすると、古いクライアントバージョンが正常にログインできるようになります。このプラグインは主に2025年5月29日以前に記録されたモーションキャプチャデータの再生に使用され、その他の機能はまだ互換性対応が行われていません。現在はバージョン3.1.0でのみテストが完了しており、バージョン4.0.0以前のバージョンは古い形式のモーションキャプチャデータの再生をサポートしています。</string>
+    <!-- Resource Version Mode -->
+    <string name="config.legacy.resource_mode.title">リソースバージョンモード</string>
+    <string name="config.legacy.resource_mode.default">デフォルト</string>
+    <string name="config.legacy.resource_mode.latest">最新</string>
+    <string name="config.legacy.resource_mode.custom">カスタム</string>
+    <string name="config.legacy.resource_mode.custom_description">カスタム機能を有効にした後、選択したカスタムバージョンとリソースバージョンでは、ゲームが正常に起動することを100％保証することはできません。</string>
+    <string name="config.legacy.resource_mode.custom_client_ver">クライアントバージョン</string>
+    <string name="config.legacy.resource_mode.custom_res_ver">リソースバージョン番号</string>
 
     <!-- Android 15+ Patch Warning -->
     <string name="patch_android15_warning">Android 15以上のユーザーは内蔵パッチ機能を使用できません。LSPatch 0.7+を使用してパッチを適用してください。</string>
@@ -534,5 +542,4 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="app_update_available">アプリの更新があります</string>
     <string name="app_update_ignore">無視</string>
     <string name="app_update_install">インストール</string>
-
 </resources>
