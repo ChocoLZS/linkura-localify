@@ -279,6 +279,7 @@
     <string name="config.legacy.resource_mode.default">默认</string>
     <string name="config.legacy.resource_mode.latest">最新</string>
     <string name="config.legacy.resource_mode.custom">自定义</string>
+    <string name="config.legacy.resource_mode.custom_description">启用自定义功能后，选择的自定义版本与资源版本无法100%保证游戏能够正常启动。</string>
     <string name="config.legacy.resource_mode.custom_client_ver">客户端版本</string>
     <string name="config.legacy.resource_mode.custom_res_ver">资源版本号</string>
 

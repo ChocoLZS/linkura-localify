@@ -397,6 +397,12 @@ private fun ReplayTabPage(
                             }
 
                             if (config.value.resourceVersionMode == 2) {
+                                Text(
+                                    text = stringResource(R.string.config_legacy_resource_mode_custom_description),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
                                 var clientResMap by remember { mutableStateOf<Map<String, List<String>>>(emptyMap()) }
                                 LaunchedEffect(Unit) {
                                     context?.let { ctx ->

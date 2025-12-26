@@ -280,6 +280,7 @@
     <string name="config.legacy.resource_mode.default">Default</string>
     <string name="config.legacy.resource_mode.latest">Latest</string>
     <string name="config.legacy.resource_mode.custom">Custom</string>
+    <string name="config.legacy.resource_mode.custom_description">After enabling custom features, the selected client and resource versions cannot 100% guarantee that the game will start normally.</string>
     <string name="config.legacy.resource_mode.custom_client_ver">Client Version</string>
     <string name="config.legacy.resource_mode.custom_res_ver">Resource Version</string>
 

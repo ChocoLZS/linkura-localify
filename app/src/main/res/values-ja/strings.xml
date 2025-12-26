@@ -529,6 +529,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="config.legacy.resource_mode.default">デフォルト</string>
     <string name="config.legacy.resource_mode.latest">最新</string>
     <string name="config.legacy.resource_mode.custom">カスタム</string>
+    <string name="config.legacy.resource_mode.custom_description">カスタム機能を有効にした後、選択したカスタムバージョンとリソースバージョンでは、ゲームが正常に起動することを100％保証することはできません。</string>
     <string name="config.legacy.resource_mode.custom_client_ver">クライアントバージョン</string>
     <string name="config.legacy.resource_mode.custom_res_ver">リソースバージョン番号</string>
 

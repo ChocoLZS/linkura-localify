@@ -757,6 +757,7 @@ namespace LinkuraLocal::HookShare {
     DEFINE_HOOK(void* , Core_SynchronizeResourceVersion, (void* self, Il2cppUtils::Il2CppString* requestedVersion,  void* mtd)) {
         Log::DebugFmt("Core_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
         if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("requestedVersion is changed from %s to %s", requestedVersion->ToString().c_str(), Config::currentResVersion.c_str());
             requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
         }
         return Core_SynchronizeResourceVersion_Orig(self, requestedVersion, mtd);
@@ -764,6 +765,7 @@ namespace LinkuraLocal::HookShare {
     DEFINE_HOOK(Il2cppUtils::Il2CppString*, Application_get_version, ()) {
         Il2cppUtils::Il2CppString* result = Application_get_version_Orig();
         if (Config::enableLegacyCompatibility) {
+            Log::DebugFmt("Application_get_version HOOKED, version is changed from %s to %s", result->ToString().c_str(), Config::currentClientVersion.toString().c_str());
             result = Il2cppUtils::Il2CppString::New(Config::currentClientVersion.toString());
         }
         return result;
