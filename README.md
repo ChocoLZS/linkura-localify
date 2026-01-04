@@ -22,23 +22,19 @@
 > 注：翻译使用了LLM大模型翻译，仅供参考，本地化数据仓库，[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
 > Note: The translation is done using LLM large model translation for reference only. The localization data repository is [linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-<img src="doc/zh/img/card-kaho-dream_believer-zh.webp" style="width: 100%; height: auto;" />
-<img src="doc/en/img/card-kaho-dream_believer-en.webp" style="width: 100%; height: auto;" />
-</div>
+| | |
+|:---:|:---:|
+| <img src="doc/zh/img/card-kaho-dream_believer-zh.webp" width="100%"/> | <img src="doc/en/img/card-kaho-dream_believer-en.webp" width="100%"/> |
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-<img src="doc/zh/img/guide-gacha-zh.webp" style="width: 100%; height: auto;" />
-<img src="doc/en/img/guide-gacha-en.webp" style="width: 100%; height: auto;" />
-</div>
+| | |
+|:---:|:---:|
+| <img src="doc/zh/img/guide-gacha-zh.webp" width="100%"/> | <img src="doc/en/img/guide-gacha-en.webp" width="100%"/> |
 
 ## 画质提升/Graphics Enhancement
 
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-<img src="doc/zh/img/graphics-zh.webp" style="width: 100%; height: auto;" />
-<img src="doc/en/img/graphics-en.webp" style="width: 100%; height: auto;" />
-<img src="doc/jp/img/graphics-jp.webp" style="width: 100%; height: auto;" />
-</div>
+| | | |
+|:---:|:---:|:---:|
+| <img src="doc/zh/img/graphics-zh.webp" width="100%"/> | <img src="doc/en/img/graphics-en.webp" width="100%"/> | <img src="doc/jp/img/graphics-jp.webp" width="100%"/> |
 
 ## 还有更多.../And More...
 
