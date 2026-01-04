@@ -15,6 +15,36 @@
 - 林库拉(リンクラ) 本地化插件
 - 如果您有添加更多功能的想法/需求，欢迎在issue/discussion板块中进行讨论。
 
+# Feature
+
+## 本地化翻译/Localization
+
+> 注：翻译使用了LLM大模型翻译，仅供参考，本地化数据仓库，[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
+> Note: The translation is done using LLM large model translation for reference only. The localization data repository is [linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="doc/zh/img/card-kaho-dream_believer-zh.webp" />
+<img src="doc/en/img/card-kaho-dream_believer-en.webp" />
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="doc/zh/img/guide-gacha-zh.webp" />
+<img src="doc/en/img/guide-gacha-en.webp" />
+</div>
+
+## 画质提升/Graphics Enhancement
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="doc/zh/img/graphics-zh.webp" />
+<img src="doc/en/img/graphics-en.webp" />
+<img src="doc/jp/img/graphics-jp.webp" />
+</div>
+
+## 还有更多.../And More...
+
+> 更多有趣的功能可以在插件中发现！
+> More interesting features can be discovered in the plugin!
+
 # Usage
 
 - 这是一个 XPosed 插件，已 Root 用户可以使用 [LSPosed](https://github.com/LSPosed/LSPosed)，未 Root 用户可以使用 [LSPatch](https://github.com/LSPosed/LSPatch)。
