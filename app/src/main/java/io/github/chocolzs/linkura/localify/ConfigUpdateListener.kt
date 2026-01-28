@@ -38,6 +38,7 @@ interface ConfigListener {
     fun onStoryNovelVocalTextDurationRateChanged(value: Float)
     fun onStoryNovelNonVocalTextDurationRateChanged(value: Float)
     fun onStoryReplaceContentChanged(value: String)
+    fun onStoryReplaceContentFileNameChanged(value: String)
     fun onFirstPersonCameraHideHeadChanged(value: Boolean)
     fun onFirstPersonCameraHideHairChanged(value: Boolean)
     fun onEnableMotionCaptureReplayChanged(value: Boolean)
@@ -271,6 +272,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
         config.storyReplaceContent = value
         saveConfig()
         sendConfigUpdate(config)
+    }
+
+    override fun onStoryReplaceContentFileNameChanged(value: String) {
+        config.storyReplaceContentFileName = value
+        saveConfig()
+        // No need to send to game process as it only cares about content
     }
 
     override fun onFirstPersonCameraHideHairChanged(value: Boolean) {

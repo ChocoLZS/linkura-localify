@@ -2,7 +2,21 @@ package io.github.chocolzs.linkura.localify.ui.pages.subPages
 
 import io.github.chocolzs.linkura.localify.ui.components.GakuGroupBox
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
+import android.widget.Toast
+import android.provider.OpenableColumns
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -233,6 +247,73 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
     val keyBoardOptionsDecimal = remember {
         KeyboardOptions(keyboardType = KeyboardType.Decimal)
     }
+
+    var storyEditorExpanded by remember { mutableStateOf(false) }
+    
+    val isLargeContent = config.value.storyReplaceContent.length > 50000
+    var storyEditText by remember(config.value.storyReplaceContent) {
+        mutableStateOf(if (isLargeContent) "" else config.value.storyReplaceContent)
+    }
+    var loadedFileName by remember(config.value.storyReplaceContentFileName) { 
+        mutableStateOf(config.value.storyReplaceContentFileName.ifEmpty { null }) 
+    }
+
+    val contextCtx = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                val contentResolver = contextCtx.contentResolver
+                val type = contentResolver.getType(it)
+                val name = try {
+                    var result: String? = null
+                    if (it.scheme == "content") {
+                        val cursor = contentResolver.query(it, null, null, null, null)
+                        cursor?.use { c ->
+                            if (c.moveToFirst()) {
+                                val index = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                                if (index >= 0) result = c.getString(index)
+                            }
+                        }
+                    }
+                    if (result == null) {
+                        result = it.path
+                        val cut = result?.lastIndexOf('/')
+                        if (cut != null && cut != -1) {
+                            result = result?.substring(cut + 1)
+                        }
+                    }
+                    result
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (type?.startsWith("text/") == true || name?.endsWith(".txt", ignoreCase = true) == true) {
+                    coroutineScope.launch {
+                        try {
+                            val text = withContext(Dispatchers.IO) {
+                                contentResolver.openInputStream(it)?.use { inputStream ->
+                                    BufferedReader(InputStreamReader(inputStream)).readText()
+                                }
+                            }
+                            if (text != null) {
+                                storyEditText = text
+                                loadedFileName = name
+                                context?.onStoryReplaceContentChanged(text)
+                                context?.onStoryReplaceContentFileNameChanged(name ?: "")
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(contextCtx, contextCtx.getString(R.string.config_story_replace_content_load_error), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(contextCtx, contextCtx.getString(R.string.config_story_replace_content_invalid_type), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    )
 
     LazyColumn(modifier = modifier
         .sizeIn(maxHeight = screenH)
@@ -489,12 +570,6 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
             Spacer(Modifier.height(6.dp))
         }
         item {
-            // State for the inline story replace content editor
-            var storyEditorExpanded by remember { mutableStateOf(false) }
-            var storyEditText by remember(config.value.storyReplaceContent) {
-                mutableStateOf(config.value.storyReplaceContent)
-            }
-
             GakuGroupBox(
                 modifier,
                 stringResource(R.string.config_story_settings_title),
@@ -571,12 +646,35 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                                 horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Load from file button
+                                TextButton(
+                                    onClick = {
+                                        launcher.launch(arrayOf("text/plain"))
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Description,
+                                        contentDescription = stringResource(R.string.config_story_replace_content_load),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = buttonColor
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.config_story_replace_content_load),
+                                        fontSize = 11.sp,
+                                        color = buttonColor
+                                    )
+                                }
+
                                 // Paste from clipboard button
                                 TextButton(
                                     onClick = {
                                         clipboardManager.getText()?.text?.let { clipText ->
                                             storyEditText = clipText
+                                            loadedFileName = null
                                             context?.onStoryReplaceContentChanged(clipText)
+                                            context?.onStoryReplaceContentFileNameChanged("")
                                         }
                                     },
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
@@ -599,12 +697,14 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                                 TextButton(
                                     onClick = {
                                         storyEditText = ""
+                                        loadedFileName = null
                                         context?.onStoryReplaceContentChanged("")
+                                        context?.onStoryReplaceContentFileNameChanged("")
                                     },
-                                    enabled = storyEditText.isNotEmpty(),
+                                    enabled = storyEditText.isNotEmpty() || isLargeContent,
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                                 ) {
-                                    val clearColor = if (storyEditText.isNotEmpty()) buttonColor
+                                    val clearColor = if (storyEditText.isNotEmpty() || isLargeContent) buttonColor
                                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                     Icon(
                                         imageVector = Icons.Default.Delete,
@@ -621,33 +721,82 @@ fun AdvanceSettingsPage(modifier: Modifier = Modifier,
                                 }
                             }
 
-                            // Text Area
-                            OutlinedTextField(
-                                value = storyEditText,
-                                onValueChange = { newText ->
-                                    storyEditText = newText
-                                    context?.onStoryReplaceContentChanged(newText)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 150.dp, max = 300.dp),
-                                textStyle = TextStyle(
-                                    fontSize = 11.sp,
-                                    lineHeight = 14.sp
-                                ),
-                                placeholder = {
-                                    Text(
-                                        text = stringResource(R.string.config_story_replace_content_placeholder),
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            // Loaded filename display in a new row below buttons
+                            if (!loadedFileName.isNullOrEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.config_story_replace_content_loaded_file, loadedFileName!!),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 4.dp),
+                                    textAlign = TextAlign.End
+                                )
+                            }
+
+                            if (isLargeContent) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 120.dp)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(32.dp)
                                     )
-                                },
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.config_story_replace_content_too_large, config.value.storyReplaceContent.length),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.config_story_replace_content_too_large_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            } else {
+                                // Text Area
+                                OutlinedTextField(
+                                    value = storyEditText,
+                                    onValueChange = { newText ->
+                                        storyEditText = newText
+                                        loadedFileName = null
+                                        context?.onStoryReplaceContentChanged(newText)
+                                        context?.onStoryReplaceContentFileNameChanged("")
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 150.dp, max = 300.dp),
+                                    textStyle = TextStyle(
+                                        fontSize = 11.sp,
+                                        lineHeight = 14.sp
+                                    ),
+                                    placeholder = {
+                                        Text(
+                                            text = stringResource(R.string.config_story_replace_content_placeholder),
+                                            fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                            }
 
                             // Character count
                             Text(
-                                text = "${storyEditText.length} ${stringResource(R.string.config_story_replace_content_chars)}",
+                                text = "${if (isLargeContent) config.value.storyReplaceContent.length else storyEditText.length} ${stringResource(R.string.config_story_replace_content_chars)}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                 modifier = Modifier.align(Alignment.End)

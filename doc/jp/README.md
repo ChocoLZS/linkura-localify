@@ -14,6 +14,18 @@
 - リンクラ(リンクラ) ローカライゼーションプラグイン
 - もし、より多くの機能を追加するためのアイデアやニーズがある場合は、issue/discussionセクションで自由に議論してください。
 
+# Feature
+
+## グラフィックス強化/Graphics Enhancement
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/graphics-jp.webp" />
+</div>
+
+## さらに多くの機能...
+
+> プラグインでさらに面白い機能を発見できます！
+
 # 使用方法
 
 - これはXPosedプラグインです。Root化済みユーザーは [LSPosed](https://github.com/LSPosed/LSPosed) を、Root化していないユーザーは [LSPatch](https://github.com/LSPosed/LSPatch) を使用できます。

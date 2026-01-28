@@ -151,6 +151,12 @@
     <string name="config.story.replace_content_placeholder">Paste or type story script content here...\n\nThis will completely replace the original story script when playing activity records.</string>
     <string name="config.story.replace_content_clear">Clear</string>
     <string name="config.story.replace_content_paste">Paste</string>
+    <string name="config.story.replace_content_load">Load from File (.txt)</string>
+    <string name="config.story.replace_content_load_error">Failed to load file</string>
+    <string name="config.story.replace_content_invalid_type">Invalid file type. Please select a .txt file.</string>
+    <string name="config.story.replace_content_loaded_file">Loaded File: %1$s</string>
+    <string name="config.story.replace_content_too_large">Content too large to display (%1$d chars)</string>
+    <string name="config.story.replace_content_too_large_desc">To ensure performance, editing is disabled for large scripts. Please edit the file externally and reload.</string>
 
     <!-- First Person Camera Settings -->
     <string name="config.first_person_camera.hide_head">Hide Head in First Person</string>
@@ -280,7 +286,7 @@
     <string name="config.legacy.resource_mode.default">Default</string>
     <string name="config.legacy.resource_mode.latest">Latest</string>
     <string name="config.legacy.resource_mode.custom">Custom</string>
-    <string name="config.legacy.resource_mode.custom_description">After enabling custom features, the selected client and resource versions cannot 100% guarantee that the game will start normally.</string>
+    <string name="config.legacy.resource_mode.custom_description">After enabling custom features, the selected client and resource versions cannot guarantee that the game will start normally.</string>
     <string name="config.legacy.resource_mode.custom_client_ver">Client Version</string>
     <string name="config.legacy.resource_mode.custom_res_ver">Resource Version</string>
 

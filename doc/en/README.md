@@ -14,6 +14,30 @@ Secondary development based on the overall framework of [**`Gakuen Idolmaster Lo
 - Linkura (リンクラ) Localization Plugin
 - If you have ideas/needs for adding more features, feel free to discuss them in the issue/discussion section.
 
+# Feature
+
+## Localization
+
+> Note: The translation is done using LLM large model translation for reference only. The localization data repository is [linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/card-kaho-dream_believer-en.webp" />
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/guide-gacha-en.webp" />
+</div>
+
+## Graphics Enhancement
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/graphics-en.webp" />
+</div>
+
+## And More...
+
+> More interesting features can be discovered in the plugin!
+
 # Usage
 
 - This is an XPosed plugin. Rooted users can use [LSPosed](https://github.com/LSPosed/LSPosed), while non-rooted users can use [LSPatch](https://github.com/LSPosed/LSPatch).

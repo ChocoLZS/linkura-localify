@@ -15,6 +15,30 @@
 - 林库拉(リンクラ) 本地化插件
 - 如果您有添加更多功能的想法/需求，欢迎在issue/discussion板块中进行讨论。
 
+# Feature
+
+## 本地化翻译/Localization
+
+> 注：翻译使用了LLM大模型翻译，仅供参考，本地化数据仓库，[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/card-kaho-dream_believer-zh.webp" />
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/guide-gacha-zh.webp" />
+</div>
+
+## 画质提升/Graphics Enhancement
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 16px; justify-content: center;">
+<img src="img/graphics-zh.webp" />
+</div>
+
+## 还有更多...
+
+> 更多有趣的功能可以在插件中发现！
+
 # Usage
 
 - 这是一个 XPosed 插件，已 Root 用户可以使用 [LSPosed](https://github.com/LSPosed/LSPosed)，未 Root 用户可以使用 [LSPatch](https://github.com/LSPosed/LSPatch)。
