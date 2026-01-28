@@ -151,6 +151,12 @@
     <string name="config.story.replace_content_placeholder">在此粘贴或输入活动记录脚本内容...\n\n此内容将在播放活动记录时完全替换原始脚本。</string>
     <string name="config.story.replace_content_clear">清空</string>
     <string name="config.story.replace_content_paste">粘贴</string>
+    <string name="config.story.replace_content_load">从文件加载 (.txt)</string>
+    <string name="config.story.replace_content_load_error">加载文件失败</string>
+    <string name="config.story.replace_content_invalid_type">无效的文件类型，请选择 .txt 文件</string>
+    <string name="config.story.replace_content_loaded_file">已加载文件: %1$s</string>
+    <string name="config.story.replace_content_too_large">内容过长，无法直接显示 (%1$d 字符)</string>
+    <string name="config.story.replace_content_too_large_desc">为确保性能，已禁用大文件编辑。请在外部编辑文件后重新加载。</string>
 
     <!-- First Person Camera Settings -->
     <string name="config.first_person_camera.hide_head">第一人称隐藏头部</string>
