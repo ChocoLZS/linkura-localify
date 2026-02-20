@@ -46,7 +46,7 @@
 - 这是一个 XPosed 插件，已 Root 用户可以使用 [LSPosed](https://github.com/LSPosed/LSPosed)，未 Root 用户可以使用 [LSPatch](https://github.com/LSPosed/LSPatch)。
 - 安卓 15 及以上的用户，请使用 [JingMatrix/LSPosed](https://github.com/JingMatrix/LSPosed) 或 [JingMatrix/LSPatch](https://github.com/JingMatrix/LSPatch)。因为原版已停止更新。
 - 关于模拟器的选择，请参考 [模拟器参考](doc/zh/simulator.md)。
-- 本地化数据仓库，[linkura-localify-assets](https://github.com/ChocoLZS/linkura-localify-assets)
+- 本地化数据仓库 [![GitHub last commit](https://img.shields.io/github/last-commit/ChocoLZS/linkura-localify-assets)](https://github.com/ChocoLZS/linkura-localify-assets/commits) 
 
 # Star History
 
