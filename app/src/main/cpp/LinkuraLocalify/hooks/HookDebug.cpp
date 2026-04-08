@@ -6,7 +6,6 @@
 #include <vector>
 #include <future>
 #include <atomic>
-
 namespace LinkuraLocal::HookDebug {
     using Il2cppString = UnityResolve::UnityType::String;
 

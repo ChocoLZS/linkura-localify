@@ -1,6 +1,11 @@
 #include "../HookMain.h"
 #include "../Misc.hpp"
+#include "../Local.h"
 #include <re2/re2.h>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string_view>
 
 namespace LinkuraLocal::HookShare {
     namespace Shareable {
@@ -497,10 +502,450 @@ namespace LinkuraLocal::HookShare {
     uintptr_t ArchiveApi_ArchiveWithliveInfoWithHttpInfoAsync_MoveNext_Addr = 0;
 
     uintptr_t ActivityRecordGetTopWithHttpInfoAsync_MoveNext_Addr = 0;
+
+    namespace OfflineApiMock {
+        static std::string ReadFileToString(const std::filesystem::path& path) {
+            std::ifstream ifs(path, std::ios::binary);
+            if (!ifs) return {};
+            std::stringstream buffer;
+            buffer << ifs.rdbuf();
+            return buffer.str();
+        }
+
+        static std::string SanitizeApiPathToRelative(std::string apiPath) {
+            // If it's a full URL, keep only the path part.
+            if (apiPath.rfind("http://", 0) == 0 || apiPath.rfind("https://", 0) == 0) {
+                const auto schemePos = apiPath.find("://");
+                const auto pathPos = schemePos == std::string::npos ? std::string::npos : apiPath.find('/', schemePos + 3);
+                apiPath = pathPos == std::string::npos ? std::string("root") : apiPath.substr(pathPos);
+            }
+
+            // Strip query string if any.
+            if (auto qpos = apiPath.find('?'); qpos != std::string::npos) {
+                apiPath.resize(qpos);
+            }
+            // Strip fragment if any.
+            if (auto fpos = apiPath.find('#'); fpos != std::string::npos) {
+                apiPath.resize(fpos);
+            }
+            while (!apiPath.empty() && apiPath.front() == '/') apiPath.erase(apiPath.begin());
+            if (apiPath.empty()) apiPath = "root";
+
+            // Make it safe as a file path across platforms.
+            for (auto& ch : apiPath) {
+                const bool ok = (ch >= 'a' && ch <= 'z')
+                             || (ch >= 'A' && ch <= 'Z')
+                             || (ch >= '0' && ch <= '9')
+                             || ch == '/' || ch == '_' || ch == '-' || ch == '.';
+                if (!ok) ch = '_';
+            }
+
+            // Prevent path traversal.
+            std::filesystem::path rel(apiPath);
+            if (rel.is_absolute()) return {};
+            for (const auto& part : rel) {
+                if (part == "..") return {};
+            }
+
+            // Always treat it as a json mock.
+            if (rel.extension() != ".json") {
+                rel += ".json";
+            }
+            return rel.generic_string();
+        }
+
+        static std::filesystem::path GetMockRootDir() {
+            const auto base = LinkuraLocal::Local::GetBasePath();
+            const auto dir = Config::offlineApiMockDir.empty() ? std::filesystem::path("mock_api") : std::filesystem::path(Config::offlineApiMockDir);
+            return (base / dir).lexically_normal();
+        }
+
+        static std::filesystem::path GetMockFilePath(const std::string& apiPath) {
+            const auto rel = SanitizeApiPathToRelative(apiPath);
+            if (rel.empty()) return {};
+            return (GetMockRootDir() / std::filesystem::path(rel)).lexically_normal();
+        }
+
+        static std::string GetBuiltInFallbackJson(const std::string& apiPath) {
+            // When users run offline integration tests without any mock files prepared,
+            // provide a minimal set of built-in defaults for critical endpoints.
+            if (apiPath == "/v1/user/login") {
+                return R"({
+  "type": 2,
+  "session_token": "foo",
+  "is_tutorial": false,
+  "is_term_update": false,
+  "is_login_bonus_receive": true,
+  "push_device_token": "bar",
+  "sisca_product_id_list": [
+    "com.oddno.lovelive.sisca_01"
+  ],
+  "membership_product_id_list": [
+    "com.oddno.lovelive.membership_0001"
+  ],
+  "item_store_product_id_list": [
+    "com.oddno.lovelive.item_store_1001"
+  ],
+  "tutorials_status_list": [
+    { "tutorial_id": 20,   "is_complete": true },
+    { "tutorial_id": 30,   "is_complete": true },
+    { "tutorial_id": 40,   "is_complete": true },
+    { "tutorial_id": 50,   "is_complete": true },
+    { "tutorial_id": 5010, "is_complete": true },
+    { "tutorial_id": 5020, "is_complete": true },
+    { "tutorial_id": 5030, "is_complete": true },
+    { "tutorial_id": 5040, "is_complete": true },
+    { "tutorial_id": 5050, "is_complete": true },
+    { "tutorial_id": 5060, "is_complete": true },
+    { "tutorial_id": 5070, "is_complete": true }
+  ]
+})";
+            }
+            return "{}";
+        }
+
+	        struct Methods {
+	            void* restResponseKlass = nullptr;
+	            Il2cppUtils::MethodInfo* restResponseCtor = nullptr;
+	            Il2cppUtils::MethodInfo* setContent = nullptr;
+	            Il2cppUtils::MethodInfo* setContentType = nullptr;
+	            Il2cppUtils::MethodInfo* setStatusCode = nullptr;
+	            Il2cppUtils::MethodInfo* setStatusDescription = nullptr;
+	            Il2cppUtils::MethodInfo* setResponseStatus = nullptr;
+	            Il2cppUtils::MethodInfo* setContentLength = nullptr;
+	            Il2cppUtils::MethodInfo* setRawBytes = nullptr;
+	            Il2cppUtils::MethodInfo* setHeaders = nullptr;
+
+	            // Build a completed Task<object> via TaskCompletionSource<object> (class, safe to invoke from native).
+	            // ApiClient.CallApiAsync returns Task<object> (confirmed in libil2cpp decompile).
+	            void* taskCompletionSourceObjectKlass = nullptr; // Il2CppClass* for TaskCompletionSource<object>
+	            Il2cppUtils::MethodInfo* tcsCtor = nullptr;      // .ctor()
+	            Il2cppUtils::MethodInfo* tcsSetResult = nullptr; // SetResult(object)
+	            Il2cppUtils::MethodInfo* tcsGetTask = nullptr;   // get_Task()
+	            UnityResolve::Method* restResponseGetContent = nullptr;
+	            UnityResolve::Method* restResponseGetStatusCode = nullptr;
+	            UnityResolve::Method* restResponseGetResponseStatus = nullptr;
+	            UnityResolve::Method* restResponseGetHeaders = nullptr;
+
+	            // For setting RawBytes in a safe way (avoid manual Il2CppArray layout).
+	            UnityResolve::Method* encodingGetUtf8 = nullptr;   // System.Text.Encoding.get_UTF8
+	            UnityResolve::Method* encodingGetBytes = nullptr;  // Encoding.GetBytes(string)
+	        };
+
+        static void* TryGetClassIl2cpp(std::initializer_list<const char*> assemblies, const char* ns, const char* name) {
+            for (const auto asmName : assemblies) {
+                if (!asmName) continue;
+                if (auto klass = Il2cppUtils::GetClassIl2cpp(asmName, ns, name)) return klass;
+            }
+            return nullptr;
+        }
+
+        static Il2cppUtils::MethodInfo* TryGetMethodIl2cpp(std::initializer_list<const char*> assemblies,
+                                                           const char* ns,
+                                                           const char* className,
+                                                           const char* methodName,
+                                                           int argsCount) {
+            for (const auto asmName : assemblies) {
+                if (!asmName) continue;
+                if (auto mtd = Il2cppUtils::GetMethodIl2cpp(asmName, ns, className, methodName, argsCount)) return mtd;
+            }
+            return nullptr;
+        }
+
+        static Methods& GetMethods() {
+            static Methods methods{};
+            static bool inited = false;
+            if (inited) return methods;
+            inited = true;
+
+            const auto restSharpAssemblies = { "RestSharp.dll", "RestSharp" };
+            methods.restResponseKlass = TryGetClassIl2cpp(restSharpAssemblies, "RestSharp", "RestResponse");
+            methods.restResponseCtor = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponse", ".ctor", 0);
+            methods.setContent = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_Content", 1);
+            methods.setContentType = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_ContentType", 1);
+            methods.setStatusCode = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_StatusCode", 1);
+            methods.setStatusDescription = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_StatusDescription", 1);
+            methods.setResponseStatus = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_ResponseStatus", 1);
+            methods.setContentLength = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_ContentLength", 1);
+	            methods.setRawBytes = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_RawBytes", 1);
+	            methods.setHeaders = TryGetMethodIl2cpp(restSharpAssemblies, "RestSharp", "RestResponseBase", "set_Headers", 1);
+
+	            // TaskCompletionSource<object> for building a completed Task<object> without Task.FromResult / struct builder pitfalls.
+	            methods.taskCompletionSourceObjectKlass = Il2cppUtils::get_system_class_from_reflection_type_str(
+	                "System.Threading.Tasks.TaskCompletionSource`1[[System.Object, mscorlib]]",
+	                "mscorlib");
+	            if (!methods.taskCompletionSourceObjectKlass) {
+	                methods.taskCompletionSourceObjectKlass = Il2cppUtils::get_system_class_from_reflection_type_str(
+	                    "System.Threading.Tasks.TaskCompletionSource`1[System.Object]",
+	                    "mscorlib");
+	            }
+	            if (methods.taskCompletionSourceObjectKlass) {
+	                methods.tcsCtor = Il2cppUtils::GetMethodIl2cpp(methods.taskCompletionSourceObjectKlass, ".ctor", 0);
+	                methods.tcsSetResult = Il2cppUtils::GetMethodIl2cpp(methods.taskCompletionSourceObjectKlass, "SetResult", 1);
+	                methods.tcsGetTask = Il2cppUtils::GetMethodIl2cpp(methods.taskCompletionSourceObjectKlass, "get_Task", 0);
+	            }
+            methods.restResponseGetContent = Il2cppUtils::GetMethod("RestSharp.dll", "RestSharp", "RestResponseBase", "get_Content");
+            if (!methods.restResponseGetContent) {
+                methods.restResponseGetContent = Il2cppUtils::GetMethod("RestSharp", "RestSharp", "RestResponseBase", "get_Content");
+            }
+            methods.restResponseGetStatusCode = Il2cppUtils::GetMethod("RestSharp.dll", "RestSharp", "RestResponseBase", "get_StatusCode");
+            if (!methods.restResponseGetStatusCode) {
+                methods.restResponseGetStatusCode = Il2cppUtils::GetMethod("RestSharp", "RestSharp", "RestResponseBase", "get_StatusCode");
+            }
+            methods.restResponseGetResponseStatus = Il2cppUtils::GetMethod("RestSharp.dll", "RestSharp", "RestResponseBase", "get_ResponseStatus");
+            if (!methods.restResponseGetResponseStatus) {
+                methods.restResponseGetResponseStatus = Il2cppUtils::GetMethod("RestSharp", "RestSharp", "RestResponseBase", "get_ResponseStatus");
+            }
+            methods.restResponseGetHeaders = Il2cppUtils::GetMethod("RestSharp.dll", "RestSharp", "RestResponseBase", "get_Headers");
+            if (!methods.restResponseGetHeaders) {
+                methods.restResponseGetHeaders = Il2cppUtils::GetMethod("RestSharp", "RestSharp", "RestResponseBase", "get_Headers");
+            }
+
+	            // UTF8 encoding helpers.
+	            methods.encodingGetUtf8 = Il2cppUtils::GetMethod("mscorlib.dll", "System.Text", "Encoding", "get_UTF8");
+	            methods.encodingGetBytes = Il2cppUtils::GetMethod("mscorlib.dll", "System.Text", "Encoding", "GetBytes", { "System.String" });
+
+	            if (Config::dbgMode || Config::enableOfflineApiMock) {
+	                Log::InfoFmt(
+	                    "[OfflineApiMock] resolve OfflineApiMock: RestResponse klass=%p ctor=%p setContent=%p TCS klass=%p ctor=%p SetResult=%p get_Task=%p",
+	                    methods.restResponseKlass,
+	                    methods.restResponseCtor ? (void*)methods.restResponseCtor->methodPointer : nullptr,
+	                    methods.setContent ? (void*)methods.setContent->methodPointer : nullptr,
+	                    methods.taskCompletionSourceObjectKlass,
+	                    methods.tcsCtor ? (void*)methods.tcsCtor->methodPointer : nullptr,
+	                    methods.tcsSetResult ? (void*)methods.tcsSetResult->methodPointer : nullptr,
+	                    methods.tcsGetTask ? (void*)methods.tcsGetTask->methodPointer : nullptr);
+	            }
+
+            return methods;
+        }
+
+        static void* CreateRestResponse(const std::string& jsonBody, int httpStatusCode, const std::string& statusDescription) {
+            auto& m = GetMethods();
+            if (!m.restResponseKlass || !m.restResponseCtor || !m.setContent || !m.setContentType || !m.setStatusCode || !m.setStatusDescription || !m.setResponseStatus) {
+                Log::Error("OfflineApiMock: RestSharp methods not resolved.");
+                return nullptr;
+            }
+
+            auto resp = UnityResolve::Invoke<void*>("il2cpp_object_new", m.restResponseKlass);
+            if (!resp) return nullptr;
+
+            using CtorFn = void(*)(void*, Il2cppUtils::MethodInfo*);
+            reinterpret_cast<CtorFn>(m.restResponseCtor->methodPointer)(resp, m.restResponseCtor);
+
+            using SetStringFn = void(*)(void*, Il2cppUtils::Il2CppString*, Il2cppUtils::MethodInfo*);
+            using SetIntFn = void(*)(void*, int, Il2cppUtils::MethodInfo*);
+
+            auto contentStr = Il2cppUtils::Il2CppString::New(jsonBody);
+            reinterpret_cast<SetStringFn>(m.setContent->methodPointer)(resp, contentStr, m.setContent);
+            reinterpret_cast<SetStringFn>(m.setContentType->methodPointer)(resp, Il2cppUtils::Il2CppString::New("application/json"), m.setContentType);
+            reinterpret_cast<SetIntFn>(m.setStatusCode->methodPointer)(resp, httpStatusCode, m.setStatusCode);
+            reinterpret_cast<SetStringFn>(m.setStatusDescription->methodPointer)(resp, Il2cppUtils::Il2CppString::New(statusDescription), m.setStatusDescription);
+            // RestSharp.ResponseStatus.Completed is typically 1.
+            reinterpret_cast<SetIntFn>(m.setResponseStatus->methodPointer)(resp, 1, m.setResponseStatus);
+
+            // Best-effort: ensure Headers is non-null (some generated clients enumerate response.Headers unconditionally).
+            if (m.setHeaders) {
+                static void* listOfParamKlass = nullptr;
+                static Il2cppUtils::MethodInfo* listCtor = nullptr;
+                if (!listOfParamKlass) {
+                    // Assembly-qualified generic arg is required since RestSharp.Parameter lives in RestSharp assembly.
+                    listOfParamKlass = Il2cppUtils::get_system_class_from_reflection_type_str(
+                        "System.Collections.Generic.List`1[[RestSharp.Parameter, RestSharp]]", "mscorlib");
+                    if (listOfParamKlass) {
+                        listCtor = Il2cppUtils::GetMethodIl2cpp(listOfParamKlass, ".ctor", 0);
+                    }
+                }
+                if (listOfParamKlass && listCtor) {
+                    auto emptyList = UnityResolve::Invoke<void*>("il2cpp_object_new", listOfParamKlass);
+                    if (emptyList) {
+                        using CtorFn = void(*)(void*, Il2cppUtils::MethodInfo*);
+                        reinterpret_cast<CtorFn>(listCtor->methodPointer)(emptyList, listCtor);
+                        using SetObjFn = void(*)(void*, void*, Il2cppUtils::MethodInfo*);
+                        reinterpret_cast<SetObjFn>(m.setHeaders->methodPointer)(resp, emptyList, m.setHeaders);
+                    }
+                }
+            }
+
+            // Best-effort: also populate RawBytes/ContentLength, since some client code prefers RawBytes.
+            if (m.setRawBytes && m.setContentLength && m.encodingGetUtf8 && m.encodingGetUtf8->function && m.encodingGetBytes && m.encodingGetBytes->function) {
+                // Encoding.UTF8.GetBytes(content)
+                using GetUtf8Fn = void*(*)(void* method_info);
+                using GetBytesFn = void*(*)(void* selfEncoding, Il2cppUtils::Il2CppString* s, void* method_info);
+                auto enc = reinterpret_cast<GetUtf8Fn>(m.encodingGetUtf8->function)(m.encodingGetUtf8->address);
+                if (enc) {
+                    auto bytes = reinterpret_cast<GetBytesFn>(m.encodingGetBytes->function)(enc, contentStr, m.encodingGetBytes->address);
+                    if (bytes) {
+                        using SetObjFn = void(*)(void*, void*, Il2cppUtils::MethodInfo*);
+                        reinterpret_cast<SetObjFn>(m.setRawBytes->methodPointer)(resp, bytes, m.setRawBytes);
+                        // ContentLength = RawBytes.Length (we don't read length here; set to content string length as fallback).
+                        using SetI64Fn = void(*)(void*, int64_t, Il2cppUtils::MethodInfo*);
+                        reinterpret_cast<SetI64Fn>(m.setContentLength->methodPointer)(resp, (int64_t)jsonBody.size(), m.setContentLength);
+                    }
+                }
+            }
+
+            if (m.restResponseGetContent && m.restResponseGetContent->function && (Config::dbgMode || Config::enableOfflineApiMock)) {
+                // Best-effort sanity check: ensure Content getter sees what we set.
+                using GetContentFn = Il2cppUtils::Il2CppString*(*)(void*, void*);
+                auto content = reinterpret_cast<GetContentFn>(m.restResponseGetContent->function)(resp, m.restResponseGetContent->address);
+                const auto contentLen = content ? (int)content->ToString().size() : -1;
+                Log::InfoFmt("[OfflineApiMock] RestResponse content length=%d", contentLen);
+            }
+            if ((Config::dbgMode || Config::enableOfflineApiMock) && m.restResponseGetStatusCode && m.restResponseGetStatusCode->function) {
+                using GetIntFn = int(*)(void*, void*);
+                auto sc = reinterpret_cast<GetIntFn>(m.restResponseGetStatusCode->function)(resp, m.restResponseGetStatusCode->address);
+                Log::InfoFmt("[OfflineApiMock] RestResponse StatusCode=%d", sc);
+            }
+            if ((Config::dbgMode || Config::enableOfflineApiMock) && m.restResponseGetResponseStatus && m.restResponseGetResponseStatus->function) {
+                using GetIntFn = int(*)(void*, void*);
+                auto rs = reinterpret_cast<GetIntFn>(m.restResponseGetResponseStatus->function)(resp, m.restResponseGetResponseStatus->address);
+                Log::InfoFmt("[OfflineApiMock] RestResponse ResponseStatus=%d", rs);
+            }
+            if ((Config::dbgMode || Config::enableOfflineApiMock) && m.restResponseGetHeaders && m.restResponseGetHeaders->function) {
+                using GetObjFn = void*(*)(void*, void*);
+                auto headers = reinterpret_cast<GetObjFn>(m.restResponseGetHeaders->function)(resp, m.restResponseGetHeaders->address);
+                Log::InfoFmt("[OfflineApiMock] RestResponse Headers=%p", headers);
+            }
+
+            return resp;
+        }
+
+        static void* TaskFromResultObject(void* resultObject) {
+            auto& m = GetMethods();
+            if (!m.taskCompletionSourceObjectKlass || !m.tcsCtor || !m.tcsSetResult || !m.tcsGetTask) {
+                Log::Error("OfflineApiMock: TaskCompletionSource<object> not resolved (.ctor/SetResult/get_Task missing).");
+                return nullptr;
+            }
+
+            // This hook may run on non-Unity threads; il2cpp_runtime_invoke requires the current thread to be attached.
+            UnityResolve::ThreadAttach();
+
+            if (Config::dbgMode || Config::enableOfflineApiMock) {
+                Log::InfoFmt("[OfflineApiMock] creating completed Task<object> for result=%p", resultObject);
+            }
+
+            auto tcs = UnityResolve::Invoke<void*>("il2cpp_object_new", m.taskCompletionSourceObjectKlass);
+            if (!tcs) {
+                Log::Error("OfflineApiMock: il2cpp_object_new(TaskCompletionSource<object>) failed.");
+                return nullptr;
+            }
+
+            using CtorFn = void(*)(void*, Il2cppUtils::MethodInfo*);
+            reinterpret_cast<CtorFn>(m.tcsCtor->methodPointer)(tcs, m.tcsCtor);
+
+            using SetObjFn = void(*)(void*, void*, Il2cppUtils::MethodInfo*);
+            reinterpret_cast<SetObjFn>(m.tcsSetResult->methodPointer)(tcs, resultObject, m.tcsSetResult);
+
+            using GetObjFn = void*(*)(void*, Il2cppUtils::MethodInfo*);
+            auto task = reinterpret_cast<GetObjFn>(m.tcsGetTask->methodPointer)(tcs, m.tcsGetTask);
+            if (!task) {
+                Log::Error("OfflineApiMock: TaskCompletionSource<object>.Task returned nullptr.");
+                return nullptr;
+            }
+
+            if (Config::dbgMode || Config::enableOfflineApiMock) {
+                auto k = Il2cppUtils::get_class_from_instance(task);
+                Log::InfoFmt("[OfflineApiMock] created completed task=%p klass=%s.%s",
+                             task,
+                             (k && k->namespaze) ? k->namespaze : "",
+                             (k && k->name) ? k->name : "");
+            }
+            return task;
+        }
+    }
+
+	    // http request log
+	    DEFINE_HOOK(void*, ApiClient_CallApiAsync, (void* self,
+	            Il2cppUtils::Il2CppString* path, void* method,
+	            void* queryParams, void* postBody,
+            void* headerParams, void* formParams, void* fileParams, void* pathParams,
+            Il2cppUtils::Il2CppString* contentType, void* cancellationToken, void* method_info)) {
+        auto strPath = path ? path->ToString() : "(null)";
+        std::string strBody = "{}";
+        if (postBody) {
+            const auto klass = Il2cppUtils::get_class_from_instance(postBody);
+            const bool isString = klass
+                && klass->name && std::string_view(klass->name) == "String"
+                && klass->namespaze && std::string_view(klass->namespaze) == "System";
+            if (isString) {
+                auto bodyStr = static_cast<Il2cppUtils::Il2CppString*>(postBody);
+                strBody = bodyStr->ToString();
+            }
+        }
+        Log::VerboseFmt("[ApiClient_CallApiAsync] path: %s\nrequest: %s", strPath.c_str(), strBody.c_str());
+
+        if (Config::enableOfflineApiMock && path) {
+            const auto mockFile = OfflineApiMock::GetMockFilePath(strPath);
+            const auto mockFileStr = mockFile.empty() ? std::string("(invalid path)") : mockFile.string();
+            std::string mockJson;
+            if (!mockFile.empty()) {
+                mockJson = OfflineApiMock::ReadFileToString(mockFile);
+            }
+
+            if (mockJson.empty()) {
+                if (Config::offlineApiMockForceNoNetwork) {
+                    Log::WarnFmt("[OfflineApiMock] missing mock file for path=%s (expected: %s), using built-in fallback json",
+                                 strPath.c_str(), mockFileStr.c_str());
+                    mockJson = OfflineApiMock::GetBuiltInFallbackJson(strPath);
+                } else {
+                    Log::WarnFmt("[OfflineApiMock] missing mock file for path=%s, falling back to real HTTP", strPath.c_str());
+                    return ApiClient_CallApiAsync_Orig(self, path, method, queryParams, postBody,
+                                                      headerParams, formParams, fileParams, pathParams,
+                                                      contentType, cancellationToken, method_info);
+                }
+            } else {
+                Log::InfoFmt("[OfflineApiMock] hit %s", mockFileStr.c_str());
+            }
+
+            auto resp = OfflineApiMock::CreateRestResponse(mockJson, 200, "OK (offline mock)");
+            if (!resp) {
+                Log::Error("[OfflineApiMock] failed to create RestResponse, returning empty json response");
+                resp = OfflineApiMock::CreateRestResponse("{}", 200, "OK (offline mock)");
+            }
+
+            if (Config::dbgMode || Config::enableOfflineApiMock) {
+                Log::InfoFmt("[OfflineApiMock] creating completed Task<object> for resp=%p path=%s", resp, strPath.c_str());
+            }
+            auto task = OfflineApiMock::TaskFromResultObject(resp);
+            if (!task) {
+                // Last-resort: avoid sending network request.
+                Log::Error("[OfflineApiMock] failed to create completed Task<object>, returning nullptr (may break caller)");
+                return nullptr;
+            }
+            if (Config::dbgMode || Config::enableOfflineApiMock) {
+                auto tk = Il2cppUtils::get_class_from_instance(task);
+                Log::InfoFmt("[OfflineApiMock] returning mock task=%p klass=%s.%s for path=%s",
+                             task,
+                             (tk && tk->namespaze) ? tk->namespaze : "",
+                             (tk && tk->name) ? tk->name : "",
+                             strPath.c_str());
+            }
+            return task;
+        }
+
+        return ApiClient_CallApiAsync_Orig(self, path, method, queryParams, postBody,
+                                          headerParams, formParams, fileParams, pathParams,
+                                          contentType, cancellationToken, method_info);
+    }
     // http response modify
     DEFINE_HOOK(void* , ApiClient_Deserialize, (void* self, void* response, void* type, void* method_info)) {
+        if (Config::dbgMode || Config::enableOfflineApiMock) {
+            auto caller = __builtin_return_address(0);
+            Log::VerboseFmt("[ApiClient_Deserialize] enter self=%p response=%p type=%p caller=%p", self, response, type, caller);
+        }
         auto result = ApiClient_Deserialize_Orig(self, response, type, method_info);
         auto json = nlohmann::json::parse(Il2cppUtils::ToJsonStr(result)->ToString());
+        // Print API response type name and response body for debugging
+        {
+            auto klass = UnityResolve::Invoke<void*>("il2cpp_class_from_system_type", type);
+            if (klass) {
+                auto ns   = UnityResolve::Invoke<const char*>("il2cpp_class_get_namespace", klass);
+                auto name = UnityResolve::Invoke<const char*>("il2cpp_class_get_name", klass);
+                Log::VerboseFmt("[ApiClient_Deserialize] type: %s.%s\nresponse: %s",
+                    ns ? ns : "", name ? name : "", json.dump().c_str());
+            }
+        }
         auto caller = __builtin_return_address(0);
         IF_CALLER_WITHIN(ArchiveApi_ArchiveGetFesArchiveDataWithHttpInfoAsync_MoveNext_Addr, caller, 3000) { // hook /v1/archive/get_fes_archive_data response
             json = handle_get_fes_archive_data(json);
@@ -773,8 +1218,12 @@ namespace LinkuraLocal::HookShare {
 #pragma region
 
     void Install(HookInstaller* hookInstaller) {
+        if (Config::dbgMode || Config::enableOfflineApiMock) {
+            Log::InfoFmt("[OfflineApiMock] native build=%s %s", __DATE__, __TIME__);
+        }
 
         // GetHttpAsyncAddr
+        ADD_HOOK(ApiClient_CallApiAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client","ApiClient", "CallApiAsync"));
         ADD_HOOK(ApiClient_Deserialize, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client","ApiClient", "Deserialize"));
 #pragma region ArchiveApi
         auto ArchiveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi");
