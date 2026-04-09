@@ -3,8 +3,9 @@
 # TODO
 
 Due to recent news about the discontinuation of this game, I have decided to introduce the following new features in chronological order:
-	1.	Purely static offline login: Only allows viewing motion capture replays, card information, and stories.
-	2.	Locally playable service (basic): On top of the above, supports rhythm game mode, gacha system, etc.
+
+1.	Purely static offline login: Only allows viewing motion capture replays, card information, and stories.	
+2.	Locally playable service (basic): On top of the above, supports rhythm game mode, gacha system, etc.
 
 # Statement
 
