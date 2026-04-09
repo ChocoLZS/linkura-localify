@@ -1,5 +1,11 @@
 # linkura-localify
 
+# TODO
+
+Due to recent news about the discontinuation of this game, I have decided to introduce the following new features in chronological order:
+	1.	Purely static offline login: Only allows viewing motion capture replays, card information, and stories.
+	2.	Locally playable service (basic): On top of the above, supports rhythm game mode, gacha system, etc.
+
 # Statement
 
 本仓库内的所有代码与资源仅供开发者学习与参考。作者不对代码的准确性、完整性或适用性作任何保证，使用者因使用本代码而引发的任何直接或间接的后果、损失或法律责任，均与作者无关，由使用者自行承担全部风险。
