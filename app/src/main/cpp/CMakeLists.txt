@@ -70,12 +70,13 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         LinkuraLocalify/Log.cpp
         LinkuraLocalify/Misc.cpp
         LinkuraLocalify/Local.cpp
-        LinkuraLocalify/MasterLocal.cpp
-        LinkuraLocalify/camera/baseCamera.cpp
-        LinkuraLocalify/camera/camera.cpp
-        LinkuraLocalify/config/Config.cpp
-        LinkuraLocalify/config/version_compatibility.cpp
-        LinkuraLocalify/string_parser/StringParser.cpp
+	        LinkuraLocalify/MasterLocal.cpp
+	        LinkuraLocalify/camera/baseCamera.cpp
+	        LinkuraLocalify/camera/camera.cpp
+	        LinkuraLocalify/http-mock/HttpMock.cpp
+	        LinkuraLocalify/config/Config.cpp
+	        LinkuraLocalify/config/version_compatibility.cpp
+	        LinkuraLocalify/string_parser/StringParser.cpp
         # Hook modules
         LinkuraLocalify/hooks/HookDebug.cpp
         LinkuraLocalify/hooks/HookLiveRender.cpp
@@ -86,6 +87,33 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         # Generated protobuf files
         build/linkura_messages.pb.cc
         )
+
+# Generate built-in offline API mock json constants (header) at build time.
+set(OFFLINE_API_BUILTIN_JSON_DIR "${CMAKE_SOURCE_DIR}/LinkuraLocalify/http-mock/builtin")
+set(OFFLINE_API_BUILTIN_GEN_DIR "${CMAKE_BINARY_DIR}/generated")
+set(OFFLINE_API_BUILTIN_HEADER "${OFFLINE_API_BUILTIN_GEN_DIR}/offline_api_mock_builtin.hpp")
+
+file(GLOB OFFLINE_API_BUILTIN_FILES CONFIGURE_DEPENDS
+    "${OFFLINE_API_BUILTIN_JSON_DIR}/*.json"
+    "${OFFLINE_API_BUILTIN_JSON_DIR}/*.headers"
+    "${OFFLINE_API_BUILTIN_JSON_DIR}/*.hdr"
+)
+
+add_custom_command(
+    OUTPUT "${OFFLINE_API_BUILTIN_HEADER}"
+    COMMAND "${CMAKE_COMMAND}"
+            -DINPUT_DIR:PATH=${OFFLINE_API_BUILTIN_JSON_DIR}
+            -DOUTPUT_HEADER:FILEPATH=${OFFLINE_API_BUILTIN_HEADER}
+            -P "${CMAKE_SOURCE_DIR}/cmake/generate_builtin_json_header.cmake"
+    DEPENDS
+            "${CMAKE_SOURCE_DIR}/cmake/generate_builtin_json_header.cmake"
+            ${OFFLINE_API_BUILTIN_FILES}
+    VERBATIM
+)
+
+add_custom_target(generate_offline_api_builtin_header DEPENDS "${OFFLINE_API_BUILTIN_HEADER}")
+add_dependencies(${CMAKE_PROJECT_NAME} generate_offline_api_builtin_header)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE "${OFFLINE_API_BUILTIN_GEN_DIR}")
 
 target_link_libraries(${CMAKE_PROJECT_NAME} xdl::xdl)
 target_link_libraries(${CMAKE_PROJECT_NAME} shadowhook::shadowhook)

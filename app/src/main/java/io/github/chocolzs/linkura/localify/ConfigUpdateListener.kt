@@ -69,6 +69,8 @@ interface ConfigListener {
     fun onResourceVersionModeChanged(value: Int)
     fun onCustomClientVersionChanged(value: String)
     fun onCustomResVersionChanged(value: String)
+    fun onEnableOfflineApiMockChanged(value: Boolean)
+    fun onOfflineApiMockDirChanged(value: String)
 
     fun onPUseRemoteAssetsChanged(value: Boolean)
     fun onPCleanLocalAssetsChanged(value: Boolean)
@@ -454,6 +456,18 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
     override fun onCustomResVersionChanged(value: String) {
         config.customResVersion = value
         saveConfig()
+    }
+
+    override fun onEnableOfflineApiMockChanged(value: Boolean) {
+        config.enableOfflineApiMock = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onOfflineApiMockDirChanged(value: String) {
+        config.offlineApiMockDir = value
+        saveConfig()
+        sendConfigUpdate(config)
     }
 
     override fun onPUsePluginBuiltInAssetsChanged(value: Boolean) {
