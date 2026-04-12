@@ -319,6 +319,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="reserve_patched">パッチ済みの APK を予約する</string>
     <string name="resource_settings">リソース設定</string>
     <string name="resource_url">リソース URL</string>
+    <string name="replay.settings.resource_prefix_url">リプレイ接頭辞URL</string>
     <string name="rootweight">ルートウエイト</string>
     <string name="search_menu_title">検索</string>
     <string name="searchbar_scrolling_view_behavior">com.google.android.material.search.SearchBar$ScrollingViewBehavior</string>
@@ -451,6 +452,9 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="replay.settings.metadata_url_placeholder">再生メタデータリンク</string>
     <string name="replay.settings.reset_url">リセット</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.version_info_url">バージョン情報URL</string>
+    <string name="replay.settings.version_info_url_placeholder">バージョン情報リンク</string>
+    <string name="replay.default_version_info_url">https://assets.chocoie.com/client-res</string>
     <string name="replay.settings.filter_motion_capture_replay">モーションキャプチャ再生をフィルタリング</string>
     <string name="replay.settings.filter_playable_motion_capture">再生可能なモーションキャプチャのみ</string>
     <string name="replay.settings.enable_custom_start_time">カスタム開始時間を有効にする</string>

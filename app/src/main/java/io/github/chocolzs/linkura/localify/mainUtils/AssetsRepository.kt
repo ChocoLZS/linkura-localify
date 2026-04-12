@@ -160,11 +160,19 @@ object AssetsRepository {
         return saveArchiveConfig(context, updatedConfig)
     }
 
-    suspend fun fetchClientRes(metadataUrl: String): Result<Map<String, List<String>>> = withContext(Dispatchers.IO) {
-        try {
+    fun deriveClientResUrl(metadataUrl: String): String? {
+        return try {
             val metaUrl = URL(metadataUrl)
+            "${metaUrl.protocol}://${metaUrl.host}/client-res"
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to derive client resource URL from metadata URL", e)
+            null
+        }
+    }
 
-            val url = URL("${metaUrl.protocol}://${metaUrl.host}/client-res")
+    suspend fun fetchClientRes(clientResUrl: String): Result<Map<String, List<String>>> = withContext(Dispatchers.IO) {
+        try {
+            val url = URL(clientResUrl)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = 10000

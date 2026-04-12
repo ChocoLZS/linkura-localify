@@ -213,12 +213,21 @@ private fun ReplayTabPage(
 ) {
     val config = getConfigState(context, previewData)
     val defaultMetadataUrl = stringResource(R.string.replay_default_metadata_url)
+    val defaultVersionInfoUrl = stringResource(R.string.replay_default_version_info_url)
 
     // Load saved metadata URL or use default
     var localMetadataUrl by remember { 
         mutableStateOf(
             context?.getSharedPreferences("linkura_prefs", 0)
                 ?.getString("metadata_url", defaultMetadataUrl) ?: defaultMetadataUrl
+        )
+    }
+    var localVersionInfoUrl by remember {
+        mutableStateOf(
+            context?.getSharedPreferences("linkura_prefs", 0)
+                ?.getString("client_res_url", null)
+                ?: AssetsRepository.deriveClientResUrl(localMetadataUrl)
+                ?: defaultVersionInfoUrl
         )
     }
 
@@ -265,9 +274,9 @@ private fun ReplayTabPage(
 
     // Fetch client resources function (silent)
     suspend fun fetchClientResources() {
-        if (localMetadataUrl.isBlank()) return
+        if (localVersionInfoUrl.isBlank()) return
         try {
-            val result = AssetsRepository.fetchClientRes(localMetadataUrl)
+            val result = AssetsRepository.fetchClientRes(localVersionInfoUrl)
             result.onSuccess { clientRes ->
                 context?.let { ctx ->
                     AssetsRepository.saveClientRes(ctx, clientRes)
@@ -380,6 +389,55 @@ private fun ReplayTabPage(
 
                     if (config.value.enableLegacyCompatibility) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.Bottom
+                                ) {
+                                    GakuTextInput(
+                                        value = localVersionInfoUrl,
+                                        onValueChange = { newUrl ->
+                                            localVersionInfoUrl = newUrl
+                                            context?.getSharedPreferences("linkura_prefs", 0)
+                                                ?.edit()
+                                                ?.putString("client_res_url", newUrl)
+                                                ?.apply()
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        label = {
+                                            Text(text = stringResource(R.string.replay_settings_version_info_url))
+                                        }
+                                    )
+
+                                    IconButton(
+                                        onClick = {
+                                            localVersionInfoUrl = defaultVersionInfoUrl
+                                            context?.getSharedPreferences("linkura_prefs", 0)
+                                                ?.edit()
+                                                ?.putString("client_res_url", defaultVersionInfoUrl)
+                                                ?.apply()
+                                        },
+                                        modifier = Modifier.size(48.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = stringResource(R.string.replay_settings_reset_url),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    text = localVersionInfoUrl,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(start = 16.dp)
+                                )
+                            }
+
                             Text(stringResource(R.string.config_legacy_resource_mode_title))
                             Row(modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -541,7 +599,7 @@ private fun ReplayTabPage(
                                 },
                                 modifier = Modifier.weight(1f),
                                 label = {
-                                    Text(text = stringResource(R.string.resource_url))
+                                    Text(text = stringResource(R.string.replay_settings_resource_prefix_url))
                                 }
                             )
 
@@ -620,6 +678,7 @@ private fun ReplayTabPage(
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
+
                 }
             }
         }

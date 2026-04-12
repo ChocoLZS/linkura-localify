@@ -76,6 +76,7 @@
     <string name="delete_plugin_resource">刪除外掛資源</string>
     <string name="use_remote_zip_resource">使用遠端 ZIP 資源</string>
     <string name="resource_url">資源網址</string>
+    <string name="replay.settings.resource_prefix_url">回放前綴位址</string>
     <string name="download">下載</string>
     <string name="invalid_zip_file">無效檔案</string>
     <string name="invalid_zip_file_warn">此檔案不是有效的 ZIP 翻譯資源包。</string>
@@ -184,6 +185,9 @@
     <string name="replay.settings.metadata_url_placeholder">回放中繼資料連結</string>
     <string name="replay.settings.reset_url">重設為預設</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.version_info_url">版本資訊位址</string>
+    <string name="replay.settings.version_info_url_placeholder">版本資訊位址</string>
+    <string name="replay.default_version_info_url">https://assets.chocoie.com/client-res</string>
     <string name="replay.settings.filter_motion_capture_replay">只顯示含動作捕捉的回放</string>
     <string name="replay.settings.filter_playable_motion_capture">只顯示可播放的動作捕捉回放</string>
     <string name="replay.settings.enable_custom_start_time">啟用自訂回放開始時間</string>

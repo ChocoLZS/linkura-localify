@@ -76,6 +76,7 @@
     <string name="delete_plugin_resource">Eliminar recurso del plugin</string>
     <string name="use_remote_zip_resource">Usar recurso ZIP remoto</string>
     <string name="resource_url">URL del recurso</string>
+    <string name="replay.settings.resource_prefix_url">URL de prefijo de repetición</string>
     <string name="download">Descargar</string>
     <string name="invalid_zip_file">Archivo no válido</string>
     <string name="invalid_zip_file_warn">Este archivo no es un paquete ZIP de recursos de traducción válido.</string>
@@ -184,6 +185,9 @@
     <string name="replay.settings.metadata_url_placeholder">Enlace de metadatos de la repetición</string>
     <string name="replay.settings.reset_url">Restablecer al valor predeterminado</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.version_info_url">URL de información de versión</string>
+    <string name="replay.settings.version_info_url_placeholder">Enlace de información de versión</string>
+    <string name="replay.default_version_info_url">https://assets.chocoie.com/client-res</string>
     <string name="replay.settings.filter_motion_capture_replay">Mostrar solo repeticiones con captura de movimiento</string>
     <string name="replay.settings.filter_playable_motion_capture">Mostrar solo repeticiones de captura de movimiento reproducibles</string>
     <string name="replay.settings.enable_custom_start_time">Activar hora de inicio personalizada de la repetición</string>
