@@ -16,6 +16,7 @@ namespace LinkuraLocal::Config {
     bool renderHighResolution = true;
     bool fesArchiveUnlockTicket = false;
     bool lazyInit = true;
+    bool loginAsIOS = false;
     bool replaceFont = true;
     bool textTest = false;
     bool dumpText = false;
@@ -86,6 +87,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(renderHighResolution);
             GetConfigItem(fesArchiveUnlockTicket);
             GetConfigItem(lazyInit);
+            GetConfigItem(loginAsIOS);
             GetConfigItem(replaceFont);
             GetConfigItem(textTest);
             GetConfigItem(dumpText);
@@ -176,6 +178,7 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_render_high_resolution()) renderHighResolution = configUpdate.render_high_resolution();
                 if (configUpdate.has_fes_archive_unlock_ticket()) fesArchiveUnlockTicket = configUpdate.fes_archive_unlock_ticket();
                 if (configUpdate.has_lazy_init()) lazyInit = configUpdate.lazy_init();
+                if (configUpdate.has_login_as_ios()) loginAsIOS = configUpdate.login_as_ios();
                 if (configUpdate.has_replace_font()) replaceFont = configUpdate.replace_font();
                 if (configUpdate.has_text_test()) textTest = configUpdate.text_test();
                 if (configUpdate.has_dump_text()) dumpText = configUpdate.dump_text();

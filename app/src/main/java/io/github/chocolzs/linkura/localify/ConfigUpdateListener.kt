@@ -24,6 +24,7 @@ interface ConfigListener {
     fun onTextTestChanged(value: Boolean)
     fun onReplaceFontChanged(value: Boolean)
     fun onLazyInitChanged(value: Boolean)
+    fun onLoginAsIOSChanged(value: Boolean)
     fun onEnableFreeCameraChanged(value: Boolean)
     fun onMemorizeFreeCameraPosChanged(value: Boolean)
     fun onTargetFpsChanged(s: CharSequence, start: Int, before: Int, count: Int)
@@ -171,6 +172,12 @@ interface ConfigUpdateListener: ConfigListener, IHasConfigItems {
 
     override fun onLazyInitChanged(value: Boolean) {
         config.lazyInit = value
+        saveConfig()
+        sendConfigUpdate(config)
+    }
+
+    override fun onLoginAsIOSChanged(value: Boolean) {
+        config.loginAsIOS = value
         saveConfig()
         sendConfigUpdate(config)
     }

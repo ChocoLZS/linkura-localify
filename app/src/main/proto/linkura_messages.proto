@@ -70,6 +70,7 @@ message ConfigUpdate {
   optional bool render_high_resolution = 4;
   optional bool fes_archive_unlock_ticket = 5;
   optional bool lazy_init = 6;
+  optional bool login_as_ios = 48;
   optional bool replace_font = 7;
   optional bool text_test = 8;
   optional bool dump_text = 9;

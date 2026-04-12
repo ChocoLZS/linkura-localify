@@ -10,6 +10,23 @@
 namespace LinkuraLocal::HookDebug {
     using Il2cppString = UnityResolve::UnityType::String;
 
+    static std::string replaceAndroidDirWithIos(std::string s) {
+        // Only swap the platform path component. This is intentionally narrow to avoid accidental replacements.
+        constexpr std::string_view fromMid = "/android";
+        constexpr std::string_view toMid = "/ios";
+
+        size_t pos = 0;
+        while ((pos = s.find(fromMid, pos)) != std::string::npos) {
+            s.replace(pos, fromMid.size(), toMid);
+            pos += toMid.size();
+        }
+        // Handle trailing "/android" (no trailing slash)
+        if (s.size() >= 8 && s.rfind("/android") == s.size() - 8) {
+            s.replace(s.size() - 8, 8, "/ios");
+        }
+        return s;
+    }
+
     DEFINE_HOOK(void, Internal_LogException, (void* ex, void* obj)) {
         Internal_LogException_Orig(ex, obj);
         static auto Exception_ToString = Il2cppUtils::GetMethod("mscorlib.dll", "System", "Exception", "ToString");
@@ -49,8 +66,25 @@ namespace LinkuraLocal::HookDebug {
 
     DEFINE_HOOK(Il2cppString*, Hailstorm_AssetDownloadJob_get_UrlBase, (Il2cppUtils::Il2CppObject* self, void* method)) {
         auto base = Hailstorm_AssetDownloadJob_get_UrlBase_Orig(self, method);
-        if (!Config::assetsUrlPrefix.empty()) {
-            base = Il2cppString::New(HookShare::replaceUriHost(base->ToString(), Config::assetsUrlPrefix));
+        if (base) {
+            auto s = base->ToString();
+            if (!Config::assetsUrlPrefix.empty()) {
+                s = HookShare::replaceUriHost(s, Config::assetsUrlPrefix);
+            }
+            if (Config::loginAsIOS) {
+                // Force platform dir to ios so we request "/ios/..." instead of "/android/...".
+                s = replaceAndroidDirWithIos(std::move(s));
+            }
+            base = Il2cppString::New(s);
+        }
+        return base;
+    }
+
+    DEFINE_HOOK(Il2cppString*, Hailstorm_AssetDownloadJob_get_LocalBase, (Il2cppUtils::Il2CppObject* self, void* method)) {
+        auto base = Hailstorm_AssetDownloadJob_get_LocalBase_Orig(self, method);
+        if (base && Config::loginAsIOS) {
+            // Force local cache dir to ios so files land under ".../ios/..."
+            base = Il2cppString::New(replaceAndroidDirWithIos(base->ToString()));
         }
         return base;
     }
@@ -793,6 +827,7 @@ namespace LinkuraLocal::HookDebug {
         ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
         ADD_HOOK(CharacterVisibleReceiver_UpdateAvatarVisibility, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.Character", "CharacterVisibleReceiver", "UpdateAvatarVisibility"));
         ADD_HOOK(Hailstorm_AssetDownloadJob_get_UrlBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_UrlBase"));
+        ADD_HOOK(Hailstorm_AssetDownloadJob_get_LocalBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_LocalBase"));
 
         ADD_HOOK(FootShadowManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.FootShadow", "FootShadowManipulator", "OnInstantiate"));
         ADD_HOOK(ItemManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemManipulator", "OnInstantiate"));

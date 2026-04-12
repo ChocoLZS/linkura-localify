@@ -37,6 +37,7 @@ class ConfigUpdateManager private constructor() {
                 if (config.renderHighResolution != null) renderHighResolution = config.renderHighResolution
                 if (config.fesArchiveUnlockTicket != null) fesArchiveUnlockTicket = config.fesArchiveUnlockTicket
                 if (config.lazyInit != null) lazyInit = config.lazyInit
+                if (config.loginAsIOS != null) loginAsIos = config.loginAsIOS
                 if (config.replaceFont != null) replaceFont = config.replaceFont
                 if (config.textTest != null) textTest = config.textTest
                 if (config.dumpText != null) dumpText = config.dumpText

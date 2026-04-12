@@ -9,6 +9,7 @@ data class LinkuraConfig (
     var renderHighResolution: Boolean = true,
     var fesArchiveUnlockTicket: Boolean = false,
     var lazyInit: Boolean = true,
+    var loginAsIOS: Boolean = false,
     var replaceFont: Boolean = true,
     var textTest: Boolean = false,
     var dumpText: Boolean = false,

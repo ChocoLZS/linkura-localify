@@ -14,6 +14,7 @@ namespace LinkuraLocal::Config {
     extern bool renderHighResolution;
     extern bool fesArchiveUnlockTicket;
     extern bool lazyInit;
+    extern bool loginAsIOS;
     extern bool replaceFont;
     extern bool textTest;
     extern bool dumpText;
