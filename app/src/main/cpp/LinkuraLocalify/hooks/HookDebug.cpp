@@ -1,4 +1,5 @@
 #include "../HookMain.h"
+#include "../UnityAssetHelper.hpp"
 #include <chrono>
 #include <thread>
 #include <set>
@@ -6,14 +7,694 @@
 #include <vector>
 #include <future>
 #include <atomic>
+#include <mutex>
+
+#include <sys/mman.h>
+#include <unistd.h>
+#include <cstdio>
+#include <cstring>
 
 namespace LinkuraLocal::HookDebug {
     using Il2cppString = UnityResolve::UnityType::String;
 
-    static std::string replaceAndroidDirWithIos(std::string s) {
-        // Only swap the platform path component. This is intentionally narrow to avoid accidental replacements.
-        constexpr std::string_view fromMid = "/android";
-        constexpr std::string_view toMid = "/ios";
+    static thread_local bool tls_insideAssetBundleLoadFromFile = false;
+
+    // Unity AssetBundle build target enum (BuildTarget): Android=13(0x0D), iOS=9(0x09).
+    // When loginAsIOS is enabled we still download iOS resources, but the Android Unity player expects
+    // AssetBundle metadata to say Android. The reliable path is to rewrite the source file's
+    // serialized m_TargetPlatform from iOS(9) to Android(13) before LoadFromFile_Internal reads it.
+    namespace {
+        constexpr uint16_t kBuildTargetAndroid = 0x0D;
+        constexpr uint16_t kBuildTargetIos = 0x09;
+
+        struct CmpImmPatchSite {
+            uintptr_t addr = 0;      // instruction address
+            uint32_t origInsn = 0;   // original 32-bit instruction word
+        };
+
+        static std::mutex g_buildTargetPatchMutex;
+        static std::vector<CmpImmPatchSite> g_buildTargetPatchSites;
+        static std::atomic<int> g_buildTargetPatchUsers{0};
+        static uintptr_t g_unityLoadFromFileInternalAddr = 0; // resolved icall pointer
+
+	        struct NopPatchSite {
+	            uintptr_t addr = 0;
+	            uint32_t origInsn = 0;
+	            uint32_t patchedInsn = 0;
+	        };
+		        static std::vector<NopPatchSite> g_buildTargetBypassBranchSites;
+		        static std::atomic<int> g_buildTargetBypassUsers{0};
+		        static std::chrono::steady_clock::time_point g_buildTargetBypassLastScan{};
+		        static int g_buildTargetBypassScanAttempts = 0;
+
+        static bool is_cond_branch_insn(uint32_t insn) {
+            // B.cond encoding: 01010100 (0x54) at [31:24], bit[4]==0, cond in [3:0]
+            return (insn & 0xFF000010u) == 0x54000000u;
+        }
+
+        static uintptr_t sign_extend(uintptr_t x, int bits) {
+            const uintptr_t m = static_cast<uintptr_t>(1) << (bits - 1);
+            return (x ^ m) - m;
+        }
+
+	        static bool is_adrp(uint32_t insn) {
+	            // ADRP: op=1, fixed bits [28:24]=10000, mask from ARM64 encoding patterns.
+	            return (insn & 0x9F000000u) == 0x90000000u;
+	        }
+
+	        static bool is_adr(uint32_t insn) {
+	            // ADR: op=0, fixed bits [28:24]=10000
+	            return (insn & 0x9F000000u) == 0x10000000u;
+	        }
+
+	        static uintptr_t decode_adr_target(uint32_t insn, uintptr_t pc) {
+	            // imm = sign_extend(immhi:immlo, 21); target = pc + imm
+	            const uintptr_t immlo = (insn >> 29) & 0x3;
+	            const uintptr_t immhi = (insn >> 5) & 0x7FFFF;
+	            uintptr_t imm21 = (immhi << 2) | immlo;
+	            imm21 = sign_extend(imm21, 21);
+	            return pc + imm21;
+	        }
+
+	        static bool is_add_imm64(uint32_t insn) {
+	            // ADD (immediate, 64-bit): 0x91000000 with varying fields.
+	            return (insn & 0xFF000000u) == 0x91000000u;
+	        }
+
+        static uintptr_t decode_adrp_target(uint32_t insn, uintptr_t pc) {
+            // imm = sign_extend(immhi:immlo, 21) << 12; target = (pc & ~0xFFF) + imm
+            const uintptr_t immlo = (insn >> 29) & 0x3;
+            const uintptr_t immhi = (insn >> 5) & 0x7FFFF;
+            uintptr_t imm21 = (immhi << 2) | immlo;
+            imm21 = sign_extend(imm21, 21);
+            const uintptr_t imm = imm21 << 12;
+            return (pc & ~static_cast<uintptr_t>(0xFFF)) + imm;
+        }
+
+	        static bool decode_add_imm64(uint32_t insn, uint32_t& rd, uint32_t& rn, uint32_t& imm12, uint32_t& shift) {
+	            if (!is_add_imm64(insn)) return false;
+	            rd = insn & 0x1F;
+	            rn = (insn >> 5) & 0x1F;
+	            imm12 = (insn >> 10) & 0xFFF;
+	            shift = (insn >> 22) & 0x3;
+	            return true;
+	        }
+
+		        static bool is_ldr_x_uimm(uint32_t insn) {
+		            // LDR Xt, [Xn, #imm12*8]
+		            return (insn & 0xFFC00000u) == 0xF9400000u;
+		        }
+
+		        static bool decode_ldr_x_uimm(uint32_t insn, uint32_t& rt, uint32_t& rn, uint32_t& imm12) {
+		            if (!is_ldr_x_uimm(insn)) return false;
+		            rt = insn & 0x1F;
+		            rn = (insn >> 5) & 0x1F;
+		            imm12 = (insn >> 10) & 0xFFF;
+		            return true;
+		        }
+
+		        static bool is_ldr_lit64(uint32_t insn) {
+		            // LDR Xt, #imm19 (literal, 64-bit)
+		            return (insn & 0xFF000000u) == 0x58000000u;
+		        }
+
+		        static uintptr_t decode_ldr_lit_target(uint32_t insn, uintptr_t pc) {
+		            // imm19 in bits [23:5], signed, <<2. Address is PC-relative.
+		            uintptr_t imm19 = (insn >> 5) & 0x7FFFF;
+		            imm19 = sign_extend(imm19, 19);
+		            return pc + (imm19 << 2);
+		        }
+
+	        static bool is_cmp_imm_32(uint32_t insn, uint16_t imm12) {
+	            // cmp wN, #imm == subs wzr, wN, #imm (shift=0)
+	            // SUBS (immediate, 32-bit) base: 0x71000000, Rd=WZR => low5=0x1F
+	            if ((insn & 0x7F00001Fu) != 0x7100001Fu) return false;
+            if (((insn >> 22) & 0x3u) != 0) return false; // shift must be 0
+            return ((insn >> 10) & 0xFFFu) == imm12;
+        }
+
+        static bool is_cmp_imm_64(uint32_t insn, uint16_t imm12) {
+            // cmp xN, #imm == subs xzr, xN, #imm (shift=0)
+            if ((insn & 0xFF00001Fu) != 0xF100001Fu) return false;
+            if (((insn >> 22) & 0x3u) != 0) return false; // shift must be 0
+            return ((insn >> 10) & 0xFFFu) == imm12;
+        }
+
+        static bool write_code_u32(uintptr_t addr, uint32_t value) {
+            const long pageSize = sysconf(_SC_PAGESIZE);
+            if (pageSize <= 0) return false;
+            const uintptr_t pageStart = addr & ~(static_cast<uintptr_t>(pageSize) - 1);
+            if (mprotect(reinterpret_cast<void*>(pageStart), static_cast<size_t>(pageSize),
+                         PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+                return false;
+            }
+            *reinterpret_cast<volatile uint32_t*>(addr) = value;
+            __builtin___clear_cache(reinterpret_cast<char*>(pageStart),
+                                    reinterpret_cast<char*>(pageStart + pageSize));
+            // Best-effort restore to RX.
+            (void)mprotect(reinterpret_cast<void*>(pageStart), static_cast<size_t>(pageSize),
+                           PROT_READ | PROT_EXEC);
+            return true;
+        }
+
+        static uintptr_t find_mapping_start(uintptr_t addr) {
+            FILE* fp = std::fopen("/proc/self/maps", "r");
+            if (!fp) return 0;
+            char line[512];
+            uintptr_t start = 0, end = 0;
+            while (std::fgets(line, sizeof(line), fp)) {
+                start = 0; end = 0;
+                if (std::sscanf(line, "%lx-%lx", &start, &end) == 2) {
+                    if (addr >= start && addr < end) {
+                        std::fclose(fp);
+                        return start;
+                    }
+                }
+            }
+            std::fclose(fp);
+            return 0;
+        }
+
+        static uintptr_t find_mapping_end(uintptr_t addr) {
+            // Parse /proc/self/maps to find the mapping containing addr.
+            // Format: start-end perms offset dev inode pathname?
+            FILE* fp = std::fopen("/proc/self/maps", "r");
+            if (!fp) return 0;
+            char line[512];
+            uintptr_t start = 0, end = 0;
+            while (std::fgets(line, sizeof(line), fp)) {
+                start = 0; end = 0;
+                if (std::sscanf(line, "%lx-%lx", &start, &end) == 2) {
+                    if (addr >= start && addr < end) {
+                        std::fclose(fp);
+                        return end;
+                    }
+                }
+            }
+            std::fclose(fp);
+            return 0;
+        }
+
+	        struct MapsSeg {
+	            uintptr_t start = 0;
+	            uintptr_t end = 0;
+	            char perms[5] = {0};
+	            unsigned long inode = 0;
+	            char path[256] = {0};
+	        };
+
+	        static std::vector<MapsSeg> list_all_segments() {
+	            std::vector<MapsSeg> segs;
+	            FILE* fp = std::fopen("/proc/self/maps", "r");
+	            if (!fp) return segs;
+	            char line[1024];
+	            while (std::fgets(line, sizeof(line), fp)) {
+	                MapsSeg s;
+	                unsigned long st = 0, ed = 0;
+	                char perms[5] = {0};
+	                unsigned long inode = 0;
+	                char path[256] = {0};
+	                // pathname is optional
+	                // start-end perms offset dev inode pathname?
+	                // Conversions: st, ed, perms, inode, path  => max n = 5
+	                const int n = std::sscanf(line, "%lx-%lx %4s %*s %*s %lu %255s", &st, &ed, perms, &inode, path);
+	                if (n < 3) continue;
+	                s.start = static_cast<uintptr_t>(st);
+	                s.end = static_cast<uintptr_t>(ed);
+	                s.inode = (n >= 4) ? inode : 0;
+	                std::snprintf(s.perms, sizeof(s.perms), "%s", perms);
+	                if (n >= 5) {
+	                    std::snprintf(s.path, sizeof(s.path), "%s", path);
+	                } else {
+	                    s.path[0] = '\0';
+	                }
+	                segs.push_back(s);
+	            }
+	            std::fclose(fp);
+	            return segs;
+	        }
+
+	        static bool find_segment_for_addr(const std::vector<MapsSeg>& segs, uintptr_t addr, MapsSeg& out) {
+	            for (const auto& s : segs) {
+	                if (addr >= s.start && addr < s.end) {
+	                    out = s;
+	                    return true;
+	                }
+	            }
+	            return false;
+	        }
+
+	        static std::vector<MapsSeg> filter_segments_by_inode(const std::vector<MapsSeg>& segs, unsigned long inode) {
+	            std::vector<MapsSeg> out;
+	            if (!inode) return out;
+	            out.reserve(16);
+	            for (const auto& s : segs) {
+	                if (s.inode == inode) out.push_back(s);
+	            }
+	            return out;
+	        }
+
+	        static std::vector<MapsSeg> filter_segments_by_path_substr(const std::vector<MapsSeg>& segs, const char* substr) {
+	            std::vector<MapsSeg> out;
+	            if (!substr || !*substr) return out;
+	            out.reserve(16);
+	            for (const auto& s : segs) {
+	                if (std::strstr(s.path, substr)) out.push_back(s);
+	            }
+	            return out;
+	        }
+
+	        static const uint8_t* memmem_u8(const uint8_t* hay, size_t hayLen, const char* needle) {
+	            if (!hay || !needle) return nullptr;
+	            const size_t nLen = std::strlen(needle);
+	            if (nLen == 0 || hayLen < nLen) return nullptr;
+	            for (size_t i = 0; i + nLen <= hayLen; i++) {
+	                if (std::memcmp(hay + i, needle, nLen) == 0) return hay + i;
+	            }
+	            return nullptr;
+	        }
+
+	        static uintptr_t find_cstr_start(const uint8_t* segStart, const uint8_t* p, size_t maxBack = 0x200) {
+	            // `p` points inside a C-string. Walk backwards to find its start (after previous '\0').
+	            if (!segStart || !p) return reinterpret_cast<uintptr_t>(p);
+	            const uint8_t* cur = p;
+	            size_t walked = 0;
+	            while (cur > segStart && walked < maxBack) {
+	                if (*(cur - 1) == 0) break;
+	                cur--;
+	                walked++;
+	            }
+	            return reinterpret_cast<uintptr_t>(cur);
+	        }
+
+	        static bool is_readable_range(uintptr_t addr, size_t size) {
+	            if (size == 0) return true;
+	            const uintptr_t end = addr + size;
+	            FILE* fp = std::fopen("/proc/self/maps", "r");
+	            if (!fp) return false;
+	            char line[512];
+	            uintptr_t start = 0, stop = 0;
+	            char perms[5] = {0};
+	            while (std::fgets(line, sizeof(line), fp)) {
+	                start = 0; stop = 0; perms[0] = 0;
+	                if (std::sscanf(line, "%lx-%lx %4s", &start, &stop, perms) == 3) {
+	                    if (addr >= start && end <= stop) {
+	                        std::fclose(fp);
+	                        return perms[0] == 'r';
+	                    }
+	                }
+	            }
+	            std::fclose(fp);
+	            return false;
+	        }
+
+	        static bool is_cbz_cbnz(uint32_t insn) {
+	            // CBZ/CBNZ: opcodes 0x34/0x35 in top bits. Mask: 0x7F000000 == 0x34000000.
+	            return (insn & 0x7F000000u) == 0x34000000u;
+	        }
+
+        static bool is_tbz_tbnz(uint32_t insn) {
+            // TBZ/TBNZ: 0x36000000 with mask 0x7F000000 == 0x36000000.
+            return (insn & 0x7F000000u) == 0x36000000u;
+        }
+
+        static uintptr_t decode_bcond_target(uint32_t insn, uintptr_t pc) {
+            // imm19 in bits [23:5], signed, <<2.
+            uintptr_t imm19 = (insn >> 5) & 0x7FFFF;
+            imm19 = sign_extend(imm19, 19);
+            return pc + (imm19 << 2);
+        }
+
+        static uintptr_t decode_cb_target(uint32_t insn, uintptr_t pc) {
+            // imm19 in bits [23:5], signed, <<2.
+            uintptr_t imm19 = (insn >> 5) & 0x7FFFF;
+            imm19 = sign_extend(imm19, 19);
+            return pc + (imm19 << 2);
+        }
+
+	        static uintptr_t decode_tb_target(uint32_t insn, uintptr_t pc) {
+	            // imm14 in bits [18:5], signed, <<2.
+	            uintptr_t imm14 = (insn >> 5) & 0x3FFF;
+	            imm14 = sign_extend(imm14, 14);
+	            return pc + (imm14 << 2);
+	        }
+
+	        static bool encode_uncond_b(uintptr_t pc, uintptr_t target, uint32_t& outInsn) {
+	            // Unconditional B: 0x14000000 | imm26, where imm26 = (target - pc) >> 2 (signed).
+	            const intptr_t delta = static_cast<intptr_t>(target) - static_cast<intptr_t>(pc);
+	            if ((delta & 0x3) != 0) return false;
+	            const intptr_t imm26 = delta >> 2;
+	            if (imm26 < -(1 << 25) || imm26 >= (1 << 25)) return false; // signed 26-bit
+	            outInsn = 0x14000000u | (static_cast<uint32_t>(imm26) & 0x03FFFFFFu);
+	            return true;
+	        }
+
+		        static void ensure_build_target_bypass_sites_locked() {
+		            if (!g_buildTargetBypassBranchSites.empty()) return;
+
+		            const auto allSegs = list_all_segments();
+		            if (allSegs.empty()) return;
+
+		            // Retry scanning periodically until we find patch sites. Unity may map modules/strings lazily.
+		            const auto now = std::chrono::steady_clock::now();
+		            if (g_buildTargetBypassScanAttempts > 0) {
+		                const auto dt = now - g_buildTargetBypassLastScan;
+		                if (dt < std::chrono::seconds(3)) return;
+		            }
+		            g_buildTargetBypassLastScan = now;
+		            g_buildTargetBypassScanAttempts++;
+		            Log::WarnFmt("BuildTarget bypass: scan attempt %d (icall=%p)", g_buildTargetBypassScanAttempts,
+		                         (void*)g_unityLoadFromFileInternalAddr);
+
+		            // Prefer scanning within the same mapped module that contains the resolved icall pointer.
+		            std::vector<MapsSeg> moduleSegs;
+		            MapsSeg icallSeg{};
+		            if (g_unityLoadFromFileInternalAddr && find_segment_for_addr(allSegs, g_unityLoadFromFileInternalAddr, icallSeg)) {
+	                if (icallSeg.inode) {
+	                    moduleSegs = filter_segments_by_inode(allSegs, icallSeg.inode);
+	                } else if (icallSeg.path[0]) {
+	                    moduleSegs = filter_segments_by_path_substr(allSegs, icallSeg.path);
+	                }
+	            }
+		            if (moduleSegs.empty()) {
+		                // Fallback: try classic name; if even that fails, scan globally for the needle.
+		                moduleSegs = filter_segments_by_path_substr(allSegs, "libunity.so");
+		            }
+
+		            if (moduleSegs.empty()) {
+		                Log::WarnFmt("BuildTarget bypass: module identification failed (icall=%p segPath=%s inode=%lu).",
+		                             (void*)g_unityLoadFromFileInternalAddr, icallSeg.path, icallSeg.inode);
+		                return;
+		            }
+		            Log::WarnFmt("BuildTarget bypass: icall seg %p-%p perms=%s inode=%lu path=%s",
+		                         (void*)icallSeg.start, (void*)icallSeg.end, icallSeg.perms, icallSeg.inode, icallSeg.path);
+		            Log::WarnFmt("BuildTarget bypass: scanning module segments=%zu", moduleSegs.size());
+
+		            constexpr const char* kNeedle = "File's Build target is:";
+		            uintptr_t hitAddr = 0;
+		            uintptr_t strAddr = 0; // actual C-string start
+		            MapsSeg needleSeg{};
+	            for (const auto& s : moduleSegs) {
+	                if (s.perms[0] != 'r') continue;
+	                const auto* mem = reinterpret_cast<const uint8_t*>(s.start);
+	                const size_t len = static_cast<size_t>(s.end - s.start);
+	                if (const uint8_t* hit = memmem_u8(mem, len, kNeedle)) {
+	                    hitAddr = reinterpret_cast<uintptr_t>(hit);
+	                    strAddr = find_cstr_start(mem, hit);
+	                    needleSeg = s;
+	                    break;
+	                }
+	            }
+	            if (!strAddr) {
+	                // As a fallback, scan all segments globally for the needle (string may live in a different module).
+	                for (const auto& s : allSegs) {
+	                    if (s.perms[0] != 'r') continue;
+	                    const auto* mem = reinterpret_cast<const uint8_t*>(s.start);
+	                    const size_t len = static_cast<size_t>(s.end - s.start);
+	                    if (const uint8_t* hit = memmem_u8(mem, len, kNeedle)) {
+	                        hitAddr = reinterpret_cast<uintptr_t>(hit);
+	                        strAddr = find_cstr_start(mem, hit);
+	                        needleSeg = s;
+	                        break;
+	                    }
+	                }
+	            }
+		            if (!strAddr) {
+		                Log::WarnFmt("BuildTarget bypass: string needle not found.");
+		                return;
+		            }
+		            Log::WarnFmt("BuildTarget bypass: needle hit=%p cstr=%p seg %p-%p perms=%s inode=%lu path=%s",
+		                         (void*)hitAddr, (void*)strAddr,
+		                         (void*)needleSeg.start, (void*)needleSeg.end, needleSeg.perms, needleSeg.inode, needleSeg.path);
+	            {
+	                char preview[96] = {0};
+	                std::strncpy(preview, reinterpret_cast<const char*>(strAddr), sizeof(preview) - 1);
+	                Log::WarnFmt("BuildTarget bypass: preview=\"%s\"", preview);
+	            }
+
+	            // If the string is in a different module, re-scope scans to that module.
+		            if (needleSeg.inode && (!icallSeg.inode || needleSeg.inode != icallSeg.inode)) {
+		                moduleSegs = filter_segments_by_inode(allSegs, needleSeg.inode);
+		                Log::WarnFmt("BuildTarget bypass: rescoping to needle inode=%lu segments=%zu", needleSeg.inode, moduleSegs.size());
+		            }
+
+		            // Find a code site that materializes the string address (in the same module as the string).
+		            uintptr_t codeRefPc = 0;
+		            const char* xrefKind = nullptr;
+		            for (const auto& s : moduleSegs) {
+		                if (s.perms[0] != 'r') continue;
+		                if (std::strchr(s.perms, 'x') == nullptr) continue;
+		                const uintptr_t start = s.start;
+		                const uintptr_t end = s.end;
+		                for (uintptr_t pc = start; pc + 8 <= end; pc += 4) {
+		                    const uint32_t i0 = *reinterpret_cast<const uint32_t*>(pc);
+			                    if (is_adr(i0)) {
+			                        const uintptr_t full = decode_adr_target(i0, pc);
+			                        if (full == strAddr || (hitAddr && full == hitAddr)) {
+			                            codeRefPc = pc;
+			                            xrefKind = "ADR";
+			                            break;
+			                        }
+			                        continue;
+			                    }
+			                    if (is_ldr_lit64(i0)) {
+			                        const uintptr_t lit = decode_ldr_lit_target(i0, pc);
+			                        if (is_readable_range(lit, sizeof(uintptr_t))) {
+			                            const uintptr_t ptr = *reinterpret_cast<const uintptr_t*>(lit);
+			                            if (ptr == strAddr || (hitAddr && ptr == hitAddr)) {
+			                                codeRefPc = pc;
+			                                xrefKind = "LDR-literal";
+			                                Log::WarnFmt("BuildTarget bypass: xref via LDR literal at %p (lit=%p ptr=%p)",
+			                                             (void*)pc, (void*)lit, (void*)ptr);
+			                                break;
+			                            }
+			                        }
+			                    }
+
+		                    if (!is_adrp(i0)) continue;
+		                    const uint32_t baseReg = i0 & 0x1F;
+		                    const uintptr_t page = decode_adrp_target(i0, pc);
+
+		                    // Unity often does ADRP, then a few instructions, then ADD/LDR to materialize the pointer.
+		                    constexpr int kLookaheadInsns = 8;
+		                    for (int k = 1; k <= kLookaheadInsns && pc + 4u * k < end; k++) {
+		                        const uint32_t insn = *reinterpret_cast<const uint32_t*>(pc + 4u * k);
+
+		                        uint32_t rd1 = 0, rn1 = 0, imm12 = 0, shift = 0;
+		                        if (decode_add_imm64(insn, rd1, rn1, imm12, shift)) {
+		                            if (rn1 == baseReg && (shift == 0 || shift == 1)) {
+		                                const uintptr_t full = page + (shift == 1 ? (static_cast<uintptr_t>(imm12) << 12) : static_cast<uintptr_t>(imm12));
+		                                if (full == strAddr || (hitAddr && full == hitAddr)) {
+		                                    codeRefPc = pc;
+		                                    xrefKind = "ADRP..ADD";
+		                                    Log::WarnFmt("BuildTarget bypass: xref via ADRP..ADD at %p (+%d)", (void*)pc, k);
+		                                    break;
+		                                }
+		                            }
+		                        }
+
+		                        uint32_t rt = 0, rn = 0, ldrImm12 = 0;
+		                        if (decode_ldr_x_uimm(insn, rt, rn, ldrImm12)) {
+		                            if (rn == baseReg) {
+		                                const uintptr_t slot = page + (static_cast<uintptr_t>(ldrImm12) << 3);
+		                                if (!is_readable_range(slot, sizeof(uintptr_t))) continue;
+		                                const uintptr_t ptr = *reinterpret_cast<const uintptr_t*>(slot);
+		                                if (ptr == strAddr || (hitAddr && ptr == hitAddr)) {
+		                                    codeRefPc = pc;
+		                                    xrefKind = "ADRP..LDR";
+		                                    Log::WarnFmt("BuildTarget bypass: xref via ADRP..LDR at %p (+%d) (slot=%p ptr=%p rt=%u)",
+		                                                 (void*)pc, k, (void*)slot, (void*)ptr, rt);
+		                                    break;
+		                                }
+		                            }
+		                        }
+		                    }
+		                    if (codeRefPc) break;
+		                }
+		                if (codeRefPc) break;
+		            }
+
+		            if (!codeRefPc) {
+		                Log::WarnFmt("BuildTarget bypass: no code xref found (cstr=%p hit=%p).", (void*)strAddr, (void*)hitAddr);
+		                return;
+		            }
+		            Log::WarnFmt("BuildTarget bypass: picked xref=%p kind=%s", (void*)codeRefPc, xrefKind ? xrefKind : "?");
+
+	            // Find a nearby conditional branch controlling the error block containing codeRefPc.
+	            // Two possible layouts:
+	            // - branch enters error: target near codeRefPc -> NOP branch
+	            // - branch skips error: target just after codeRefPc -> force always-taken by rewriting to unconditional B
+	            constexpr intptr_t kBackScan = 0x300;
+	            constexpr intptr_t kEnterNearLo = -0x80;
+	            constexpr intptr_t kEnterNearHi = 0x120;
+	            constexpr intptr_t kSkipMin = 0x10;
+	            constexpr intptr_t kSkipMax = 0x240;
+
+	            const uintptr_t scanStart = codeRefPc > static_cast<uintptr_t>(kBackScan) ? (codeRefPc - kBackScan) : codeRefPc;
+	            uintptr_t bestPc = 0;
+	            uint32_t bestOrig = 0;
+	            uint32_t bestPatched = 0;
+	            const char* bestMode = nullptr;
+	            for (uintptr_t pc = scanStart; pc < codeRefPc; pc += 4) {
+	                const uint32_t insn = *reinterpret_cast<const uint32_t*>(pc);
+	                uintptr_t target = 0;
+	                if (is_cond_branch_insn(insn)) {
+	                    target = decode_bcond_target(insn, pc);
+	                } else if (is_cbz_cbnz(insn)) {
+	                    target = decode_cb_target(insn, pc);
+	                } else if (is_tbz_tbnz(insn)) {
+	                    target = decode_tb_target(insn, pc);
+	                } else {
+	                    continue;
+	                }
+
+	                // Enter-error branch (target into error block)
+	                const intptr_t enterDelta = static_cast<intptr_t>(target) - static_cast<intptr_t>(codeRefPc);
+	                if (enterDelta >= kEnterNearLo && enterDelta <= kEnterNearHi) {
+	                    if (pc >= bestPc) {
+	                        bestPc = pc;
+	                        bestOrig = insn;
+	                        bestPatched = 0xD503201F; // NOP
+	                        bestMode = "NopBranch";
+	                    }
+	                    continue;
+	                }
+
+	                // Skip-error branch (target after error block)
+	                const intptr_t skipDelta = static_cast<intptr_t>(target) - static_cast<intptr_t>(codeRefPc);
+	                if (skipDelta >= kSkipMin && skipDelta <= kSkipMax) {
+	                    uint32_t bInsn = 0;
+	                    if (encode_uncond_b(pc, target, bInsn)) {
+	                        if (pc >= bestPc) {
+	                            bestPc = pc;
+	                            bestOrig = insn;
+	                            bestPatched = bInsn;
+	                            bestMode = "ForceBranch";
+	                        }
+	                    }
+	                }
+	            }
+
+	            if (!bestPc) {
+	                Log::WarnFmt("BuildTarget bypass: no nearby conditional branch found for error block near %p.", (void*)codeRefPc);
+	                return;
+	            }
+
+		            g_buildTargetBypassBranchSites.push_back({bestPc, bestOrig, bestPatched});
+		            Log::WarnFmt("BuildTarget bypass: will patch 1 branch at %p (mode=%s, xref=%p, needle=%p).",
+		                         (void*)bestPc, bestMode ? bestMode : "?", (void*)codeRefPc, (void*)strAddr);
+		        }
+
+        static void apply_build_target_patch_locked(uint16_t desiredImm12) {
+            for (auto& site : g_buildTargetPatchSites) {
+                // Rewrite only imm12 bits (21:10) based on the original instruction word.
+                const uint32_t patched = (site.origInsn & ~(0xFFFu << 10)) | (static_cast<uint32_t>(desiredImm12) << 10);
+                (void)write_code_u32(site.addr, patched);
+            }
+        }
+
+	        static void apply_build_target_bypass_locked(bool enable) {
+	            for (auto& s : g_buildTargetBypassBranchSites) {
+	                (void)write_code_u32(s.addr, enable ? s.patchedInsn : s.origInsn);
+	            }
+	        }
+
+        static void ensure_build_target_patch_sites_locked() {
+            if (g_unityLoadFromFileInternalAddr == 0) return;
+            if (!g_buildTargetPatchSites.empty()) return;
+
+            // Scan a small window in the native function for "cmp #0x0D; b.cond" patterns.
+            // We patch those compares to iOS (0x09) while inside iOS AssetBundle loads.
+            constexpr size_t kMaxScanBytes = 0x3000;
+            constexpr size_t kMinOffset = 0x40; // skip prologue/trampoline region
+
+            const auto base = g_unityLoadFromFileInternalAddr;
+            size_t scanBytes = kMaxScanBytes;
+            if (const uintptr_t mappingEnd = find_mapping_end(base)) {
+                const uintptr_t avail = mappingEnd - base;
+                if (avail < scanBytes) scanBytes = static_cast<size_t>(avail);
+            }
+            if (scanBytes <= kMinOffset + 8) {
+                Log::WarnFmt("BuildTarget patch: mapping too small to scan (%p).", (void*)base);
+                return;
+            }
+
+            size_t found = 0;
+            for (size_t off = kMinOffset; off + 8 <= scanBytes; off += 4) {
+                const uint32_t insn = *reinterpret_cast<const uint32_t*>(base + off);
+                const uint32_t next = *reinterpret_cast<const uint32_t*>(base + off + 4);
+                if (!is_cond_branch_insn(next)) continue;
+
+                if (is_cmp_imm_32(insn, kBuildTargetAndroid) || is_cmp_imm_64(insn, kBuildTargetAndroid)) {
+                    g_buildTargetPatchSites.push_back({base + off, insn});
+                    found++;
+                    // Avoid patching too many sites; if there are lots, our heuristic is probably wrong.
+                    if (found >= 8) break;
+                }
+            }
+
+            if (g_buildTargetPatchSites.empty()) {
+                Log::WarnFmt("BuildTarget patch: no cmp-immediate sites found near LoadFromFile_Internal (%p).", (void*)base);
+            } else {
+                Log::InfoFmt("BuildTarget patch: found %zu candidate cmp sites near LoadFromFile_Internal (%p).", g_buildTargetPatchSites.size(), (void*)base);
+            }
+        }
+
+        struct ScopedBuildTargetPatch {
+            bool active = false;
+            ScopedBuildTargetPatch() = default;
+            explicit ScopedBuildTargetPatch(bool enable) {
+                if (!enable) return;
+                std::lock_guard<std::mutex> lock(g_buildTargetPatchMutex);
+                ensure_build_target_patch_sites_locked();
+                if (g_buildTargetPatchSites.empty()) return;
+
+                const int prev = g_buildTargetPatchUsers.fetch_add(1, std::memory_order_acq_rel);
+                if (prev == 0) {
+                    apply_build_target_patch_locked(kBuildTargetIos);
+                }
+                active = true;
+            }
+            ~ScopedBuildTargetPatch() {
+                if (!active) return;
+                std::lock_guard<std::mutex> lock(g_buildTargetPatchMutex);
+                const int now = g_buildTargetPatchUsers.fetch_sub(1, std::memory_order_acq_rel) - 1;
+                if (now == 0 && !g_buildTargetPatchSites.empty()) {
+                    apply_build_target_patch_locked(kBuildTargetAndroid);
+                }
+            }
+        };
+
+        struct ScopedBuildTargetBypass {
+            bool active = false;
+            ScopedBuildTargetBypass() = default;
+            explicit ScopedBuildTargetBypass(bool enable) {
+                if (!enable) return;
+                std::lock_guard<std::mutex> lock(g_buildTargetPatchMutex);
+                ensure_build_target_bypass_sites_locked();
+                if (g_buildTargetBypassBranchSites.empty()) return;
+
+                const int prev = g_buildTargetBypassUsers.fetch_add(1, std::memory_order_acq_rel);
+                if (prev == 0) {
+                    apply_build_target_bypass_locked(true);
+                }
+                active = true;
+            }
+            ~ScopedBuildTargetBypass() {
+                if (!active) return;
+                std::lock_guard<std::mutex> lock(g_buildTargetPatchMutex);
+                const int now = g_buildTargetBypassUsers.fetch_sub(1, std::memory_order_acq_rel) - 1;
+                if (now == 0 && !g_buildTargetBypassBranchSites.empty()) {
+                    apply_build_target_bypass_locked(false);
+                }
+            }
+        };
+    } // namespace
+
+	    static std::string replaceAndroidDirWithIos(std::string s) {
+	        // Only swap the platform path component. This is intentionally narrow to avoid accidental replacements.
+	        constexpr std::string_view fromMid = "/android";
+	        constexpr std::string_view toMid = "/ios";
 
         size_t pos = 0;
         while ((pos = s.find(fromMid, pos)) != std::string::npos) {
@@ -24,14 +705,14 @@ namespace LinkuraLocal::HookDebug {
         if (s.size() >= 8 && s.rfind("/android") == s.size() - 8) {
             s.replace(s.size() - 8, 8, "/ios");
         }
-        return s;
-    }
+	        return s;
+	    }
 
-    DEFINE_HOOK(void, Internal_LogException, (void* ex, void* obj)) {
-        Internal_LogException_Orig(ex, obj);
-        static auto Exception_ToString = Il2cppUtils::GetMethod("mscorlib.dll", "System", "Exception", "ToString");
-        Log::LogUnityLog(ANDROID_LOG_ERROR, "UnityLog - Internal_LogException:\n%s", Exception_ToString->Invoke<Il2cppString*>(ex)->ToString().c_str());
-    }
+	    DEFINE_HOOK(void, Internal_LogException, (void* ex, void* obj)) {
+	        Internal_LogException_Orig(ex, obj);
+	        static auto Exception_ToString = Il2cppUtils::GetMethod("mscorlib.dll", "System", "Exception", "ToString");
+	        Log::LogUnityLog(ANDROID_LOG_ERROR, "UnityLog - Internal_LogException:\n%s", Exception_ToString->Invoke<Il2cppString*>(ex)->ToString().c_str());
+	    }
 
     DEFINE_HOOK(void, Internal_Log, (int logType, int logOption, UnityResolve::UnityType::String* content, void* context)) {
         Internal_Log_Orig(logType, logOption, content, context);
@@ -87,6 +768,130 @@ namespace LinkuraLocal::HookDebug {
             base = Il2cppString::New(replaceAndroidDirWithIos(base->ToString()));
         }
         return base;
+    }
+
+    DEFINE_HOOK(int, UnityEngine_Application_get_platform, ()) {
+        return UnityEngine_Application_get_platform_Orig();
+    }
+
+    DEFINE_HOOK(void*, UnityEngine_AssetBundle_LoadFromFile_Internal, (Il2cppString* path, uint32_t crc, uint64_t offset)) {
+        if (Config::loginAsIOS) {
+            static bool s_loggedOnce = false;
+            static std::mutex s_pathLogMutex;
+            static std::set<std::string> s_loggedPaths;
+            static std::mutex s_patchLogMutex;
+            static std::set<std::string> s_patchLoggedPaths;
+            if (!s_loggedOnce) {
+                s_loggedOnce = true;
+                Log::WarnFmt("BuildTarget bypass: hook entered (icall=%p).", (void*)g_unityLoadFromFileInternalAddr);
+            }
+            if (path) {
+                const auto p0 = path->ToString();
+                if (!p0.empty()) {
+                    bool doLog = false;
+                    {
+                        std::lock_guard<std::mutex> lock(s_pathLogMutex);
+                        if (s_loggedPaths.insert(p0).second) doLog = true;
+                    }
+                    if (doLog) {
+                        Log::WarnFmt("AssetBundle.LoadFromFile_Internal: path=%s crc=%u offset=%llu",
+                                     p0.c_str(), crc, static_cast<unsigned long long>(offset));
+                    }
+                }
+            }
+
+            tls_insideAssetBundleLoadFromFile = true;
+            // The primary strategy is now to rewrite the on-disk source bundle target to Android(13)
+            // before Unity reads it. Keep the native bypass disabled unless we prove it is needed again.
+            const ScopedBuildTargetBypass bypassGuard(false);
+            const ScopedBuildTargetPatch patchGuard(false);
+
+            if (path) {
+                const auto originalPath = path->ToString();
+                if (!originalPath.empty()) {
+                    const auto patchResult = UnityAssetHelper::PatchFileTargetBuildIdInPlace(originalPath, offset, kBuildTargetAndroid);
+                    bool shouldLogPatchResult = false;
+                    {
+                        std::lock_guard<std::mutex> lock(s_patchLogMutex);
+                        shouldLogPatchResult = s_patchLoggedPaths.insert(originalPath).second;
+                    }
+                    if (patchResult.patched) {
+                        crc = 0;
+                        if (shouldLogPatchResult) {
+                            const auto directFileOffsetStr = patchResult.firstDirectFileOffsetValid
+                                                             ? Log::StringFormat("0x%llX", static_cast<unsigned long long>(patchResult.firstDirectFileOffset))
+                                                             : std::string("n/a");
+                            Log::WarnFmt("AssetBundle target patch: path=%s target=0x%02X patched=%zu observed=0x%02X requestOffset=%llu actualOffset=%llu nodeOffset=0x%llX nodeSize=0x%llX targetOffsetInNode=0x%llX targetRawOffset=0x%llX blockIndex=%lld blockCompression=%u directFileOffset=%s",
+                                         originalPath.c_str(),
+                                         kBuildTargetAndroid,
+                                         patchResult.patchedSerializedFileCount,
+                                         patchResult.firstObservedBuildTarget,
+                                         static_cast<unsigned long long>(offset),
+                                         static_cast<unsigned long long>(patchResult.actualOffset),
+                                         static_cast<unsigned long long>(patchResult.firstNodeOffset),
+                                         static_cast<unsigned long long>(patchResult.firstNodeSize),
+                                         static_cast<unsigned long long>(patchResult.firstTargetOffsetInNode),
+                                         static_cast<unsigned long long>(patchResult.firstTargetAbsoluteRawOffset),
+                                         static_cast<long long>(patchResult.firstBlockIndex),
+                                         patchResult.firstBlockCompression,
+                                         directFileOffsetStr.c_str());
+                            Log::WarnFmt("AssetBundle target patch: source file modified in place: %s", originalPath.c_str());
+                        }
+                    } else if (patchResult.targetAlreadyMatched) {
+                        if (shouldLogPatchResult) {
+                            const auto directFileOffsetStr = patchResult.firstDirectFileOffsetValid
+                                                             ? Log::StringFormat("0x%llX", static_cast<unsigned long long>(patchResult.firstDirectFileOffset))
+                                                             : std::string("n/a");
+                            Log::WarnFmt("AssetBundle target patch: path=%s already target=0x%02X requestOffset=%llu actualOffset=%llu nodeOffset=0x%llX nodeSize=0x%llX targetOffsetInNode=0x%llX targetRawOffset=0x%llX blockIndex=%lld blockCompression=%u directFileOffset=%s",
+                                         originalPath.c_str(),
+                                         kBuildTargetAndroid,
+                                         static_cast<unsigned long long>(offset),
+                                         static_cast<unsigned long long>(patchResult.actualOffset),
+                                         static_cast<unsigned long long>(patchResult.firstNodeOffset),
+                                         static_cast<unsigned long long>(patchResult.firstNodeSize),
+                                         static_cast<unsigned long long>(patchResult.firstTargetOffsetInNode),
+                                         static_cast<unsigned long long>(patchResult.firstTargetAbsoluteRawOffset),
+                                         static_cast<long long>(patchResult.firstBlockIndex),
+                                         patchResult.firstBlockCompression,
+                                         directFileOffsetStr.c_str());
+                        }
+                    } else if (!patchResult.error.empty() && shouldLogPatchResult) {
+                        const auto directFileOffsetStr = patchResult.firstDirectFileOffsetValid
+                                                         ? Log::StringFormat("0x%llX", static_cast<unsigned long long>(patchResult.firstDirectFileOffset))
+                                                         : std::string("n/a");
+                        Log::WarnFmt("AssetBundle target patch skipped: path=%s requestOffset=%llu actualOffset=%llu found=%s observed=0x%02X targetOffsetInNode=0x%llX targetRawOffset=0x%llX blockIndex=%lld blockCompression=%u directFileOffset=%s error=%s",
+                                     originalPath.c_str(),
+                                     static_cast<unsigned long long>(offset),
+                                     static_cast<unsigned long long>(patchResult.actualOffset),
+                                     patchResult.foundSerializedFile ? "true" : "false",
+                                     patchResult.firstObservedBuildTarget,
+                                     static_cast<unsigned long long>(patchResult.firstTargetOffsetInNode),
+                                     static_cast<unsigned long long>(patchResult.firstTargetAbsoluteRawOffset),
+                                     static_cast<long long>(patchResult.firstBlockIndex),
+                                     patchResult.firstBlockCompression,
+                                     directFileOffsetStr.c_str(),
+                                     patchResult.error.c_str());
+                    }
+                }
+            }
+
+            auto ret = UnityEngine_AssetBundle_LoadFromFile_Internal_Orig(path, crc, offset);
+            tls_insideAssetBundleLoadFromFile = false;
+            if (path) {
+                const auto finalPath = path->ToString();
+                if (!ret) {
+                    Log::WarnFmt("AssetBundle.LoadFromFile_Internal returned NULL (path=%s crc=%u offset=%llu).",
+                                 finalPath.c_str(), crc, static_cast<unsigned long long>(offset));
+                } else {
+                    Log::WarnFmt("AssetBundle.LoadFromFile_Internal succeeded (path=%s ret=%p crc=%u offset=%llu).",
+                                 finalPath.c_str(), ret, crc, static_cast<unsigned long long>(offset));
+                }
+            }
+            return ret;
+        }
+
+        tls_insideAssetBundleLoadFromFile = false;
+        return UnityEngine_AssetBundle_LoadFromFile_Internal_Orig(path, crc, offset);
     }
 
     DEFINE_HOOK(void, FootShadowManipulator_OnInstantiate, (Il2cppUtils::Il2CppObject* self, void* method)) {
@@ -828,6 +1633,23 @@ namespace LinkuraLocal::HookDebug {
         ADD_HOOK(CharacterVisibleReceiver_UpdateAvatarVisibility, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.Character", "CharacterVisibleReceiver", "UpdateAvatarVisibility"));
         ADD_HOOK(Hailstorm_AssetDownloadJob_get_UrlBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_UrlBase"));
         ADD_HOOK(Hailstorm_AssetDownloadJob_get_LocalBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_LocalBase"));
+
+        // Experimental: try to bypass iOS AssetBundle build-target validation on Android.
+        ADD_HOOK(UnityEngine_Application_get_platform, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Application::get_platform()"));
+        // Hook the real native implementation in libunity via icall resolution (not the il2cpp stub).
+        g_unityLoadFromFileInternalAddr = reinterpret_cast<uintptr_t>(Il2cppUtils::il2cpp_resolve_icall(
+                "UnityEngine.AssetBundle::LoadFromFile_Internal(System.String,System.UInt32,System.UInt64)"));
+        if (g_unityLoadFromFileInternalAddr != 0) {
+            // Pre-scan patch sites before we install the hook (hooking may overwrite the prologue).
+            {
+                std::lock_guard<std::mutex> lock(g_buildTargetPatchMutex);
+                ensure_build_target_patch_sites_locked();
+                ensure_build_target_bypass_sites_locked();
+            }
+            ADD_HOOK(UnityEngine_AssetBundle_LoadFromFile_Internal, reinterpret_cast<void*>(g_unityLoadFromFileInternalAddr));
+        } else {
+            Log::WarnFmt("Resolve icall failed: UnityEngine.AssetBundle::LoadFromFile_Internal(...) is NULL.");
+        }
 
         ADD_HOOK(FootShadowManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.FootShadow", "FootShadowManipulator", "OnInstantiate"));
         ADD_HOOK(ItemManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemManipulator", "OnInstantiate"));
