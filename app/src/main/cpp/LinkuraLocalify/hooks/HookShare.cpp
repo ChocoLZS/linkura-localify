@@ -697,7 +697,29 @@ namespace LinkuraLocal::HookShare {
 #pragma endregion
 
 #pragma region oldVersion
+    static Il2cppUtils::Il2CppString* OverrideInspixUserAgentPlatform(Il2cppUtils::Il2CppString* value, bool toIos) {
+        if (!value) return value;
+        auto s = value->ToString();
+        constexpr std::string_view kAndroid = "inspix-android/";
+        constexpr std::string_view kIos = "inspix-ios/";
+        const auto target = toIos ? kIos : kAndroid;
+        if (s.rfind(kAndroid, 0) == 0) s.replace(0, kAndroid.size(), target);
+        else if (s.rfind(kIos, 0) == 0) s.replace(0, kIos.size(), target);
+        else return value;
+        return Il2cppUtils::Il2CppString::New(s);
+    }
+
     DEFINE_HOOK(void, Configuration_AddDefaultHeader, (void* self, Il2cppUtils::Il2CppString* key, Il2cppUtils::Il2CppString* value, void* mtd)) {
+        // Toggle platform headers for Login-as-iOS feature.
+        if (key) {
+            const auto key_str = key->ToString();
+            if (key_str == "x-device-type" || key_str == "X-Device-Type") {
+                value = Il2cppUtils::Il2CppString::New(Config::loginAsIOS ? "ios" : "android");
+            } else if (key_str == "User-Agent" || key_str == "user-agent") {
+                value = OverrideInspixUserAgentPlatform(value, Config::loginAsIOS);
+            }
+        }
+
         if (Config::enableLegacyCompatibility) {
             Log::DebugFmt("Configuration_AddDefaultHeader HOOKED, %s=%s", key->ToString().c_str(), value->ToString().c_str());
             auto key_str = key->ToString();
@@ -716,10 +738,13 @@ namespace LinkuraLocal::HookShare {
         if (Config::enableLegacyCompatibility) {
             Log::DebugFmt("Configuration_set_UserAgent HOOKED, %s", value->ToString().c_str());
             auto value_str = value->ToString();
-            if (value_str.starts_with("inspix-android")) {
-                value = Il2cppUtils::Il2CppString::New("inspix-android/" + Config::latestClientVersion.toString());
+            if (value_str.starts_with("inspix-android") || value_str.starts_with("inspix-ios")) {
+                // Keep legacy behavior (override version), but switch UA prefix by current platform toggle.
+                value = Il2cppUtils::Il2CppString::New(std::string(Config::loginAsIOS ? "inspix-ios/" : "inspix-android/") + Config::latestClientVersion.toString());
             }
         }
+        // Non-legacy path: keep version but swap prefix.
+        value = OverrideInspixUserAgentPlatform(value, Config::loginAsIOS);
         Configuration_set_UserAgent_Orig(self, value ,mtd);
     }
 
@@ -761,6 +786,56 @@ namespace LinkuraLocal::HookShare {
             requestedVersion = Il2cppUtils::Il2CppString::New(Config::currentResVersion);
         }
         return Core_SynchronizeResourceVersion_Orig(self, requestedVersion, mtd);
+    }
+
+    static void* Resolve_Hailstorm_HashLib_Crc32_Calc_Ptr() {
+        struct Candidate {
+            const char* namespaze;
+            const char* klass;
+        };
+
+        // IL2CPP nested type naming is commonly "Outer/Inner" (sometimes "Outer+Inner").
+        // Try several variants because UnityResolve::Assembly::Get doesn't always index stripped/nested types.
+        constexpr Candidate candidates[] = {
+            {"Hailstorm.HashLib", "Crc32"},
+            {"Hailstorm", "HashLib/Crc32"},
+            {"Hailstorm", "HashLib+Crc32"},
+            {"Hailstorm", "HashLib.Crc32"},
+        };
+
+        for (const auto& c : candidates) {
+            void* klass = Il2cppUtils::GetClassIl2cpp("Core.dll", c.namespaze, c.klass);
+            if (!klass) continue;
+            auto mi = Il2cppUtils::il2cpp_class_get_method_from_name(klass, "Calc", 1);
+            if (!mi || !mi->methodPointer) continue;
+            Log::InfoFmt("Resolved Hailstorm.HashLib.Crc32.Calc at %p via %s::%s", mi->methodPointer, c.namespaze, c.klass);
+            return reinterpret_cast<void*>(mi->methodPointer);
+        }
+
+        Log::Error("Failed to resolve Hailstorm.HashLib.Crc32.Calc (tried multiple nested-type name variants).");
+        return nullptr;
+    }
+
+    // Hailstorm.HashLib.Crc32.Calc(ReadOnlySpan<char> source) -> arm64: (char16_t* ptr, int len, MethodInfo*)
+    // We hook here to swap the platform string used in Catalog key derivation: "android" -> "ios" (test only).
+    DEFINE_HOOK(uint32_t, Hailstorm_HashLibCrc32Calc, (const char16_t* source, int32_t length, void* mtd)) {
+        if (!Config::loginAsIOS) {
+            return Hailstorm_HashLibCrc32Calc_Orig(source, length, mtd);
+        }
+        if (source && length > 0) {
+            const std::u16string_view sv(source, static_cast<size_t>(length));
+            if (sv == u"android") {
+                static bool logged = false;
+                if (!logged) {
+                    logged = true;
+                    Log::InfoFmt("Crc32.Calc: swapping platform string \"%s\" -> \"ios\"", Misc::ToUTF8(sv).c_str());
+                }
+
+                auto iosStr = Il2cppUtils::Il2CppString::New("ios");
+                return Hailstorm_HashLibCrc32Calc_Orig(iosStr->chars, iosStr->length, mtd);
+            }
+        }
+        return Hailstorm_HashLibCrc32Calc_Orig(source, length, mtd);
     }
     DEFINE_HOOK(Il2cppUtils::Il2CppString*, Application_get_version, ()) {
         Il2cppUtils::Il2CppString* result = Application_get_version_Orig();
@@ -910,6 +985,7 @@ namespace LinkuraLocal::HookShare {
         ADD_HOOK(Configuration_set_UserAgent, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_UserAgent"));
 //        ADD_HOOK(AssetManager_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetManager", "SynchronizeResourceVersion"));
         ADD_HOOK(Core_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "", "Core", "SynchronizeResourceVersion"));
+        ADD_HOOK(Hailstorm_HashLibCrc32Calc, Resolve_Hailstorm_HashLib_Crc32_Calc_Ptr());
         ADD_HOOK(Application_get_version, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Application::get_version"));
         ADD_HOOK(ArchiveApi_ArchiveGetWithTimelineDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetWithTimelineDataWithHttpInfoAsync"));
         ADD_HOOK(ArchiveApi_ArchiveGetFesTimelineDataWithHttpInfoAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi", "ArchiveGetFesTimelineDataWithHttpInfoAsync"));

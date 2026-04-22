@@ -113,6 +113,10 @@ fun HomePage(modifier: Modifier = Modifier,
                             v -> context?.onLazyInitChanged(v)
                     }
 
+                    GakuSwitch(modifier, stringResource(R.string.login_as_ios), checked = config.value.loginAsIOS) {
+                            v -> context?.onLoginAsIOSChanged(v)
+                    }
+
                     GakuSwitch(modifier, stringResource(R.string.app_update_check), checked = programConfig.value.checkAppUpdate) {
                             v -> context?.onPCheckAppUpdateChanged(v)
                     }

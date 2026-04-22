@@ -76,6 +76,7 @@
     <string name="delete_plugin_resource">ลบทรัพยากรของปลั๊กอิน</string>
     <string name="use_remote_zip_resource">ใช้ทรัพยากร ZIP จากระยะไกล</string>
     <string name="resource_url">URL ทรัพยากร</string>
+    <string name="replay.settings.resource_prefix_url">URL คำนำหน้าการเล่นซ้ำ</string>
     <string name="download">ดาวน์โหลด</string>
     <string name="invalid_zip_file">ไฟล์ไม่ถูกต้อง</string>
     <string name="invalid_zip_file_warn">ไฟล์นี้ไม่ใช่แพ็กทรัพยากรแปลภาษาแบบ ZIP ที่ถูกต้อง</string>
@@ -184,6 +185,9 @@
     <string name="replay.settings.metadata_url_placeholder">ลิงก์เมตาดาต้าของรีเพลย์</string>
     <string name="replay.settings.reset_url">รีเซ็ตเป็นค่าเริ่มต้น</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.version_info_url">URL ข้อมูลเวอร์ชัน</string>
+    <string name="replay.settings.version_info_url_placeholder">ลิงก์ข้อมูลเวอร์ชัน</string>
+    <string name="replay.default_version_info_url">https://assets.chocoie.com/client-res</string>
     <string name="replay.settings.filter_motion_capture_replay">แสดงเฉพาะรีเพลย์ที่มีโมชั่นแคปเจอร์</string>
     <string name="replay.settings.filter_playable_motion_capture">แสดงเฉพาะรีเพลย์โมชั่นแคปเจอร์ที่เล่นได้</string>
     <string name="replay.settings.enable_custom_start_time">เปิดใช้เวลาเริ่มรีเพลย์แบบกำหนดเอง</string>

@@ -76,6 +76,7 @@
     <string name="delete_plugin_resource">플러그인 리소스 삭제</string>
     <string name="use_remote_zip_resource">원격 ZIP 리소스 사용</string>
     <string name="resource_url">리소스 URL</string>
+    <string name="replay.settings.resource_prefix_url">리플레이 접두사 URL</string>
     <string name="download">다운로드</string>
     <string name="invalid_zip_file">잘못된 파일</string>
     <string name="invalid_zip_file_warn">이 파일은 올바른 ZIP 번역 리소스 팩이 아닙니다.</string>
@@ -184,6 +185,9 @@
     <string name="replay.settings.metadata_url_placeholder">리플레이 메타데이터 링크</string>
     <string name="replay.settings.reset_url">기본값으로 재설정</string>
     <string name="replay.default_metadata_url">https://assets.chocoie.com/archive</string>
+    <string name="replay.settings.version_info_url">버전 정보 URL</string>
+    <string name="replay.settings.version_info_url_placeholder">버전 정보 링크</string>
+    <string name="replay.default_version_info_url">https://assets.chocoie.com/client-res</string>
     <string name="replay.settings.filter_motion_capture_replay">모션 캡처가 있는 리플레이만 표시</string>
     <string name="replay.settings.filter_playable_motion_capture">재생 가능한 모션 캡처 리플레이만 표시</string>
     <string name="replay.settings.enable_custom_start_time">사용자 지정 리플레이 시작 시간 활성화</string>
