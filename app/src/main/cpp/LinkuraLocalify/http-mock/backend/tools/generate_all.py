@@ -8,6 +8,7 @@ import generate_archive_detail_sql as archive_detail
 import generate_card_detail_sql as card_detail
 import generate_character_info_sql as character_info
 import generate_custom_setting as custom_setting
+import generate_home_get_home as home
 import generate_user_items as item
 
 TOOLS_DIR = Path(__file__).resolve().parent
@@ -22,6 +23,7 @@ def main() -> None:
     card_detail.generate_json()
     character_info.generate_json()
     custom_setting.generate_json()
+    home.generate_json()
     item.generate_json()
 
     print("=== Generate SQL ===")

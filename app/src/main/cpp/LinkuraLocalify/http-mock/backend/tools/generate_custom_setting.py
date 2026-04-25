@@ -12,12 +12,17 @@ except AttributeError:
 
 TOOLS_DIR = Path(__file__).resolve().parent
 YAML_DIR = TOOLS_DIR / "link-like-diff"
+TEMPLATE_DIR = TOOLS_DIR / "template"
 BUILTIN_DIR = TOOLS_DIR.parent.parent / "builtin"
 
 
 def _load_yaml(path: Path):
     with path.open("r", encoding="utf-8") as f:
         return yaml.load(f, Loader=YAML_LOADER) or []
+
+
+def _load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def generate_json() -> None:
@@ -31,9 +36,12 @@ def generate_json() -> None:
 
     sticker_ids = sorted(row["Id"] for row in _load_yaml(YAML_DIR / "Stickers.yaml"))
 
+    profile_info = _load_json(TEMPLATE_DIR / "profile_info.json")
+
     output = {
         "user_card_data_list": user_card_data_list,
         "sticker_info_list": sticker_ids,
+        "profile_info": profile_info,
     }
 
     output_path = BUILTIN_DIR / "get_custom_setting.json"
