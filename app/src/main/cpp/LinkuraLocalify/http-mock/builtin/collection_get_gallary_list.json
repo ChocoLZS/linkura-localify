@@ -1,0 +1,792 @@
+{
+  "gallary_info_list": [
+    {
+      "comics_id": 10001,
+      "name": "入学準備編 第1話"
+    },
+    {
+      "comics_id": 10002,
+      "name": "入学準備編 第2話"
+    },
+    {
+      "comics_id": 10003,
+      "name": "入学準備編 第3話"
+    },
+    {
+      "comics_id": 10004,
+      "name": "入学準備編 第4話"
+    },
+    {
+      "comics_id": 10005,
+      "name": "入学準備編 第5話"
+    },
+    {
+      "comics_id": 10006,
+      "name": "入学準備編 第6話"
+    },
+    {
+      "comics_id": 10007,
+      "name": "入学準備編 第7話"
+    },
+    {
+      "comics_id": 10008,
+      "name": "入学準備編 第8話"
+    },
+    {
+      "comics_id": 10009,
+      "name": "入学準備編 第9話"
+    },
+    {
+      "comics_id": 10010,
+      "name": "入学準備編 第10話"
+    },
+    {
+      "comics_id": 11001,
+      "name": "第1話"
+    },
+    {
+      "comics_id": 11002,
+      "name": "第2話"
+    },
+    {
+      "comics_id": 11003,
+      "name": "第3話"
+    },
+    {
+      "comics_id": 11004,
+      "name": "第4話"
+    },
+    {
+      "comics_id": 11005,
+      "name": "第5話"
+    },
+    {
+      "comics_id": 11006,
+      "name": "第6話"
+    },
+    {
+      "comics_id": 11007,
+      "name": "第7話"
+    },
+    {
+      "comics_id": 11008,
+      "name": "第8話"
+    },
+    {
+      "comics_id": 11009,
+      "name": "第9話"
+    },
+    {
+      "comics_id": 11010,
+      "name": "第10話"
+    },
+    {
+      "comics_id": 11011,
+      "name": "第11話"
+    },
+    {
+      "comics_id": 11012,
+      "name": "第12話"
+    },
+    {
+      "comics_id": 11013,
+      "name": "第13話"
+    },
+    {
+      "comics_id": 11014,
+      "name": "第14話"
+    },
+    {
+      "comics_id": 11015,
+      "name": "第15話"
+    },
+    {
+      "comics_id": 11016,
+      "name": "第16話"
+    },
+    {
+      "comics_id": 11017,
+      "name": "第17話"
+    },
+    {
+      "comics_id": 11018,
+      "name": "第18話"
+    },
+    {
+      "comics_id": 11019,
+      "name": "第19話"
+    },
+    {
+      "comics_id": 11020,
+      "name": "第20話"
+    },
+    {
+      "comics_id": 11021,
+      "name": "第21話"
+    },
+    {
+      "comics_id": 11022,
+      "name": "第22話"
+    },
+    {
+      "comics_id": 11023,
+      "name": "第23話"
+    },
+    {
+      "comics_id": 11024,
+      "name": "第24話"
+    },
+    {
+      "comics_id": 11025,
+      "name": "第25話"
+    },
+    {
+      "comics_id": 11026,
+      "name": "第26話"
+    },
+    {
+      "comics_id": 11027,
+      "name": "第27話"
+    },
+    {
+      "comics_id": 11028,
+      "name": "第28話"
+    },
+    {
+      "comics_id": 11029,
+      "name": "第29話"
+    },
+    {
+      "comics_id": 11030,
+      "name": "第30話"
+    },
+    {
+      "comics_id": 11031,
+      "name": "第31話"
+    },
+    {
+      "comics_id": 11032,
+      "name": "第32話"
+    },
+    {
+      "comics_id": 11033,
+      "name": "第33話"
+    },
+    {
+      "comics_id": 11034,
+      "name": "第34話"
+    },
+    {
+      "comics_id": 11035,
+      "name": "第35話"
+    },
+    {
+      "comics_id": 11036,
+      "name": "第36話"
+    },
+    {
+      "comics_id": 11037,
+      "name": "第37話"
+    },
+    {
+      "comics_id": 11038,
+      "name": "第38話"
+    },
+    {
+      "comics_id": 11039,
+      "name": "第39話"
+    },
+    {
+      "comics_id": 11040,
+      "name": "第40話"
+    },
+    {
+      "comics_id": 11041,
+      "name": "第41話"
+    },
+    {
+      "comics_id": 11042,
+      "name": "第42話"
+    },
+    {
+      "comics_id": 11043,
+      "name": "第43話"
+    },
+    {
+      "comics_id": 11044,
+      "name": "第44話"
+    },
+    {
+      "comics_id": 11045,
+      "name": "第45話"
+    },
+    {
+      "comics_id": 11046,
+      "name": "第46話"
+    },
+    {
+      "comics_id": 11047,
+      "name": "第47話"
+    },
+    {
+      "comics_id": 11048,
+      "name": "第48話"
+    },
+    {
+      "comics_id": 11049,
+      "name": "第49話"
+    },
+    {
+      "comics_id": 11050,
+      "name": "第50話"
+    },
+    {
+      "comics_id": 11051,
+      "name": "第51話"
+    },
+    {
+      "comics_id": 11052,
+      "name": "第52話"
+    },
+    {
+      "comics_id": 11053,
+      "name": "第53話"
+    },
+    {
+      "comics_id": 11054,
+      "name": "第54話"
+    },
+    {
+      "comics_id": 11055,
+      "name": "第55話"
+    },
+    {
+      "comics_id": 11056,
+      "name": "第56話"
+    },
+    {
+      "comics_id": 11057,
+      "name": "第57話"
+    },
+    {
+      "comics_id": 11058,
+      "name": "第58話"
+    },
+    {
+      "comics_id": 11059,
+      "name": "第59話"
+    },
+    {
+      "comics_id": 11060,
+      "name": "第60話"
+    },
+    {
+      "comics_id": 11061,
+      "name": "第61話"
+    },
+    {
+      "comics_id": 11062,
+      "name": "第62話"
+    },
+    {
+      "comics_id": 11063,
+      "name": "第63話"
+    },
+    {
+      "comics_id": 11064,
+      "name": "第64話"
+    },
+    {
+      "comics_id": 11065,
+      "name": "第65話"
+    },
+    {
+      "comics_id": 11066,
+      "name": "第66話"
+    },
+    {
+      "comics_id": 11067,
+      "name": "第67話"
+    },
+    {
+      "comics_id": 11068,
+      "name": "第68話"
+    },
+    {
+      "comics_id": 11069,
+      "name": "第69話"
+    },
+    {
+      "comics_id": 11070,
+      "name": "第70話"
+    },
+    {
+      "comics_id": 11071,
+      "name": "第71話"
+    },
+    {
+      "comics_id": 11072,
+      "name": "第72話"
+    },
+    {
+      "comics_id": 11073,
+      "name": "第73話"
+    },
+    {
+      "comics_id": 11074,
+      "name": "第74話"
+    },
+    {
+      "comics_id": 11075,
+      "name": "第75話"
+    },
+    {
+      "comics_id": 11076,
+      "name": "第76話"
+    },
+    {
+      "comics_id": 11077,
+      "name": "第77話"
+    },
+    {
+      "comics_id": 11078,
+      "name": "第78話"
+    },
+    {
+      "comics_id": 12001,
+      "name": "第1話"
+    },
+    {
+      "comics_id": 12002,
+      "name": "第2話"
+    },
+    {
+      "comics_id": 12003,
+      "name": "第3話"
+    },
+    {
+      "comics_id": 12004,
+      "name": "第4話"
+    },
+    {
+      "comics_id": 12005,
+      "name": "第5話"
+    },
+    {
+      "comics_id": 12006,
+      "name": "第6話"
+    },
+    {
+      "comics_id": 12007,
+      "name": "第7話"
+    },
+    {
+      "comics_id": 12008,
+      "name": "第8話"
+    },
+    {
+      "comics_id": 12009,
+      "name": "第9話"
+    },
+    {
+      "comics_id": 12010,
+      "name": "第10話"
+    },
+    {
+      "comics_id": 12011,
+      "name": "第11話"
+    },
+    {
+      "comics_id": 12012,
+      "name": "第12話"
+    },
+    {
+      "comics_id": 12013,
+      "name": "第13話"
+    },
+    {
+      "comics_id": 12014,
+      "name": "第14話"
+    },
+    {
+      "comics_id": 12015,
+      "name": "第15話"
+    },
+    {
+      "comics_id": 12016,
+      "name": "第16話"
+    },
+    {
+      "comics_id": 12017,
+      "name": "第17話"
+    },
+    {
+      "comics_id": 12018,
+      "name": "第18話"
+    },
+    {
+      "comics_id": 12019,
+      "name": "第19話"
+    },
+    {
+      "comics_id": 12020,
+      "name": "第20話"
+    },
+    {
+      "comics_id": 12021,
+      "name": "第21話"
+    },
+    {
+      "comics_id": 12022,
+      "name": "第22話"
+    },
+    {
+      "comics_id": 12023,
+      "name": "第23話"
+    },
+    {
+      "comics_id": 12024,
+      "name": "第24話"
+    },
+    {
+      "comics_id": 12025,
+      "name": "第25話"
+    },
+    {
+      "comics_id": 12026,
+      "name": "第26話"
+    },
+    {
+      "comics_id": 12027,
+      "name": "第27話"
+    },
+    {
+      "comics_id": 12028,
+      "name": "第28話"
+    },
+    {
+      "comics_id": 12029,
+      "name": "第29話"
+    },
+    {
+      "comics_id": 12030,
+      "name": "第30話"
+    },
+    {
+      "comics_id": 12031,
+      "name": "第31話"
+    },
+    {
+      "comics_id": 12032,
+      "name": "第32話"
+    },
+    {
+      "comics_id": 12033,
+      "name": "第33話"
+    },
+    {
+      "comics_id": 12034,
+      "name": "第34話"
+    },
+    {
+      "comics_id": 12035,
+      "name": "第35話"
+    },
+    {
+      "comics_id": 12036,
+      "name": "第36話"
+    },
+    {
+      "comics_id": 12037,
+      "name": "第37話"
+    },
+    {
+      "comics_id": 12038,
+      "name": "第38話"
+    },
+    {
+      "comics_id": 12039,
+      "name": "第39話"
+    },
+    {
+      "comics_id": 12040,
+      "name": "第40話"
+    },
+    {
+      "comics_id": 12041,
+      "name": "第41話"
+    },
+    {
+      "comics_id": 12042,
+      "name": "第42話"
+    },
+    {
+      "comics_id": 12043,
+      "name": "第43話"
+    },
+    {
+      "comics_id": 12044,
+      "name": "第44話"
+    },
+    {
+      "comics_id": 12045,
+      "name": "第45話"
+    },
+    {
+      "comics_id": 12046,
+      "name": "第46話"
+    },
+    {
+      "comics_id": 12047,
+      "name": "第47話"
+    },
+    {
+      "comics_id": 12048,
+      "name": "第48話"
+    },
+    {
+      "comics_id": 12049,
+      "name": "第49話"
+    },
+    {
+      "comics_id": 12050,
+      "name": "第50話"
+    },
+    {
+      "comics_id": 12051,
+      "name": "第51話"
+    },
+    {
+      "comics_id": 12052,
+      "name": "第52話"
+    },
+    {
+      "comics_id": 12053,
+      "name": "第53話"
+    },
+    {
+      "comics_id": 12054,
+      "name": "第54話"
+    },
+    {
+      "comics_id": 12055,
+      "name": "第55話"
+    },
+    {
+      "comics_id": 12056,
+      "name": "第56話"
+    },
+    {
+      "comics_id": 12057,
+      "name": "第57話"
+    },
+    {
+      "comics_id": 12058,
+      "name": "第58話"
+    },
+    {
+      "comics_id": 12059,
+      "name": "第59話"
+    },
+    {
+      "comics_id": 13001,
+      "name": "第1話"
+    },
+    {
+      "comics_id": 13002,
+      "name": "第2話"
+    },
+    {
+      "comics_id": 13003,
+      "name": "第3話"
+    },
+    {
+      "comics_id": 13004,
+      "name": "第4話"
+    },
+    {
+      "comics_id": 13005,
+      "name": "第5話"
+    },
+    {
+      "comics_id": 13006,
+      "name": "第6話"
+    },
+    {
+      "comics_id": 13007,
+      "name": "第7話"
+    },
+    {
+      "comics_id": 13008,
+      "name": "第8話"
+    },
+    {
+      "comics_id": 13009,
+      "name": "第9話"
+    },
+    {
+      "comics_id": 13010,
+      "name": "第10話"
+    },
+    {
+      "comics_id": 13011,
+      "name": "第11話"
+    },
+    {
+      "comics_id": 13012,
+      "name": "第12話"
+    },
+    {
+      "comics_id": 13013,
+      "name": "第13話"
+    },
+    {
+      "comics_id": 13014,
+      "name": "第14話"
+    },
+    {
+      "comics_id": 13015,
+      "name": "第15話"
+    },
+    {
+      "comics_id": 13016,
+      "name": "第16話"
+    },
+    {
+      "comics_id": 13017,
+      "name": "第17話"
+    },
+    {
+      "comics_id": 13018,
+      "name": "第18話"
+    },
+    {
+      "comics_id": 13019,
+      "name": "第19話"
+    },
+    {
+      "comics_id": 13020,
+      "name": "第20話"
+    },
+    {
+      "comics_id": 13021,
+      "name": "第21話"
+    },
+    {
+      "comics_id": 13022,
+      "name": "第22話"
+    },
+    {
+      "comics_id": 13023,
+      "name": "第23話"
+    },
+    {
+      "comics_id": 13024,
+      "name": "第24話"
+    },
+    {
+      "comics_id": 13025,
+      "name": "第25話"
+    },
+    {
+      "comics_id": 13026,
+      "name": "第26話"
+    },
+    {
+      "comics_id": 13027,
+      "name": "第27話"
+    },
+    {
+      "comics_id": 13028,
+      "name": "第28話"
+    },
+    {
+      "comics_id": 13029,
+      "name": "第29話"
+    },
+    {
+      "comics_id": 13030,
+      "name": "第30話"
+    },
+    {
+      "comics_id": 13031,
+      "name": "第31話"
+    },
+    {
+      "comics_id": 13032,
+      "name": "第32話"
+    },
+    {
+      "comics_id": 13033,
+      "name": "第33話"
+    },
+    {
+      "comics_id": 13034,
+      "name": "第34話"
+    },
+    {
+      "comics_id": 13035,
+      "name": "第35話"
+    },
+    {
+      "comics_id": 13036,
+      "name": "第36話"
+    },
+    {
+      "comics_id": 13037,
+      "name": "第37話"
+    },
+    {
+      "comics_id": 13038,
+      "name": "第38話"
+    },
+    {
+      "comics_id": 13039,
+      "name": "第39話"
+    },
+    {
+      "comics_id": 13040,
+      "name": "第40話"
+    },
+    {
+      "comics_id": 13041,
+      "name": "第41話"
+    },
+    {
+      "comics_id": 13042,
+      "name": "第42話"
+    },
+    {
+      "comics_id": 13043,
+      "name": "第43話"
+    },
+    {
+      "comics_id": 13044,
+      "name": "第44話"
+    },
+    {
+      "comics_id": 13045,
+      "name": "第45話"
+    },
+    {
+      "comics_id": 13046,
+      "name": "第46話"
+    },
+    {
+      "comics_id": 13047,
+      "name": "第47話"
+    },
+    {
+      "comics_id": 13048,
+      "name": "第48話"
+    },
+    {
+      "comics_id": 13049,
+      "name": "第49話"
+    },
+    {
+      "comics_id": 13050,
+      "name": "第50話"
+    }
+  ]
+}

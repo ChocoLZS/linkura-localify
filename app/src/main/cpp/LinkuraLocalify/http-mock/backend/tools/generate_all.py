@@ -11,6 +11,7 @@ import generate_custom_setting as custom_setting
 import generate_deck_sql as deck
 import generate_home_get_home as home
 import generate_music_list as music_list
+import generate_sticker_list as sticker_list
 import generate_user_items as item
 
 TOOLS_DIR = Path(__file__).resolve().parent
@@ -27,6 +28,7 @@ def main() -> None:
     custom_setting.generate_json()
     home.generate_json()
     music_list.generate_json()
+    sticker_list.generate_json()
     item.generate_json()
 
     print("=== Generate SQL ===")

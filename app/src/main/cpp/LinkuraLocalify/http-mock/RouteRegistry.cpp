@@ -223,6 +223,8 @@ namespace LinkuraLocal::HttpMock {
             RegisterBackend(routes, "/v1/user/deck/modify_deck_list", HandleDeckModifyDeckList);
             RegisterStaticJson(routes, "/v1/user/deck/notify_auto_deck", "null");
             RegisterStaticJson(routes, "/v1/collection/get_music_list", OfflineApiMockBuiltIn::CollectionGetMusicListJsonView);
+            RegisterStaticJson(routes, "/v1/collection/get_sticker_list", OfflineApiMockBuiltIn::CollectionGetStickerListJsonView);
+            RegisterStaticJson(routes, "/v1/collection/get_gallary_list", OfflineApiMockBuiltIn::CollectionGetGallaryListJsonView);
 
             return routes;
         }
