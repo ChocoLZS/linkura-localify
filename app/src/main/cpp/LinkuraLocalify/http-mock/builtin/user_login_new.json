@@ -1,0 +1,12 @@
+{
+  "type": 0,
+  "session_token": "",
+  "is_tutorial": true,
+  "is_term_update": true,
+  "is_login_bonus_receive": false,
+  "push_device_token": "",
+  "sisca_product_id_list": [],
+  "membership_product_id_list": [],
+  "item_store_product_id_list": [],
+  "tutorials_status_list": []
+}

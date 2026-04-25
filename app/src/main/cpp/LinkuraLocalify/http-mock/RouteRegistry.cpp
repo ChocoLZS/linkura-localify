@@ -40,6 +40,20 @@ namespace LinkuraLocal::HttpMock {
             });
         }
 
+        static std::optional<MockResponse> HandleUserLogin(const MockRequestContext& request,
+                                                             HttpMockBackend&) {
+            const auto playerId = HttpMockBackend::ExtractPayloadStringField(request.payloadJson, "player_id");
+            const auto& jsonBody = playerId.empty()
+                ? OfflineApiMockBuiltIn::UserLoginNewJsonView
+                : OfflineApiMockBuiltIn::UserLoginJsonView;
+            return MockResponse{
+                std::string(jsonBody),
+                std::string(OfflineApiMockBuiltIn::UserLoginHeadersView),
+                200,
+                "OK (offline mock)",
+            };
+        }
+
         static std::optional<MockResponse> HandleArchiveDetail(const MockRequestContext& request,
                                                                HttpMockBackend& backend) {
             const auto fallbackArchiveId = HookShare::Shareable::currentArchiveId;
@@ -120,7 +134,9 @@ namespace LinkuraLocal::HttpMock {
         static RouteTable BuildRoutes() {
             RouteTable routes;
 
-            RegisterStaticJson(routes, "/v1/user/login", OfflineApiMockBuiltIn::UserLoginJsonView, OfflineApiMockBuiltIn::UserLoginHeadersView);
+            RegisterStaticJson(routes, "/v1/account/connect", OfflineApiMockBuiltIn::AccountConnectJsonView);
+            RegisterStaticJson(routes, "/v1/user/push/devices", "null");
+            RegisterBackend(routes, "/v1/user/login", HandleUserLogin);
             RegisterStaticJson(routes, "/v1/home/get_home", OfflineApiMockBuiltIn::HomeGetHomeJsonView);
             RegisterStaticJson(routes, "/v1/webview/school_idol_connect_post/get_theme_list", OfflineApiMockBuiltIn::WebviewSchoolIdolConnectPostGetThemeListJsonView);
             RegisterStaticJson(routes, "/v1/follow/live_chat_group_list", OfflineApiMockBuiltIn::FollowLiveChatGroupListJsonView);
