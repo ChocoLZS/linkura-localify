@@ -258,4 +258,15 @@
     <string name="app_update_available">Actualización de la app disponible</string>
     <string name="app_update_ignore">Ignorar</string>
     <string name="app_update_install">Instalar</string>
+    <string name="local_mode">Modo local</string>
+    <string name="enable_offline_api_mock">Activar API Mock sin conexión</string>
+    <string name="offline_api_mock_dir">Nombre del directorio Mock</string>
+    <string name="offline_api_mock_dir_hint">Ruta relativa bajo `linkura-local/` en el directorio de archivos de la app (ej: mock_api).</string>
+    <string name="local_mode_hint_collapsed">Toca el encabezado para expandir.</string>
+    <string name="reset_mock_database">Restablecer base de datos</string>
+    <string name="reset_mock_database_confirm_title">Restablecer base de datos</string>
+    <string name="reset_mock_database_confirm_content">Se eliminarán todos los datos de la base de datos y se restaurarán los datos iniciales integrados. ¿Continuar?</string>
+    <string name="rebuild_mock_database">Reconstruir base de datos</string>
+    <string name="rebuild_mock_database_confirm_title">Reconstruir base de datos</string>
+    <string name="rebuild_mock_database_confirm_content">Se eliminará el archivo de la base de datos y se reconstruirá desde cero (schema + seed). ¿Continuar?</string>
 </resources>

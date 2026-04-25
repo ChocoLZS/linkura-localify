@@ -1,0 +1,57 @@
+{
+  "type": 2,
+  "session_token": "00000000-0000-0000-0000-000000000000",
+  "is_tutorial": false,
+  "is_term_update": false,
+  "is_login_bonus_receive": true,
+  "push_device_token": "",
+  "sisca_product_id_list": [],
+  "membership_product_id_list": [],
+  "item_store_product_id_list": [],
+  "tutorials_status_list": [
+    {
+      "tutorial_id": 20,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 30,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 40,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 50,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5010,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5020,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5030,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5040,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5050,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5060,
+      "is_complete": true
+    },
+    {
+      "tutorial_id": 5070,
+      "is_complete": true
+    }
+  ]
+}

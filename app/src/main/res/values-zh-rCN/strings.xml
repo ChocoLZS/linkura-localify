@@ -61,6 +61,17 @@
     <string name="about">关于</string>
     <string name="home">主页</string>
     <string name="advanced_settings">高级设置</string>
+    <string name="local_mode">本地模式</string>
+    <string name="enable_offline_api_mock">启用离线 API Mock</string>
+    <string name="offline_api_mock_dir">Mock 目录名</string>
+    <string name="offline_api_mock_dir_hint">相对于应用文件目录下的 `linkura-local/`（例如 mock_api）。</string>
+    <string name="local_mode_hint_collapsed">点击标题展开设置。</string>
+    <string name="reset_mock_database">重置数据库</string>
+    <string name="reset_mock_database_confirm_title">重置数据库</string>
+    <string name="reset_mock_database_confirm_content">将清空数据库中的所有数据并恢复内置初始数据，确认继续？</string>
+    <string name="rebuild_mock_database">重建数据库</string>
+    <string name="rebuild_mock_database_confirm_title">重建数据库</string>
+    <string name="rebuild_mock_database_confirm_content">将删除数据库文件并从头重建（执行 schema + seed），确认继续？</string>
     <string name="about_warn_title">使用前警告</string>
     <string name="about_warn_p1">本插件仅供学习和交流使用。</string>
     <string name="about_warn_p2">使用外部插件属于违反游戏条款的行为。若使用插件后账号被封禁，造成的后果由用户自行承担。</string>

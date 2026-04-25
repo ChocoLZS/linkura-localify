@@ -18,3 +18,5 @@ local.properties
 /.kotlin
 /app/debug
 /app/release
+.claude/
+__pycache__/

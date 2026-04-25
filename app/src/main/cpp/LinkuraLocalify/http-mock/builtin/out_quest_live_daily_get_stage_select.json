@@ -1,0 +1,8 @@
+{
+  "user_daily_ticket_info": {
+    "num": 3,
+    "max": 3,
+    "next_reset_time": "2023-04-15T00:00:00+09:00"
+  },
+  "temporary_release_daily_quest_series_id_list": []
+}

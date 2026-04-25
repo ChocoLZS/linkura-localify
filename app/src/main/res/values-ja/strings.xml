@@ -548,4 +548,15 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="app_update_available">アプリの更新があります</string>
     <string name="app_update_ignore">無視</string>
     <string name="app_update_install">インストール</string>
+    <string name="local_mode">ローカルモード</string>
+    <string name="enable_offline_api_mock">オフライン API Mock を有効化</string>
+    <string name="offline_api_mock_dir">Mock ディレクトリ名</string>
+    <string name="offline_api_mock_dir_hint">アプリのファイル配下 `linkura-local/` からの相対パス（例: mock_api）。</string>
+    <string name="local_mode_hint_collapsed">タイトルをタップして展開します。</string>
+    <string name="reset_mock_database">データベースをリセット</string>
+    <string name="reset_mock_database_confirm_title">データベースをリセット</string>
+    <string name="reset_mock_database_confirm_content">データベース内のすべてのデータを削除し、組み込みの初期データを復元します。続けますか？</string>
+    <string name="rebuild_mock_database">データベースを再構築</string>
+    <string name="rebuild_mock_database_confirm_title">データベースを再構築</string>
+    <string name="rebuild_mock_database_confirm_content">データベースファイルを削除し、最初から再構築します（schema + seed）。続けますか？</string>
 </resources>

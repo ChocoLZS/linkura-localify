@@ -74,6 +74,7 @@ import io.github.chocolzs.linkura.localify.ui.components.GakuRadio
 import io.github.chocolzs.linkura.localify.ui.components.GakuSwitch
 import io.github.chocolzs.linkura.localify.ui.components.GakuTextInput
 import io.github.chocolzs.linkura.localify.ui.components.base.AutoSizeText
+import io.github.chocolzs.linkura.localify.LinkuraHookMain
 import java.io.File
 
 
@@ -93,6 +94,13 @@ fun HomePage(modifier: Modifier = Modifier,
     val keyBoardOptionsDecimal = remember {
         KeyboardOptions(keyboardType = KeyboardType.Decimal)
     }
+
+    var localModeExpanded by rememberSaveable { mutableStateOf(false) }
+    val localModeArrowRotation by animateFloatAsState(
+        targetValue = if (localModeExpanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 250),
+        label = "local_mode_arrow_rotation"
+    )
 
     LazyColumn(modifier = modifier
         .sizeIn(maxHeight = screenH)
@@ -117,6 +125,108 @@ fun HomePage(modifier: Modifier = Modifier,
                             v -> context?.onPCheckAppUpdateChanged(v)
                     }
 
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+        }
+        item {
+            GakuGroupBox(
+                modifier = modifier,
+                title = stringResource(R.string.local_mode),
+                rightHead = {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = "Expand",
+                        tint = Color.White,
+                        modifier = Modifier.rotate(localModeArrowRotation)
+                    )
+                },
+                onHeadClick = { localModeExpanded = !localModeExpanded }
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (!localModeExpanded) {
+                        Text(
+                            text = stringResource(R.string.local_mode_hint_collapsed),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                    CollapsibleBox(
+                        modifier = modifier,
+                        expandState = localModeExpanded,
+                        collapsedHeight = 0.dp,
+                        showExpand = false
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            GakuSwitch(
+                                modifier,
+                                stringResource(R.string.enable_offline_api_mock),
+                                checked = config.value.enableOfflineApiMock
+                            ) { v ->
+                                context?.onEnableOfflineApiMockChanged(v)
+                            }
+                            GakuTextInput(
+                                value = config.value.offlineApiMockDir,
+                                onValueChange = { value ->
+                                    context?.onOfflineApiMockDirChanged(value)
+                                },
+                                label = { Text(text = stringResource(R.string.offline_api_mock_dir)) }
+                            )
+                            Text(
+                                text = stringResource(R.string.offline_api_mock_dir_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                            val resetTitle = stringResource(R.string.reset_mock_database_confirm_title)
+                            val resetContent = stringResource(R.string.reset_mock_database_confirm_content)
+                            val rebuildTitle = stringResource(R.string.rebuild_mock_database_confirm_title)
+                            val rebuildContent = stringResource(R.string.rebuild_mock_database_confirm_content)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                GakuButton(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(36.dp),
+                                    text = stringResource(R.string.reset_mock_database),
+                                    onClick = {
+                                        context?.mainUIConfirmStatUpdate(
+                                            isShow = true,
+                                            title = resetTitle,
+                                            content = resetContent,
+                                            onConfirm = {
+                                                context?.let { ctx ->
+                                                    File(ctx.filesDir, "mock_db_cmd").writeText("reset")
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                                GakuButton(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(36.dp),
+                                    text = stringResource(R.string.rebuild_mock_database),
+                                    onClick = {
+                                        context?.mainUIConfirmStatUpdate(
+                                            isShow = true,
+                                            title = rebuildTitle,
+                                            content = rebuildContent,
+                                            onConfirm = {
+                                                context?.let { ctx ->
+                                                    File(ctx.filesDir, "mock_db_cmd").writeText("rebuild")
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
             Spacer(Modifier.height(6.dp))

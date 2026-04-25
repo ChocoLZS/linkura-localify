@@ -258,4 +258,15 @@
     <string name="app_update_available">有可用的 App 更新</string>
     <string name="app_update_ignore">忽略</string>
     <string name="app_update_install">安裝</string>
+    <string name="local_mode">本地模式</string>
+    <string name="enable_offline_api_mock">啟用離線 API Mock</string>
+    <string name="offline_api_mock_dir">Mock 目錄名</string>
+    <string name="offline_api_mock_dir_hint">相對於應用程式檔案目錄下的 `linkura-local/`（例如 mock_api）。</string>
+    <string name="local_mode_hint_collapsed">點擊標題展開設定。</string>
+    <string name="reset_mock_database">重置資料庫</string>
+    <string name="reset_mock_database_confirm_title">重置資料庫</string>
+    <string name="reset_mock_database_confirm_content">將清空資料庫中的所有資料並恢復內建初始資料，確認繼續？</string>
+    <string name="rebuild_mock_database">重建資料庫</string>
+    <string name="rebuild_mock_database_confirm_title">重建資料庫</string>
+    <string name="rebuild_mock_database_confirm_content">將刪除資料庫檔案並從頭重建（執行 schema + seed），確認繼續？</string>
 </resources>
