@@ -18,7 +18,7 @@ jewel_free: 0
 jewel_paid_apple: 0
 jewel_paid_google: 999999
 latest_chat_order_id: 0
-launcher_info: {"quest_live_status":1,"archive_status":1,"activity_status":1,"gacha_status":0,"mission_status":0,"present_box_status":0,"shop_status":0,"sisca_store_status":0,"collection_status":0,"sticker_status":0,"comic_status":0,"circle_status":0,"information_status":0,"friend_status":0,"train_status":1,"deck_status":0,"school_idol_show_status":0}
+launcher_info: {"quest_live_status":1,"archive_status":1,"activity_status":1,"gacha_status":0,"mission_status":0,"present_box_status":0,"shop_status":0,"sisca_store_status":0,"collection_status":0,"sticker_status":0,"comic_status":0,"circle_status":0,"information_status":0,"friend_status":0,"train_status":1,"deck_status":1,"school_idol_show_status":1}
 name: 6JOu44OO56m6
 new_gacha_unreadable_type: 0
 presentbox_count: 0

@@ -3,9 +3,11 @@
 #include "../../HookMain.h"
 #include "../../Local.h"
 #include "http_mock_backend_builtin_sql.hpp"
+#include "offline_api_mock_builtin.hpp"
 
 #include <filesystem>
 #include <mutex>
+#include <random>
 #include <string>
 
 #include "sqlite3.h"
@@ -82,6 +84,8 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> GetCardDetailByDCardIdLocked(std::string_view dCardDatasId);
         std::optional<MockStoredResponse> GetItemDetailByDItemIdLocked(std::string_view dItemDatasId);
         std::optional<MockStoredResponse> GetCharacterInfoByIdLocked(std::string_view characterId);
+        std::optional<MockStoredResponse> GetDeckListResponseLocked();
+        std::optional<MockStoredResponse> ModifyDeckListLocked(std::string_view payloadJson);
     };
 
     namespace {
@@ -103,6 +107,29 @@ namespace LinkuraLocal::HttpMock {
 
         static bool BindText(sqlite3_stmt* stmt, int index, std::string_view value) {
             return sqlite3_bind_text(stmt, index, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT) == SQLITE_OK;
+        }
+
+        static std::string GenerateUuid4() {
+            static thread_local std::mt19937_64 rng(std::random_device{}());
+            std::uniform_int_distribution<uint64_t> dist;
+            const uint64_t hi = dist(rng);
+            const uint64_t lo = dist(rng);
+
+            uint8_t bytes[16];
+            for (int i = 0; i < 8; ++i) bytes[i] = static_cast<uint8_t>(hi >> (56 - i * 8));
+            for (int i = 0; i < 8; ++i) bytes[8 + i] = static_cast<uint8_t>(lo >> (56 - i * 8));
+
+            bytes[6] = (bytes[6] & 0x0F) | 0x40;
+            bytes[8] = (bytes[8] & 0x3F) | 0x80;
+
+            char buf[37];
+            snprintf(buf, sizeof(buf),
+                     "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                     bytes[0], bytes[1], bytes[2], bytes[3],
+                     bytes[4], bytes[5], bytes[6], bytes[7],
+                     bytes[8], bytes[9], bytes[10], bytes[11],
+                     bytes[12], bytes[13], bytes[14], bytes[15]);
+            return std::string(buf, 36);
         }
 
         static bool ExecSqlScript(sqlite3* db, const HttpMockBackendBuiltInSql::BuiltinSqlScript& script) {
@@ -198,6 +225,7 @@ namespace LinkuraLocal::HttpMock {
             ExecSql(db, "DELETE FROM card_detail;");
             ExecSql(db, "DELETE FROM character_info;");
             ExecSql(db, "DELETE FROM item;");
+            ExecSql(db, "DELETE FROM deck;");
             std::filesystem::remove(resetCmdPath, ec);
         }
 
@@ -215,7 +243,7 @@ namespace LinkuraLocal::HttpMock {
             return false;
         }
 
-        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;")) {
+        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;") || !ExecSql(db, "DELETE FROM deck;")) {
             return false;
         }
 
@@ -396,6 +424,151 @@ namespace LinkuraLocal::HttpMock {
         return response;
     }
 
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GetDeckListResponseLocked() {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+        if (!db) {
+            return std::nullopt;
+        }
+
+        nlohmann::json deckList = nlohmann::json::array();
+
+        sqlite3_stmt* stmt = nullptr;
+        constexpr const char* sql =
+            "SELECT d_deck_datas_id, deck_name, deck_no, generations_id, ace_card, deck_cards_json "
+            "FROM deck ORDER BY deck_no;";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK || !stmt) {
+            Log::ErrorFmt("[HttpMockBackend] sqlite prepare failed for deck list: %s", sqlite3_errmsg(db));
+            if (stmt) sqlite3_finalize(stmt);
+            return std::nullopt;
+        }
+
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            const auto* id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            const auto* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            const int deckNo = sqlite3_column_int(stmt, 2);
+            const int genId = sqlite3_column_int(stmt, 3);
+            const auto* aceCard = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+            const auto* cardsJson = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+
+            nlohmann::json deck;
+            deck["d_deck_datas_id"] = id ? id : "";
+            deck["deck_name"] = name ? name : "";
+            deck["deck_no"] = deckNo;
+            deck["generations_id"] = genId;
+
+            const std::string aceStr = aceCard ? aceCard : "";
+            if (!aceStr.empty()) {
+                deck["ace_card"] = aceStr;
+            }
+
+            auto cardsParsed = nlohmann::json::parse(cardsJson ? cardsJson : "[]", nullptr, false);
+            deck["deck_cards_list"] = cardsParsed.is_array() ? cardsParsed : nlohmann::json::array();
+
+            deckList.push_back(std::move(deck));
+        }
+        sqlite3_finalize(stmt);
+
+        nlohmann::json result;
+        result["deck_list"] = std::move(deckList);
+
+        const auto& cardListObj = OfflineApiMockBuiltIn::UserCardGetListJsonObj();
+        if (cardListObj.contains("user_card_data_list")) {
+            result["user_card_data_list"] = cardListObj["user_card_data_list"];
+        } else {
+            result["user_card_data_list"] = nlohmann::json::array();
+        }
+        result["rental_deck_list"] = nlohmann::json::array();
+        result["rental_card_data_list"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::ModifyDeckListLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+        if (!db || payloadJson.empty()) {
+            return std::nullopt;
+        }
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        if (!payload.is_object() || !payload.contains("modify_deck_list") || !payload["modify_deck_list"].is_array()) {
+            return std::nullopt;
+        }
+
+        nlohmann::json responseDeckList = nlohmann::json::array();
+
+        constexpr const char* upsertSql =
+            "INSERT OR REPLACE INTO deck (d_deck_datas_id, deck_name, deck_no, generations_id, ace_card, deck_cards_json) "
+            "VALUES (?, ?, ?, ?, ?, ?);";
+
+        for (auto& deckEntry : payload["modify_deck_list"]) {
+            std::string deckId = deckEntry.value("d_deck_datas_id", std::string{});
+            if (deckId.empty()) {
+                deckId = GenerateUuid4();
+            }
+
+            nlohmann::json cardsList = nlohmann::json::array();
+            if (deckEntry.contains("deck_cards_list") && deckEntry["deck_cards_list"].is_array()) {
+                cardsList = deckEntry["deck_cards_list"];
+                for (auto& card : cardsList) {
+                    std::string cardId = card.value("d_deck_cards_id", std::string{});
+                    if (cardId.empty()) {
+                        card["d_deck_cards_id"] = GenerateUuid4();
+                    }
+                }
+            }
+
+            const std::string deckName = deckEntry.value("deck_name", std::string{});
+            const int deckNo = deckEntry.value("deck_no", 0);
+            const int genId = deckEntry.value("generations_id", 0);
+            const std::string aceCard = deckEntry.value("ace_card", std::string{});
+            const std::string cardsJsonStr = cardsList.dump();
+
+            sqlite3_stmt* stmt = nullptr;
+            if (sqlite3_prepare_v2(db, upsertSql, -1, &stmt, nullptr) != SQLITE_OK || !stmt) {
+                Log::ErrorFmt("[HttpMockBackend] sqlite prepare failed for deck upsert: %s", sqlite3_errmsg(db));
+                if (stmt) sqlite3_finalize(stmt);
+                continue;
+            }
+
+            BindText(stmt, 1, deckId);
+            BindText(stmt, 2, deckName);
+            sqlite3_bind_int(stmt, 3, deckNo);
+            sqlite3_bind_int(stmt, 4, genId);
+            BindText(stmt, 5, aceCard);
+            BindText(stmt, 6, cardsJsonStr);
+
+            if (sqlite3_step(stmt) != SQLITE_DONE) {
+                Log::ErrorFmt("[HttpMockBackend] sqlite step failed for deck upsert: %s", sqlite3_errmsg(db));
+            }
+            sqlite3_finalize(stmt);
+
+            nlohmann::json responseDeck;
+            responseDeck["d_deck_datas_id"] = deckId;
+            responseDeck["deck_name"] = deckName;
+            responseDeck["deck_no"] = deckNo;
+            responseDeck["generations_id"] = genId;
+            if (!aceCard.empty()) {
+                responseDeck["ace_card"] = aceCard;
+            }
+            responseDeck["deck_cards_list"] = cardsList;
+
+            responseDeckList.push_back(std::move(responseDeck));
+        }
+
+        nlohmann::json result;
+        result["deck_list"] = std::move(responseDeckList);
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
     HttpMockBackend& HttpMockBackend::Get() {
         static HttpMockBackend instance;
         return instance;
@@ -431,6 +604,7 @@ namespace LinkuraLocal::HttpMock {
                   ExecSql(db, "DELETE FROM card_detail;") &&
                   ExecSql(db, "DELETE FROM character_info;") &&
                   ExecSql(db, "DELETE FROM item;") &&
+                  ExecSql(db, "DELETE FROM deck;") &&
                   ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SeedScripts, "seed");
 
         sqlite3_close(db);
@@ -540,6 +714,16 @@ namespace LinkuraLocal::HttpMock {
             return std::nullopt;
         }
         return GetCharacterInfoById(characterId);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GetDeckListResponse() {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GetDeckListResponseLocked();
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::ModifyDeckList(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->ModifyDeckListLocked(payloadJson);
     }
 
     std::string HttpMockBackend::ExtractPayloadIntegerFieldAsString(std::string_view payloadJson, std::string_view fieldName) {

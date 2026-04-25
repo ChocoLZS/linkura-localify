@@ -150,6 +150,48 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleDeckGetList(const MockRequestContext&,
+                                                                HttpMockBackend& backend) {
+            auto record = backend.GetDeckListResponse();
+            if (!record.has_value()) {
+                Log::WarnFmt("[HttpMockRouteRegistry] deck get_list failed backend=%s",
+                             backend.GetStatusSummary().c_str());
+                return std::nullopt;
+            }
+
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+
+            return MockResponse{
+                std::move(record->body),
+                std::move(record->headersText),
+                record->statusCode,
+                std::move(record->statusDescription),
+            };
+        }
+
+        static std::optional<MockResponse> HandleDeckModifyDeckList(const MockRequestContext& request,
+                                                                     HttpMockBackend& backend) {
+            auto record = backend.ModifyDeckList(request.payloadJson);
+            if (!record.has_value()) {
+                Log::WarnFmt("[HttpMockRouteRegistry] deck modify_deck_list failed backend=%s",
+                             backend.GetStatusSummary().c_str());
+                return std::nullopt;
+            }
+
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+
+            return MockResponse{
+                std::move(record->body),
+                std::move(record->headersText),
+                record->statusCode,
+                std::move(record->statusDescription),
+            };
+        }
+
         static RouteTable BuildRoutes() {
             RouteTable routes;
 
@@ -176,6 +218,11 @@ namespace LinkuraLocal::HttpMock {
             RegisterBackend(routes, "/v1/archive/get_fes_archive_data", HandleArchiveDetail);
 
             RegisterStaticJson(routes, "/v1/profile/get_mute_list", OfflineApiMockBuiltIn::ProfileGetMuteListJsonView);
+
+            RegisterBackend(routes, "/v1/user/deck/get_list", HandleDeckGetList);
+            RegisterBackend(routes, "/v1/user/deck/modify_deck_list", HandleDeckModifyDeckList);
+            RegisterStaticJson(routes, "/v1/user/deck/notify_auto_deck", "null");
+            RegisterStaticJson(routes, "/v1/collection/get_music_list", OfflineApiMockBuiltIn::CollectionGetMusicListJsonView);
 
             return routes;
         }
