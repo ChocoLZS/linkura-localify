@@ -665,19 +665,14 @@ namespace LinkuraLocal::HttpMock {
         if (mockJson.empty()) {
             routeResponse = ResolveRegisteredRoute(MockRequestContext{ apiPath, requestBodyJson });
             if (routeResponse.has_value()) {
-                if (routeResponse->noop) {
-                    Log::InfoFmt("[HttpMock] noop route for path=%s, returning nullptr", apiPath.c_str());
-                    return nullptr;
-                }
                 mockJson = routeResponse->body;
                 httpStatusCode = routeResponse->statusCode;
                 statusDescription = routeResponse->statusDescription;
                 Log::InfoFmt("[HttpMock] resolved registered route for path=%s", apiPath.c_str());
             } else {
-                Log::WarnFmt("[HttpMock] missing mock file and registered route for path=%s (expected file: %s), using empty json",
-                             apiPath.c_str(),
-                             mockFileStr.c_str());
-                mockJson = "{}";
+                Log::WarnFmt("[HttpMock] no mock file or registered route for path=%s, returning nullptr",
+                             apiPath.c_str());
+                return nullptr;
             }
         } else {
             if (Config::dbgMode || Config::enableOfflineApiMock) {

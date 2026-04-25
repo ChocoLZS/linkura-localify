@@ -81,3 +81,29 @@ CREATE TABLE IF NOT EXISTS character_info (
     theme_color TEXT NOT NULL DEFAULT '',
     card_list TEXT NOT NULL DEFAULT '[]'
 );
+
+CREATE TABLE IF NOT EXISTS item (
+    d_item_datas_id TEXT NOT NULL PRIMARY KEY,
+    response_json TEXT NOT NULL,
+    item_id INTEGER NOT NULL DEFAULT 0,
+    item_type INTEGER NOT NULL DEFAULT 0,
+    item_category INTEGER NOT NULL DEFAULT 0,
+    rarity INTEGER NOT NULL DEFAULT 0,
+    name TEXT NOT NULL DEFAULT '',
+    name_furigana TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    effect_value INTEGER NOT NULL DEFAULT 0,
+    limit_num INTEGER NOT NULL DEFAULT 0,
+    requestable_num INTEGER NOT NULL DEFAULT 0,
+    start_time TEXT NOT NULL DEFAULT '',
+    end_time TEXT NOT NULL DEFAULT '',
+    item_num INTEGER NOT NULL DEFAULT 0,
+    limit_date_time TEXT,
+    quest_list TEXT NOT NULL DEFAULT '[]',
+    resource_file_name TEXT NOT NULL DEFAULT '',
+    transition_scene TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_item_item_id ON item(item_id);
+CREATE INDEX IF NOT EXISTS idx_item_item_type ON item(item_type);
+CREATE INDEX IF NOT EXISTS idx_item_item_category ON item(item_category);

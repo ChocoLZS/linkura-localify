@@ -1,0 +1,87 @@
+{
+    "player_name": "蓮ノ空",
+    "user_type": 2,
+    "profile_icon_parts_info": "{}",
+    "fan_level": 9999,
+    "birthday": "2023-04-15T00:00:00Z",
+    "is_birthday_changeable": false,
+    "entry_time": "2023-04-15T00:00:00Z",
+    "player_id": "000000000",
+    "comment": "",
+    "last_login_date": "2023-04-15T00:00:00Z",
+    "search_guild_key": "000000000",
+    "guild_name": "蓮ノ空",
+    "sticker_num": 0,
+    "card_num": 0,
+    "dream_style_num": 0,
+    "friend_num": 0,
+    "friend_max_num": 30,
+    "music_num": 0,
+    "music_max_num": 236,
+    "standard_live_clear_num": 900,
+    "standard_live_top_clear_num": 0,
+    "standard_live_max_num": 900,
+    "standard_live_star_total_num": 2700,
+    "grade_live_clear_num": 0,
+    "grade_live_series_top_clear_rank_list": [],
+    "grade_live_top_clear_num": 0,
+    "grade_live_max_num": 0,
+    "fan_level_list": [
+        {
+            "character_id": 1022,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1042,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1052,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1033,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1021,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1032,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1043,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1023,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1051,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1031,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        },
+        {
+            "character_id": 1041,
+            "d_season_fan_level": 1,
+            "member_fan_level": 100
+        }
+    ],
+    "friend_card_info": []
+}

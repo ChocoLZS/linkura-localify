@@ -34,12 +34,6 @@ namespace LinkuraLocal::HttpMock {
             routes.emplace(std::string(path), std::move(handler));
         }
 
-        static void RegisterNoop(RouteTable& routes, std::string_view path) {
-            routes.emplace(std::string(path), [](const MockRequestContext&, HttpMockBackend&) -> std::optional<MockResponse> {
-                return MockResponse{ .noop = true };
-            });
-        }
-
         static std::optional<MockResponse> HandleUserLogin(const MockRequestContext& request,
                                                              HttpMockBackend&) {
             const auto playerId = HttpMockBackend::ExtractPayloadStringField(request.payloadJson, "player_id");
@@ -131,6 +125,31 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleItemDetail(const MockRequestContext& request,
+                                                             HttpMockBackend& backend) {
+            auto record = backend.LookupItemDetailFromPayload(request.payloadJson);
+            if (!record.has_value()) {
+                const auto attemptedKey = HttpMockBackend::ExtractPayloadStringField(request.payloadJson, "d_item_datas_id");
+                Log::WarnFmt("[HttpMockRouteRegistry] item_detail not found path=%.*s d_item_datas_id=%s backend=%s",
+                             static_cast<int>(request.path.size()),
+                             request.path.data(),
+                             attemptedKey.c_str(),
+                             backend.GetStatusSummary().c_str());
+                return std::nullopt;
+            }
+
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+
+            return MockResponse{
+                std::move(record->body),
+                std::move(record->headersText),
+                record->statusCode,
+                std::move(record->statusDescription),
+            };
+        }
+
         static RouteTable BuildRoutes() {
             RouteTable routes;
 
@@ -138,6 +157,7 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/user/push/devices", "null");
             RegisterBackend(routes, "/v1/user/login", HandleUserLogin);
             RegisterStaticJson(routes, "/v1/home/get_home", OfflineApiMockBuiltIn::HomeGetHomeJsonView);
+            RegisterStaticJson(routes, "/v1/home/get_custom_setting", OfflineApiMockBuiltIn::GetCustomSettingJsonView);
             RegisterStaticJson(routes, "/v1/webview/school_idol_connect_post/get_theme_list", OfflineApiMockBuiltIn::WebviewSchoolIdolConnectPostGetThemeListJsonView);
             RegisterStaticJson(routes, "/v1/follow/live_chat_group_list", OfflineApiMockBuiltIn::FollowLiveChatGroupListJsonView);
             RegisterStaticJson(routes, "/v1/archive/get_home", OfflineApiMockBuiltIn::ArchiveGetHomeJsonView);
@@ -146,16 +166,16 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/out_quest_live/daily/get_stage_select", OfflineApiMockBuiltIn::OutQuestLiveDailyGetStageSelectJsonView);
             RegisterStaticJson(routes, "/v1/user/card/get_list", OfflineApiMockBuiltIn::UserCardGetListJsonView);
             RegisterBackend(routes, "/v1/user/card/get_detail", HandleCardDetail);
-            RegisterNoop(routes, "/v1/user/card/check_evolution");
-            RegisterNoop(routes, "/v1/user/card/check_limit_break");
-            RegisterNoop(routes, "/v1/user/card/check_skill_level_up");
-            RegisterNoop(routes, "/v1/user/card/check_style_level_up");
+            RegisterStaticJson(routes, "/v1/user/items/get_list", OfflineApiMockBuiltIn::UserItemsGetListJsonView);
+            RegisterBackend(routes, "/v1/user/item/get_detail", HandleItemDetail);
             RegisterBackend(routes, "/v1/collection/get_character_info", HandleCharacterInfo);
             RegisterStaticJson(routes, "/v1/activity_record/get_top", OfflineApiMockBuiltIn::ActivityRecordGetTopJsonView);
             RegisterStaticJson(routes, "/v1/activity_record/play_adv_data", OfflineApiMockBuiltIn::ActivityRecordPlayAdvDataJsonView);
 
             RegisterBackend(routes, "/v1/archive/get_with_archive_data", HandleArchiveDetail);
             RegisterBackend(routes, "/v1/archive/get_fes_archive_data", HandleArchiveDetail);
+
+            RegisterStaticJson(routes, "/v1/profile/get_mute_list", OfflineApiMockBuiltIn::ProfileGetMuteListJsonView);
 
             return routes;
         }

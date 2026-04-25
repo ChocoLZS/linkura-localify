@@ -7,8 +7,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import sql_utils
 
-ROOT = Path(__file__).resolve().parents[4]
-ARCHIVE_JSON = ROOT / "LinkuraLocalify" / "http-mock" / "backend" / "tools" / "data" / "archive_archive_details.json"
+TOOLS_DIR = Path(__file__).resolve().parent
+ARCHIVE_JSON = TOOLS_DIR / "data" / "archive_archive_details.json"
 
 
 def _load() -> tuple[list[str], dict[str, list[object]]]:

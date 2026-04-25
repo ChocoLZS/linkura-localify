@@ -657,9 +657,7 @@ namespace LinkuraLocal::HookShare {
         if (Config::enableOfflineApiMock && path) {
             auto task = LinkuraLocal::HttpMock::CreateMockTaskForApiPath(strPath, strBody);
             if (!task) {
-                // Avoid sending network request.
-                Log::ErrorFmt("[HttpMock] failed to create mock task for path=%s, returning nullptr (may break caller)",
-                              strPath.c_str());
+                Log::InfoFmt("[HttpMock] noop/unmatched for path=%s, returning nullptr", strPath.c_str());
                 return nullptr;
             }
             return task;

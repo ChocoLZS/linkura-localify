@@ -2,17 +2,69 @@ from __future__ import annotations
 
 import json
 import sys
+import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import sql_utils
 
-ROOT = Path(__file__).resolve().parents[4]
-CARD_LIST_JSON = ROOT / "LinkuraLocalify" / "http-mock" / "backend" / "tools" / "data" / "user_card_get_list.json"
+import yaml
+
+try:
+    YAML_LOADER = yaml.CSafeLoader
+except AttributeError:
+    YAML_LOADER = yaml.SafeLoader
+
+TOOLS_DIR = Path(__file__).resolve().parent
+YAML_DIR = TOOLS_DIR / "link-like-diff"
+DATA_DIR = TOOLS_DIR / "data"
+BUILTIN_DIR = TOOLS_DIR.parent.parent / "builtin"
+
+
+def _load_yaml(path: Path):
+    with path.open("r", encoding="utf-8") as f:
+        return yaml.load(f, Loader=YAML_LOADER) or []
+
+
+def _sequential_uuid(index: int) -> str:
+    return str(uuid.UUID(int=index))
+
+
+def _build_skill_list(card: dict, skill_level_max_by_series: dict[int, int]) -> list[dict]:
+    skill_defs = [
+        (1, card.get("SpecialAppealSeriesId", 0)),
+        (2, card.get("SkillSeriesId", 0)),
+        (3, card.get("AttributeId", 0)),
+    ]
+    skill_list = []
+    for skill_type, series_id in skill_defs:
+        if not series_id:
+            continue
+        max_skill_level = skill_level_max_by_series.get(series_id, 1)
+        skill_list.append({
+            "skill_type": skill_type,
+            "card_skill_series_id": series_id,
+            "skill_level": max_skill_level,
+            "max_skill_level": max_skill_level,
+        })
+    return skill_list
+
+
+def _build_rhythm_game_skill_list(card: dict, rhythm_skill_meta: dict[int, dict]) -> list[dict]:
+    series_id = card.get("RhythmGameSkillSeriesId", 0)
+    if not series_id:
+        return []
+    meta = rhythm_skill_meta.get(series_id)
+    if not meta:
+        return []
+    max_skill_level = meta["max_skill_level"]
+    return [
+        {"rhythm_game_skill_type": skill_type, "skill_level": max_skill_level}
+        for skill_type in meta["skill_types"]
+    ]
 
 
 def _fill_character_bonus(card: dict) -> dict:
-    """Return card with character_bonus populated if it is empty."""
     bonus = card.get("character_bonus")
     if bonus:
         return card
@@ -27,10 +79,83 @@ def _fill_character_bonus(card: dict) -> dict:
     return card
 
 
+def _build_card_list() -> list[dict]:
+    card_datas = _load_yaml(YAML_DIR / "CardDatas.yaml")
+    characters = {row["Id"]: row for row in _load_yaml(YAML_DIR / "Characters.yaml")}
+    card_rarities = {row["Id"]: row for row in _load_yaml(YAML_DIR / "CardRarities.yaml")}
+
+    limit_break_max_by_series: dict[int, int] = {}
+    global_limit_break_max = 0
+    for row in _load_yaml(YAML_DIR / "CardLimitBreakMaterials.yaml"):
+        series_id = row["CardSeriesId"]
+        limit_break_times = row["LimitBreakTimes"]
+        limit_break_max_by_series[series_id] = max(limit_break_max_by_series.get(series_id, 0), limit_break_times)
+        global_limit_break_max = max(global_limit_break_max, limit_break_times)
+
+    skill_level_max_by_series: dict[int, int] = {}
+    for row in _load_yaml(YAML_DIR / "CardSkills.yaml"):
+        series_id = row["CardSkillSeriesId"]
+        skill_level = row["SkillLevel"]
+        skill_level_max_by_series[series_id] = max(skill_level_max_by_series.get(series_id, 0), skill_level)
+
+    rhythm_skill_meta: dict[int, dict] = {}
+    for row in _load_yaml(YAML_DIR / "RhythmGameSkills.yaml"):
+        series_id = row["RhythmGameSkillSeriesId"]
+        meta = rhythm_skill_meta.setdefault(series_id, {"skill_types": set(), "max_skill_level": 0})
+        meta["skill_types"].add(row["OrderId"])
+        meta["max_skill_level"] = max(meta["max_skill_level"], row["SkillLevel"])
+    for meta in rhythm_skill_meta.values():
+        meta["skill_types"] = sorted(meta["skill_types"])
+
+    series_to_card: dict[int, dict] = {}
+    for card in card_datas:
+        series_id = card["CardSeriesId"]
+        if series_id not in series_to_card or card["Id"] > series_to_card[series_id]["Id"]:
+            series_to_card[series_id] = card
+    deduplicated_cards = sorted(series_to_card.values(), key=lambda c: c["Id"])
+
+    user_card_data_list = []
+    for index, card in enumerate(deduplicated_cards, start=1):
+        character = characters.get(card["CharactersId"], {})
+        rarity = card_rarities.get(card["Rarity"], {})
+        evolution_key = f"Evolution{card['EvolveTimes']}_MaxLevel"
+        max_style_level = rarity.get(evolution_key, 0)
+        limit_break_times = limit_break_max_by_series.get(card["CardSeriesId"], global_limit_break_max)
+
+        user_card_data_list.append({
+            "d_card_datas_id": _sequential_uuid(index),
+            "card_datas_id": card["Id"],
+            "card_name": card["Name"],
+            "style_level": max_style_level,
+            "max_style_level": max_style_level,
+            "limit_break_times": limit_break_times,
+            "max_limit_break_times": limit_break_times,
+            "card_parameters": {
+                "smile": card["InitialSmile"],
+                "pure": card["InitialPure"],
+                "cool": card["InitialCool"],
+                "mental": card["InitialMental"],
+                "beat_point": card["BeatPoint"],
+            },
+            "skill_list": _build_skill_list(card, skill_level_max_by_series),
+            "character_id": card["CharactersId"],
+            "generations_id": character.get("GenerationsId", 0),
+            "series_type": character.get("SeriesType", 0),
+            "card_sort_order": 0,
+            "character_bonus": {},
+            "is_evolve_possible": False,
+            "is_evolve_max": False,
+            "member_fan_level": 100,
+            "is_limit_break": True,
+            "is_style_level_up": True,
+            "rhythm_game_skill_list": _build_rhythm_game_skill_list(card, rhythm_skill_meta),
+        })
+
+    return user_card_data_list
+
+
 def _load() -> tuple[list[str], dict[str, list[object]], dict[str, dict]]:
-    """Returns (field_order, field_values, records) where records maps d_card_datas_id -> card dict."""
-    raw = json.loads(CARD_LIST_JSON.read_text(encoding="utf-8"))
-    card_list: list[dict] = raw["user_card_data_list"]
+    card_list = _build_card_list()
 
     field_order: list[str] = []
     field_values: dict[str, list[object]] = {}
@@ -51,6 +176,15 @@ def _load() -> tuple[list[str], dict[str, list[object]], dict[str, dict]]:
             field_values[field].append(value)
 
     return field_order, field_values, records
+
+
+def generate_json() -> None:
+    card_list = _build_card_list()
+    output = {"user_card_data_list": card_list}
+    content = json.dumps(output, ensure_ascii=False, indent=2)
+    for path in [DATA_DIR / "user_card_get_list.json", BUILTIN_DIR / "user_card_get_list.json"]:
+        path.write_text(content, encoding="utf-8")
+        print(f"  Written {len(card_list)} cards -> {path}")
 
 
 def generate_schema_ddl() -> str:
