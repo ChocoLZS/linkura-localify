@@ -74,6 +74,8 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 	        LinkuraLocalify/camera/baseCamera.cpp
 	        LinkuraLocalify/camera/camera.cpp
 	        LinkuraLocalify/http-mock/HttpMock.cpp
+	        LinkuraLocalify/http-mock/RouteRegistry.cpp
+	        LinkuraLocalify/http-mock/backend/HttpMockBackend.cpp
 	        LinkuraLocalify/config/Config.cpp
 	        LinkuraLocalify/config/version_compatibility.cpp
 	        LinkuraLocalify/string_parser/StringParser.cpp
@@ -92,6 +94,8 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 set(OFFLINE_API_BUILTIN_JSON_DIR "${CMAKE_SOURCE_DIR}/LinkuraLocalify/http-mock/builtin")
 set(OFFLINE_API_BUILTIN_GEN_DIR "${CMAKE_BINARY_DIR}/generated")
 set(OFFLINE_API_BUILTIN_HEADER "${OFFLINE_API_BUILTIN_GEN_DIR}/offline_api_mock_builtin.hpp")
+set(HTTP_MOCK_SQL_BUILTIN_DIR "${CMAKE_SOURCE_DIR}/LinkuraLocalify/http-mock/backend")
+set(HTTP_MOCK_SQL_BUILTIN_HEADER "${OFFLINE_API_BUILTIN_GEN_DIR}/http_mock_backend_builtin_sql.hpp")
 
 file(GLOB OFFLINE_API_BUILTIN_FILES CONFIGURE_DEPENDS
     "${OFFLINE_API_BUILTIN_JSON_DIR}/*.json"
@@ -114,6 +118,38 @@ add_custom_command(
 add_custom_target(generate_offline_api_builtin_header DEPENDS "${OFFLINE_API_BUILTIN_HEADER}")
 add_dependencies(${CMAKE_PROJECT_NAME} generate_offline_api_builtin_header)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE "${OFFLINE_API_BUILTIN_GEN_DIR}")
+
+file(GLOB_RECURSE HTTP_MOCK_SQL_BUILTIN_FILES CONFIGURE_DEPENDS
+    "${HTTP_MOCK_SQL_BUILTIN_DIR}/schema/*.sql"
+    "${HTTP_MOCK_SQL_BUILTIN_DIR}/seed/*.sql"
+)
+
+add_custom_command(
+    OUTPUT "${HTTP_MOCK_SQL_BUILTIN_HEADER}"
+    COMMAND "${CMAKE_COMMAND}"
+            -DINPUT_DIR:PATH=${HTTP_MOCK_SQL_BUILTIN_DIR}
+            -DOUTPUT_HEADER:FILEPATH=${HTTP_MOCK_SQL_BUILTIN_HEADER}
+            -P "${CMAKE_SOURCE_DIR}/cmake/generate_builtin_sql_header.cmake"
+    DEPENDS
+            "${CMAKE_SOURCE_DIR}/cmake/generate_builtin_sql_header.cmake"
+            ${HTTP_MOCK_SQL_BUILTIN_FILES}
+    VERBATIM
+)
+
+add_custom_target(generate_http_mock_sql_builtin_header DEPENDS "${HTTP_MOCK_SQL_BUILTIN_HEADER}")
+add_dependencies(${CMAKE_PROJECT_NAME} generate_http_mock_sql_builtin_header)
+
+set(LINKURA_SQLITE_DIR "${CMAKE_SOURCE_DIR}/deps/sqlite")
+set(LINKURA_SQLITE_C "${LINKURA_SQLITE_DIR}/sqlite3.c")
+set(LINKURA_SQLITE_H "${LINKURA_SQLITE_DIR}/sqlite3.h")
+
+if(NOT EXISTS "${LINKURA_SQLITE_C}" OR NOT EXISTS "${LINKURA_SQLITE_H}")
+    message(FATAL_ERROR "sqlite is required: expected ${LINKURA_SQLITE_C} and ${LINKURA_SQLITE_H}")
+endif()
+
+add_library(linkura_sqlite STATIC "${LINKURA_SQLITE_C}")
+target_include_directories(linkura_sqlite PUBLIC "${LINKURA_SQLITE_DIR}")
+target_link_libraries(${CMAKE_PROJECT_NAME} linkura_sqlite)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} xdl::xdl)
 target_link_libraries(${CMAKE_PROJECT_NAME} shadowhook::shadowhook)

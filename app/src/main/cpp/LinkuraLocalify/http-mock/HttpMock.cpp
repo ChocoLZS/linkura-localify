@@ -3,6 +3,7 @@
 #include "../HookMain.h"
 #include "../Local.h"
 
+#include "RouteRegistry.hpp"
 #include "offline_api_mock_builtin.hpp"
 
 #include <filesystem>
@@ -10,6 +11,7 @@
 #include <sstream>
 #include <ctime>
 #include <mutex>
+#include <optional>
 #include <string_view>
 #include <unordered_set>
 #include <vector>
@@ -128,50 +130,6 @@ namespace LinkuraLocal::HttpMock {
             if (p.empty()) return {};
             p.replace_extension(".headers");
             return p;
-        }
-
-        static std::string GetBuiltInFallbackJson(const std::string& apiPath) {
-            if (apiPath == "/v1/user/login") {
-                return OfflineApiMockBuiltIn::UserLoginJson;
-            }
-            if (apiPath == "/v1/home/get_home") {
-                return OfflineApiMockBuiltIn::HomeGetHomeJson;
-            }
-            if (apiPath == "/v1/webview/school_idol_connect_post/get_theme_list") {
-                return OfflineApiMockBuiltIn::WebviewSchoolIdolConnectPostGetThemeListJson;
-            }
-            if (apiPath == "/v1/follow/live_chat_group_list") {
-                return OfflineApiMockBuiltIn::FollowLiveChatGroupListJson;
-            }
-            if (apiPath == "/v1/archive/get_home") {
-                return OfflineApiMockBuiltIn::ArchiveGetHomeJson;
-            }
-            if (apiPath == "/v1/archive/get_archive_list") {
-                return OfflineApiMockBuiltIn::ArchiveGetArchiveListJson;
-            }
-            return "{}";
-        }
-
-        static std::string GetBuiltInFallbackHeadersText(const std::string& apiPath) {
-            if (apiPath == "/v1/user/login") {
-                return OfflineApiMockBuiltIn::UserLoginHeaders;
-            }
-            if (apiPath == "/v1/home/get_home") {
-                return OfflineApiMockBuiltIn::HomeGetHomeHeaders;
-            }
-            if (apiPath == "/v1/webview/school_idol_connect_post/get_theme_list") {
-                return OfflineApiMockBuiltIn::WebviewSchoolIdolConnectPostGetThemeListHeaders;
-            }
-            if (apiPath == "/v1/follow/live_chat_group_list") {
-                return OfflineApiMockBuiltIn::FollowLiveChatGroupListHeaders;
-            }
-            if (apiPath == "/v1/archive/get_home") {
-                return OfflineApiMockBuiltIn::ArchiveGetHomeHeaders;
-            }
-            if (apiPath == "/v1/archive/get_archive_list") {
-                return OfflineApiMockBuiltIn::ArchiveGetArchiveListHeaders;
-            }
-            return {};
         }
 
         static std::vector<std::pair<std::string, std::string>> ParseHeadersText(std::string text) {
@@ -690,11 +648,14 @@ namespace LinkuraLocal::HttpMock {
         }
     } // namespace
 
-    void* CreateMockTaskForApiPath(const std::string& apiPath) {
+    void* CreateMockTaskForApiPath(const std::string& apiPath, const std::string& requestBodyJson) {
         const auto mockFile = GetMockFilePath(apiPath);
         const auto mockFileStr = mockFile.empty() ? std::string("(invalid path)") : mockFile.string();
         const auto headersFile = GetMockHeadersFilePath(apiPath);
         const auto headersFileStr = headersFile.empty() ? std::string("(invalid path)") : headersFile.string();
+        std::optional<MockResponse> routeResponse;
+        int httpStatusCode = 200;
+        std::string statusDescription = "OK (offline mock)";
 
         std::string mockJson;
         if (!mockFile.empty()) {
@@ -702,10 +663,22 @@ namespace LinkuraLocal::HttpMock {
         }
 
         if (mockJson.empty()) {
-            Log::WarnFmt("[HttpMock] missing mock file for path=%s (expected: %s), using built-in fallback json",
-                         apiPath.c_str(), mockFileStr.c_str());
-            mockJson = GetBuiltInFallbackJson(apiPath);
-            if (mockJson.empty()) mockJson = "{}";
+            routeResponse = ResolveRegisteredRoute(MockRequestContext{ apiPath, requestBodyJson });
+            if (routeResponse.has_value()) {
+                if (routeResponse->noop) {
+                    Log::InfoFmt("[HttpMock] noop route for path=%s, returning nullptr", apiPath.c_str());
+                    return nullptr;
+                }
+                mockJson = routeResponse->body;
+                httpStatusCode = routeResponse->statusCode;
+                statusDescription = routeResponse->statusDescription;
+                Log::InfoFmt("[HttpMock] resolved registered route for path=%s", apiPath.c_str());
+            } else {
+                Log::WarnFmt("[HttpMock] missing mock file and registered route for path=%s (expected file: %s), using empty json",
+                             apiPath.c_str(),
+                             mockFileStr.c_str());
+                mockJson = "{}";
+            }
         } else {
             if (Config::dbgMode || Config::enableOfflineApiMock) {
                 Log::InfoFmt("[HttpMock] hit %s", mockFileStr.c_str());
@@ -718,12 +691,16 @@ namespace LinkuraLocal::HttpMock {
             headersText = ReadFileToString(headersFile);
         }
         if (headersText.empty()) {
-            headersText = GetBuiltInFallbackHeadersText(apiPath);
-            if (!headersText.empty()) {
-                Log::InfoFmt("[HttpMock] using built-in headers for path=%s", apiPath.c_str());
-            } else if (!headersFile.empty()) {
-                Log::WarnFmt("[HttpMock] missing headers file for path=%s (expected: %s), using defaults",
-                             apiPath.c_str(), headersFileStr.c_str());
+            if (routeResponse.has_value() && !routeResponse->headersText.empty()) {
+                headersText = routeResponse->headersText;
+                Log::InfoFmt("[HttpMock] using registered route headers for path=%s", apiPath.c_str());
+            } else {
+                headersText = OfflineApiMockBuiltIn::DefaultHeaders;
+                if (!headersFile.empty()) {
+                    Log::WarnFmt("[HttpMock] missing headers file for path=%s (expected: %s), using defaults",
+                                 apiPath.c_str(),
+                                 headersFileStr.c_str());
+                }
             }
         } else {
             if (Config::dbgMode || Config::enableOfflineApiMock) {
@@ -742,26 +719,26 @@ namespace LinkuraLocal::HttpMock {
         auto headerPairs = ParseHeadersText(headersText);
         ApplyStandardHeaders(headerPairs);
 
-        // Debug dump resolved header pairs (after placeholder expansion and standard upsert).
-        // Throttled: print at most once per apiPath to avoid spamming logcat.
-        if (Config::dbgMode || Config::enableOfflineApiMock) {
-            static std::mutex s_mtx;
-            static std::unordered_set<std::string> s_dumped;
-            bool shouldDump = false;
-            {
-                std::lock_guard<std::mutex> _l(s_mtx);
-                shouldDump = s_dumped.insert(apiPath).second;
-            }
-            if (shouldDump) {
-                Log::InfoFmt("[HttpMock] headerPairs path=%s count=%d", apiPath.c_str(), (int)headerPairs.size());
-                for (int i = 0; i < (int)headerPairs.size(); ++i) {
-                    const auto& kv = headerPairs[(size_t)i];
-                    Log::InfoFmt("[HttpMock] header[%d] %s: %s", i, kv.first.c_str(), kv.second.c_str());
-                }
-            }
-        }
+        // // Debug dump resolved header pairs (after placeholder expansion and standard upsert).
+        // // Throttled: print at most once per apiPath to avoid spamming logcat.
+        // if (Config::dbgMode || Config::enableOfflineApiMock) {
+        //     static std::mutex s_mtx;
+        //     static std::unordered_set<std::string> s_dumped;
+        //     bool shouldDump = false;
+        //     {
+        //         std::lock_guard<std::mutex> _l(s_mtx);
+        //         shouldDump = s_dumped.insert(apiPath).second;
+        //     }
+        //     if (shouldDump) {
+        //         Log::InfoFmt("[HttpMock] headerPairs path=%s count=%d", apiPath.c_str(), (int)headerPairs.size());
+        //         for (int i = 0; i < (int)headerPairs.size(); ++i) {
+        //             const auto& kv = headerPairs[(size_t)i];
+        //             Log::VerboseFmt("[HttpMock] header[%d] %s: %s", i, kv.first.c_str(), kv.second.c_str());
+        //         }
+        //     }
+        // }
 
-        auto resp = CreateRestResponse(mockJson, 200, "OK (offline mock)", headerPairs);
+        auto resp = CreateRestResponse(mockJson, httpStatusCode, statusDescription, headerPairs);
         if (!resp) {
             Log::Error("[HttpMock] failed to create RestResponse, returning empty json response");
             std::vector<std::pair<std::string, std::string>> fallbackHeaders;

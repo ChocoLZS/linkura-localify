@@ -1,0 +1,82 @@
+{
+  "favorite_channel_list": [
+    {
+      "live_channels_id": 100,
+      "name": "蓮ノ空女学院スクールアイドルクラブ",
+      "is_watched": false
+    },
+    {
+      "live_channels_id": 101,
+      "name": "スリーズブーケ",
+      "is_watched": false
+    },
+    {
+      "live_channels_id": 102,
+      "name": "DOLLCHESTRA",
+      "is_watched": false
+    },
+    {
+      "live_channels_id": 103,
+      "name": "みらくらぱーく！",
+      "is_watched": false
+    },
+    {
+      "live_channels_id": 105,
+      "name": "Edel Note",
+      "is_watched": false
+    }
+  ],
+  "live_archive_list": [],
+  "trailer_archive_list": [],
+  "recommend_archive_list": [],
+  "with_station_list": [
+    {
+      "live_type": 3,
+      "live_id": "115870b0-dd49-44bb-ba68-ffd300e94e58",
+      "status": 0,
+      "name": "新入生紹介配信",
+      "description": "蓮ノ空女学院スクールアイドルクラブに\n2人の新入生が加入いたしました。\n2人の紹介をしつつ、先日行われた\nFes×LIVEについてのお話も\nさせていただきます。",
+      "ticket_list": [],
+      "trailer_start_time": "2023-04-14T07:25:45Z",
+      "trailer_end_time": "2999-01-01T00:00:00Z",
+      "start_time": "2023-04-17T02:00:16Z",
+      "end_time": "2999-01-01T00:00:00Z",
+      "interaction_start_time": "2999-01-01T00:00:00Z",
+      "interaction_end_time": "2999-01-01T00:00:00Z",
+      "external_link": "",
+      "thumbnail_image_url": "https://assets.link-like-lovelive.app/with_meets/thumbnail_image/b4700cde-34a8-4586-bc9d-392a457f491b.jpg",
+      "ticket_rank": 0,
+      "character_list": [
+        {
+          "character_id": 1021
+        },
+        {
+          "character_id": 1022
+        },
+        {
+          "character_id": 1023
+        },
+        {
+          "character_id": 1031
+        },
+        {
+          "character_id": 1032
+        },
+        {
+          "character_id": 1033
+        }
+      ],
+      "total_playing_time_second": 1380,
+      "is_publish_video_url": false,
+      "is_extra_started": false,
+      "has_extra": false,
+      "has_extra_admission": false,
+      "earned_star_count": 0,
+      "gift_stars_threshold_for_extra_admission": 0,
+      "video_url": "",
+      "archive_video_size_in_byte": 0,
+      "is_scheduled_start_time_visible": false
+    }
+  ],
+  "music_video_list": []
+}

@@ -1,0 +1,140 @@
+{
+  "plan_list": [],
+  "is_login_bonus": false,
+  "profile_info": {
+    "player_name": "蓮ノ空",
+    "user_type": 2,
+    "profile_icon_parts_info": "{}",
+    "fan_level": 9999,
+    "birthday": "2023-04-15T00:00:00Z",
+    "is_birthday_changeable": false,
+    "entry_time": "2023-04-15T00:00:00Z",
+    "player_id": "000000000",
+    "comment": "",
+    "last_login_date": "2023-04-15T00:00:00Z",
+    "search_guild_key": "000000000",
+    "guild_name": "蓮ノ空",
+    "sticker_num": 0,
+    "card_num": 0,
+    "dream_style_num": 0,
+    "friend_num": 0,
+    "friend_max_num": 30,
+    "music_num": 0,
+    "music_max_num": 236,
+    "standard_live_clear_num": 900,
+    "standard_live_top_clear_num": 0,
+    "standard_live_max_num": 900,
+    "standard_live_star_total_num": 2700,
+    "grade_live_clear_num": 0,
+    "grade_live_series_top_clear_rank_list": [],
+    "grade_live_top_clear_num": 0,
+    "grade_live_max_num": 0,
+    "fan_level_list": [
+      {
+        "character_id": 1022,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1042,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1052,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1033,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1021,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1032,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1043,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1023,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1051,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1031,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      },
+      {
+        "character_id": 1041,
+        "d_season_fan_level": 1,
+        "member_fan_level": 100
+      }
+    ],
+    "friend_card_info": []
+  },
+  "is_finish_tutorial": false,
+  "is_first_home": false,
+  "membership_update_confirm_list": [],
+  "membership_pending_list": [],
+  "quest_quit_info": null,
+  "finished_simple_tutorial_list": [
+    103,
+    104,
+    106,
+    109,
+    110,
+    203,
+    302,
+    309,
+    310,
+    501,
+    700
+  ],
+  "beginner_mission_status": 2,
+  "is_not_watched_adv_from_current_season": false,
+  "has_daily_ticket": false,
+  "has_grand_prix_playable_count": false,
+  "latest_news_id": "",
+  "highlighted_badge_info": {
+    "is_not_watched_adv_from_current_season": false,
+    "is_not_displayed_adv_new_part": false,
+    "has_daily_ticket": false,
+    "has_grand_prix_playable_count": false,
+    "latest_news_id": null,
+    "feslive_next_start_time": null,
+    "feslive_next_end_time": null,
+    "withlive_next_start_time": null,
+    "withlive_next_end_time": null,
+    "is_not_watched_quest_live_from_current_season": false,
+    "is_not_received_grade_reward": false,
+    "is_update_grade_live": false,
+    "is_not_read_gp_prize_exchange_new_arrival": false,
+    "is_not_read_item_exchange_new_arrival": false,
+    "item_exchange_new_arrival_list": [],
+    "is_available_convert_limit_break_material": false,
+    "is_not_read_on_sale_select_ticket_exchange_new_arrival": false,
+    "is_not_read_out_sale_select_ticket_exchange_new_arrival": false,
+    "is_not_received_common_mission_reward": false,
+    "is_not_read_sticker_exchange_new_arrival": false,
+    "is_not_read_sisca_store_new_arrival": false
+  },
+  "expired_limited_gacha_ticket_id_confirm_list": [],
+  "standard_quest_areas_id": 1030405,
+  "standard_quest_stages_id": 103040515
+}

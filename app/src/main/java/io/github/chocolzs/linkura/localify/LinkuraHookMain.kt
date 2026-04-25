@@ -854,6 +854,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
         val programData = intent.getStringExtra("localData")
         val archiveData = intent.getStringExtra("archiveData")
         val clientResData = intent.getStringExtra("clientResData")
+
+        val mockDbCmd = intent.getStringExtra("mockDbCmd")
+        if (!mockDbCmd.isNullOrEmpty()) {
+            File(activity.filesDir, "db_cmd").writeText(mockDbCmd)
+        }
+
         if (l4Data != null) {
             val readVersion = intent.getStringExtra("lVerName")
             checkPluginVersion(activity, readVersion)
@@ -1209,6 +1215,12 @@ class LinkuraHookMain : IXposedHookLoadPackage, IXposedHookZygoteInit  {
 
         @JvmStatic
         external fun toggleArchivePlay(play: Boolean)
+
+        @JvmStatic
+        external fun resetMockDatabase(filesDir: String): Boolean
+
+        @JvmStatic
+        external fun rebuildMockDatabase(filesDir: String): Boolean
 
         @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic

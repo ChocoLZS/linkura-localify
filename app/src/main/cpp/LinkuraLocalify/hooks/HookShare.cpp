@@ -131,11 +131,11 @@ namespace LinkuraLocal::HookShare {
                     }
                 }
 
-                Log::InfoFmt("[ApiClient_Deserialize] header[%d] %s: %s", idx, name.c_str(), value.c_str());
+                // Log::VerboseFmt("[ApiClient_Deserialize] header[%d] %s: %s", idx, name.c_str(), value.c_str());
                 ++idx;
             }
 
-            Log::InfoFmt("[ApiClient_Deserialize] response headers dump end response=%p count=%d", response, idx);
+            // Log::VerboseFmt("[ApiClient_Deserialize] response headers dump end response=%p count=%d", response, idx);
         }
     } // namespace
 
@@ -655,7 +655,7 @@ namespace LinkuraLocal::HookShare {
         Log::VerboseFmt("[ApiClient_CallApiAsync] path: %s\nrequest: %s", strPath.c_str(), strBody.c_str());
 
         if (Config::enableOfflineApiMock && path) {
-            auto task = LinkuraLocal::HttpMock::CreateMockTaskForApiPath(strPath);
+            auto task = LinkuraLocal::HttpMock::CreateMockTaskForApiPath(strPath, strBody);
             if (!task) {
                 // Avoid sending network request.
                 Log::ErrorFmt("[HttpMock] failed to create mock task for path=%s, returning nullptr (may break caller)",

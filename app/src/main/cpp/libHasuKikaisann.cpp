@@ -12,6 +12,10 @@
 #include "LinkuraLocalify/config/Config.hpp"
 #include "Joystick/JoystickEvent.h"
 #include "build/linkura_messages.pb.h"
+#include "LinkuraLocalify/http-mock/backend/HttpMockBackend.hpp"
+
+#include <filesystem>
+#include <fstream>
 
 JavaVM* g_javaVM = nullptr;
 jclass g_linkuraHookMainClass = nullptr;
@@ -118,6 +122,26 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_loadConfig(JNIEnv *env,
                                                                    jstring config_json_str) {
     const auto configJsonStrChars = env->GetStringUTFChars(config_json_str, nullptr);
     const std::string configJson = configJsonStrChars;
+
+    const auto dbCmdPath = LinkuraLocal::Local::GetBasePath().parent_path() / "db_cmd";
+    std::error_code ec;
+    if (std::filesystem::exists(dbCmdPath, ec)) {
+        std::ifstream cmdFile(dbCmdPath);
+        std::string cmd;
+        std::getline(cmdFile, cmd);
+        cmdFile.close();
+        while (!cmd.empty() && std::isspace(static_cast<unsigned char>(cmd.back()))) cmd.pop_back();
+
+        LinkuraLocal::Log::InfoFmt("[loadConfig] db_cmd: %s", cmd.c_str());
+        auto& backend = LinkuraLocal::HttpMock::HttpMockBackend::Get();
+        if (cmd == "reset") {
+            backend.Reset();
+        } else if (cmd == "rebuild") {
+            backend.Rebuild();
+        }
+        std::filesystem::remove(dbCmdPath, ec);
+    }
+
     LinkuraLocal::Config::LoadConfig(configJson);
 }
 
@@ -339,6 +363,24 @@ Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_setCameraBackgroundColo
     } catch (...) {
         LinkuraLocal::Log::Error("Unknown error in setCameraBackgroundColor");
     }
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_resetMockDatabase(JNIEnv *env, jclass clazz, jstring filesDir) {
+    const auto chars = env->GetStringUTFChars(filesDir, nullptr);
+    const std::string dir(chars);
+    env->ReleaseStringUTFChars(filesDir, chars);
+    return LinkuraLocal::HttpMock::HttpMockBackend::ResetAtFilesDir(dir) ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_io_github_chocolzs_linkura_localify_LinkuraHookMain_rebuildMockDatabase(JNIEnv *env, jclass clazz, jstring filesDir) {
+    const auto chars = env->GetStringUTFChars(filesDir, nullptr);
+    const std::string dir(chars);
+    env->ReleaseStringUTFChars(filesDir, chars);
+    return LinkuraLocal::HttpMock::HttpMockBackend::RebuildAtFilesDir(dir) ? JNI_TRUE : JNI_FALSE;
 }
 
 // Function to be called from HookCamera.cpp with default delay

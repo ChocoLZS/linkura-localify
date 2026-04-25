@@ -99,6 +99,13 @@ fun <T> T.loadConfig() where T : Activity, T : IHasConfigItems {
 }
 
 fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
+    val mockDbCmdFile = File(filesDir, "mock_db_cmd")
+    val mockDbCmd = if (mockDbCmdFile.exists()) {
+        val cmd = mockDbCmdFile.readText().trim()
+        mockDbCmdFile.delete()
+        cmd
+    } else ""
+
     val lastStartPluginVersionFile = File(filesDir, "lastStartPluginVersion.txt")
     val lastStartPluginVersion = if (lastStartPluginVersionFile.exists()) {
         lastStartPluginVersionFile.readText()
@@ -128,6 +135,9 @@ fun <T> T.onClickStartGame() where T : Activity, T : IHasConfigItems {
         )
         putExtra("archiveData", getArchiveConfigContent())
         putExtra("clientResData", getClientResContent())
+        if (mockDbCmd.isNotEmpty()) {
+            putExtra("mockDbCmd", mockDbCmd)
+        }
         putExtra("lVerName", version)
 
         flags = Intent.FLAG_ACTIVITY_NEW_TASK

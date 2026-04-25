@@ -65,6 +65,12 @@
     <string name="offline_api_mock_dir">Offline API Mock Dir</string>
     <string name="offline_api_mock_dir_hint">Directory name under app files `linkura-local/` (e.g. mock_api).</string>
     <string name="local_mode_hint_collapsed">Tap the header to expand.</string>
+    <string name="reset_mock_database">Reset Database</string>
+    <string name="reset_mock_database_confirm_title">Reset Database</string>
+    <string name="reset_mock_database_confirm_content">This will delete all data in the database and restore the built-in seed data. Continue?</string>
+    <string name="rebuild_mock_database">Rebuild Database</string>
+    <string name="rebuild_mock_database_confirm_title">Rebuild Database</string>
+    <string name="rebuild_mock_database_confirm_content">This will delete the database file and recreate it from scratch (schema + seed data). Continue?</string>
     <string name="about_warn_title">WARNING</string>
     <string name="about_warn_p1">This plugin is for learning and communication only.</string>
     <string name="about_warn_p2">Using external plugin against the relevant TOS so proceed at your own risk.</string>
