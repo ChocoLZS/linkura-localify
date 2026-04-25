@@ -7,13 +7,101 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import sql_utils
 
-ROOT = Path(__file__).resolve().parents[4]
-CHARACTER_INFO_JSON = ROOT / "LinkuraLocalify" / "http-mock" / "backend" / "tools" / "data" / "get_character_info.json"
+import yaml
+
+try:
+    YAML_LOADER = yaml.CSafeLoader
+except AttributeError:
+    YAML_LOADER = yaml.SafeLoader
+
+TOOLS_DIR = Path(__file__).resolve().parent
+YAML_DIR = TOOLS_DIR / "link-like-diff"
+DATA_DIR = TOOLS_DIR / "data"
+
+
+def _load_yaml(path: Path):
+    with path.open("r", encoding="utf-8") as f:
+        return yaml.load(f, Loader=YAML_LOADER) or []
+
+
+def _build_character_data() -> dict[str, dict]:
+    characters = {row["Id"]: row for row in _load_yaml(YAML_DIR / "Characters.yaml")}
+    card_datas = _load_yaml(YAML_DIR / "CardDatas.yaml")
+
+    movies_by_series: dict[int, list] = {}
+    for movie in _load_yaml(YAML_DIR / "StyleMovies.yaml"):
+        movies_by_series.setdefault(movie["CardSeriesId"], []).append(movie)
+
+    voices_by_series: dict[int, list] = {}
+    for voice in _load_yaml(YAML_DIR / "StyleVoices.yaml"):
+        voices_by_series.setdefault(voice["CardSeriesId"], []).append(voice)
+
+    char_series_max: dict[int, dict[int, dict]] = {}
+    for card in card_datas:
+        char_id = card["CharactersId"]
+        series_id = card["CardSeriesId"]
+        bucket = char_series_max.setdefault(char_id, {})
+        if series_id not in bucket or card["Id"] > bucket[series_id]["Id"]:
+            bucket[series_id] = card
+
+    result: dict[str, dict] = {}
+    for char_id, char_data in characters.items():
+        if char_id not in char_series_max:
+            continue
+
+        card_list = []
+        for series_id, card in sorted(char_series_max[char_id].items()):
+            evolve_times = card["EvolveTimes"]
+
+            voice_list = [
+                {"voices_id": v["Id"], "priority": v["Priority"], "is_opened": True}
+                for v in sorted(voices_by_series.get(series_id, []), key=lambda v: v["Priority"])
+            ]
+
+            movie_list = [
+                {
+                    "movies_id": m["Id"],
+                    "priority": 1,
+                    "is_opened": (m["MovieType"] - 1) <= evolve_times,
+                }
+                for m in sorted(movies_by_series.get(series_id, []), key=lambda m: m["MovieType"])
+            ]
+
+            card_list.append({
+                "card_datas_id": card["Id"],
+                "voice_list": voice_list,
+                "movie_list": movie_list,
+            })
+
+        result[str(char_id)] = {
+            "collection_character_info": {
+                "character_id": char_id,
+                "name_last": char_data.get("NameLast", ""),
+                "name_first": char_data.get("NameFirst", ""),
+                "latin_alphabet_name_last": char_data.get("LatinAlphabetNameLast", ""),
+                "latin_alphabet_name_first": char_data.get("LatinAlphabetNameFirst", ""),
+                "character_voice": char_data.get("CharacterVoice", ""),
+                "theme_color": char_data.get("ThemeColor", ""),
+                "card_list": card_list,
+            }
+        }
+
+    merge_map = {1020: 1021, 1030: 1031, 1044: 1051, 1040: 1041, 1050: 1051}
+    for src_id, dst_id in merge_map.items():
+        src_key, dst_key = str(src_id), str(dst_id)
+        if src_key not in result:
+            continue
+        if dst_key in result:
+            result[dst_key]["collection_character_info"]["card_list"].extend(
+                result[src_key]["collection_character_info"]["card_list"]
+            )
+        del result[src_key]
+
+    return result
 
 
 def _load() -> tuple[list[str], dict[str, list[object]], dict[str, dict]]:
-    """Returns (field_order, field_values, records) where records maps character_id_str -> collection_character_info dict."""
-    data = json.loads(CHARACTER_INFO_JSON.read_text(encoding="utf-8"))
+    data = _build_character_data()
 
     field_order: list[str] = []
     field_values: dict[str, list[object]] = {}
@@ -33,6 +121,13 @@ def _load() -> tuple[list[str], dict[str, list[object]], dict[str, dict]]:
             field_values[key].append(value)
 
     return field_order, field_values, records
+
+
+def generate_json() -> None:
+    data = _build_character_data()
+    output_path = DATA_DIR / "get_character_info.json"
+    output_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"  Written {len(data)} characters -> {output_path}")
 
 
 def generate_schema_ddl() -> str:

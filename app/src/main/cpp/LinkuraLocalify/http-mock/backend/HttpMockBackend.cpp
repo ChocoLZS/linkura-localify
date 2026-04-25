@@ -80,6 +80,7 @@ namespace LinkuraLocal::HttpMock {
         bool RebuildLocked();
         std::optional<MockStoredResponse> GetArchiveDetailByIdLocked(std::string_view archivesId);
         std::optional<MockStoredResponse> GetCardDetailByDCardIdLocked(std::string_view dCardDatasId);
+        std::optional<MockStoredResponse> GetItemDetailByDItemIdLocked(std::string_view dItemDatasId);
         std::optional<MockStoredResponse> GetCharacterInfoByIdLocked(std::string_view characterId);
     };
 
@@ -196,10 +197,11 @@ namespace LinkuraLocal::HttpMock {
             ExecSql(db, "DELETE FROM archive_detail;");
             ExecSql(db, "DELETE FROM card_detail;");
             ExecSql(db, "DELETE FROM character_info;");
+            ExecSql(db, "DELETE FROM item;");
             std::filesystem::remove(resetCmdPath, ec);
         }
 
-        if ((hasPendingReset || !TableHasAnyRows(db, "archive_detail") || !TableHasAnyRows(db, "card_detail") || !TableHasAnyRows(db, "character_info"))
+        if ((hasPendingReset || !TableHasAnyRows(db, "archive_detail") || !TableHasAnyRows(db, "card_detail") || !TableHasAnyRows(db, "character_info") || !TableHasAnyRows(db, "item"))
             && !ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SeedScripts, "seed")) {
             persistentStorageAvailable = false;
             return false;
@@ -213,7 +215,7 @@ namespace LinkuraLocal::HttpMock {
             return false;
         }
 
-        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;")) {
+        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;")) {
             return false;
         }
 
@@ -316,6 +318,45 @@ namespace LinkuraLocal::HttpMock {
         return response;
     }
 
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GetItemDetailByDItemIdLocked(std::string_view dItemDatasId) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+
+        if (!db || dItemDatasId.empty()) {
+            return std::nullopt;
+        }
+
+        sqlite3_stmt* stmt = nullptr;
+        constexpr const char* sql =
+            "SELECT response_json "
+            "FROM item "
+            "WHERE d_item_datas_id = ?;";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK || !stmt) {
+            Log::ErrorFmt("[HttpMockBackend] sqlite prepare failed for item query: %s", sqlite3_errmsg(db));
+            if (stmt) sqlite3_finalize(stmt);
+            return std::nullopt;
+        }
+
+        if (!BindText(stmt, 1, dItemDatasId)) {
+            Log::ErrorFmt("[HttpMockBackend] sqlite bind failed for item query: %s", sqlite3_errmsg(db));
+            sqlite3_finalize(stmt);
+            return std::nullopt;
+        }
+
+        const int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_ROW) {
+            sqlite3_finalize(stmt);
+            return std::nullopt;
+        }
+
+        const auto* responseJson = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        MockStoredResponse response;
+        response.body = responseJson ? responseJson : "{}";
+        sqlite3_finalize(stmt);
+        return response;
+    }
+
     std::optional<MockStoredResponse> HttpMockBackend::Impl::GetCharacterInfoByIdLocked(std::string_view characterId) {
         if (!initialized && !EnsureReadyLocked()) {
             return std::nullopt;
@@ -389,6 +430,7 @@ namespace LinkuraLocal::HttpMock {
         bool ok = ExecSql(db, "DELETE FROM archive_detail;") &&
                   ExecSql(db, "DELETE FROM card_detail;") &&
                   ExecSql(db, "DELETE FROM character_info;") &&
+                  ExecSql(db, "DELETE FROM item;") &&
                   ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SeedScripts, "seed");
 
         sqlite3_close(db);
@@ -472,6 +514,19 @@ namespace LinkuraLocal::HttpMock {
             return std::nullopt;
         }
         return GetCardDetailByDCardId(dCardDatasId);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GetItemDetailByDItemId(std::string_view dItemDatasId) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GetItemDetailByDItemIdLocked(dItemDatasId);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::LookupItemDetailFromPayload(std::string_view payloadJson) {
+        const auto dItemDatasId = ExtractPayloadStringField(payloadJson, "d_item_datas_id");
+        if (dItemDatasId.empty()) {
+            return std::nullopt;
+        }
+        return GetItemDetailByDItemId(dItemDatasId);
     }
 
     std::optional<MockStoredResponse> HttpMockBackend::GetCharacterInfoById(std::string_view characterId) {
