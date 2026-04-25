@@ -18,7 +18,6 @@ namespace LinkuraLocal::HttpMock {
         std::string headersText;
         int statusCode = 200;
         std::string statusDescription = "OK (offline mock)";
-        bool noop = false;
     };
 
     using RegisteredRouteHandler = std::function<std::optional<MockResponse>(const MockRequestContext&, HttpMockBackend&)>;
