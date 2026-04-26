@@ -29,12 +29,18 @@ namespace LinkuraLocal::HttpMock {
 
         std::optional<MockStoredResponse> GetCardDetailByDCardId(std::string_view dCardDatasId);
         std::optional<MockStoredResponse> LookupCardDetailFromPayload(std::string_view payloadJson);
+        std::optional<MockStoredResponse> CheckStyleLevelUp(std::string_view payloadJson);
 
         std::optional<MockStoredResponse> GetItemDetailByDItemId(std::string_view dItemDatasId);
         std::optional<MockStoredResponse> LookupItemDetailFromPayload(std::string_view payloadJson);
 
         std::optional<MockStoredResponse> GetDeckListResponse();
         std::optional<MockStoredResponse> ModifyDeckList(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> GetRhythmGameHome();
+        std::optional<MockStoredResponse> RhythmGameSetStart(std::string_view payloadJson);
+        std::optional<MockStoredResponse> RhythmGameSetFinish(std::string_view payloadJson);
+        std::optional<MockStoredResponse> ModifyRhythmGameDeckList(std::string_view payloadJson);
 
         std::optional<MockStoredResponse> GetCharacterInfoById(std::string_view characterId);
         std::optional<MockStoredResponse> LookupCharacterInfoFromPayload(std::string_view payloadJson);

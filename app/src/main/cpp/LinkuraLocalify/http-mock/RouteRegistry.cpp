@@ -125,6 +125,21 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleCheckStyleLevelUp(const MockRequestContext& request,
+                                                                    HttpMockBackend& backend) {
+            auto record = backend.CheckStyleLevelUp(request.payloadJson);
+            if (!record.has_value()) {
+                return std::nullopt;
+            }
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+            return MockResponse{
+                std::move(record->body), std::move(record->headersText),
+                record->statusCode, std::move(record->statusDescription),
+            };
+        }
+
         static std::optional<MockResponse> HandleItemDetail(const MockRequestContext& request,
                                                              HttpMockBackend& backend) {
             auto record = backend.LookupItemDetailFromPayload(request.payloadJson);
@@ -192,6 +207,72 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleRhythmGameHome(const MockRequestContext&,
+                                                                  HttpMockBackend& backend) {
+            auto record = backend.GetRhythmGameHome();
+            if (!record.has_value()) {
+                Log::WarnFmt("[HttpMockRouteRegistry] rhythm_game/home failed backend=%s",
+                             backend.GetStatusSummary().c_str());
+                return std::nullopt;
+            }
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+            return MockResponse{
+                std::move(record->body), std::move(record->headersText),
+                record->statusCode, std::move(record->statusDescription),
+            };
+        }
+
+        static std::optional<MockResponse> HandleRhythmGameSetStart(const MockRequestContext& request,
+                                                                      HttpMockBackend& backend) {
+            auto record = backend.RhythmGameSetStart(request.payloadJson);
+            if (!record.has_value()) {
+                return std::nullopt;
+            }
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+            return MockResponse{
+                std::move(record->body), std::move(record->headersText),
+                record->statusCode, std::move(record->statusDescription),
+            };
+        }
+
+        static std::optional<MockResponse> HandleRhythmGameSetFinish(const MockRequestContext& request,
+                                                                      HttpMockBackend& backend) {
+            auto record = backend.RhythmGameSetFinish(request.payloadJson);
+            if (!record.has_value()) {
+                Log::WarnFmt("[HttpMockRouteRegistry] rhythm_game_live/set_finish failed backend=%s",
+                             backend.GetStatusSummary().c_str());
+                return std::nullopt;
+            }
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+            return MockResponse{
+                std::move(record->body), std::move(record->headersText),
+                record->statusCode, std::move(record->statusDescription),
+            };
+        }
+
+        static std::optional<MockResponse> HandleRhythmGameDeckModify(const MockRequestContext& request,
+                                                                       HttpMockBackend& backend) {
+            auto record = backend.ModifyRhythmGameDeckList(request.payloadJson);
+            if (!record.has_value()) {
+                Log::WarnFmt("[HttpMockRouteRegistry] rhythm_game_deck/modify failed backend=%s",
+                             backend.GetStatusSummary().c_str());
+                return std::nullopt;
+            }
+            if (record->headersText.empty()) {
+                record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            }
+            return MockResponse{
+                std::move(record->body), std::move(record->headersText),
+                record->statusCode, std::move(record->statusDescription),
+            };
+        }
+
         static RouteTable BuildRoutes() {
             RouteTable routes;
 
@@ -208,6 +289,7 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/out_quest_live/daily/get_stage_select", OfflineApiMockBuiltIn::OutQuestLiveDailyGetStageSelectJsonView);
             RegisterStaticJson(routes, "/v1/user/card/get_list", OfflineApiMockBuiltIn::UserCardGetListJsonView);
             RegisterBackend(routes, "/v1/user/card/get_detail", HandleCardDetail);
+            RegisterBackend(routes, "/v1/user/card/check_style_level_up", HandleCheckStyleLevelUp);
             RegisterStaticJson(routes, "/v1/user/items/get_list", OfflineApiMockBuiltIn::UserItemsGetListJsonView);
             RegisterBackend(routes, "/v1/user/item/get_detail", HandleItemDetail);
             RegisterBackend(routes, "/v1/collection/get_character_info", HandleCharacterInfo);
@@ -225,6 +307,14 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/collection/get_music_list", OfflineApiMockBuiltIn::CollectionGetMusicListJsonView);
             RegisterStaticJson(routes, "/v1/collection/get_sticker_list", OfflineApiMockBuiltIn::CollectionGetStickerListJsonView);
             RegisterStaticJson(routes, "/v1/collection/get_gallary_list", OfflineApiMockBuiltIn::CollectionGetGallaryListJsonView);
+
+            RegisterStaticJson(routes, "/v1/step_up_beginner_mission/get_list", OfflineApiMockBuiltIn::StepUpBeginnerMissionGetListJsonView);
+
+            RegisterBackend(routes, "/v1/rhythm_game/home", HandleRhythmGameHome);
+            RegisterBackend(routes, "/v1/rhythm_game_live/set_start", HandleRhythmGameSetStart);
+            RegisterBackend(routes, "/v1/rhythm_game_live/set_finish", HandleRhythmGameSetFinish);
+            RegisterBackend(routes, "/v1/rhythm_game_deck/modify_deck_list", HandleRhythmGameDeckModify);
+            RegisterStaticJson(routes, "/v1/rhythm_game/receive_class_mission", "null");
 
             return routes;
         }

@@ -47,7 +47,7 @@
       "is_style_level_up": true,
       "rhythm_game_skill_list": [
         {
-          "rhythm_game_skill_type": 1,
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -99,7 +99,7 @@
       "is_style_level_up": true,
       "rhythm_game_skill_list": [
         {
-          "rhythm_game_skill_type": 1,
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -144,10 +144,6 @@
       "is_limit_break": true,
       "is_style_level_up": true,
       "rhythm_game_skill_list": [
-        {
-          "rhythm_game_skill_type": 1,
-          "skill_level": 14
-        },
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
@@ -195,19 +191,7 @@
       "is_style_level_up": true,
       "rhythm_game_skill_list": [
         {
-          "rhythm_game_skill_type": 1,
-          "skill_level": 14
-        },
-        {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -255,6 +239,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -300,6 +288,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -347,6 +339,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -392,6 +388,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -444,6 +444,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -665,6 +669,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -884,6 +892,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -1105,6 +1117,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -1324,6 +1340,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -1601,6 +1621,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -1652,6 +1676,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -1705,6 +1733,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -1756,6 +1788,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -1809,6 +1845,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -1860,6 +1900,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -1913,6 +1957,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -1964,6 +2012,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -2805,10 +2857,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -3089,14 +3137,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -3152,10 +3192,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -3213,14 +3249,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -3276,14 +3304,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -3341,10 +3361,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -3401,14 +3417,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -3454,6 +3462,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -3550,6 +3562,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -3652,6 +3668,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -4041,6 +4061,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -4428,6 +4452,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -4817,6 +4845,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -4868,6 +4900,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -4921,6 +4957,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -4972,6 +5012,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -6317,14 +6361,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -6380,18 +6416,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
           "skill_level": 14
         }
       ]
@@ -6449,14 +6473,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -6512,10 +6528,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -6573,14 +6585,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -6637,10 +6641,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -6686,6 +6686,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -6782,6 +6786,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -6884,6 +6892,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -7160,6 +7172,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -7661,6 +7677,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -7713,6 +7733,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -7764,6 +7788,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -7872,6 +7900,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -8149,6 +8181,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -8200,6 +8236,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -8253,6 +8293,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -8304,6 +8348,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -8977,10 +9025,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -9036,10 +9080,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -9097,14 +9137,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -9160,10 +9192,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -9221,14 +9249,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -9285,14 +9305,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -9337,19 +9349,7 @@
       "is_style_level_up": true,
       "rhythm_game_skill_list": [
         {
-          "rhythm_game_skill_type": 1,
-          "skill_level": 14
-        },
-        {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -9396,6 +9396,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -9493,6 +9497,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -9588,6 +9596,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -9690,6 +9702,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -10023,6 +10039,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -10354,6 +10374,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -10911,6 +10935,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -10962,6 +10990,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -11015,6 +11047,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -11066,6 +11102,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -11567,6 +11607,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -11618,6 +11662,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -11671,6 +11719,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -11722,6 +11774,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -12507,10 +12563,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -12566,10 +12618,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -12627,10 +12675,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -12686,14 +12730,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -12806,10 +12842,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -12979,14 +13011,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -13042,18 +13066,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
           "skill_level": 14
         }
       ]
@@ -13111,10 +13123,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -13170,14 +13178,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -13235,18 +13235,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -13302,10 +13290,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -13409,6 +13393,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -13505,6 +13493,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -13600,6 +13592,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -13702,6 +13698,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -14091,6 +14091,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -14478,6 +14482,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -14867,6 +14875,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -15031,6 +15043,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -15082,6 +15098,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -15135,6 +15155,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -15186,6 +15210,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -15971,10 +15999,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -16535,14 +16559,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -16598,10 +16614,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -16659,14 +16671,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -16723,10 +16727,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -16782,14 +16782,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -16903,10 +16895,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -16962,14 +16950,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -17027,10 +17007,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -17086,14 +17062,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -17151,10 +17119,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -17210,14 +17174,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -17275,18 +17231,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -17342,10 +17286,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -17403,14 +17343,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -17456,6 +17388,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -17503,6 +17439,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -17548,6 +17488,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -17595,6 +17539,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -17641,6 +17589,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -17686,6 +17638,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -17738,6 +17694,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -17903,6 +17863,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -18066,6 +18030,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -18231,6 +18199,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -18394,6 +18366,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -18619,10 +18595,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -18674,6 +18646,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -18727,6 +18703,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -18778,6 +18758,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -18831,6 +18815,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -18882,6 +18870,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -18935,6 +18927,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -18987,6 +18983,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -19038,6 +19038,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -19374,10 +19378,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -19939,14 +19939,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -20002,10 +19994,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -20063,10 +20051,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -20122,14 +20106,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -20187,14 +20163,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -20250,10 +20218,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -20311,14 +20275,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -20374,10 +20330,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -20491,10 +20443,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -20550,18 +20498,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
           "skill_level": 14
         }
       ]
@@ -20619,18 +20555,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -20686,14 +20610,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -20751,14 +20667,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -20814,18 +20722,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
           "skill_level": 14
         }
       ]
@@ -20883,22 +20779,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 6,
-          "skill_level": 14
         }
       ]
     },
@@ -20954,14 +20834,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -21019,18 +20891,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -21076,6 +20936,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -21123,6 +20987,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -21169,6 +21037,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -21214,6 +21086,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -21379,6 +21255,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -21491,10 +21371,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -21551,10 +21427,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -21606,6 +21478,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -21659,6 +21535,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -21710,6 +21590,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -21763,6 +21647,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -21815,6 +21703,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -21866,6 +21758,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -22259,14 +22155,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -22379,10 +22267,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -22438,14 +22322,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -22559,10 +22435,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -22675,14 +22547,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -22738,14 +22602,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -22803,18 +22659,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -22870,14 +22714,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -22935,14 +22771,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -22998,14 +22826,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -23063,14 +22883,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -23127,10 +22939,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -23176,6 +22984,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -23272,6 +23084,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -23374,6 +23190,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -23599,10 +23419,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -23659,10 +23475,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -23714,6 +23526,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -23767,6 +23583,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -23818,6 +23638,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -24323,10 +24147,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -24435,6 +24255,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -24490,14 +24314,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -24555,10 +24371,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -24614,10 +24426,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -24675,10 +24483,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -24734,10 +24538,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -24795,10 +24595,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -24854,10 +24650,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -24915,10 +24707,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -24974,14 +24762,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -25039,10 +24819,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -25098,14 +24874,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -25163,18 +24931,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -25230,10 +24986,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -25291,10 +25043,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -25340,6 +25088,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -25436,6 +25188,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -25595,6 +25351,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -25646,6 +25406,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -25815,10 +25579,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -25870,6 +25630,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -25923,6 +25687,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -25975,6 +25743,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -26026,6 +25798,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -26475,10 +26251,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -26647,14 +26419,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -26822,10 +26586,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -27051,10 +26811,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -27110,10 +26866,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -27171,10 +26923,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -27230,14 +26978,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -27295,18 +27035,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
         }
       ]
     },
@@ -27362,10 +27090,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -27423,10 +27147,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -27471,7 +27191,7 @@
       "is_style_level_up": true,
       "rhythm_game_skill_list": [
         {
-          "rhythm_game_skill_type": 1,
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -27518,6 +27238,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -27620,6 +27344,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -27733,10 +27461,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -27845,6 +27569,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -27896,6 +27624,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -27952,10 +27684,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -28069,10 +27797,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -28128,10 +27852,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -28301,14 +28021,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -28364,18 +28076,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
           "skill_level": 14
         }
       ]
@@ -28433,22 +28133,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 6,
-          "skill_level": 14
         }
       ]
     },
@@ -28505,14 +28189,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
         }
       ]
     },
@@ -28568,18 +28244,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
           "skill_level": 14
         }
       ]
@@ -28683,6 +28347,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -28785,6 +28453,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -28836,6 +28508,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -28949,10 +28625,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -29005,6 +28677,10 @@
         {
           "rhythm_game_skill_type": 1,
           "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
         }
       ]
     },
@@ -29056,6 +28732,10 @@
       "rhythm_game_skill_list": [
         {
           "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
           "skill_level": 14
         }
       ]
@@ -29113,10 +28793,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -29172,10 +28848,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
           "skill_level": 14
         }
       ]
@@ -29233,10 +28905,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -29292,14 +28960,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -29357,10 +29017,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -29416,14 +29072,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]
@@ -29481,10 +29129,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -29541,10 +29185,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
         }
       ]
     },
@@ -29600,22 +29240,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 6,
           "skill_level": 14
         }
       ]
@@ -29729,22 +29353,6 @@
         {
           "rhythm_game_skill_type": 2,
           "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 5,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 6,
-          "skill_level": 14
         }
       ]
     },
@@ -29800,14 +29408,6 @@
         },
         {
           "rhythm_game_skill_type": 2,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 3,
-          "skill_level": 14
-        },
-        {
-          "rhythm_game_skill_type": 4,
           "skill_level": 14
         }
       ]

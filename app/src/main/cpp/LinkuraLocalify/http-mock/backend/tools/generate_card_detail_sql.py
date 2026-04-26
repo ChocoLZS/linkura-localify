@@ -50,18 +50,19 @@ def _build_skill_list(card: dict, skill_level_max_by_series: dict[int, int]) -> 
     return skill_list
 
 
-def _build_rhythm_game_skill_list(card: dict, rhythm_skill_meta: dict[int, dict]) -> list[dict]:
-    series_id = card.get("RhythmGameSkillSeriesId", 0)
-    if not series_id:
-        return []
-    meta = rhythm_skill_meta.get(series_id)
-    if not meta:
-        return []
-    max_skill_level = meta["max_skill_level"]
-    return [
-        {"rhythm_game_skill_type": skill_type, "skill_level": max_skill_level}
-        for skill_type in meta["skill_types"]
-    ]
+def _build_rhythm_game_skill_list(
+    card: dict,
+    center_skill_max: dict[int, int],
+    rhythm_skill_max: dict[int, int],
+) -> list[dict]:
+    result: list[dict] = []
+    center_id = card.get("CenterSkillSeriesId", 0)
+    if center_id and center_id in center_skill_max:
+        result.append({"rhythm_game_skill_type": 1, "skill_level": center_skill_max[center_id]})
+    rg_id = card.get("RhythmGameSkillSeriesId", 0)
+    if rg_id and rg_id in rhythm_skill_max:
+        result.append({"rhythm_game_skill_type": 2, "skill_level": rhythm_skill_max[rg_id]})
+    return result
 
 
 def _fill_character_bonus(card: dict) -> dict:
@@ -98,14 +99,15 @@ def _build_card_list() -> list[dict]:
         skill_level = row["SkillLevel"]
         skill_level_max_by_series[series_id] = max(skill_level_max_by_series.get(series_id, 0), skill_level)
 
-    rhythm_skill_meta: dict[int, dict] = {}
+    center_skill_max: dict[int, int] = {}
+    for row in _load_yaml(YAML_DIR / "CenterSkills.yaml"):
+        series_id = row["CenterSkillSeriesId"]
+        center_skill_max[series_id] = max(center_skill_max.get(series_id, 0), row["SkillLevel"])
+
+    rhythm_skill_max: dict[int, int] = {}
     for row in _load_yaml(YAML_DIR / "RhythmGameSkills.yaml"):
         series_id = row["RhythmGameSkillSeriesId"]
-        meta = rhythm_skill_meta.setdefault(series_id, {"skill_types": set(), "max_skill_level": 0})
-        meta["skill_types"].add(row["OrderId"])
-        meta["max_skill_level"] = max(meta["max_skill_level"], row["SkillLevel"])
-    for meta in rhythm_skill_meta.values():
-        meta["skill_types"] = sorted(meta["skill_types"])
+        rhythm_skill_max[series_id] = max(rhythm_skill_max.get(series_id, 0), row["SkillLevel"])
 
     series_to_card: dict[int, dict] = {}
     for card in card_datas:
@@ -148,7 +150,7 @@ def _build_card_list() -> list[dict]:
             "member_fan_level": 100,
             "is_limit_break": True,
             "is_style_level_up": True,
-            "rhythm_game_skill_list": _build_rhythm_game_skill_list(card, rhythm_skill_meta),
+            "rhythm_game_skill_list": _build_rhythm_game_skill_list(card, center_skill_max, rhythm_skill_max),
         })
 
     return user_card_data_list
