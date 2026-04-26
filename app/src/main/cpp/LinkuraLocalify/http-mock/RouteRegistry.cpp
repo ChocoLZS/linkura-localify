@@ -315,6 +315,8 @@ namespace LinkuraLocal::HttpMock {
             RegisterBackend(routes, "/v1/rhythm_game_live/set_finish", HandleRhythmGameSetFinish);
             RegisterBackend(routes, "/v1/rhythm_game_deck/modify_deck_list", HandleRhythmGameDeckModify);
             RegisterStaticJson(routes, "/v1/rhythm_game/receive_class_mission", "null");
+            RegisterStaticJson(routes, "/v1/rhythm_game_live/set_start", "null");
+            RegisterStaticJson(routes, "/v1/rhythm_game_live/set_retire", "null");
 
             return routes;
         }
