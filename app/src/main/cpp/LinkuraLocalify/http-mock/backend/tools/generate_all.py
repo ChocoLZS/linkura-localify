@@ -8,7 +8,11 @@ import generate_archive_detail_sql as archive_detail
 import generate_card_detail_sql as card_detail
 import generate_character_info_sql as character_info
 import generate_custom_setting as custom_setting
+import generate_deck_sql as deck
 import generate_home_get_home as home
+import generate_music_list as music_list
+import generate_rhythm_game_sql as rhythm_game
+import generate_sticker_list as sticker_list
 import generate_user_items as item
 
 TOOLS_DIR = Path(__file__).resolve().parent
@@ -24,6 +28,8 @@ def main() -> None:
     character_info.generate_json()
     custom_setting.generate_json()
     home.generate_json()
+    music_list.generate_json()
+    sticker_list.generate_json()
     item.generate_json()
 
     print("=== Generate SQL ===")
@@ -39,6 +45,10 @@ def main() -> None:
         "",
         item.generate_schema_ddl(),
         "",
+        deck.generate_schema_ddl(),
+        "",
+        rhythm_game.generate_schema_ddl(),
+        "",
     ]
     SCHEMA_SQL.write_text("\n".join(schema_parts), encoding="utf-8", newline="\n")
     print(f"  Written: {SCHEMA_SQL}")
@@ -50,6 +60,8 @@ def main() -> None:
         *card_detail.generate_seed_statements(),
         *character_info.generate_seed_statements(),
         *item.generate_seed_statements(),
+        *deck.generate_seed_statements(),
+        *rhythm_game.generate_seed_statements(),
         "COMMIT;",
         "",
     ]

@@ -113,10 +113,7 @@ namespace LinkuraLocal::HttpMock {
 
         static std::filesystem::path GetMockRootDir() {
             const auto base = LinkuraLocal::Local::GetBasePath();
-            const auto dir = Config::offlineApiMockDir.empty()
-                ? std::filesystem::path("mock_api")
-                : std::filesystem::path(Config::offlineApiMockDir);
-            return (base / dir).lexically_normal();
+            return (base / "mock_api").lexically_normal();
         }
 
         static std::filesystem::path GetMockFilePath(const std::string& apiPath) {

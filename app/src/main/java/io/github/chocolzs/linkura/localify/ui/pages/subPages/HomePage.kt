@@ -168,18 +168,6 @@ fun HomePage(modifier: Modifier = Modifier,
                             ) { v ->
                                 context?.onEnableOfflineApiMockChanged(v)
                             }
-                            GakuTextInput(
-                                value = config.value.offlineApiMockDir,
-                                onValueChange = { value ->
-                                    context?.onOfflineApiMockDirChanged(value)
-                                },
-                                label = { Text(text = stringResource(R.string.offline_api_mock_dir)) }
-                            )
-                            Text(
-                                text = stringResource(R.string.offline_api_mock_dir_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
                             val resetTitle = stringResource(R.string.reset_mock_database_confirm_title)
                             val resetContent = stringResource(R.string.reset_mock_database_confirm_content)
                             val rebuildTitle = stringResource(R.string.rebuild_mock_database_confirm_title)
