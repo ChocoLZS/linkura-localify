@@ -41,7 +41,7 @@ def generate_json() -> None:
             "variant_requirement_progress": 0,
             "is_owned": True,
             "is_available_variant": False,
-            "create_time": "2023-06-16T00:58:57.052672Z",
+            "create_time": s.get("StartTime").strftime("%Y-%m-%dT%H:%M:%SZ") if hasattr(s.get("StartTime"), "strftime") else str(s.get("StartTime", "2023-04-15T00:00:00Z")),
         }
         for s in sorted(stickers, key=lambda s: s["Id"])
     ]
