@@ -69,13 +69,7 @@ data class LinkuraConfig (
     var localeCode: String = "ja-JP",
 
     // Offline API mock (native hook)
-    var enableOfflineApiMock: Boolean = true,
-    /**
-     * Directory name (relative to LinkuraLocal base path) that contains mock API json files.
-     * Example: `mock_api` -> `<files>/linkura-local/mock_api/...`
-     */
-    var offlineApiMockDir: String = "mock_api",
-
+    var enableOfflineApiMock: Boolean = false,
     var resourceVersionMode: Int = 0,
     var customClientVersion: String = "",
     var customResVersion: String = "",

@@ -61,8 +61,7 @@ namespace LinkuraLocal::Config {
     std::string localeCode = "ja-JP";
 
     // Offline API mock defaults (disabled by default).
-    bool enableOfflineApiMock = true;
-    std::string offlineApiMockDir = "mock_api";
+    bool enableOfflineApiMock = false;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -134,7 +133,6 @@ namespace LinkuraLocal::Config {
             GetConfigItem(hideLiveStreamCharacterItems);
             GetConfigItem(localeCode);
             GetConfigItem(enableOfflineApiMock);
-            GetConfigItem(offlineApiMockDir);
             if (localeCode != "ja-JP") {
                 enableLocale = true;
             }
