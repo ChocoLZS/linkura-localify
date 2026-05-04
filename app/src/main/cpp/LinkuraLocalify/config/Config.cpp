@@ -62,6 +62,7 @@ namespace LinkuraLocal::Config {
 
     // Offline API mock defaults (disabled by default).
     bool enableOfflineApiMock = false;
+    bool dumpHttpMockJson = false;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -133,6 +134,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(hideLiveStreamCharacterItems);
             GetConfigItem(localeCode);
             GetConfigItem(enableOfflineApiMock);
+            GetConfigItem(dumpHttpMockJson);
             if (localeCode != "ja-JP") {
                 enableLocale = true;
             }
@@ -221,6 +223,8 @@ namespace LinkuraLocal::Config {
                 if (configUpdate.has_hide_live_stream_scene_items_level()) hideLiveStreamSceneItemsLevel = configUpdate.hide_live_stream_scene_items_level();
                 if (configUpdate.has_hide_live_stream_character_items()) hideLiveStreamCharacterItems = configUpdate.hide_live_stream_character_items();
                 if (configUpdate.has_story_replace_content()) storyReplaceContent = configUpdate.story_replace_content();
+                if (configUpdate.has_enable_offline_api_mock()) enableOfflineApiMock = configUpdate.enable_offline_api_mock();
+                if (configUpdate.has_dump_http_mock_json()) dumpHttpMockJson = configUpdate.dump_http_mock_json();
             }
         } catch (const std::exception& e) {
             Log::ErrorFmt("UpdateConfig error: %s", e.what());

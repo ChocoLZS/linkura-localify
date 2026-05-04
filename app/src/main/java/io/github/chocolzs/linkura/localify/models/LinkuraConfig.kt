@@ -70,6 +70,7 @@ data class LinkuraConfig (
 
     // Offline API mock (native hook)
     var enableOfflineApiMock: Boolean = false,
+    var dumpHttpMockJson: Boolean = false,
     var resourceVersionMode: Int = 0,
     var customClientVersion: String = "",
     var customResVersion: String = "",

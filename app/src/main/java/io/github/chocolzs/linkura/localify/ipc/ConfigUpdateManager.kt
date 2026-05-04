@@ -73,6 +73,8 @@ class ConfigUpdateManager private constructor() {
                 if (config.hideCharacterShadow != null) hideCharacterShadow = config.hideCharacterShadow
                 if (config.hideLiveStreamSceneItemsLevel != null) hideLiveStreamSceneItemsLevel = config.hideLiveStreamSceneItemsLevel
                 if (config.hideLiveStreamCharacterItems != null) hideLiveStreamCharacterItems = config.hideLiveStreamCharacterItems
+                if (config.enableOfflineApiMock != null) enableOfflineApiMock = config.enableOfflineApiMock
+                if (config.dumpHttpMockJson != null) dumpHttpMockJson = config.dumpHttpMockJson
             }.build()
 
             serviceInstance?.sendMessage(MessageType.CONFIG_UPDATE, configUpdate)

@@ -133,3 +133,25 @@ CREATE TABLE IF NOT EXISTS rhythm_game_deck (
     deck_no INTEGER NOT NULL DEFAULT 0,
     deck_card_list_json TEXT NOT NULL DEFAULT '[]'
 );
+
+CREATE TABLE IF NOT EXISTS quest_stage (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    area_id INTEGER NOT NULL DEFAULT 0,
+    music_id INTEGER NOT NULL DEFAULT 0,
+    quest_musics_type INTEGER NOT NULL DEFAULT 0,
+    score1 INTEGER NOT NULL DEFAULT 0,
+    score2 INTEGER NOT NULL DEFAULT 0,
+    score3 INTEGER NOT NULL DEFAULT 0,
+    gain_style_point INTEGER NOT NULL DEFAULT 0,
+    use_num INTEGER NOT NULL DEFAULT 0,
+    section_skills_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE INDEX IF NOT EXISTS idx_quest_stage_area_id ON quest_stage(area_id);
+
+CREATE TABLE IF NOT EXISTS music (
+    music_id INTEGER NOT NULL PRIMARY KEY,
+    generations_id INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_music_generations_id ON music(generations_id);

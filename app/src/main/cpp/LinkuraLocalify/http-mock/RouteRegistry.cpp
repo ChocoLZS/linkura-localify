@@ -207,6 +207,78 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleQuestStageSelect(const MockRequestContext& request,
+                                                                  HttpMockBackend& backend) {
+            auto record = backend.QuestStageSelect(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestStageData(const MockRequestContext& request,
+                                                                 HttpMockBackend& backend) {
+            auto record = backend.QuestStageData(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestGetLiveSetting(const MockRequestContext& request,
+                                                                      HttpMockBackend& backend) {
+            auto record = backend.QuestGetLiveSetting(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestSetLiveSetting(const MockRequestContext& request,
+                                                                      HttpMockBackend& backend) {
+            auto record = backend.QuestSetLiveSetting(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestSetStart(const MockRequestContext& request,
+                                                                HttpMockBackend& backend) {
+            auto record = backend.QuestSetStart(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestGetLiveInfo(const MockRequestContext& request,
+                                                                    HttpMockBackend& backend) {
+            auto record = backend.QuestGetLiveInfo(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestSetFinish(const MockRequestContext& request,
+                                                                  HttpMockBackend& backend) {
+            auto record = backend.QuestSetFinish(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestGetResult(const MockRequestContext& request,
+                                                                  HttpMockBackend& backend) {
+            auto record = backend.QuestGetResult(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleQuestSkip(const MockRequestContext& request,
+                                                            HttpMockBackend& backend) {
+            auto record = backend.QuestSkip(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
         static std::optional<MockResponse> HandleRhythmGameHome(const MockRequestContext&,
                                                                   HttpMockBackend& backend) {
             auto record = backend.GetRhythmGameHome();
@@ -287,6 +359,15 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/archive/get_archive_list", OfflineApiMockBuiltIn::ArchiveGetArchiveListJsonView);
             RegisterStaticJson(routes, "/v1/out_quest_live/get_quest_top", OfflineApiMockBuiltIn::OutQuestLiveGetQuestTopJsonView);
             RegisterStaticJson(routes, "/v1/out_quest_live/daily/get_stage_select", OfflineApiMockBuiltIn::OutQuestLiveDailyGetStageSelectJsonView);
+            RegisterBackend(routes, "/v1/out_quest_live/standard/get_stage_select", HandleQuestStageSelect);
+            RegisterBackend(routes, "/v1/out_quest_live/standard/get_stage_data", HandleQuestStageData);
+            RegisterBackend(routes, "/v1/out_quest_live/get_live_setting", HandleQuestGetLiveSetting);
+            RegisterBackend(routes, "/v1/out_quest_live/set_live_setting", HandleQuestSetLiveSetting);
+            RegisterBackend(routes, "/v1/in_quest_live/set_start", HandleQuestSetStart);
+            RegisterBackend(routes, "/v1/in_quest_live/get_live_info", HandleQuestGetLiveInfo);
+            RegisterBackend(routes, "/v1/in_quest_live/set_finish", HandleQuestSetFinish);
+            RegisterBackend(routes, "/v1/out_quest_live/get_result", HandleQuestGetResult);
+            RegisterBackend(routes, "/v1/in_quest_live/skip_quest", HandleQuestSkip);
             RegisterStaticJson(routes, "/v1/user/card/get_list", OfflineApiMockBuiltIn::UserCardGetListJsonView);
             RegisterBackend(routes, "/v1/user/card/get_detail", HandleCardDetail);
             RegisterBackend(routes, "/v1/user/card/check_style_level_up", HandleCheckStyleLevelUp);

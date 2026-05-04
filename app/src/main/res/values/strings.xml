@@ -62,6 +62,7 @@
     <string name="advanced_settings">Advanced</string>
     <string name="local_mode">Local Mode</string>
     <string name="enable_offline_api_mock">Enable Offline API Mock</string>
+    <string name="dump_http_mock_json">Dump HTTP Mock JSON</string>
     <string name="offline_api_mock_dir">Offline API Mock Dir</string>
     <string name="offline_api_mock_dir_hint">Directory name under app files `linkura-local/` (e.g. mock_api).</string>
     <string name="local_mode_hint_collapsed">Tap the header to expand.</string>

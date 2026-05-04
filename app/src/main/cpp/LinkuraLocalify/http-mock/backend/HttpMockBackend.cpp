@@ -5,6 +5,7 @@
 #include "http_mock_backend_builtin_sql.hpp"
 #include "offline_api_mock_builtin.hpp"
 
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <mutex>
@@ -63,6 +64,20 @@ namespace LinkuraLocal::HttpMock {
 
             return it->get<std::string>();
         }
+        static const nlohmann::json kDefaultCharacterBonus = {
+            {"character_id", 0},
+            {"music_mastery_bonus", 0},
+            {"love_correction_value", 0},
+            {"music_mastery_bonus_list", nullptr},
+            {"season_fan_level", 0},
+        };
+
+        static const nlohmann::json kDefaultRentalDeckData = {
+            {"rental_deck_id", 0},
+            {"rental_deck_cards_list", nullptr},
+            {"grade_bonus_value", 0},
+            {"is_released", false},
+        };
     }
 
     struct HttpMockBackend::Impl {
@@ -89,6 +104,31 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> ModifyDeckListLocked(std::string_view payloadJson);
         int currentRhythmMusicId = 0;
         int currentRhythmDifficulty = 1;
+
+        struct QuestLiveState {
+            std::string questLiveId;
+            int questLiveType = 0;
+            int stageId = 0;
+            int musicId = 0;
+            bool isChallengeMode = false;
+            nlohmann::json deckData;
+            nlohmann::json characterBonus;
+            std::string startTime;
+            int score = 0;
+            std::string playReport;
+            bool finished = false;
+        };
+        QuestLiveState currentQuestLive;
+
+        std::optional<MockStoredResponse> QuestStageSelectLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestStageDataLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestGetLiveSettingLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSetLiveSettingLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSetStartLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestGetLiveInfoLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSetFinishLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestGetResultLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSkipLocked(std::string_view payloadJson);
 
         std::optional<MockStoredResponse> GetRhythmGameHomeLocked();
         std::optional<MockStoredResponse> RhythmGameSetStartLocked(std::string_view payloadJson);
@@ -236,10 +276,12 @@ namespace LinkuraLocal::HttpMock {
             ExecSql(db, "DELETE FROM deck;");
             ExecSql(db, "DELETE FROM rhythm_music_score;");
             ExecSql(db, "DELETE FROM rhythm_game_deck;");
+            ExecSql(db, "DELETE FROM quest_stage;");
+            ExecSql(db, "DELETE FROM music;");
             std::filesystem::remove(resetCmdPath, ec);
         }
 
-        if ((hasPendingReset || !TableHasAnyRows(db, "archive_detail") || !TableHasAnyRows(db, "card_detail") || !TableHasAnyRows(db, "character_info") || !TableHasAnyRows(db, "item"))
+        if ((hasPendingReset || !TableHasAnyRows(db, "archive_detail") || !TableHasAnyRows(db, "card_detail") || !TableHasAnyRows(db, "character_info") || !TableHasAnyRows(db, "item") || !TableHasAnyRows(db, "quest_stage") || !TableHasAnyRows(db, "music"))
             && !ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SeedScripts, "seed")) {
             persistentStorageAvailable = false;
             return false;
@@ -253,7 +295,7 @@ namespace LinkuraLocal::HttpMock {
             return false;
         }
 
-        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;") || !ExecSql(db, "DELETE FROM deck;") || !ExecSql(db, "DELETE FROM rhythm_music_score;") || !ExecSql(db, "DELETE FROM rhythm_game_deck;")) {
+        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;") || !ExecSql(db, "DELETE FROM deck;") || !ExecSql(db, "DELETE FROM rhythm_music_score;") || !ExecSql(db, "DELETE FROM rhythm_game_deck;") || !ExecSql(db, "DELETE FROM quest_stage;") || !ExecSql(db, "DELETE FROM music;")) {
             return false;
         }
 
@@ -654,13 +696,6 @@ namespace LinkuraLocal::HttpMock {
         if (cardListObj.contains("user_card_data_list")) {
             cardDataList = cardListObj["user_card_data_list"];
         }
-        static const nlohmann::json kDefaultCharacterBonus = {
-            {"character_id", 0},
-            {"music_mastery_bonus", 0},
-            {"love_correction_value", 0},
-            {"music_mastery_bonus_list", nullptr},
-            {"season_fan_level", 0},
-        };
         for (auto& card : cardDataList) {
             if (!card.contains("character_bonus") || card["character_bonus"].empty()) {
                 card["character_bonus"] = kDefaultCharacterBonus;
@@ -1032,6 +1067,554 @@ namespace LinkuraLocal::HttpMock {
         return response;
     }
 
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestStageSelectLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+        if (!db) {
+            return std::nullopt;
+        }
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        const int areaId = payload.is_object() ? payload.value("area_id", 0) : 0;
+        if (areaId == 0) {
+            return std::nullopt;
+        }
+
+        nlohmann::json stageList = nlohmann::json::array();
+        sqlite3_stmt* stmt = nullptr;
+        constexpr const char* sql =
+            "SELECT stage_id FROM quest_stage WHERE area_id = ? ORDER BY stage_id;";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+            sqlite3_bind_int(stmt, 1, areaId);
+            while (sqlite3_step(stmt) == SQLITE_ROW) {
+                nlohmann::json stage;
+                stage["stage_id"] = sqlite3_column_int(stmt, 0);
+                stage["clear_status"] = 3;
+                stage["is_lock"] = false;
+                stageList.push_back(std::move(stage));
+            }
+            sqlite3_finalize(stmt);
+        }
+
+        nlohmann::json result;
+        result["stage_list"] = std::move(stageList);
+        result["user_stamina"] = {
+            {"stamina_now", 200},
+            {"stamina_max", 200},
+            {"stamina_recovery_time", "2099-01-01T00:00:00Z"},
+        };
+        result["is_update_grade_live"] = false;
+
+        MockStoredResponse response;
+        response.body = result.dump();
+
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestStageDataLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+        if (!db) {
+            return std::nullopt;
+        }
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        const int areaId = payload.is_object() ? payload.value("area_id", 0) : 0;
+        const int viewStageId = payload.is_object() ? payload.value("stage_id", 0) : 0;
+        if (areaId == 0) {
+            return std::nullopt;
+        }
+
+        nlohmann::json stageDetailList = nlohmann::json::array();
+        sqlite3_stmt* stmt = nullptr;
+        constexpr const char* sql =
+            "SELECT stage_id, music_id, quest_musics_type, score1, score2, score3, gain_style_point, use_num "
+            "FROM quest_stage WHERE area_id = ? ORDER BY stage_id;";
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+            sqlite3_bind_int(stmt, 1, areaId);
+            while (sqlite3_step(stmt) == SQLITE_ROW) {
+                const int stageId = sqlite3_column_int(stmt, 0);
+                const int musicId = sqlite3_column_int(stmt, 1);
+                const int score3Val = sqlite3_column_int(stmt, 5);
+
+                nlohmann::json detail;
+                detail["stage_id"] = stageId;
+                detail["is_challenge"] = false;
+                detail["is_skip"] = true;
+                detail["clear_status"] = 3;
+                detail["best_love_music_id"] = musicId;
+                detail["stage_reward_list"] = nlohmann::json::array();
+                detail["best_love"] = score3Val;
+
+                stageDetailList.push_back(std::move(detail));
+            }
+            sqlite3_finalize(stmt);
+        }
+
+        // Build music_list: for type=0 stages in this area, expand GenerationsId via music table
+        nlohmann::json musicList = nlohmann::json::array();
+        {
+            sqlite3_stmt* genStmt = nullptr;
+            constexpr const char* genSql =
+                "SELECT music_id FROM quest_stage WHERE area_id = ? AND quest_musics_type = 0 AND music_id > 0 LIMIT 1;";
+            int generationsId = 0;
+            if (sqlite3_prepare_v2(db, genSql, -1, &genStmt, nullptr) == SQLITE_OK && genStmt) {
+                sqlite3_bind_int(genStmt, 1, areaId);
+                if (sqlite3_step(genStmt) == SQLITE_ROW) {
+                    generationsId = sqlite3_column_int(genStmt, 0);
+                }
+                sqlite3_finalize(genStmt);
+            }
+            if (generationsId > 0) {
+                sqlite3_stmt* mStmt = nullptr;
+                constexpr const char* mSql =
+                    "SELECT music_id FROM music WHERE generations_id = ? ORDER BY music_id;";
+                if (sqlite3_prepare_v2(db, mSql, -1, &mStmt, nullptr) == SQLITE_OK && mStmt) {
+                    sqlite3_bind_int(mStmt, 1, generationsId);
+                    while (sqlite3_step(mStmt) == SQLITE_ROW) {
+                        musicList.push_back({
+                            {"m_musics_id", sqlite3_column_int(mStmt, 0)},
+                            {"is_enable", true},
+                        });
+                    }
+                    sqlite3_finalize(mStmt);
+                }
+            }
+        }
+
+        nlohmann::json result;
+        result["view_stage_id"] = viewStageId;
+        result["stage_detail_list"] = std::move(stageDetailList);
+        result["user_stamina"] = {
+            {"stamina_now", 200},
+            {"stamina_max", 200},
+            {"stamina_recovery_time", "2099-01-01T00:00:00Z"},
+        };
+        result["music_list"] = std::move(musicList);
+
+        MockStoredResponse response;
+        response.body = result.dump();
+
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestGetLiveSettingLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+        if (!db) {
+            return std::nullopt;
+        }
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        const int stageId = payload.is_object() ? payload.value("stage_id", 0) : 0;
+        const int questLiveType = payload.is_object() ? payload.value("quest_live_type", 1) : 1;
+
+        int musicId = 0;
+        int questMusicsType = 0;
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql = "SELECT music_id, quest_musics_type FROM quest_stage WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    musicId = sqlite3_column_int(stmt, 0);
+                    questMusicsType = sqlite3_column_int(stmt, 1);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json deckList = nlohmann::json::array();
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT d_deck_datas_id, deck_name, deck_no, generations_id, deck_cards_json "
+                "FROM deck ORDER BY deck_no;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                while (sqlite3_step(stmt) == SQLITE_ROW) {
+                    const auto* id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                    const auto* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+                    const int deckNo = sqlite3_column_int(stmt, 2);
+                    const int genId = sqlite3_column_int(stmt, 3);
+                    const auto* cardsJson = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+
+                    nlohmann::json deck;
+                    deck["d_deck_datas_id"] = id ? id : "";
+                    deck["deck_name"] = name ? name : "";
+                    deck["deck_no"] = deckNo;
+                    deck["generations_id"] = genId;
+                    auto cardsParsed = nlohmann::json::parse(cardsJson ? cardsJson : "[]", nullptr, false);
+                    deck["deck_cards_list"] = cardsParsed.is_array() ? cardsParsed : nlohmann::json::array();
+                    deckList.push_back(std::move(deck));
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        const auto& cardListObj = OfflineApiMockBuiltIn::UserCardGetListJsonObj();
+        nlohmann::json userCardDataList = nlohmann::json::array();
+        if (cardListObj.contains("user_card_data_list")) {
+            userCardDataList = cardListObj["user_card_data_list"];
+        }
+
+        nlohmann::json musicList = nlohmann::json::array();
+        if (questMusicsType == 2 && musicId > 0) {
+            musicList.push_back({{"m_musics_id", musicId}, {"is_enable", true}});
+        } else if (questMusicsType == 0 && musicId > 0) {
+            sqlite3_stmt* mStmt = nullptr;
+            constexpr const char* mSql =
+                "SELECT music_id FROM music WHERE generations_id = ? ORDER BY music_id;";
+            if (sqlite3_prepare_v2(db, mSql, -1, &mStmt, nullptr) == SQLITE_OK && mStmt) {
+                sqlite3_bind_int(mStmt, 1, musicId);
+                while (sqlite3_step(mStmt) == SQLITE_ROW) {
+                    musicList.push_back({
+                        {"m_musics_id", sqlite3_column_int(mStmt, 0)},
+                        {"is_enable", true},
+                    });
+                }
+                sqlite3_finalize(mStmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["quest_live_type"] = questLiveType;
+        result["stage_id"] = stageId;
+        result["deck_data"] = std::move(deckList);
+        result["best_love_deck"] = nlohmann::json::object();
+        result["best_love_musics_id"] = musicId;
+        result["user_stamina"] = {
+            {"stamina_now", 200},
+            {"stamina_max", 200},
+            {"stamina_recovery_time", "2099-01-01T00:00:00Z"},
+        };
+        result["music_list"] = std::move(musicList);
+        result["user_card_data_list"] = std::move(userCardDataList);
+        result["rental_deck_data"] = nlohmann::json::array();
+        result["rental_card_data_list"] = nlohmann::json::array();
+        result["friend_card_list"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestSetLiveSettingLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+        if (!db) {
+            return std::nullopt;
+        }
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        if (!payload.is_object()) {
+            return std::nullopt;
+        }
+
+        const int stageId = payload.value("stage_id", 0);
+        const std::string deckId = payload.value("deck_id", std::string{});
+        const int musicId = payload.value("music_id", 0);
+        const bool isChallengeMode = payload.value("is_challenge_mode", false);
+        const int questLiveType = payload.value("quest_live_type", 1);
+
+        const std::string questLiveId = std::to_string(questLiveType) + "_" + std::to_string(stageId);
+
+        nlohmann::json deckData = nlohmann::json::object();
+        if (!deckId.empty()) {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT d_deck_datas_id, deck_name, deck_no, generations_id, deck_cards_json "
+                "FROM deck WHERE d_deck_datas_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                BindText(stmt, 1, deckId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    const auto* id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                    const auto* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+                    const int deckNo = sqlite3_column_int(stmt, 2);
+                    const int genId = sqlite3_column_int(stmt, 3);
+                    const auto* cardsJson = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+
+                    deckData["d_deck_datas_id"] = id ? id : "";
+                    deckData["deck_name"] = name ? name : "";
+                    deckData["deck_no"] = deckNo;
+                    deckData["generations_id"] = genId;
+                    auto cardsParsed = nlohmann::json::parse(cardsJson ? cardsJson : "[]", nullptr, false);
+                    deckData["deck_cards_list"] = cardsParsed.is_array() ? cardsParsed : nlohmann::json::array();
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        // Look up character_bonus from the first card in deck
+        nlohmann::json charBonus = kDefaultCharacterBonus;
+        if (deckData.contains("deck_cards_list") && deckData["deck_cards_list"].is_array()
+            && !deckData["deck_cards_list"].empty()) {
+            const auto& firstCard = deckData["deck_cards_list"][0];
+            const std::string cardId = firstCard.value("d_card_datas_id", std::string{});
+            if (!cardId.empty()) {
+                sqlite3_stmt* cbStmt = nullptr;
+                constexpr const char* cbSql = "SELECT character_bonus FROM card_detail WHERE d_card_datas_id = ?;";
+                if (sqlite3_prepare_v2(db, cbSql, -1, &cbStmt, nullptr) == SQLITE_OK && cbStmt) {
+                    BindText(cbStmt, 1, cardId);
+                    if (sqlite3_step(cbStmt) == SQLITE_ROW) {
+                        const auto* cbJson = reinterpret_cast<const char*>(sqlite3_column_text(cbStmt, 0));
+                        auto parsed = nlohmann::json::parse(cbJson ? cbJson : "{}", nullptr, false);
+                        if (parsed.is_object() && !parsed.empty()) {
+                            charBonus = std::move(parsed);
+                        }
+                    }
+                    sqlite3_finalize(cbStmt);
+                }
+            }
+        }
+
+        currentQuestLive = {};
+        currentQuestLive.questLiveId = questLiveId;
+        currentQuestLive.questLiveType = questLiveType;
+        currentQuestLive.stageId = stageId;
+        currentQuestLive.musicId = musicId;
+        currentQuestLive.isChallengeMode = isChallengeMode;
+        currentQuestLive.deckData = deckData;
+        currentQuestLive.characterBonus = charBonus;
+
+        nlohmann::json sectionSkillList = nlohmann::json::array();
+        if (stageId > 0) {
+            sqlite3_stmt* skStmt = nullptr;
+            constexpr const char* skSql = "SELECT section_skills_json FROM quest_stage WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, skSql, -1, &skStmt, nullptr) == SQLITE_OK && skStmt) {
+                sqlite3_bind_int(skStmt, 1, stageId);
+                if (sqlite3_step(skStmt) == SQLITE_ROW) {
+                    const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(skStmt, 0));
+                    auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
+                    if (parsed.is_array()) {
+                        sectionSkillList = std::move(parsed);
+                    }
+                }
+                sqlite3_finalize(skStmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["result"] = true;
+        result["quest_live_id"] = questLiveId;
+        result["quest_live_type"] = questLiveType;
+        result["quest_id"] = stageId;
+        result["is_challenge_mode"] = isChallengeMode;
+        result["music_id"] = musicId;
+        result["deck_data"] = deckData;
+        result["rental_deck_data"] = kDefaultRentalDeckData;
+        result["character_bonus"] = charBonus;
+        result["section_skill_list"] = std::move(sectionSkillList);
+        result["init_hand_data"] = "";
+        result["grand_prix_retry_count"] = 0;
+        result["grand_prix_is_rehearsal"] = false;
+        result["grand_prix_id"] = 0;
+        result["grade_retry_count"] = 0;
+        result["grade_add_skill_list"] = nlohmann::json::array();
+        result["playable_count"] = 0;
+        result["play_count"] = 0;
+        result["fan_level_info_list"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestSetStartLocked(std::string_view payloadJson) {
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        if (payload.is_object()) {
+            const std::string liveId = payload.value("quest_live_id", std::string{});
+            if (!liveId.empty()) {
+                currentQuestLive.questLiveId = liveId;
+            }
+        }
+
+        std::time_t now = std::time(nullptr);
+        std::tm tmLocal{};
+#if defined(_WIN32)
+        localtime_s(&tmLocal, &now);
+#else
+        localtime_r(&now, &tmLocal);
+#endif
+        char buf[64]{};
+        std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+09:00", &tmLocal);
+        currentQuestLive.startTime = buf;
+        currentQuestLive.finished = false;
+
+        nlohmann::json result;
+        result["quest_start_time"] = currentQuestLive.startTime;
+
+        MockStoredResponse response;
+        response.body = result.dump();
+
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestGetLiveInfoLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+
+        nlohmann::json sectionSkillList = nlohmann::json::array();
+        if (db && currentQuestLive.stageId > 0) {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql = "SELECT section_skills_json FROM quest_stage WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, currentQuestLive.stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                    auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
+                    if (parsed.is_array()) {
+                        sectionSkillList = std::move(parsed);
+                    }
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["result"] = true;
+        result["quest_live_id"] = currentQuestLive.questLiveId;
+        result["quest_live_type"] = currentQuestLive.questLiveType;
+        result["quest_id"] = currentQuestLive.stageId;
+        result["is_challenge_mode"] = currentQuestLive.isChallengeMode;
+        result["music_id"] = currentQuestLive.musicId;
+        result["deck_data"] = currentQuestLive.deckData;
+        result["rental_deck_data"] = kDefaultRentalDeckData;
+        result["character_bonus"] = currentQuestLive.characterBonus;
+        result["section_skill_list"] = std::move(sectionSkillList);
+        result["init_hand_data"] = "";
+        result["grand_prix_retry_count"] = 0;
+        result["grand_prix_is_rehearsal"] = false;
+        result["grand_prix_id"] = 0;
+        result["grade_retry_count"] = 0;
+        result["grade_add_skill_list"] = nlohmann::json::array();
+        result["playable_count"] = 0;
+        result["play_count"] = 0;
+        result["fan_level_info_list"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestSetFinishLocked(std::string_view payloadJson) {
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        if (payload.is_object()) {
+            currentQuestLive.score = payload.value("score", 0);
+            currentQuestLive.playReport = payload.value("play_report", std::string{});
+            currentQuestLive.finished = true;
+        }
+
+        nlohmann::json result;
+        result["quest_live_type"] = currentQuestLive.questLiveType;
+        result["quest_result"] = true;
+        result["return_resource"] = 0;
+        result["applied_campaign_types"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestGetResultLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) {
+            return std::nullopt;
+        }
+
+        int gainStylePoint = 0;
+        if (db && currentQuestLive.stageId > 0) {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql = "SELECT gain_style_point FROM quest_stage WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, currentQuestLive.stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    gainStylePoint = sqlite3_column_int(stmt, 0);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["quest_live_type"] = currentQuestLive.questLiveType;
+        result["stage_id"] = currentQuestLive.stageId;
+        result["quest_result"] = true;
+        result["result_love"] = currentQuestLive.score;
+        result["best_love"] = currentQuestLive.score;
+        result["before_best_love"] = 0;
+        result["add_style_point"] = gainStylePoint;
+        result["is_challenge_mode"] = currentQuestLive.isChallengeMode;
+        result["music_id"] = currentQuestLive.musicId;
+        result["reward_list"] = nlohmann::json::array();
+        result["play_report"] = currentQuestLive.playReport;
+        result["mastary_level_before"] = 1;
+        result["mastary_level_after"] = 1;
+        result["mastary_level_experience"] = 0;
+        result["mastary_level_total_experience_before"] = 0;
+        result["first_clear_flag"] = false;
+        result["first_complete_clear_flag"] = false;
+        result["is_limit_over_style_point"] = false;
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::QuestSkipLocked(std::string_view payloadJson) {
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        const int questLiveType = payload.is_object() ? payload.value("quest_live_type", 1) : 1;
+        const int stageId = payload.is_object() ? payload.value("stage_id", 0) : 0;
+
+        int gainStylePoint = 0;
+        if (db && stageId > 0) {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql = "SELECT gain_style_point FROM quest_stage WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    gainStylePoint = sqlite3_column_int(stmt, 0);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["quest_live_type"] = questLiveType;
+        result["quest_live_id"] = "";
+        result["user_stamina"] = {
+            {"stamina_now", 200},
+            {"stamina_max", 200},
+            {"stamina_recovery_time", "2099-01-01T00:00:00Z"},
+        };
+        result["add_style_point"] = gainStylePoint;
+        result["skip_reward_list"] = nlohmann::json::array();
+        result["total_skip_reward_list"] = nlohmann::json::array();
+        result["is_limit_over_style_point"] = false;
+        result["mastery_level_before"] = 1;
+        result["mastery_level_after"] = 1;
+        result["mastery_level_experience"] = 0;
+        result["mastery_level_total_experience_before"] = 0;
+        result["before_earned_music_exp"] = 0;
+        result["earned_music_exp"] = 0;
+        result["raid_stamina"] = {
+            {"stamina_now", 0},
+            {"stamina_recovered_time", "0001-01-01T00:00:00Z"},
+        };
+        result["add_once_event_point"] = 0;
+        result["event_point_reward_list"] = nlohmann::json::array();
+        result["event_personal_total_point"] = 0;
+        result["applied_campaign_types"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
     HttpMockBackend& HttpMockBackend::Get() {
         static HttpMockBackend instance;
         return instance;
@@ -1070,6 +1653,8 @@ namespace LinkuraLocal::HttpMock {
                   ExecSql(db, "DELETE FROM deck;") &&
                   ExecSql(db, "DELETE FROM rhythm_music_score;") &&
                   ExecSql(db, "DELETE FROM rhythm_game_deck;") &&
+                  ExecSql(db, "DELETE FROM quest_stage;") &&
+                  ExecSql(db, "DELETE FROM music;") &&
                   ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SeedScripts, "seed");
 
         sqlite3_close(db);
@@ -1230,6 +1815,51 @@ namespace LinkuraLocal::HttpMock {
     std::optional<MockStoredResponse> HttpMockBackend::ModifyRhythmGameDeckList(std::string_view payloadJson) {
         std::lock_guard<std::mutex> lock(impl_->mutex);
         return impl_->ModifyRhythmGameDeckListLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestStageSelect(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestStageSelectLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestStageData(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestStageDataLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestGetLiveSetting(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestGetLiveSettingLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestSetLiveSetting(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestSetLiveSettingLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestSetStart(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestSetStartLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestGetLiveInfo(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestGetLiveInfoLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestSetFinish(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestSetFinishLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestGetResult(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestGetResultLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::QuestSkip(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->QuestSkipLocked(payloadJson);
     }
 
     std::string HttpMockBackend::ExtractPayloadIntegerFieldAsString(std::string_view payloadJson, std::string_view fieldName) {
