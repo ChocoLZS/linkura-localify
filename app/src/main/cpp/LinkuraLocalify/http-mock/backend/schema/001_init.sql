@@ -149,9 +149,62 @@ CREATE TABLE IF NOT EXISTS quest_stage (
 
 CREATE INDEX IF NOT EXISTS idx_quest_stage_area_id ON quest_stage(area_id);
 
+CREATE TABLE IF NOT EXISTS daily_quest_stage (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    series_id INTEGER NOT NULL DEFAULT 0,
+    quest_musics_type INTEGER NOT NULL DEFAULT 0,
+    quest_musics_detail INTEGER NOT NULL DEFAULT 0,
+    score1 INTEGER NOT NULL DEFAULT 0,
+    score2 INTEGER NOT NULL DEFAULT 0,
+    score3 INTEGER NOT NULL DEFAULT 0,
+    gain_style_point INTEGER NOT NULL DEFAULT 0,
+    use_num INTEGER NOT NULL DEFAULT 0,
+    section_skills_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_quest_stage_series_id ON daily_quest_stage(series_id);
+
+CREATE TABLE IF NOT EXISTS dream_quest_stage (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    series_id INTEGER NOT NULL,
+    quest_musics_type INTEGER NOT NULL DEFAULT 3,
+    quest_musics_detail INTEGER NOT NULL DEFAULT 0,
+    score1 INTEGER NOT NULL DEFAULT 0,
+    use_num INTEGER NOT NULL DEFAULT 0,
+    section_skills_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE INDEX IF NOT EXISTS idx_dream_quest_stage_series ON dream_quest_stage(series_id);
+
+CREATE TABLE IF NOT EXISTS learning_stage (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    series_id INTEGER NOT NULL DEFAULT 0,
+    music_id INTEGER NOT NULL DEFAULT 0,
+    quest_level INTEGER NOT NULL DEFAULT 0,
+    quest_rank INTEGER NOT NULL DEFAULT 0,
+    score1 INTEGER NOT NULL DEFAULT 0,
+    gain_style_point INTEGER NOT NULL DEFAULT 0,
+    gain_music_exp INTEGER NOT NULL DEFAULT 0,
+    use_num INTEGER NOT NULL DEFAULT 0,
+    section_skills_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE INDEX IF NOT EXISTS idx_learning_stage_series_id ON learning_stage(series_id);
+CREATE INDEX IF NOT EXISTS idx_learning_stage_music_id ON learning_stage(music_id);
+
+CREATE TABLE IF NOT EXISTS music_mastery (
+    music_id INTEGER NOT NULL PRIMARY KEY,
+    music_exp_level INTEGER NOT NULL DEFAULT 50,
+    earned_music_exp INTEGER NOT NULL DEFAULT 250300,
+    is_mastery INTEGER NOT NULL DEFAULT 1
+);
+
 CREATE TABLE IF NOT EXISTS music (
     music_id INTEGER NOT NULL PRIMARY KEY,
-    generations_id INTEGER NOT NULL DEFAULT 0
+    generations_id INTEGER NOT NULL DEFAULT 0,
+    center_character_id INTEGER NOT NULL DEFAULT 0,
+    has_score INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE INDEX IF NOT EXISTS idx_music_generations_id ON music(generations_id);
+CREATE INDEX IF NOT EXISTS idx_music_center_character_id ON music(center_character_id);

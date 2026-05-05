@@ -8,7 +8,11 @@ import generate_archive_detail_sql as archive_detail
 import generate_card_detail_sql as card_detail
 import generate_character_info_sql as character_info
 import generate_custom_setting as custom_setting
+import generate_daily_quest_stage_sql as daily_quest_stage
 import generate_deck_sql as deck
+import generate_dream_quest_stage_sql as dream_quest_stage
+import generate_learning_stage_sql as learning_stage
+import generate_music_mastery_sql as music_mastery
 import generate_home_get_home as home
 import generate_music_list as music_list
 import generate_music_sql as music_db
@@ -53,6 +57,14 @@ def main() -> None:
         "",
         quest_stage.generate_schema_ddl(),
         "",
+        daily_quest_stage.generate_schema_ddl(),
+        "",
+        dream_quest_stage.generate_schema_ddl(),
+        "",
+        learning_stage.generate_schema_ddl(),
+        "",
+        music_mastery.generate_schema_ddl(),
+        "",
         music_db.generate_schema_ddl(),
         "",
     ]
@@ -69,6 +81,10 @@ def main() -> None:
         *deck.generate_seed_statements(),
         *rhythm_game.generate_seed_statements(),
         *quest_stage.generate_seed_statements(),
+        *daily_quest_stage.generate_seed_statements(),
+        *dream_quest_stage.generate_seed_statements(),
+        *learning_stage.generate_seed_statements(),
+        *music_mastery.generate_seed_statements(),
         *music_db.generate_seed_statements(),
         "COMMIT;",
         "",

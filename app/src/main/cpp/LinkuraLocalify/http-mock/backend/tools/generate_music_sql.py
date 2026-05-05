@@ -23,10 +23,13 @@ def generate_schema_ddl() -> str:
     lines = [
         "CREATE TABLE IF NOT EXISTS music (",
         "    music_id INTEGER NOT NULL PRIMARY KEY,",
-        "    generations_id INTEGER NOT NULL DEFAULT 0",
+        "    generations_id INTEGER NOT NULL DEFAULT 0,",
+        "    center_character_id INTEGER NOT NULL DEFAULT 0,",
+        "    has_score INTEGER NOT NULL DEFAULT 1",
         ");",
         "",
         "CREATE INDEX IF NOT EXISTS idx_music_generations_id ON music(generations_id);",
+        "CREATE INDEX IF NOT EXISTS idx_music_center_character_id ON music(center_character_id);",
     ]
     return "\n".join(lines)
 
@@ -39,12 +42,12 @@ def generate_seed_statements() -> list[str]:
     statements: list[str] = []
     for m in musics:
         music_id = m["Id"]
-        if music_id not in score_ids:
-            continue
         gen_id = m["GenerationsId"]
+        center_char = m.get("CenterCharacterId", 0)
+        has_score = 1 if music_id in score_ids else 0
         statements.append(
-            f"INSERT OR IGNORE INTO music (music_id, generations_id) "
-            f"VALUES ({music_id}, {gen_id});"
+            f"INSERT OR IGNORE INTO music (music_id, generations_id, center_character_id, has_score) "
+            f"VALUES ({music_id}, {gen_id}, {center_char}, {has_score});"
         )
 
     return statements

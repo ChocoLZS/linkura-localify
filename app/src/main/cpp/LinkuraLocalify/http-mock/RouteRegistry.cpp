@@ -207,6 +207,54 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleMusicLearningGetMusicSelect(const MockRequestContext& request,
+                                                                              HttpMockBackend& backend) {
+            auto record = backend.MusicLearningGetMusicSelect(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleMusicLearningGetResult(const MockRequestContext& request,
+                                                                         HttpMockBackend& backend) {
+            auto record = backend.MusicLearningGetResult(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleDreamNotifyMemberReleaseConfirm(const MockRequestContext& request,
+                                                                                    HttpMockBackend& backend) {
+            auto record = backend.DreamNotifyMemberReleaseConfirm(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleDreamGetResult(const MockRequestContext& request,
+                                                                 HttpMockBackend& backend) {
+            auto record = backend.DreamGetResult(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleDailyQuestStageList(const MockRequestContext& request,
+                                                                     HttpMockBackend& backend) {
+            auto record = backend.DailyQuestStageList(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleDailyQuestStageData(const MockRequestContext& request,
+                                                                      HttpMockBackend& backend) {
+            auto record = backend.DailyQuestStageData(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
         static std::optional<MockResponse> HandleQuestStageSelect(const MockRequestContext& request,
                                                                   HttpMockBackend& backend) {
             auto record = backend.QuestStageSelect(request.payloadJson);
@@ -359,6 +407,12 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/archive/get_archive_list", OfflineApiMockBuiltIn::ArchiveGetArchiveListJsonView);
             RegisterStaticJson(routes, "/v1/out_quest_live/get_quest_top", OfflineApiMockBuiltIn::OutQuestLiveGetQuestTopJsonView);
             RegisterStaticJson(routes, "/v1/out_quest_live/daily/get_stage_select", OfflineApiMockBuiltIn::OutQuestLiveDailyGetStageSelectJsonView);
+            RegisterBackend(routes, "/v1/out_quest_live/daily/get_stage_list", HandleDailyQuestStageList);
+            RegisterBackend(routes, "/v1/out_quest_live/daily/get_stage_data", HandleDailyQuestStageData);
+            RegisterBackend(routes, "/v1/out_quest_live/music_learning/get_music_select", HandleMusicLearningGetMusicSelect);
+            RegisterBackend(routes, "/v1/out_quest_live/music_learning/get_result", HandleMusicLearningGetResult);
+            RegisterBackend(routes, "/v1/out_quest_live/dream/notify_member_release_confirm", HandleDreamNotifyMemberReleaseConfirm);
+            RegisterBackend(routes, "/v1/out_quest_live/dream/get_result", HandleDreamGetResult);
             RegisterBackend(routes, "/v1/out_quest_live/standard/get_stage_select", HandleQuestStageSelect);
             RegisterBackend(routes, "/v1/out_quest_live/standard/get_stage_data", HandleQuestStageData);
             RegisterBackend(routes, "/v1/out_quest_live/get_live_setting", HandleQuestGetLiveSetting);

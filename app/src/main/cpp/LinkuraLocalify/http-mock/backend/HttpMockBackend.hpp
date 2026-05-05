@@ -55,6 +55,15 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> QuestGetResult(std::string_view payloadJson);
         std::optional<MockStoredResponse> QuestSkip(std::string_view payloadJson);
 
+        std::optional<MockStoredResponse> DailyQuestStageList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> DailyQuestStageData(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> MusicLearningGetMusicSelect(std::string_view payloadJson);
+        std::optional<MockStoredResponse> MusicLearningGetResult(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> DreamNotifyMemberReleaseConfirm(std::string_view payloadJson);
+        std::optional<MockStoredResponse> DreamGetResult(std::string_view payloadJson);
+
         bool IsPersistentStorageAvailable() const;
         std::string GetStatusSummary() const;
 

@@ -1,10 +1,10 @@
 {
   "standard_live_status": 1,
-  "daily_live_status": 0,
-  "music_live_status": 0,
+  "daily_live_status": 1,
+  "music_live_status": 1,
   "grade_live_status": 0,
   "grade_challenge_status": 0,
-  "dream_live_status": 0,
+  "dream_live_status": 1,
   "grand_prix_open": false,
   "grand_prix_status": 0,
   "grand_prix_id": 0,
@@ -281,7 +281,7 @@
         },
         {
           "condition_text": "日野下 花帆のファンレベルを125まで上げよう",
-          "achieve_count": 134,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -417,7 +417,7 @@
         },
         {
           "m_musics_id": 405303,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1001
@@ -427,7 +427,7 @@
       "dream_quest_stages_id": 610328010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -438,7 +438,7 @@
         },
         {
           "condition_text": "村野 さやかのファンレベルを100まで上げよう",
-          "achieve_count": 133,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -558,11 +558,11 @@
         },
         {
           "m_musics_id": 405202,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405305,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1001
@@ -572,7 +572,7 @@
       "dream_quest_stages_id": 610338010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -583,7 +583,7 @@
         },
         {
           "condition_text": "大沢 瑠璃乃のファンレベルを100まで上げよう",
-          "achieve_count": 131,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -711,7 +711,7 @@
         },
         {
           "m_musics_id": 405302,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1001
@@ -732,8 +732,8 @@
         },
         {
           "condition_text": "乙宗 梢のファンレベルを125まで上げよう",
-          "achieve_count": 111,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         }
       ],
@@ -784,7 +784,7 @@
         },
         {
           "m_musics_id": 104204,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 203101,
@@ -850,7 +850,7 @@
       "dream_quest_stages_id": 610228010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -861,7 +861,7 @@
         },
         {
           "condition_text": "夕霧 綴理のファンレベルを100まで上げよう",
-          "achieve_count": 108,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -975,7 +975,7 @@
       "dream_quest_stages_id": 610238010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -986,7 +986,7 @@
         },
         {
           "condition_text": "藤島 慈のファンレベルを100まで上げよう",
-          "achieve_count": 111,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1108,7 +1108,7 @@
       "dream_quest_stages_id": 610418010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1125,7 +1125,7 @@
         },
         {
           "condition_text": "百生 吟子のファンレベルを100まで上げよう",
-          "achieve_count": 101,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1185,11 +1185,11 @@
         },
         {
           "m_musics_id": 405203,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405208,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1002
@@ -1199,7 +1199,7 @@
       "dream_quest_stages_id": 610428010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1216,7 +1216,7 @@
         },
         {
           "condition_text": "徒町 小鈴のファンレベルを100まで上げよう",
-          "achieve_count": 104,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1272,11 +1272,11 @@
         },
         {
           "m_musics_id": 405204,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405301,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1002
@@ -1286,7 +1286,7 @@
       "dream_quest_stages_id": 610438010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1303,7 +1303,7 @@
         },
         {
           "condition_text": "安養寺 姫芽のファンレベルを100まで上げよう",
-          "achieve_count": 103,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1331,7 +1331,7 @@
         },
         {
           "m_musics_id": 205301,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 304103,
@@ -1363,11 +1363,11 @@
         },
         {
           "m_musics_id": 405201,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405205,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1002
@@ -1394,7 +1394,7 @@
         },
         {
           "condition_text": "日野下 花帆のファンレベルを125まで上げよう",
-          "achieve_count": 134,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1530,7 +1530,7 @@
         },
         {
           "m_musics_id": 405303,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1002
@@ -1540,7 +1540,7 @@
       "dream_quest_stages_id": 610328020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1557,7 +1557,7 @@
         },
         {
           "condition_text": "村野 さやかのファンレベルを100まで上げよう",
-          "achieve_count": 133,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1677,11 +1677,11 @@
         },
         {
           "m_musics_id": 405202,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405305,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1002
@@ -1691,7 +1691,7 @@
       "dream_quest_stages_id": 610338020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1708,7 +1708,7 @@
         },
         {
           "condition_text": "大沢 瑠璃乃のファンレベルを100まで上げよう",
-          "achieve_count": 131,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1836,7 +1836,7 @@
         },
         {
           "m_musics_id": 405302,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1002
@@ -1846,7 +1846,7 @@
       "dream_quest_stages_id": 610218020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1863,7 +1863,7 @@
         },
         {
           "condition_text": "乙宗 梢のファンレベルを100まで上げよう",
-          "achieve_count": 111,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -1915,7 +1915,7 @@
         },
         {
           "m_musics_id": 104204,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 203101,
@@ -1981,7 +1981,7 @@
       "dream_quest_stages_id": 610228020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -1998,7 +1998,7 @@
         },
         {
           "condition_text": "夕霧 綴理のファンレベルを100まで上げよう",
-          "achieve_count": 108,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2112,7 +2112,7 @@
       "dream_quest_stages_id": 610238020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
@@ -2129,7 +2129,7 @@
         },
         {
           "condition_text": "藤島 慈のファンレベルを100まで上げよう",
-          "achieve_count": 111,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2251,13 +2251,13 @@
       "dream_quest_stages_id": 610518010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2268,8 +2268,8 @@
         },
         {
           "condition_text": "桂城 泉のファンレベルを100まで上げよう",
-          "achieve_count": 77,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         }
       ],
@@ -2280,7 +2280,7 @@
         },
         {
           "m_musics_id": 205203,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 305101,
@@ -2304,15 +2304,15 @@
         },
         {
           "m_musics_id": 405206,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405207,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405304,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2322,13 +2322,13 @@
       "dream_quest_stages_id": 610528010,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2339,19 +2339,19 @@
         },
         {
           "condition_text": "セラス 柳田 リリエンフェルトのファンレベルを100まで上げよう",
-          "achieve_count": 73,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         }
       ],
       "music_list": [
         {
           "m_musics_id": 205201,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 205202,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 305103,
@@ -2383,7 +2383,7 @@
         },
         {
           "m_musics_id": 405209,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2393,13 +2393,13 @@
       "dream_quest_stages_id": 610418020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2410,7 +2410,7 @@
         },
         {
           "condition_text": "百生 吟子のファンレベルを100まで上げよう",
-          "achieve_count": 101,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2470,11 +2470,11 @@
         },
         {
           "m_musics_id": 405203,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405208,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2484,13 +2484,13 @@
       "dream_quest_stages_id": 610428020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2501,7 +2501,7 @@
         },
         {
           "condition_text": "徒町 小鈴のファンレベルを100まで上げよう",
-          "achieve_count": 104,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2557,11 +2557,11 @@
         },
         {
           "m_musics_id": 405204,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405301,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2571,13 +2571,13 @@
       "dream_quest_stages_id": 610438020,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2588,7 +2588,7 @@
         },
         {
           "condition_text": "安養寺 姫芽のファンレベルを100まで上げよう",
-          "achieve_count": 103,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2616,7 +2616,7 @@
         },
         {
           "m_musics_id": 205301,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 304103,
@@ -2648,11 +2648,11 @@
         },
         {
           "m_musics_id": 405201,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405205,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2662,13 +2662,13 @@
       "dream_quest_stages_id": 610318030,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2679,7 +2679,7 @@
         },
         {
           "condition_text": "日野下 花帆のファンレベルを100まで上げよう",
-          "achieve_count": 134,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2815,7 +2815,7 @@
         },
         {
           "m_musics_id": 405303,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2825,13 +2825,13 @@
       "dream_quest_stages_id": 610328030,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2842,7 +2842,7 @@
         },
         {
           "condition_text": "村野 さやかのファンレベルを100まで上げよう",
-          "achieve_count": 133,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -2962,11 +2962,11 @@
         },
         {
           "m_musics_id": 405202,
-          "is_enable": false
+          "is_enable": true
         },
         {
           "m_musics_id": 405305,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
@@ -2976,13 +2976,13 @@
       "dream_quest_stages_id": 610338030,
       "clear_times": 0,
       "is_clear": false,
-      "is_get_card": false,
+      "is_get_card": true,
       "limit_break_times": 0,
       "condition_list": [
         {
           "condition_text": "ユメノコトワリを300個集めよう",
-          "achieve_count": 16,
-          "is_release": false,
+          "achieve_count": 9999,
+          "is_release": true,
           "is_display_progress_num": true
         },
         {
@@ -2993,7 +2993,7 @@
         },
         {
           "condition_text": "大沢 瑠璃乃のファンレベルを100まで上げよう",
-          "achieve_count": 131,
+          "achieve_count": 9999,
           "is_release": true,
           "is_display_progress_num": true
         }
@@ -3121,7 +3121,7 @@
         },
         {
           "m_musics_id": 405302,
-          "is_enable": false
+          "is_enable": true
         }
       ],
       "dream_live_series_id": 1003
