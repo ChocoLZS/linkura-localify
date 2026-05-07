@@ -11,6 +11,7 @@ import generate_custom_setting as custom_setting
 import generate_daily_quest_stage_sql as daily_quest_stage
 import generate_deck_sql as deck
 import generate_dream_quest_stage_sql as dream_quest_stage
+import generate_grade_quest_sql as grade_quest
 import generate_learning_stage_sql as learning_stage
 import generate_music_mastery_sql as music_mastery
 import generate_home_get_home as home
@@ -61,6 +62,8 @@ def main() -> None:
         "",
         dream_quest_stage.generate_schema_ddl(),
         "",
+        grade_quest.generate_schema_ddl(),
+        "",
         learning_stage.generate_schema_ddl(),
         "",
         music_mastery.generate_schema_ddl(),
@@ -83,6 +86,7 @@ def main() -> None:
         *quest_stage.generate_seed_statements(),
         *daily_quest_stage.generate_seed_statements(),
         *dream_quest_stage.generate_seed_statements(),
+        *grade_quest.generate_seed_statements(),
         *learning_stage.generate_seed_statements(),
         *music_mastery.generate_seed_statements(),
         *music_db.generate_seed_statements(),

@@ -2,7 +2,7 @@
   "standard_live_status": 1,
   "daily_live_status": 1,
   "music_live_status": 1,
-  "grade_live_status": 0,
+  "grade_live_status": 1,
   "grade_challenge_status": 0,
   "dream_live_status": 1,
   "grand_prix_open": false,

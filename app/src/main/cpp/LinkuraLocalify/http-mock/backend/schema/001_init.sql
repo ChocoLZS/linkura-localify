@@ -176,6 +176,46 @@ CREATE TABLE IF NOT EXISTS dream_quest_stage (
 
 CREATE INDEX IF NOT EXISTS idx_dream_quest_stage_series ON dream_quest_stage(series_id);
 
+CREATE TABLE IF NOT EXISTS grade_quest_season (
+    season_id INTEGER NOT NULL PRIMARY KEY,
+    generation INTEGER NOT NULL DEFAULT 0,
+    season INTEGER NOT NULL DEFAULT 0,
+    order_id INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS grade_quest_series (
+    series_id INTEGER NOT NULL PRIMARY KEY,
+    season_id INTEGER NOT NULL,
+    order_id INTEGER NOT NULL DEFAULT 0,
+    default_action_point INTEGER NOT NULL DEFAULT 15,
+    squares_json TEXT NOT NULL DEFAULT '[]',
+    rewards_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE INDEX IF NOT EXISTS idx_grade_quest_series_season ON grade_quest_series(season_id);
+
+CREATE TABLE IF NOT EXISTS grade_quest_stage (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    quest_musics_type INTEGER NOT NULL DEFAULT 2,
+    quest_musics_detail INTEGER NOT NULL DEFAULT 0,
+    live_point INTEGER NOT NULL DEFAULT 0,
+    section_skills_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE TABLE IF NOT EXISTS grade_add_skill (
+    skill_id INTEGER NOT NULL PRIMARY KEY,
+    tier INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS idx_grade_add_skill_tier ON grade_add_skill(tier);
+
+CREATE TABLE IF NOT EXISTS grade_quest_progress (
+    series_id INTEGER NOT NULL PRIMARY KEY,
+    clear_status INTEGER NOT NULL DEFAULT 0,
+    bonus_cleared INTEGER NOT NULL DEFAULT 0
+);
+
+
 CREATE TABLE IF NOT EXISTS learning_stage (
     stage_id INTEGER NOT NULL PRIMARY KEY,
     series_id INTEGER NOT NULL DEFAULT 0,

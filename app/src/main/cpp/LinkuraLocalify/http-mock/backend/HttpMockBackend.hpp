@@ -64,6 +64,14 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> DreamNotifyMemberReleaseConfirm(std::string_view payloadJson);
         std::optional<MockStoredResponse> DreamGetResult(std::string_view payloadJson);
 
+        std::optional<MockStoredResponse> GradeGetQuestList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestStart(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestAction(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestAddSkill(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeGetStageData(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeGetResult(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestRetire(std::string_view payloadJson);
+
         bool IsPersistentStorageAvailable() const;
         std::string GetStatusSummary() const;
 
