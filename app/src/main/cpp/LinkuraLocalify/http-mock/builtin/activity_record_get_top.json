@@ -5231,6 +5231,54 @@
         }
       ],
       "is_not_displayed_new_part": false
+    },
+    {
+      "adv_series_id": 200001,
+      "monthly_title": "『Water the flowers』",
+      "monthly_description": "105期3月。Bloom Garden Partyが間近に迫る中、\n花帆が「三連華の曲を作りたい！」と提案する。\n3年間の軌跡を歌にするべくアイディアを出し合う\n三連華だったが、なかなか方向性が定まらず……？",
+      "is_monthly_not_watched": true,
+      "is_current_season": false,
+      "monthly_start_date": "2026-04-30T03:00:00Z",
+      "monthly_end_date": "2035-12-31T14:59:59Z",
+      "adv_info_list": [
+        {
+          "adv_data_id": 20000101,
+          "title": "『Water the flowers』",
+          "order_id": 385,
+          "subtitle": "1",
+          "description": "PART 1",
+          "watchable_status": 1,
+          "is_not_watched": false,
+          "open_season_fan_level": 1,
+          "watch_reward_list": [],
+          "adv_unlock_item_num": 0
+        },
+        {
+          "adv_data_id": 20000102,
+          "title": "『Water the flowers』",
+          "order_id": 386,
+          "subtitle": "2",
+          "description": "PART 2",
+          "watchable_status": 1,
+          "is_not_watched": false,
+          "open_season_fan_level": 1,
+          "watch_reward_list": [],
+          "adv_unlock_item_num": 0
+        },
+        {
+          "adv_data_id": 20000103,
+          "title": "『Water the flowers』",
+          "order_id": 387,
+          "subtitle": "3",
+          "description": "PART 3",
+          "watchable_status": 1,
+          "is_not_watched": false,
+          "open_season_fan_level": 1,
+          "watch_reward_list": [],
+          "adv_unlock_item_num": 0
+        }
+      ],
+      "is_not_displayed_new_part": false
     }
   ]
 }

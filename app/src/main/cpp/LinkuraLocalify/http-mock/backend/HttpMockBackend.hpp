@@ -45,6 +45,40 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> GetCharacterInfoById(std::string_view characterId);
         std::optional<MockStoredResponse> LookupCharacterInfoFromPayload(std::string_view payloadJson);
 
+        std::optional<MockStoredResponse> QuestStageSelect(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestStageData(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestGetLiveSetting(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSetLiveSetting(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSetStart(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestGetLiveInfo(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSetFinish(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestGetResult(std::string_view payloadJson);
+        std::optional<MockStoredResponse> QuestSkip(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> DailyQuestStageList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> DailyQuestStageData(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> MusicLearningGetMusicSelect(std::string_view payloadJson);
+        std::optional<MockStoredResponse> MusicLearningGetResult(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> DreamNotifyMemberReleaseConfirm(std::string_view payloadJson);
+        std::optional<MockStoredResponse> DreamGetResult(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> GradeGetQuestList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestStart(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestAction(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestAddSkill(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeGetStageData(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeGetResult(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GradeSetQuestRetire(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> GrandPrixGetTopInfo(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageSelect(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageData(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetRankingList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetResult(std::string_view payloadJson);
+
         bool IsPersistentStorageAvailable() const;
         std::string GetStatusSummary() const;
 

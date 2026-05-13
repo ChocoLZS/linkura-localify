@@ -111,6 +111,8 @@ message ConfigUpdate {
   optional bool hide_live_stream_character_items = 45;
   optional string story_replace_content = 46;
   optional bool memorize_free_camera_pos = 47;
+  optional bool enable_offline_api_mock = 48;
+  optional bool dump_http_mock_json = 49;
 }
 
 // Overlay control actions

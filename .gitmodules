@@ -3,4 +3,4 @@
 	url = https://github.com/ChocoLZS/linkura-localify-assets
 [submodule "link-like-diff"]
 	path = app/src/main/cpp/LinkuraLocalify/http-mock/backend/tools/link-like-diff
-	url = https://github.com/vertesan/link-like-diff.git
+	url = https://github.com/ChocoLZS/link-like-diff.git

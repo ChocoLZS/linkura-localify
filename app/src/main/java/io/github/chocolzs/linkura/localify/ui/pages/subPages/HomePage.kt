@@ -168,6 +168,13 @@ fun HomePage(modifier: Modifier = Modifier,
                             ) { v ->
                                 context?.onEnableOfflineApiMockChanged(v)
                             }
+                            GakuSwitch(
+                                modifier,
+                                stringResource(R.string.dump_http_mock_json),
+                                checked = config.value.dumpHttpMockJson
+                            ) { v ->
+                                context?.onDumpHttpMockJsonChanged(v)
+                            }
                             val resetTitle = stringResource(R.string.reset_mock_database_confirm_title)
                             val resetContent = stringResource(R.string.reset_mock_database_confirm_content)
                             val rebuildTitle = stringResource(R.string.rebuild_mock_database_confirm_title)

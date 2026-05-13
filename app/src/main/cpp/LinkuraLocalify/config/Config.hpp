@@ -68,6 +68,7 @@ namespace LinkuraLocal::Config {
     // When enabled, `Org.OpenAPITools.Client.ApiClient.CallApiAsync` can be short-circuited
     // to return a locally constructed RestSharp response without sending HTTP requests.
     extern bool enableOfflineApiMock;
+    extern bool dumpHttpMockJson;
 
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     extern VersionCompatibility::Version currentClientVersion;

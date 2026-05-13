@@ -677,6 +677,32 @@ namespace LinkuraLocal::HttpMock {
             }
         }
 
+        if (Config::dumpHttpMockJson) {
+            const auto dumpDir = GetMockRootDir().parent_path() / "mock_dump";
+            std::error_code dumpEc;
+            std::filesystem::create_directories(dumpDir, dumpEc);
+            if (!dumpEc) {
+                auto sanitized = SanitizeApiPathToRelative(apiPath);
+                for (auto& ch : sanitized) { if (ch == '/') ch = '_'; }
+                const auto filePath = dumpDir / (sanitized + ".json");
+
+                nlohmann::json dumpObj;
+                if (!requestBodyJson.empty()) {
+                    auto reqParsed = nlohmann::json::parse(requestBodyJson, nullptr, false);
+                    dumpObj["request"] = reqParsed.is_discarded() ? nlohmann::json(requestBodyJson) : reqParsed;
+                } else {
+                    dumpObj["request"] = nullptr;
+                }
+                auto respParsed = nlohmann::json::parse(mockJson, nullptr, false);
+                dumpObj["response"] = respParsed.is_discarded() ? nlohmann::json(mockJson) : respParsed;
+
+                std::ofstream dumpOfs(filePath, std::ios::trunc);
+                if (dumpOfs.is_open()) {
+                    dumpOfs << dumpObj.dump(2);
+                }
+            }
+        }
+
         // Headers: disk overrides -> built-in -> defaults. Then enforce standard required headers.
         std::string headersText;
         if (!headersFile.empty()) {

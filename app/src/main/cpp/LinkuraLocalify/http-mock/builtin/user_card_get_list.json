@@ -29411,6 +29411,342 @@
           "skill_level": 14
         }
       ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000214",
+      "card_datas_id": 19215014,
+      "card_name": "今、過去、未来の三原色",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4565,
+        "pure": 7040,
+        "cool": 4125,
+        "mental": 490,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19215012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29215010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39215010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1021,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000215",
+      "card_datas_id": 19225014,
+      "card_name": "今、過去、未来の三原色",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4290,
+        "pure": 7260,
+        "cool": 4180,
+        "mental": 490,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19225012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29225010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39225010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1022,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000216",
+      "card_datas_id": 19234014,
+      "card_name": "今、過去、未来の三原色",
+      "style_level": 100,
+      "max_style_level": 100,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4400,
+        "pure": 5720,
+        "cool": 3630,
+        "mental": 430,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19234012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29234010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39234010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1023,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000217",
+      "card_datas_id": 19315014,
+      "card_name": "ペレニアル",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4620,
+        "pure": 5500,
+        "cool": 5720,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19315012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29315010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39315010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1031,
+      "generations_id": 103,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000218",
+      "card_datas_id": 19325014,
+      "card_name": "ペレニアル",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4400,
+        "pure": 5610,
+        "cool": 5830,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19325012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29325010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39325010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1032,
+      "generations_id": 103,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000219",
+      "card_datas_id": 19335014,
+      "card_name": "ペレニアル",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4840,
+        "pure": 5390,
+        "cool": 5610,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19335012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29335010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39335010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1033,
+      "generations_id": 103,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
     }
   ]
 }

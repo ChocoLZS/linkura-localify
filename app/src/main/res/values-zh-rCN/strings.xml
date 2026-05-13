@@ -63,6 +63,7 @@
     <string name="advanced_settings">高级设置</string>
     <string name="local_mode">本地模式</string>
     <string name="enable_offline_api_mock">启用离线 API Mock</string>
+    <string name="dump_http_mock_json">导出 HTTP Mock JSON</string>
     <string name="offline_api_mock_dir">Mock 目录名</string>
     <string name="offline_api_mock_dir_hint">相对于应用文件目录下的 `linkura-local/`（例如 mock_api）。</string>
     <string name="local_mode_hint_collapsed">点击标题展开设置。</string>
