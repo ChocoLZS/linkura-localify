@@ -10603,6 +10603,25 @@
       "create_time": "2026-04-30T03:00:00Z"
     },
     {
+      "stickers_id": 19534011,
+      "category_type": 2,
+      "category_name": 2,
+      "name": "[B.G.P. 撮影係]錦上 マイカ＆令沢 葵",
+      "text": "[B.G.P. 撮影係]錦上 マイカ＆令沢 葵 を4回解放した記念のステッカー",
+      "character_id": 0,
+      "is_variant": 0,
+      "season_id": 0,
+      "requirement_text": "[B.G.P. 撮影係]錦上 マイカ＆令沢 葵 解放完了",
+      "requirement_num": 1953401,
+      "requirement_progress": 1953401,
+      "variant_requirement_text": "",
+      "variant_requirement_num": 0,
+      "variant_requirement_progress": 0,
+      "is_owned": true,
+      "is_available_variant": false,
+      "create_time": "2026-05-08T03:00:00Z"
+    },
+    {
       "stickers_id": 20000001,
       "category_type": 1,
       "category_name": 1,

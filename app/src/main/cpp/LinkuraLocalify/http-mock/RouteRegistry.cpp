@@ -569,6 +569,7 @@ namespace LinkuraLocal::HttpMock {
             RegisterStaticJson(routes, "/v1/rhythm_game/receive_class_mission", "null");
             RegisterStaticJson(routes, "/v1/rhythm_game_live/set_start", "null");
             RegisterStaticJson(routes, "/v1/rhythm_game_live/set_retire", "null");
+            RegisterStaticJson(routes, "/v1/card/set_display_data", R"({"result":true})");
 
             return routes;
         }

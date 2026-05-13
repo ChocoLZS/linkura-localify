@@ -29747,6 +29747,52 @@
           "skill_level": 14
         }
       ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021a",
+      "card_datas_id": 19534014,
+      "card_name": "B.G.P. 撮影係",
+      "style_level": 100,
+      "max_style_level": 100,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4620,
+        "pure": 4620,
+        "cool": 4620,
+        "mental": 420,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29534010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39534010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1053,
+      "generations_id": 0,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
     }
   ]
 }
