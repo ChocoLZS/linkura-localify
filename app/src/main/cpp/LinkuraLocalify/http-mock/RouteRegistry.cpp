@@ -449,6 +449,54 @@ namespace LinkuraLocal::HttpMock {
             };
         }
 
+        static std::optional<MockResponse> HandleGrandPrixGetTopInfo(const MockRequestContext& request,
+                                                                       HttpMockBackend& backend) {
+            auto record = backend.GrandPrixGetTopInfo(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleGrandPrixGetStageSelect(const MockRequestContext& request,
+                                                                           HttpMockBackend& backend) {
+            auto record = backend.GrandPrixGetStageSelect(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleGrandPrixGetStageList(const MockRequestContext& request,
+                                                                         HttpMockBackend& backend) {
+            auto record = backend.GrandPrixGetStageList(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleGrandPrixGetStageData(const MockRequestContext& request,
+                                                                         HttpMockBackend& backend) {
+            auto record = backend.GrandPrixGetStageData(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleGrandPrixGetRankingList(const MockRequestContext& request,
+                                                                           HttpMockBackend& backend) {
+            auto record = backend.GrandPrixGetRankingList(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
+        static std::optional<MockResponse> HandleGrandPrixGetResult(const MockRequestContext& request,
+                                                                       HttpMockBackend& backend) {
+            auto record = backend.GrandPrixGetResult(request.payloadJson);
+            if (!record.has_value()) return std::nullopt;
+            if (record->headersText.empty()) record->headersText = std::string(OfflineApiMockBuiltIn::DefaultHeadersView);
+            return MockResponse{std::move(record->body), std::move(record->headersText), record->statusCode, std::move(record->statusDescription)};
+        }
+
         static RouteTable BuildRoutes() {
             RouteTable routes;
 
@@ -476,6 +524,12 @@ namespace LinkuraLocal::HttpMock {
             RegisterBackend(routes, "/v1/out_quest_live/grade/get_stage_data", HandleGradeGetStageData);
             RegisterBackend(routes, "/v1/out_quest_live/grade/get_result", HandleGradeGetResult);
             RegisterBackend(routes, "/v1/out_quest_live/grade/set_quest_retire", HandleGradeSetQuestRetire);
+            RegisterBackend(routes, "/v1/out_quest_live/grand_prix/get_top_info", HandleGrandPrixGetTopInfo);
+            RegisterBackend(routes, "/v1/out_quest_live/grand_prix/get_stage_select", HandleGrandPrixGetStageSelect);
+            RegisterBackend(routes, "/v1/out_quest_live/grand_prix/get_stage_list", HandleGrandPrixGetStageList);
+            RegisterBackend(routes, "/v1/out_quest_live/grand_prix/get_stage_data", HandleGrandPrixGetStageData);
+            RegisterBackend(routes, "/v1/out_quest_live/grand_prix/get_ranking_list", HandleGrandPrixGetRankingList);
+            RegisterBackend(routes, "/v1/out_quest_live/grand_prix/get_result", HandleGrandPrixGetResult);
             RegisterBackend(routes, "/v1/out_quest_live/standard/get_stage_select", HandleQuestStageSelect);
             RegisterBackend(routes, "/v1/out_quest_live/standard/get_stage_data", HandleQuestStageData);
             RegisterBackend(routes, "/v1/out_quest_live/get_live_setting", HandleQuestGetLiveSetting);

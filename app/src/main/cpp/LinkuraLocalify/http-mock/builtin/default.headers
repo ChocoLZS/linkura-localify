@@ -12,7 +12,7 @@ is_already_read_sisca_shop_new_arrival: false
 is_circle_approve_user: false
 is_circle_dissolution_user: false
 is_circle_invite_user: false
-is_grand_prix_open: false
+is_grand_prix_open: true
 is_party_gacha_underway: false
 jewel_free: 0
 jewel_paid_apple: 0

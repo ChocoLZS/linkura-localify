@@ -72,6 +72,13 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> GradeGetResult(std::string_view payloadJson);
         std::optional<MockStoredResponse> GradeSetQuestRetire(std::string_view payloadJson);
 
+        std::optional<MockStoredResponse> GrandPrixGetTopInfo(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageSelect(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageData(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetRankingList(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetResult(std::string_view payloadJson);
+
         bool IsPersistentStorageAvailable() const;
         std::string GetStatusSummary() const;
 

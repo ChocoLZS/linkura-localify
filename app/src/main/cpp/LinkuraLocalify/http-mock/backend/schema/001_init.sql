@@ -216,6 +216,44 @@ CREATE TABLE IF NOT EXISTS grade_quest_progress (
 );
 
 
+CREATE TABLE IF NOT EXISTS grand_prix (
+    grand_prix_id INTEGER NOT NULL PRIMARY KEY,
+    grand_prix_type INTEGER NOT NULL DEFAULT 1,
+    start_date TEXT NOT NULL DEFAULT '',
+    end_date TEXT NOT NULL DEFAULT '',
+    rewards_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE TABLE IF NOT EXISTS grand_prix_series (
+    quest_id INTEGER NOT NULL PRIMARY KEY,
+    grand_prix_id INTEGER NOT NULL,
+    order_id INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS idx_gp_series_gp ON grand_prix_series(grand_prix_id);
+
+CREATE TABLE IF NOT EXISTS grand_prix_stage (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    quest_id INTEGER NOT NULL,
+    order_id INTEGER NOT NULL DEFAULT 1,
+    quest_musics_type INTEGER NOT NULL DEFAULT 0,
+    quest_musics_detail INTEGER NOT NULL DEFAULT 0,
+    score_bonus_value INTEGER NOT NULL DEFAULT 10000,
+    release_condition_type INTEGER NOT NULL DEFAULT 0,
+    release_condition_value INTEGER NOT NULL DEFAULT 0,
+    section_skills_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE INDEX IF NOT EXISTS idx_gp_stage_quest ON grand_prix_stage(quest_id);
+
+CREATE TABLE IF NOT EXISTS grand_prix_progress (
+    stage_id INTEGER NOT NULL PRIMARY KEY,
+    high_score INTEGER NOT NULL DEFAULT 0,
+    daily_best_score INTEGER NOT NULL DEFAULT 0,
+    play_count INTEGER NOT NULL DEFAULT 0
+);
+
+
 CREATE TABLE IF NOT EXISTS learning_stage (
     stage_id INTEGER NOT NULL PRIMARY KEY,
     series_id INTEGER NOT NULL DEFAULT 0,

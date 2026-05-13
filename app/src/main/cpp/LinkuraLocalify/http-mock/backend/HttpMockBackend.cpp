@@ -81,6 +81,40 @@ namespace LinkuraLocal::HttpMock {
             {"grade_bonus_value", 0},
             {"is_released", false},
         };
+
+        static nlohmann::json LookupSectionSkills(sqlite3* db, int stageId) {
+            if (!db || stageId <= 0) return nlohmann::json::array();
+
+            static constexpr const char* kTables[] = {
+                "quest_stage",
+                "daily_quest_stage",
+                "dream_quest_stage",
+                "grade_quest_stage",
+                "grand_prix_stage",
+                "learning_stage",
+            };
+
+            for (const char* table : kTables) {
+                std::string sql = "SELECT section_skills_json FROM ";
+                sql += table;
+                sql += " WHERE stage_id = ?;";
+
+                sqlite3_stmt* stmt = nullptr;
+                if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                    sqlite3_bind_int(stmt, 1, stageId);
+                    if (sqlite3_step(stmt) == SQLITE_ROW) {
+                        const auto* raw = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                        auto parsed = nlohmann::json::parse(raw ? raw : "[]", nullptr, false);
+                        sqlite3_finalize(stmt);
+                        if (parsed.is_array()) return parsed;
+                    } else {
+                        sqlite3_finalize(stmt);
+                    }
+                }
+            }
+
+            return nlohmann::json::array();
+        }
     }
 
     struct HttpMockBackend::Impl {
@@ -173,6 +207,13 @@ namespace LinkuraLocal::HttpMock {
         std::optional<MockStoredResponse> GradeGetStageDataLocked(std::string_view payloadJson);
         std::optional<MockStoredResponse> GradeGetResultLocked(std::string_view payloadJson);
         std::optional<MockStoredResponse> GradeSetQuestRetireLocked(std::string_view payloadJson);
+
+        std::optional<MockStoredResponse> GrandPrixGetTopInfoLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageSelectLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageListLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetStageDataLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetRankingListLocked(std::string_view payloadJson);
+        std::optional<MockStoredResponse> GrandPrixGetResultLocked(std::string_view payloadJson);
 
         std::optional<MockStoredResponse> GetRhythmGameHomeLocked();
         std::optional<MockStoredResponse> RhythmGameSetStartLocked(std::string_view payloadJson);
@@ -309,6 +350,25 @@ namespace LinkuraLocal::HttpMock {
             return false;
         }
 
+        {
+            bool hasColumn = false;
+            sqlite3_stmt* pi = nullptr;
+            if (sqlite3_prepare_v2(db, "PRAGMA table_info(grand_prix_stage);", -1, &pi, nullptr) == SQLITE_OK && pi) {
+                while (sqlite3_step(pi) == SQLITE_ROW) {
+                    const auto* col = reinterpret_cast<const char*>(sqlite3_column_text(pi, 1));
+                    if (col && std::string(col) == "section_skills_json") { hasColumn = true; break; }
+                }
+                sqlite3_finalize(pi);
+            }
+            if (!hasColumn) {
+                ExecSql(db, "DROP TABLE IF EXISTS grand_prix_stage;");
+                ExecSql(db, "DROP TABLE IF EXISTS grand_prix_series;");
+                ExecSql(db, "DROP TABLE IF EXISTS grand_prix;");
+                ExecSql(db, "DROP TABLE IF EXISTS grand_prix_progress;");
+                ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SchemaScripts, "schema");
+            }
+        }
+
         const auto resetCmdPath = dbPath.parent_path() / "mock_db_reset_cmd";
         bool hasPendingReset = std::filesystem::exists(resetCmdPath, ec);
         if (hasPendingReset) {
@@ -328,13 +388,17 @@ namespace LinkuraLocal::HttpMock {
             ExecSql(db, "DELETE FROM grade_quest_stage;");
             ExecSql(db, "DELETE FROM grade_add_skill;");
             ExecSql(db, "DELETE FROM grade_quest_progress;");
+            ExecSql(db, "DELETE FROM grand_prix_progress;");
+            ExecSql(db, "DELETE FROM grand_prix;");
+            ExecSql(db, "DELETE FROM grand_prix_series;");
+            ExecSql(db, "DELETE FROM grand_prix_stage;");
             ExecSql(db, "DELETE FROM learning_stage;");
             ExecSql(db, "DELETE FROM music_mastery;");
             ExecSql(db, "DELETE FROM music;");
             std::filesystem::remove(resetCmdPath, ec);
         }
 
-        if ((hasPendingReset || !TableHasAnyRows(db, "archive_detail") || !TableHasAnyRows(db, "card_detail") || !TableHasAnyRows(db, "character_info") || !TableHasAnyRows(db, "item") || !TableHasAnyRows(db, "quest_stage") || !TableHasAnyRows(db, "daily_quest_stage") || !TableHasAnyRows(db, "dream_quest_stage") || !TableHasAnyRows(db, "grade_quest_stage") || !TableHasAnyRows(db, "grade_add_skill") || !TableHasAnyRows(db, "learning_stage") || !TableHasAnyRows(db, "music_mastery") || !TableHasAnyRows(db, "music"))
+        if ((hasPendingReset || !TableHasAnyRows(db, "archive_detail") || !TableHasAnyRows(db, "card_detail") || !TableHasAnyRows(db, "character_info") || !TableHasAnyRows(db, "item") || !TableHasAnyRows(db, "quest_stage") || !TableHasAnyRows(db, "daily_quest_stage") || !TableHasAnyRows(db, "dream_quest_stage") || !TableHasAnyRows(db, "grade_quest_stage") || !TableHasAnyRows(db, "grade_add_skill") || !TableHasAnyRows(db, "grand_prix_stage") || !TableHasAnyRows(db, "learning_stage") || !TableHasAnyRows(db, "music_mastery") || !TableHasAnyRows(db, "music"))
             && !ExecBuiltInSqlScripts(db, HttpMockBackendBuiltInSql::SeedScripts, "seed")) {
             persistentStorageAvailable = false;
             return false;
@@ -348,7 +412,7 @@ namespace LinkuraLocal::HttpMock {
             return false;
         }
 
-        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;") || !ExecSql(db, "DELETE FROM deck;") || !ExecSql(db, "DELETE FROM rhythm_music_score;") || !ExecSql(db, "DELETE FROM rhythm_game_deck;") || !ExecSql(db, "DELETE FROM quest_stage;") || !ExecSql(db, "DELETE FROM daily_quest_stage;") || !ExecSql(db, "DELETE FROM dream_quest_stage;") || !ExecSql(db, "DELETE FROM grade_quest_season;") || !ExecSql(db, "DELETE FROM grade_quest_series;") || !ExecSql(db, "DELETE FROM grade_quest_stage;") || !ExecSql(db, "DELETE FROM grade_add_skill;") || !ExecSql(db, "DELETE FROM grade_quest_progress;") || !ExecSql(db, "DELETE FROM learning_stage;") || !ExecSql(db, "DELETE FROM music_mastery;") || !ExecSql(db, "DELETE FROM music;")) {
+        if (!ExecSql(db, "DELETE FROM archive_detail;") || !ExecSql(db, "DELETE FROM card_detail;") || !ExecSql(db, "DELETE FROM character_info;") || !ExecSql(db, "DELETE FROM item;") || !ExecSql(db, "DELETE FROM deck;") || !ExecSql(db, "DELETE FROM rhythm_music_score;") || !ExecSql(db, "DELETE FROM rhythm_game_deck;") || !ExecSql(db, "DELETE FROM quest_stage;") || !ExecSql(db, "DELETE FROM daily_quest_stage;") || !ExecSql(db, "DELETE FROM dream_quest_stage;") || !ExecSql(db, "DELETE FROM grade_quest_season;") || !ExecSql(db, "DELETE FROM grade_quest_series;") || !ExecSql(db, "DELETE FROM grade_quest_stage;") || !ExecSql(db, "DELETE FROM grade_add_skill;") || !ExecSql(db, "DELETE FROM grade_quest_progress;") || !ExecSql(db, "DELETE FROM grand_prix_progress;") || !ExecSql(db, "DELETE FROM grand_prix;") || !ExecSql(db, "DELETE FROM grand_prix_series;") || !ExecSql(db, "DELETE FROM grand_prix_stage;") || !ExecSql(db, "DELETE FROM learning_stage;") || !ExecSql(db, "DELETE FROM music_mastery;") || !ExecSql(db, "DELETE FROM music;")) {
             return false;
         }
 
@@ -1538,87 +1602,7 @@ namespace LinkuraLocal::HttpMock {
         currentQuestLive.deckData = deckData;
         currentQuestLive.characterBonus = charBonus;
 
-        nlohmann::json sectionSkillList = nlohmann::json::array();
-        if (stageId > 0) {
-            bool foundSections = false;
-            sqlite3_stmt* skStmt = nullptr;
-            constexpr const char* skSql = "SELECT section_skills_json FROM quest_stage WHERE stage_id = ?;";
-            if (sqlite3_prepare_v2(db, skSql, -1, &skStmt, nullptr) == SQLITE_OK && skStmt) {
-                sqlite3_bind_int(skStmt, 1, stageId);
-                if (sqlite3_step(skStmt) == SQLITE_ROW) {
-                    const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(skStmt, 0));
-                    auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                    if (parsed.is_array()) {
-                        sectionSkillList = std::move(parsed);
-                        foundSections = true;
-                    }
-                }
-                sqlite3_finalize(skStmt);
-            }
-            if (!foundSections) {
-                sqlite3_stmt* dStmt = nullptr;
-                constexpr const char* dSql = "SELECT section_skills_json FROM daily_quest_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, dSql, -1, &dStmt, nullptr) == SQLITE_OK && dStmt) {
-                    sqlite3_bind_int(dStmt, 1, stageId);
-                    if (sqlite3_step(dStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(dStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                            foundSections = true;
-                        }
-                    }
-                    sqlite3_finalize(dStmt);
-                }
-            }
-            if (!foundSections) {
-                sqlite3_stmt* drStmt = nullptr;
-                constexpr const char* drSql = "SELECT section_skills_json FROM dream_quest_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, drSql, -1, &drStmt, nullptr) == SQLITE_OK && drStmt) {
-                    sqlite3_bind_int(drStmt, 1, stageId);
-                    if (sqlite3_step(drStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(drStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                            foundSections = true;
-                        }
-                    }
-                    sqlite3_finalize(drStmt);
-                }
-            }
-            if (!foundSections) {
-                sqlite3_stmt* grStmt = nullptr;
-                constexpr const char* grSql = "SELECT section_skills_json FROM grade_quest_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, grSql, -1, &grStmt, nullptr) == SQLITE_OK && grStmt) {
-                    sqlite3_bind_int(grStmt, 1, stageId);
-                    if (sqlite3_step(grStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(grStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                            foundSections = true;
-                        }
-                    }
-                    sqlite3_finalize(grStmt);
-                }
-            }
-            if (!foundSections) {
-                sqlite3_stmt* lStmt = nullptr;
-                constexpr const char* lSql = "SELECT section_skills_json FROM learning_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, lSql, -1, &lStmt, nullptr) == SQLITE_OK && lStmt) {
-                    sqlite3_bind_int(lStmt, 1, stageId);
-                    if (sqlite3_step(lStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(lStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                        }
-                    }
-                    sqlite3_finalize(lStmt);
-                }
-            }
-        }
+        const auto sectionSkillList = LookupSectionSkills(db, stageId);
 
         nlohmann::json fanLevelInfoList = nlohmann::json::array();
         {
@@ -1647,7 +1631,7 @@ namespace LinkuraLocal::HttpMock {
         result["init_hand_data"] = "";
         result["grand_prix_retry_count"] = 0;
         result["grand_prix_is_rehearsal"] = false;
-        result["grand_prix_id"] = 0;
+        result["grand_prix_id"] = (questLiveType == 6) ? 806101 : 0;
         result["grade_retry_count"] = (questLiveType == 4) ? 1 : 0;
         {
             nlohmann::json gradeSkills = nlohmann::json::array();
@@ -1658,8 +1642,22 @@ namespace LinkuraLocal::HttpMock {
             }
             result["grade_add_skill_list"] = std::move(gradeSkills);
         }
-        result["playable_count"] = 0;
-        result["play_count"] = 0;
+        int playCount = 0;
+        int playableCount = 0;
+        if (questLiveType == 6 && stageId > 0) {
+            sqlite3_stmt* pcStmt = nullptr;
+            constexpr const char* pcSql = "SELECT play_count FROM grand_prix_progress WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, pcSql, -1, &pcStmt, nullptr) == SQLITE_OK && pcStmt) {
+                sqlite3_bind_int(pcStmt, 1, stageId);
+                if (sqlite3_step(pcStmt) == SQLITE_ROW) {
+                    playCount = sqlite3_column_int(pcStmt, 0);
+                }
+                sqlite3_finalize(pcStmt);
+            }
+            playableCount = 1;
+        }
+        result["playable_count"] = playableCount;
+        result["play_count"] = playCount;
         result["fan_level_info_list"] = std::move(fanLevelInfoList);
 
         MockStoredResponse response;
@@ -1703,87 +1701,7 @@ namespace LinkuraLocal::HttpMock {
             return std::nullopt;
         }
 
-        nlohmann::json sectionSkillList = nlohmann::json::array();
-        if (db && currentQuestLive.stageId > 0) {
-            bool foundSections = false;
-            sqlite3_stmt* stmt = nullptr;
-            constexpr const char* sql = "SELECT section_skills_json FROM quest_stage WHERE stage_id = ?;";
-            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
-                sqlite3_bind_int(stmt, 1, currentQuestLive.stageId);
-                if (sqlite3_step(stmt) == SQLITE_ROW) {
-                    const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                    auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                    if (parsed.is_array()) {
-                        sectionSkillList = std::move(parsed);
-                        foundSections = true;
-                    }
-                }
-                sqlite3_finalize(stmt);
-            }
-            if (!foundSections) {
-                sqlite3_stmt* dStmt = nullptr;
-                constexpr const char* dSql = "SELECT section_skills_json FROM daily_quest_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, dSql, -1, &dStmt, nullptr) == SQLITE_OK && dStmt) {
-                    sqlite3_bind_int(dStmt, 1, currentQuestLive.stageId);
-                    if (sqlite3_step(dStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(dStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                            foundSections = true;
-                        }
-                    }
-                    sqlite3_finalize(dStmt);
-                }
-            }
-            if (!foundSections) {
-                sqlite3_stmt* drStmt = nullptr;
-                constexpr const char* drSql = "SELECT section_skills_json FROM dream_quest_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, drSql, -1, &drStmt, nullptr) == SQLITE_OK && drStmt) {
-                    sqlite3_bind_int(drStmt, 1, currentQuestLive.stageId);
-                    if (sqlite3_step(drStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(drStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                            foundSections = true;
-                        }
-                    }
-                    sqlite3_finalize(drStmt);
-                }
-            }
-            if (!foundSections) {
-                sqlite3_stmt* grStmt = nullptr;
-                constexpr const char* grSql = "SELECT section_skills_json FROM grade_quest_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, grSql, -1, &grStmt, nullptr) == SQLITE_OK && grStmt) {
-                    sqlite3_bind_int(grStmt, 1, currentQuestLive.stageId);
-                    if (sqlite3_step(grStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(grStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                            foundSections = true;
-                        }
-                    }
-                    sqlite3_finalize(grStmt);
-                }
-            }
-            if (!foundSections) {
-                sqlite3_stmt* lStmt = nullptr;
-                constexpr const char* lSql = "SELECT section_skills_json FROM learning_stage WHERE stage_id = ?;";
-                if (sqlite3_prepare_v2(db, lSql, -1, &lStmt, nullptr) == SQLITE_OK && lStmt) {
-                    sqlite3_bind_int(lStmt, 1, currentQuestLive.stageId);
-                    if (sqlite3_step(lStmt) == SQLITE_ROW) {
-                        const auto* json = reinterpret_cast<const char*>(sqlite3_column_text(lStmt, 0));
-                        auto parsed = nlohmann::json::parse(json ? json : "[]", nullptr, false);
-                        if (parsed.is_array()) {
-                            sectionSkillList = std::move(parsed);
-                        }
-                    }
-                    sqlite3_finalize(lStmt);
-                }
-            }
-        }
+        const auto sectionSkillList = LookupSectionSkills(db, currentQuestLive.stageId);
 
         nlohmann::json fanLevelInfoList = nlohmann::json::array();
         {
@@ -1812,11 +1730,27 @@ namespace LinkuraLocal::HttpMock {
         result["init_hand_data"] = "";
         result["grand_prix_retry_count"] = 0;
         result["grand_prix_is_rehearsal"] = false;
-        result["grand_prix_id"] = 0;
-        result["grade_retry_count"] = 0;
+        result["grand_prix_id"] = (currentQuestLive.questLiveType == 6) ? 806101 : 0;
+        result["grade_retry_count"] = (currentQuestLive.questLiveType == 4) ? 1 : 0;
         result["grade_add_skill_list"] = nlohmann::json::array();
-        result["playable_count"] = 0;
-        result["play_count"] = 0;
+        {
+            int playCount = 0;
+            int playableCount = 0;
+            if (currentQuestLive.questLiveType == 6 && currentQuestLive.stageId > 0 && db) {
+                sqlite3_stmt* pcStmt = nullptr;
+                constexpr const char* pcSql = "SELECT play_count FROM grand_prix_progress WHERE stage_id = ?;";
+                if (sqlite3_prepare_v2(db, pcSql, -1, &pcStmt, nullptr) == SQLITE_OK && pcStmt) {
+                    sqlite3_bind_int(pcStmt, 1, currentQuestLive.stageId);
+                    if (sqlite3_step(pcStmt) == SQLITE_ROW) {
+                        playCount = sqlite3_column_int(pcStmt, 0);
+                    }
+                    sqlite3_finalize(pcStmt);
+                }
+                playableCount = 1;
+            }
+            result["playable_count"] = playableCount;
+            result["play_count"] = playCount;
+        }
         result["fan_level_info_list"] = std::move(fanLevelInfoList);
 
         MockStoredResponse response;
@@ -2876,6 +2810,357 @@ namespace LinkuraLocal::HttpMock {
         return response;
     }
 
+    // ─── Grand Prix ───
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GrandPrixGetTopInfoLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) return std::nullopt;
+        if (!db) return std::nullopt;
+
+        constexpr int gpId = 806101;
+
+        std::string startDate, endDate;
+        int gpType = 1;
+        nlohmann::json rewardsJson = nlohmann::json::array();
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT grand_prix_type, start_date, end_date, rewards_json FROM grand_prix WHERE grand_prix_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, gpId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    gpType = sqlite3_column_int(stmt, 0);
+                    const auto* sd = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+                    const auto* ed = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+                    if (sd) startDate = sd;
+                    if (ed) endDate = ed;
+                    const auto* rj = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+                    auto rp = nlohmann::json::parse(rj ? rj : "[]", nullptr, false);
+                    if (rp.is_array()) rewardsJson = std::move(rp);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["start_date"] = startDate;
+        result["end_date"] = endDate;
+        result["grand_prix_type"] = gpType;
+        result["status"] = 2;
+        result["search_guild_key"] = "";
+        result["guild_name"] = "";
+        result["guild_total_point"] = 0;
+        result["guild_ranking"] = 0;
+        result["within_guild_ranking"] = 0;
+        result["personal_total_point"] = 0;
+        result["personal_ranking"] = 0;
+        result["get_points"] = nlohmann::json::array();
+        result["personal_rewards"] = std::move(rewardsJson);
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GrandPrixGetStageSelectLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) return std::nullopt;
+        if (!db) return std::nullopt;
+
+        constexpr int gpId = 806101;
+
+        nlohmann::json stages = nlohmann::json::array();
+        int64_t dailyTotalPoint = 0;
+        int64_t bestPoint = 0;
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT quest_id FROM grand_prix_series WHERE grand_prix_id = ? ORDER BY order_id;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, gpId);
+                while (sqlite3_step(stmt) == SQLITE_ROW) {
+                    const int questId = sqlite3_column_int(stmt, 0);
+
+                    int64_t questHighScore = 0;
+                    int64_t questDailyBest = 0;
+                    int totalPlayCount = 0;
+                    int dailyStageId = 0;
+                    int dailyMusicId = 0;
+                    {
+                        sqlite3_stmt* pStmt = nullptr;
+                        constexpr const char* pSql =
+                            "SELECT s.stage_id, p.high_score, p.daily_best_score, p.play_count "
+                            "FROM grand_prix_stage s "
+                            "LEFT JOIN grand_prix_progress p ON p.stage_id = s.stage_id "
+                            "WHERE s.quest_id = ? ORDER BY COALESCE(p.daily_best_score, 0) DESC;";
+                        if (sqlite3_prepare_v2(db, pSql, -1, &pStmt, nullptr) == SQLITE_OK && pStmt) {
+                            sqlite3_bind_int(pStmt, 1, questId);
+                            bool first = true;
+                            while (sqlite3_step(pStmt) == SQLITE_ROW) {
+                                const int64_t hs = sqlite3_column_int64(pStmt, 1);
+                                const int64_t ds = sqlite3_column_int64(pStmt, 2);
+                                const int pc = sqlite3_column_int(pStmt, 3);
+                                if (hs > questHighScore) questHighScore = hs;
+                                if (first && ds > 0) {
+                                    dailyStageId = sqlite3_column_int(pStmt, 0);
+                                    questDailyBest = ds;
+                                }
+                                totalPlayCount += pc;
+                                first = false;
+                            }
+                            sqlite3_finalize(pStmt);
+                        }
+                    }
+
+                    dailyTotalPoint += questDailyBest;
+                    if (questDailyBest > bestPoint) bestPoint = questDailyBest;
+
+                    stages.push_back({
+                        {"quest_id", questId},
+                        {"daily_stage_id", dailyStageId},
+                        {"daily_point", questDailyBest},
+                        {"daily_music_id", dailyMusicId},
+                        {"daily_rank", (questDailyBest > 0) ? 1 : 0},
+                        {"high_score", questHighScore},
+                        {"high_score_rank", (questHighScore > 0) ? 1 : 0},
+                        {"playable_count", 1},
+                        {"play_count", totalPlayCount > 0 ? 1 : 0},
+                        {"play_count_bonus_value", 10000},
+                    });
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["daily_total_point"] = dailyTotalPoint;
+        result["best_point"] = bestPoint;
+        result["stages"] = std::move(stages);
+        result["stage_ranking_info_list"] = nlohmann::json::array({
+            {{"quest_id", 0}, {"rank_display_type", 1}, {"rank", 0}, {"point", 0}},
+        });
+        result["predicated_ranking_score_info"] = {
+            {"ranking_score", 0}, {"contents_type", 2},
+        };
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GrandPrixGetStageListLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) return std::nullopt;
+        if (!db) return std::nullopt;
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        const int questId = payload.is_object() ? payload.value("quest_id", 0) : 0;
+
+        std::unordered_map<int, bool> clearedStages;
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT p.stage_id FROM grand_prix_progress p "
+                "JOIN grand_prix_stage s ON s.stage_id = p.stage_id "
+                "WHERE s.quest_id = ? AND p.play_count > 0;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, questId);
+                while (sqlite3_step(stmt) == SQLITE_ROW) {
+                    clearedStages[sqlite3_column_int(stmt, 0)] = true;
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json stageList = nlohmann::json::array();
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT stage_id, release_condition_type, release_condition_value "
+                "FROM grand_prix_stage WHERE quest_id = ? ORDER BY order_id;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, questId);
+                while (sqlite3_step(stmt) == SQLITE_ROW) {
+                    const int stageId = sqlite3_column_int(stmt, 0);
+                    const int condType = sqlite3_column_int(stmt, 1);
+                    const int condVal = sqlite3_column_int(stmt, 2);
+
+                    bool isLock = false;
+                    if (condType == 1) {
+                        isLock = (clearedStages.find(condVal) == clearedStages.end());
+                    }
+
+                    const int clearStatus = clearedStages.count(stageId) ? 3 : 0;
+
+                    stageList.push_back({
+                        {"stage_id", stageId},
+                        {"clear_status", clearStatus},
+                        {"is_lock", isLock},
+                        {"playable_count", 1},
+                        {"play_count", clearedStages.count(stageId) ? 1 : 0},
+                        {"play_count_bonus_value", 10000},
+                    });
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["stage_list"] = std::move(stageList);
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GrandPrixGetStageDataLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) return std::nullopt;
+        if (!db) return std::nullopt;
+
+        auto payload = nlohmann::json::parse(payloadJson.begin(), payloadJson.end(), nullptr, false);
+        const int stageId = payload.is_object() ? payload.value("stage_id", 0) : 0;
+
+        int musicsType = 0;
+        int musicsDetail = 0;
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "SELECT quest_musics_type, quest_musics_detail FROM grand_prix_stage WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    musicsType = sqlite3_column_int(stmt, 0);
+                    musicsDetail = sqlite3_column_int(stmt, 1);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json musicList = nlohmann::json::array();
+        if (musicsType == 2 && musicsDetail > 0) {
+            musicList.push_back({{"m_musics_id", musicsDetail}, {"is_enable", true}});
+        } else {
+            sqlite3_stmt* mStmt = nullptr;
+            constexpr const char* mSql =
+                "SELECT music_id FROM music WHERE has_score = 1 ORDER BY music_id;";
+            if (sqlite3_prepare_v2(db, mSql, -1, &mStmt, nullptr) == SQLITE_OK && mStmt) {
+                while (sqlite3_step(mStmt) == SQLITE_ROW) {
+                    musicList.push_back({
+                        {"m_musics_id", sqlite3_column_int(mStmt, 0)},
+                        {"is_enable", true},
+                    });
+                }
+                sqlite3_finalize(mStmt);
+            }
+        }
+
+        int playCount = 0;
+        {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql = "SELECT play_count FROM grand_prix_progress WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    playCount = sqlite3_column_int(stmt, 0);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["stage_name"] = "";
+        result["clear_status"] = (playCount > 0) ? 3 : 0;
+        result["stage_reward_list"] = nlohmann::json::array();
+        result["playable_count"] = 1;
+        result["play_count"] = playCount;
+        result["play_count_bonus_value"] = 10000;
+        result["skip_guarantee_point"] = 0;
+        result["music_list"] = std::move(musicList);
+        result["is_today_playable"] = true;
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GrandPrixGetRankingListLocked(std::string_view payloadJson) {
+        nlohmann::json result;
+        result["status"] = 2;
+        result["my_rank"] = 0;
+        result["lowest_rank"] = 0;
+        result["point_rankings"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::Impl::GrandPrixGetResultLocked(std::string_view payloadJson) {
+        if (!initialized && !EnsureReadyLocked()) return std::nullopt;
+
+        const int64_t score = currentQuestLive.score;
+        const int stageId = currentQuestLive.stageId;
+        const int musicId = currentQuestLive.musicId;
+        const int64_t dailyScore = score / 1000;
+
+        int64_t beforeHighScore = 0;
+        if (db) {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql = "SELECT high_score FROM grand_prix_progress WHERE stage_id = ?;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, stageId);
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    beforeHighScore = sqlite3_column_int64(stmt, 0);
+                }
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        if (db) {
+            sqlite3_stmt* stmt = nullptr;
+            constexpr const char* sql =
+                "INSERT INTO grand_prix_progress (stage_id, high_score, daily_best_score, play_count) "
+                "VALUES (?, ?, ?, 1) "
+                "ON CONFLICT(stage_id) DO UPDATE SET "
+                "high_score = MAX(high_score, excluded.high_score), "
+                "daily_best_score = MAX(daily_best_score, excluded.daily_best_score), "
+                "play_count = play_count + 1;";
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK && stmt) {
+                sqlite3_bind_int(stmt, 1, stageId);
+                sqlite3_bind_int64(stmt, 2, score);
+                sqlite3_bind_int64(stmt, 3, dailyScore);
+                sqlite3_step(stmt);
+                sqlite3_finalize(stmt);
+            }
+        }
+
+        nlohmann::json result;
+        result["quest_live_type"] = 6;
+        result["stage_id"] = stageId;
+        result["quest_result"] = true;
+        result["result_love"] = score;
+        result["best_love"] = std::max(score, beforeHighScore);
+        result["before_best_love"] = beforeHighScore;
+        result["add_style_point"] = 0;
+        result["is_challenge_mode"] = false;
+        result["music_id"] = musicId;
+        result["reward_list"] = nlohmann::json::array();
+        result["play_report"] = currentQuestLive.playReport;
+        result["mastary_level_before"] = 1;
+        result["mastary_level_after"] = 1;
+        result["mastary_level_experience"] = 0;
+        result["mastary_level_total_experience_before"] = 0;
+        result["first_clear_flag"] = (beforeHighScore == 0);
+        result["first_complete_clear_flag"] = (beforeHighScore == 0);
+        result["is_limit_over_style_point"] = false;
+        result["daily_score"] = dailyScore;
+        result["before_high_score"] = beforeHighScore;
+        result["is_rehearsal"] = false;
+        result["is_guarantee"] = false;
+        result["point_bonus_list"] = nlohmann::json::array();
+
+        MockStoredResponse response;
+        response.body = result.dump();
+        return response;
+    }
+
     HttpMockBackend& HttpMockBackend::Get() {
         static HttpMockBackend instance;
         return instance;
@@ -2922,6 +3207,10 @@ namespace LinkuraLocal::HttpMock {
                   ExecSql(db, "DELETE FROM grade_quest_stage;") &&
                   ExecSql(db, "DELETE FROM grade_add_skill;") &&
                   ExecSql(db, "DELETE FROM grade_quest_progress;") &&
+                  ExecSql(db, "DELETE FROM grand_prix_progress;") &&
+                  ExecSql(db, "DELETE FROM grand_prix;") &&
+                  ExecSql(db, "DELETE FROM grand_prix_series;") &&
+                  ExecSql(db, "DELETE FROM grand_prix_stage;") &&
                   ExecSql(db, "DELETE FROM learning_stage;") &&
                   ExecSql(db, "DELETE FROM music_mastery;") &&
                   ExecSql(db, "DELETE FROM music;") &&
@@ -3195,6 +3484,36 @@ namespace LinkuraLocal::HttpMock {
     std::optional<MockStoredResponse> HttpMockBackend::GradeSetQuestRetire(std::string_view payloadJson) {
         std::lock_guard<std::mutex> lock(impl_->mutex);
         return impl_->GradeSetQuestRetireLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GrandPrixGetTopInfo(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GrandPrixGetTopInfoLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GrandPrixGetStageSelect(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GrandPrixGetStageSelectLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GrandPrixGetStageList(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GrandPrixGetStageListLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GrandPrixGetStageData(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GrandPrixGetStageDataLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GrandPrixGetRankingList(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GrandPrixGetRankingListLocked(payloadJson);
+    }
+
+    std::optional<MockStoredResponse> HttpMockBackend::GrandPrixGetResult(std::string_view payloadJson) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        return impl_->GrandPrixGetResultLocked(payloadJson);
     }
 
     std::string HttpMockBackend::ExtractPayloadIntegerFieldAsString(std::string_view payloadJson, std::string_view fieldName) {
