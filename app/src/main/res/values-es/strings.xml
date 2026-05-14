@@ -260,6 +260,7 @@
     <string name="app_update_install">Instalar</string>
     <string name="local_mode">Modo local</string>
     <string name="enable_offline_api_mock">Activar API Mock sin conexión</string>
+    <string name="dump_http_mock_json">Exportar HTTP Mock JSON</string>
     <string name="offline_api_mock_dir">Nombre del directorio Mock</string>
     <string name="offline_api_mock_dir_hint">Ruta relativa bajo `linkura-local/` en el directorio de archivos de la app (ej: mock_api).</string>
     <string name="local_mode_hint_collapsed">Toca el encabezado para expandir.</string>

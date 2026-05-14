@@ -260,6 +260,7 @@
     <string name="app_update_install">ติดตั้ง</string>
     <string name="local_mode">โหมดโลคัล</string>
     <string name="enable_offline_api_mock">เปิดใช้ API Mock แบบออฟไลน์</string>
+    <string name="dump_http_mock_json">ส่งออก HTTP Mock JSON</string>
     <string name="offline_api_mock_dir">ชื่อไดเรกทอรี Mock</string>
     <string name="offline_api_mock_dir_hint">ชื่อไดเรกทอรีภายใต้ `linkura-local/` ในไดเรกทอรีไฟล์ของแอป (เช่น mock_api).</string>
     <string name="local_mode_hint_collapsed">แตะส่วนหัวเพื่อขยาย.</string>

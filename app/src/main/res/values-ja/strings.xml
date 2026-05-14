@@ -550,6 +550,7 @@ Xposed スコープは再パッチなしで動的に変更が可能です。
     <string name="app_update_install">インストール</string>
     <string name="local_mode">ローカルモード</string>
     <string name="enable_offline_api_mock">オフライン API Mock を有効化</string>
+    <string name="dump_http_mock_json">HTTP Mock JSON をエクスポート</string>
     <string name="offline_api_mock_dir">Mock ディレクトリ名</string>
     <string name="offline_api_mock_dir_hint">アプリのファイル配下 `linkura-local/` からの相対パス（例: mock_api）。</string>
     <string name="local_mode_hint_collapsed">タイトルをタップして展開します。</string>
