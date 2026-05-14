@@ -1301,7 +1301,7 @@ namespace LinkuraLocal::HttpMock {
             if (generationsId > 0) {
                 sqlite3_stmt* mStmt = nullptr;
                 constexpr const char* mSql =
-                    "SELECT music_id FROM music WHERE generations_id = ? AND has_score = 1 ORDER BY music_id;";
+                    "SELECT music_id FROM music WHERE generations_id = ? ORDER BY music_id;";
                 if (sqlite3_prepare_v2(db, mSql, -1, &mStmt, nullptr) == SQLITE_OK && mStmt) {
                     sqlite3_bind_int(mStmt, 1, generationsId);
                     while (sqlite3_step(mStmt) == SQLITE_ROW) {
@@ -1470,7 +1470,7 @@ namespace LinkuraLocal::HttpMock {
         } else if (questMusicsType == 0 && musicId > 0) {
             sqlite3_stmt* mStmt = nullptr;
             constexpr const char* mSql =
-                "SELECT music_id FROM music WHERE generations_id = ? AND has_score = 1 ORDER BY music_id;";
+                "SELECT music_id FROM music WHERE generations_id = ? ORDER BY music_id;";
             if (sqlite3_prepare_v2(db, mSql, -1, &mStmt, nullptr) == SQLITE_OK && mStmt) {
                 sqlite3_bind_int(mStmt, 1, musicId);
                 while (sqlite3_step(mStmt) == SQLITE_ROW) {
@@ -1483,7 +1483,7 @@ namespace LinkuraLocal::HttpMock {
             }
         } else if (questMusicsType == 0 && musicId == 0) {
             sqlite3_stmt* mStmt = nullptr;
-            constexpr const char* mSql = "SELECT music_id FROM music WHERE has_score = 1 ORDER BY music_id;";
+            constexpr const char* mSql = "SELECT music_id FROM music ORDER BY music_id;";
             if (sqlite3_prepare_v2(db, mSql, -1, &mStmt, nullptr) == SQLITE_OK && mStmt) {
                 while (sqlite3_step(mStmt) == SQLITE_ROW) {
                     musicList.push_back({
