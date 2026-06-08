@@ -8,6 +8,7 @@ All code and resources in this repository are for developer learning and referen
 [![GitHub issues](https://img.shields.io/github/issues/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues) [![GitHub issues closed](https://img.shields.io/github/issues-closed/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/pulls) [![GitHub last commit](https://img.shields.io/github/last-commit/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/commits) 
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify) [![GitHub repo size](https://img.shields.io/github/repo-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify)
 
+📥 **[Jump to Download](#download)**
 
 Secondary development based on the overall framework of [**`Gakuen Idolmaster Localization Plugin`**](https://github.com/chinosk6/gakuen-imas-localify)
 
@@ -43,7 +44,7 @@ Secondary development based on the overall framework of [**`Gakuen Idolmaster Lo
 > If rooting is inconvenient for you, or you're not familiar with patching via LSPatch, you can simply download the patched apk and the plugin below.
 
 - Plugin download: [Release](https://github.com/ChocoLZS/linkura-localify/releases)
-- Game client download (Android / iOS / patched Android): <https://drive.google.com/drive/u/1/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
+- Game client download (Android / iOS / patched Android): <https://drive.google.com/drive/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
 - Patched Android: <https://github.com/ChocoLZS/linkura-localify/releases/tag/patched-apk>
   - patched android is the patched Android game client (plugin pre-integrated).
 

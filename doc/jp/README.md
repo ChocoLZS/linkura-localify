@@ -8,6 +8,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues) [![GitHub issues closed](https://img.shields.io/github/issues-closed/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/pulls) [![GitHub last commit](https://img.shields.io/github/last-commit/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify/commits) 
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify) [![GitHub repo size](https://img.shields.io/github/repo-size/ChocoLZS/linkura-localify)](https://github.com/ChocoLZS/linkura-localify)
 
+📥 **[ダウンロードへ移動](#ダウンロード)**
 
 [**`学園アイドルマスター ローカライゼーションプラグイン`**](https://github.com/chinosk6/gakuen-imas-localify) の全体フレームワークをベースとした二次開発
 
@@ -31,7 +32,7 @@
 > Root 化が難しい場合や、LSPatch でのパッチ作業に不慣れな場合は、下記の patched apk とプラグイン本体を直接ダウンロードしてご利用いただけます。
 
 - プラグインのダウンロード：[Release](https://github.com/ChocoLZS/linkura-localify/releases)
-- ゲーム本体のダウンロード（Android / iOS / patched Android）：<https://drive.google.com/drive/u/1/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
+- ゲーム本体のダウンロード（Android / iOS / patched Android）：<https://drive.google.com/drive/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
 - Patched Android：<https://github.com/ChocoLZS/linkura-localify/releases/tag/patched-apk>
   - patched android はパッチ適用済みの Android ゲーム本体です（プラグイン組み込み済み）。
 
