@@ -26,6 +26,15 @@
 
 > プラグインでさらに面白い機能を発見できます！
 
+# ダウンロード
+
+> Root 化が難しい場合や、LSPatch でのパッチ作業に不慣れな場合は、下記の patched apk とプラグイン本体を直接ダウンロードしてご利用いただけます。
+
+- プラグインのダウンロード：[Release](https://github.com/ChocoLZS/linkura-localify/releases)
+- ゲーム本体のダウンロード（Android / iOS / patched Android）：<https://drive.google.com/drive/u/1/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
+- Patched Android：<https://github.com/ChocoLZS/linkura-localify/releases/tag/patched-apk>
+  - patched android はパッチ適用済みの Android ゲーム本体です（プラグイン組み込み済み）。
+
 # 使用方法
 
 - これはXPosedプラグインです。Root化済みユーザーは [LSPosed](https://github.com/LSPosed/LSPosed) を、Root化していないユーザーは [LSPatch](https://github.com/LSPosed/LSPatch) を使用できます。

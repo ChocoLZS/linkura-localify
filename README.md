@@ -48,6 +48,17 @@ Due to recent news about the discontinuation of this game, I have decided to int
 > 更多有趣的功能可以在插件中发现！
 > More interesting features can be discovered in the plugin!
 
+# Download
+
+> 如果你不方便 Root，或者不熟悉 LSPatch 的打补丁流程，可以直接下载下方的 patched apk 和插件本体使用。
+>
+> If rooting is inconvenient for you, or you're not familiar with patching via LSPatch, you can simply download the patched apk and the plugin below.
+
+- 插件下载 / Plugin download: [Release](https://github.com/ChocoLZS/linkura-localify/releases)
+- 游戏本体下载（Android / iOS / patched Android）/ Game client download: <https://drive.google.com/drive/u/1/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
+- Patched Android: <https://github.com/ChocoLZS/linkura-localify/releases/tag/patched-apk>
+  - patched android 即修补好的安卓游戏本体（已集成插件）/ patched android is the patched Android game client (plugin pre-integrated).
+
 # Usage
 
 - 这是一个 XPosed 插件，已 Root 用户可以使用 [LSPosed](https://github.com/LSPosed/LSPosed)，未 Root 用户可以使用 [LSPatch](https://github.com/LSPosed/LSPatch)。

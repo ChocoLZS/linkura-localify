@@ -38,6 +38,15 @@ Secondary development based on the overall framework of [**`Gakuen Idolmaster Lo
 
 > More interesting features can be discovered in the plugin!
 
+# Download
+
+> If rooting is inconvenient for you, or you're not familiar with patching via LSPatch, you can simply download the patched apk and the plugin below.
+
+- Plugin download: [Release](https://github.com/ChocoLZS/linkura-localify/releases)
+- Game client download (Android / iOS / patched Android): <https://drive.google.com/drive/u/1/folders/1ZadqbvqCFeYddi_a7ahEJvUvW7xSeWIE>
+- Patched Android: <https://github.com/ChocoLZS/linkura-localify/releases/tag/patched-apk>
+  - patched android is the patched Android game client (plugin pre-integrated).
+
 # Usage
 
 - This is an XPosed plugin. Rooted users can use [LSPosed](https://github.com/LSPosed/LSPosed), while non-rooted users can use [LSPatch](https://github.com/LSPosed/LSPatch).
