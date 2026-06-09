@@ -3366,6 +3366,62 @@
     },
     {
       "d_card_datas_id": "00000000-0000-0000-0000-00000000003e",
+      "card_datas_id": 10218034,
+      "card_name": "Oracle Étude",
+      "style_level": 140,
+      "max_style_level": 140,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 7810,
+        "pure": 6050,
+        "cool": 5280,
+        "mental": 580,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 10218032,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 20218030,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 30218030,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1021,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000003f",
       "card_datas_id": 10219014,
       "card_name": "18th Birthday",
       "style_level": 120,
@@ -3421,7 +3477,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000003f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000040",
       "card_datas_id": 10223014,
       "card_name": "オーロラスカイ",
       "style_level": 80,
@@ -3471,7 +3527,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000040",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000041",
       "card_datas_id": 10223024,
       "card_name": "華紺青",
       "style_level": 80,
@@ -3521,7 +3577,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000041",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000042",
       "card_datas_id": 10223034,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -3571,7 +3627,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000042",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000043",
       "card_datas_id": 10223044,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -3621,7 +3677,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000043",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000044",
       "card_datas_id": 10224014,
       "card_name": "Vivid Phrase",
       "style_level": 100,
@@ -3677,7 +3733,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000044",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000045",
       "card_datas_id": 10224024,
       "card_name": "AWOKE",
       "style_level": 100,
@@ -3733,7 +3789,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000045",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000046",
       "card_datas_id": 10224034,
       "card_name": "春色ニューデイズ",
       "style_level": 100,
@@ -3789,7 +3845,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000046",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000047",
       "card_datas_id": 10224044,
       "card_name": "Sparkly Spot",
       "style_level": 100,
@@ -3845,7 +3901,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000047",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000048",
       "card_datas_id": 10224054,
       "card_name": "薫風の調べ",
       "style_level": 100,
@@ -3901,7 +3957,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000048",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000049",
       "card_datas_id": 10224064,
       "card_name": "Rose Garden",
       "style_level": 100,
@@ -3957,7 +4013,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000049",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000004a",
       "card_datas_id": 10224074,
       "card_name": "Tragic Drops",
       "style_level": 100,
@@ -4013,7 +4069,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000004a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000004b",
       "card_datas_id": 10224084,
       "card_name": "雨と紫陽花に唄へば",
       "style_level": 100,
@@ -4069,7 +4125,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000004b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000004c",
       "card_datas_id": 10224094,
       "card_name": "アメアガリストリート",
       "style_level": 100,
@@ -4125,7 +4181,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000004c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000004d",
       "card_datas_id": 10224104,
       "card_name": "Mirage Voyage",
       "style_level": 100,
@@ -4181,7 +4237,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000004d",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000004e",
       "card_datas_id": 10224114,
       "card_name": "SPLASH!!!!",
       "style_level": 100,
@@ -4237,7 +4293,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000004e",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000004f",
       "card_datas_id": 10224124,
       "card_name": "夏めきペイン",
       "style_level": 100,
@@ -4293,7 +4349,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000004f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000050",
       "card_datas_id": 10224134,
       "card_name": "喫茶ハスノソラ",
       "style_level": 100,
@@ -4349,7 +4405,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000050",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000051",
       "card_datas_id": 10224144,
       "card_name": "コットン=ユートピア",
       "style_level": 100,
@@ -4405,7 +4461,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000051",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000052",
       "card_datas_id": 10224154,
       "card_name": "Secret Christmas",
       "style_level": 100,
@@ -4461,7 +4517,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000052",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000053",
       "card_datas_id": 10224164,
       "card_name": "Link to the FUTURE",
       "style_level": 100,
@@ -4517,7 +4573,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000053",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000054",
       "card_datas_id": 10224174,
       "card_name": "Eisritter",
       "style_level": 100,
@@ -4573,7 +4629,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000054",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000055",
       "card_datas_id": 10224184,
       "card_name": "青とシャボン",
       "style_level": 100,
@@ -4629,7 +4685,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000055",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000056",
       "card_datas_id": 10224194,
       "card_name": "節分 -妖-",
       "style_level": 100,
@@ -4685,7 +4741,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000056",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000057",
       "card_datas_id": 10224204,
       "card_name": "365 Days",
       "style_level": 100,
@@ -4741,7 +4797,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000057",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000058",
       "card_datas_id": 10224214,
       "card_name": "PASSION!!!!!!",
       "style_level": 100,
@@ -4797,7 +4853,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000058",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000059",
       "card_datas_id": 10225014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -4853,7 +4909,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000059",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000005a",
       "card_datas_id": 10225024,
       "card_name": "スケイプゴート",
       "style_level": 120,
@@ -4909,7 +4965,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000005a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000005b",
       "card_datas_id": 10225034,
       "card_name": "チェリー♫ピクニック",
       "style_level": 120,
@@ -4965,7 +5021,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000005b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000005c",
       "card_datas_id": 10225044,
       "card_name": "ツキマカセ",
       "style_level": 120,
@@ -5021,7 +5077,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000005c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000005d",
       "card_datas_id": 10225054,
       "card_name": "DEEPNESS",
       "style_level": 120,
@@ -5077,7 +5133,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000005d",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000005e",
       "card_datas_id": 10225064,
       "card_name": "ペンギンアイス",
       "style_level": 120,
@@ -5133,7 +5189,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000005e",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000005f",
       "card_datas_id": 10225074,
       "card_name": "朝顔令嬢",
       "style_level": 120,
@@ -5189,7 +5245,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000005f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000060",
       "card_datas_id": 10225084,
       "card_name": "金魚◎花火",
       "style_level": 120,
@@ -5245,7 +5301,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000060",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000061",
       "card_datas_id": 10225094,
       "card_name": "はじける☆スイカソーダ",
       "style_level": 120,
@@ -5301,7 +5357,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000061",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000062",
       "card_datas_id": 10225104,
       "card_name": "秋色カントリーロード",
       "style_level": 120,
@@ -5357,7 +5413,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000062",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000063",
       "card_datas_id": 10225114,
       "card_name": "Take It Over",
       "style_level": 120,
@@ -5413,7 +5469,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000063",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000064",
       "card_datas_id": 10225124,
       "card_name": "革命の舞踏会",
       "style_level": 120,
@@ -5469,7 +5525,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000064",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000065",
       "card_datas_id": 10225134,
       "card_name": "Trick ＆ Cute",
       "style_level": 120,
@@ -5525,7 +5581,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000065",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000066",
       "card_datas_id": 10225144,
       "card_name": "ツバサ・ラ・リベルテ",
       "style_level": 120,
@@ -5581,7 +5637,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000066",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000067",
       "card_datas_id": 10225154,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -5637,7 +5693,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000067",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000068",
       "card_datas_id": 10225164,
       "card_name": "Colorfulness",
       "style_level": 120,
@@ -5693,7 +5749,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000068",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000069",
       "card_datas_id": 10225174,
       "card_name": "桃節銘記",
       "style_level": 120,
@@ -5749,7 +5805,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000069",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000006a",
       "card_datas_id": 10225184,
       "card_name": "抱きしめる花びら",
       "style_level": 120,
@@ -5805,7 +5861,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000006a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000006b",
       "card_datas_id": 10225194,
       "card_name": "レディバグ",
       "style_level": 120,
@@ -5861,7 +5917,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000006b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000006c",
       "card_datas_id": 10225204,
       "card_name": "Proof",
       "style_level": 120,
@@ -5917,7 +5973,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000006c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000006d",
       "card_datas_id": 10225214,
       "card_name": "福音の銀河へ",
       "style_level": 120,
@@ -5973,7 +6029,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000006d",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000006e",
       "card_datas_id": 10225224,
       "card_name": "バアドケージ",
       "style_level": 120,
@@ -6029,7 +6085,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000006e",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000006f",
       "card_datas_id": 10225234,
       "card_name": "102/R.B.P.",
       "style_level": 120,
@@ -6085,7 +6141,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000006f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000070",
       "card_datas_id": 10225244,
       "card_name": "KEY of Like！",
       "style_level": 120,
@@ -6141,7 +6197,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000070",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000071",
       "card_datas_id": 10225254,
       "card_name": "AURORA FLOWER",
       "style_level": 120,
@@ -6197,7 +6253,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000071",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000072",
       "card_datas_id": 10225264,
       "card_name": "COMPASS",
       "style_level": 120,
@@ -6253,7 +6309,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000072",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000073",
       "card_datas_id": 10225274,
       "card_name": "いつでも、いつまでも",
       "style_level": 120,
@@ -6309,7 +6365,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000073",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000074",
       "card_datas_id": 10227014,
       "card_name": "幸せのリボン",
       "style_level": 140,
@@ -6365,7 +6421,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000074",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000075",
       "card_datas_id": 10227024,
       "card_name": "Sparkly Spot/102",
       "style_level": 140,
@@ -6421,7 +6477,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000075",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000076",
       "card_datas_id": 10227034,
       "card_name": "アイシイ",
       "style_level": 140,
@@ -6477,7 +6533,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000076",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000077",
       "card_datas_id": 10228014,
       "card_name": "Prism Echo",
       "style_level": 140,
@@ -6533,7 +6589,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000077",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000078",
       "card_datas_id": 10228024,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -6589,7 +6645,63 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000078",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000079",
+      "card_datas_id": 10228034,
+      "card_name": "Oracle Étude",
+      "style_level": 140,
+      "max_style_level": 140,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 6600,
+        "pure": 4400,
+        "cool": 8030,
+        "mental": 590,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 10228032,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 20228030,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 30228030,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1022,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000007a",
       "card_datas_id": 10229014,
       "card_name": "18th Birthday",
       "style_level": 120,
@@ -6645,7 +6757,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000079",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000007b",
       "card_datas_id": 10233014,
       "card_name": "オーロラスカイ",
       "style_level": 80,
@@ -6695,7 +6807,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000007a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000007c",
       "card_datas_id": 10233024,
       "card_name": "華紺青",
       "style_level": 80,
@@ -6745,7 +6857,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000007b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000007d",
       "card_datas_id": 10233034,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -6795,7 +6907,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000007c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000007e",
       "card_datas_id": 10233044,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -6845,7 +6957,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000007d",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000007f",
       "card_datas_id": 10234014,
       "card_name": "M's One Day",
       "style_level": 100,
@@ -6901,7 +7013,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000007e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000080",
       "card_datas_id": 10234024,
       "card_name": "@いっつぁどりーみんわーるど！",
       "style_level": 100,
@@ -6957,7 +7069,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000007f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000081",
       "card_datas_id": 10234034,
       "card_name": "世界中を夢中に",
       "style_level": 100,
@@ -7013,7 +7125,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000080",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000082",
       "card_datas_id": 10234044,
       "card_name": "yours ever",
       "style_level": 100,
@@ -7069,7 +7181,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000081",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000083",
       "card_datas_id": 10234054,
       "card_name": "ゆのくにガールズ！",
       "style_level": 100,
@@ -7125,7 +7237,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000082",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000084",
       "card_datas_id": 10234064,
       "card_name": "宇宙演舞☆うさぴょん",
       "style_level": 100,
@@ -7181,7 +7293,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000083",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000085",
       "card_datas_id": 10234074,
       "card_name": "Trick ＆ Cute",
       "style_level": 100,
@@ -7237,7 +7349,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000084",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000086",
       "card_datas_id": 10234084,
       "card_name": "コットン=ユートピア",
       "style_level": 100,
@@ -7293,7 +7405,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000085",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000087",
       "card_datas_id": 10234094,
       "card_name": "プチパティシエール",
       "style_level": 100,
@@ -7349,7 +7461,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000086",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000088",
       "card_datas_id": 10234104,
       "card_name": "Link to the FUTURE",
       "style_level": 100,
@@ -7405,7 +7517,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000087",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000089",
       "card_datas_id": 10234114,
       "card_name": "ミルク",
       "style_level": 100,
@@ -7461,7 +7573,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000088",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000008a",
       "card_datas_id": 10234124,
       "card_name": "節分 -艶-",
       "style_level": 100,
@@ -7517,7 +7629,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000089",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000008b",
       "card_datas_id": 10234134,
       "card_name": "H.S.C.T.☆",
       "style_level": 100,
@@ -7573,7 +7685,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000008a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000008c",
       "card_datas_id": 10234144,
       "card_name": "AURORA FLOWER",
       "style_level": 100,
@@ -7629,7 +7741,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000008b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000008d",
       "card_datas_id": 10235014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -7685,7 +7797,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000008c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000008e",
       "card_datas_id": 10235024,
       "card_name": "夏めきペイン",
       "style_level": 120,
@@ -7741,7 +7853,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000008d",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000008f",
       "card_datas_id": 10235034,
       "card_name": "アイデンティティ",
       "style_level": 120,
@@ -7797,7 +7909,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000008e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000090",
       "card_datas_id": 10235044,
       "card_name": "約束の舞踏会",
       "style_level": 120,
@@ -7853,7 +7965,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000008f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000091",
       "card_datas_id": 10235054,
       "card_name": "Au Bord du Lac",
       "style_level": 120,
@@ -7909,7 +8021,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000090",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000092",
       "card_datas_id": 10235064,
       "card_name": "喫茶ハスノソラ",
       "style_level": 120,
@@ -7965,7 +8077,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000091",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000093",
       "card_datas_id": 10235074,
       "card_name": "ツバサ・ラ・リベルテ",
       "style_level": 120,
@@ -8021,7 +8133,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000092",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000094",
       "card_datas_id": 10235084,
       "card_name": "冬のおくりもの",
       "style_level": 120,
@@ -8077,7 +8189,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000093",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000095",
       "card_datas_id": 10235094,
       "card_name": "Secret Christmas",
       "style_level": 120,
@@ -8133,7 +8245,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000094",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000096",
       "card_datas_id": 10235104,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -8189,7 +8301,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000095",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000097",
       "card_datas_id": 10235114,
       "card_name": "ハクチューアラモード",
       "style_level": 120,
@@ -8245,7 +8357,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000096",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000098",
       "card_datas_id": 10235124,
       "card_name": "ハッピー至上主義！",
       "style_level": 120,
@@ -8301,7 +8413,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000097",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000099",
       "card_datas_id": 10235134,
       "card_name": "おしえて♡ティーチャー",
       "style_level": 120,
@@ -8357,7 +8469,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000098",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000009a",
       "card_datas_id": 10235144,
       "card_name": "抱きしめる花びら",
       "style_level": 120,
@@ -8413,7 +8525,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000099",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000009b",
       "card_datas_id": 10235154,
       "card_name": "365 Days",
       "style_level": 120,
@@ -8469,7 +8581,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000009a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000009c",
       "card_datas_id": 10235164,
       "card_name": "みらくりえーしょん",
       "style_level": 120,
@@ -8525,7 +8637,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000009b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000009d",
       "card_datas_id": 10235174,
       "card_name": "PASSION!!!!!!",
       "style_level": 120,
@@ -8581,7 +8693,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000009c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000009e",
       "card_datas_id": 10235184,
       "card_name": "DEEPNESS",
       "style_level": 120,
@@ -8637,7 +8749,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000009d",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000009f",
       "card_datas_id": 10235194,
       "card_name": "ファンファーレ！！！",
       "style_level": 120,
@@ -8693,7 +8805,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000009e",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a0",
       "card_datas_id": 10235204,
       "card_name": "久遠の銀河へ",
       "style_level": 120,
@@ -8749,7 +8861,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000009f",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a1",
       "card_datas_id": 10235214,
       "card_name": "ジョーショーキリュー",
       "style_level": 120,
@@ -8805,7 +8917,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a2",
       "card_datas_id": 10235224,
       "card_name": "KEY of Like！",
       "style_level": 120,
@@ -8861,7 +8973,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a3",
       "card_datas_id": 10235234,
       "card_name": "全方位キュン♡",
       "style_level": 120,
@@ -8917,7 +9029,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a4",
       "card_datas_id": 10235244,
       "card_name": "いつでも、いつまでも",
       "style_level": 120,
@@ -8973,7 +9085,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a5",
       "card_datas_id": 10237014,
       "card_name": "やっぱ天使！",
       "style_level": 140,
@@ -9029,7 +9141,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a6",
       "card_datas_id": 10237024,
       "card_name": "On your mark/102",
       "style_level": 140,
@@ -9085,7 +9197,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a7",
       "card_datas_id": 10237034,
       "card_name": "トモダチになれる場所",
       "style_level": 140,
@@ -9141,7 +9253,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a8",
       "card_datas_id": 10238014,
       "card_name": "Prism Echo",
       "style_level": 140,
@@ -9197,7 +9309,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a9",
       "card_datas_id": 10238024,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -9253,7 +9365,63 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000aa",
+      "card_datas_id": 10238034,
+      "card_name": "Oracle Étude",
+      "style_level": 140,
+      "max_style_level": 140,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 6380,
+        "pure": 4950,
+        "cool": 7700,
+        "mental": 590,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 10238032,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 20238030,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 30238030,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1023,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ab",
       "card_datas_id": 10239014,
       "card_name": "18th Birthday",
       "style_level": 120,
@@ -9309,7 +9477,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000a9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ac",
       "card_datas_id": 10305014,
       "card_name": "蓮ノ空女学院スクールアイドルクラブ103期生",
       "style_level": 120,
@@ -9355,7 +9523,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000aa",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ad",
       "card_datas_id": 10313014,
       "card_name": "オーロラスカイ",
       "style_level": 80,
@@ -9405,7 +9573,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ab",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ae",
       "card_datas_id": 10313024,
       "card_name": "華紺青",
       "style_level": 80,
@@ -9455,7 +9623,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ac",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000af",
       "card_datas_id": 10313034,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -9505,7 +9673,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ad",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b0",
       "card_datas_id": 10313044,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -9555,7 +9723,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ae",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b1",
       "card_datas_id": 10313054,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -9605,7 +9773,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000af",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b2",
       "card_datas_id": 10313064,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -9655,7 +9823,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b3",
       "card_datas_id": 10314014,
       "card_name": "水彩世界",
       "style_level": 100,
@@ -9711,7 +9879,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b4",
       "card_datas_id": 10314024,
       "card_name": "Reflection in the mirror",
       "style_level": 100,
@@ -9767,7 +9935,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b5",
       "card_datas_id": 10314034,
       "card_name": "謳歌爛漫",
       "style_level": 100,
@@ -9823,7 +9991,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b6",
       "card_datas_id": 10314044,
       "card_name": "チェリー♫ピクニック",
       "style_level": 100,
@@ -9879,7 +10047,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b7",
       "card_datas_id": 10314054,
       "card_name": "アメアガリストリート",
       "style_level": 100,
@@ -9935,7 +10103,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b8",
       "card_datas_id": 10314064,
       "card_name": "雨と紫陽花に唄へば",
       "style_level": 100,
@@ -9991,7 +10159,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b9",
       "card_datas_id": 10314074,
       "card_name": "DEEPNESS",
       "style_level": 100,
@@ -10047,7 +10215,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ba",
       "card_datas_id": 10314084,
       "card_name": "金魚◎花火",
       "style_level": 100,
@@ -10103,7 +10271,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bb",
       "card_datas_id": 10314094,
       "card_name": "朝顔令嬢",
       "style_level": 100,
@@ -10159,7 +10327,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000b9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bc",
       "card_datas_id": 10314104,
       "card_name": "はじける☆オレンジソーダ",
       "style_level": 100,
@@ -10215,7 +10383,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ba",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bd",
       "card_datas_id": 10314114,
       "card_name": "ドルフィン〰ビーチ",
       "style_level": 100,
@@ -10271,7 +10439,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000be",
       "card_datas_id": 10314124,
       "card_name": "素顔のピクセル",
       "style_level": 100,
@@ -10327,7 +10495,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bf",
       "card_datas_id": 10314134,
       "card_name": "宇宙演舞☆うさぴょん",
       "style_level": 100,
@@ -10383,7 +10551,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bd",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c0",
       "card_datas_id": 10314144,
       "card_name": "ツバサ・ラ・リベルテ",
       "style_level": 100,
@@ -10439,7 +10607,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000be",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c1",
       "card_datas_id": 10314154,
       "card_name": "冬のおくりもの",
       "style_level": 100,
@@ -10495,7 +10663,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000bf",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c2",
       "card_datas_id": 10314164,
       "card_name": "迎春 -食-",
       "style_level": 100,
@@ -10551,7 +10719,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c3",
       "card_datas_id": 10314174,
       "card_name": "ハッピー至上主義！",
       "style_level": 100,
@@ -10607,7 +10775,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c4",
       "card_datas_id": 10314184,
       "card_name": "桃節銘記",
       "style_level": 100,
@@ -10663,7 +10831,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c5",
       "card_datas_id": 10314194,
       "card_name": "抱きしめる花びら",
       "style_level": 100,
@@ -10719,7 +10887,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c6",
       "card_datas_id": 10314204,
       "card_name": "織姫草紙",
       "style_level": 100,
@@ -10775,7 +10943,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c7",
       "card_datas_id": 10314214,
       "card_name": "紅葉乃舞姫",
       "style_level": 100,
@@ -10831,7 +10999,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c8",
       "card_datas_id": 10314224,
       "card_name": "四蓮琴之武",
       "style_level": 100,
@@ -10887,7 +11055,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c9",
       "card_datas_id": 10315014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -10943,7 +11111,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ca",
       "card_datas_id": 10315024,
       "card_name": "春色ニューデイズ",
       "style_level": 120,
@@ -10999,7 +11167,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cb",
       "card_datas_id": 10315034,
       "card_name": "薫風の調べ",
       "style_level": 120,
@@ -11055,7 +11223,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000c9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cc",
       "card_datas_id": 10315044,
       "card_name": "Rose Garden",
       "style_level": 120,
@@ -11111,7 +11279,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ca",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cd",
       "card_datas_id": 10315054,
       "card_name": "Holiday∞Holiday",
       "style_level": 120,
@@ -11167,7 +11335,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ce",
       "card_datas_id": 10315064,
       "card_name": "フォーチュンムービー",
       "style_level": 120,
@@ -11223,7 +11391,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cf",
       "card_datas_id": 10315074,
       "card_name": "ペンギンアイス",
       "style_level": 120,
@@ -11279,7 +11447,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cd",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d0",
       "card_datas_id": 10315084,
       "card_name": "眩耀夜行",
       "style_level": 120,
@@ -11335,7 +11503,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ce",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d1",
       "card_datas_id": 10315094,
       "card_name": "SPLASH!!!!",
       "style_level": 120,
@@ -11391,7 +11559,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000cf",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d2",
       "card_datas_id": 10315104,
       "card_name": "夏めきペイン",
       "style_level": 120,
@@ -11447,7 +11615,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d3",
       "card_datas_id": 10315114,
       "card_name": "ゆのくにガールズ！",
       "style_level": 120,
@@ -11503,7 +11671,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d4",
       "card_datas_id": 10315124,
       "card_name": "Trick ＆ Cute",
       "style_level": 120,
@@ -11559,7 +11727,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d5",
       "card_datas_id": 10315134,
       "card_name": "喫茶ハスノソラ",
       "style_level": 120,
@@ -11615,7 +11783,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d6",
       "card_datas_id": 10315144,
       "card_name": "コットン=ユートピア",
       "style_level": 120,
@@ -11671,7 +11839,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d7",
       "card_datas_id": 10315154,
       "card_name": "Link to the FUTURE",
       "style_level": 120,
@@ -11727,7 +11895,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d8",
       "card_datas_id": 10315164,
       "card_name": "Special Thanks",
       "style_level": 120,
@@ -11783,7 +11951,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d9",
       "card_datas_id": 10315174,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -11839,7 +12007,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000da",
       "card_datas_id": 10315184,
       "card_name": "lucky train!",
       "style_level": 120,
@@ -11895,7 +12063,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000db",
       "card_datas_id": 10315194,
       "card_name": "軌跡の舞踏会",
       "style_level": 120,
@@ -11951,7 +12119,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000d9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000dc",
       "card_datas_id": 10315204,
       "card_name": "春風ブランコ",
       "style_level": 120,
@@ -12007,7 +12175,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000da",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000dd",
       "card_datas_id": 10315214,
       "card_name": "H.S.C.T.☆",
       "style_level": 120,
@@ -12063,7 +12231,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000db",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000de",
       "card_datas_id": 10315224,
       "card_name": "アオクハルカ",
       "style_level": 120,
@@ -12119,7 +12287,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000dc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000df",
       "card_datas_id": 10315234,
       "card_name": "月夜見海月",
       "style_level": 120,
@@ -12175,7 +12343,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000dd",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e0",
       "card_datas_id": 10315244,
       "card_name": "ハナムスビ",
       "style_level": 120,
@@ -12231,7 +12399,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000de",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e1",
       "card_datas_id": 10315254,
       "card_name": "103/ASTERISM",
       "style_level": 120,
@@ -12287,7 +12455,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000df",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e2",
       "card_datas_id": 10315264,
       "card_name": "AURORA FLOWER",
       "style_level": 120,
@@ -12343,7 +12511,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e3",
       "card_datas_id": 10315274,
       "card_name": "ユメワズライ",
       "style_level": 120,
@@ -12399,7 +12567,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e4",
       "card_datas_id": 10315284,
       "card_name": "Celebration!",
       "style_level": 120,
@@ -12455,7 +12623,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e5",
       "card_datas_id": 10315294,
       "card_name": "Her-bath-rium",
       "style_level": 120,
@@ -12511,7 +12679,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e6",
       "card_datas_id": 10315304,
       "card_name": "アイドゥーミー！",
       "style_level": 120,
@@ -12567,7 +12735,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e7",
       "card_datas_id": 10315314,
       "card_name": "フルーツパンチ",
       "style_level": 120,
@@ -12623,7 +12791,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e8",
       "card_datas_id": 10315324,
       "card_name": "可惜夜花火",
       "style_level": 120,
@@ -12679,7 +12847,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e9",
       "card_datas_id": 10315334,
       "card_name": "想造の地平から",
       "style_level": 120,
@@ -12735,7 +12903,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ea",
       "card_datas_id": 10315344,
       "card_name": "乙女詞華集",
       "style_level": 120,
@@ -12791,7 +12959,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000eb",
       "card_datas_id": 10315354,
       "card_name": "Poupée en Lotus",
       "style_level": 120,
@@ -12847,7 +13015,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000e9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ec",
       "card_datas_id": 10315364,
       "card_name": "雪舞う空と二秒の永遠",
       "style_level": 120,
@@ -12903,7 +13071,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ea",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ed",
       "card_datas_id": 10315374,
       "card_name": "Sayo-Shigure",
       "style_level": 120,
@@ -12959,7 +13127,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000eb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ee",
       "card_datas_id": 10315384,
       "card_name": "不思議と君とライブラリー",
       "style_level": 120,
@@ -13015,7 +13183,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ec",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ef",
       "card_datas_id": 10315394,
       "card_name": "今、過去、未来の三原色",
       "style_level": 120,
@@ -13071,7 +13239,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ed",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f0",
       "card_datas_id": 10318014,
       "card_name": "Prism Echo",
       "style_level": 140,
@@ -13127,7 +13295,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ee",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f1",
       "card_datas_id": 10318024,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -13183,7 +13351,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ef",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f2",
       "card_datas_id": 10318034,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -13239,7 +13407,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f3",
       "card_datas_id": 10319014,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -13295,7 +13463,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f4",
       "card_datas_id": 10319024,
       "card_name": "18th Birthday",
       "style_level": 120,
@@ -13351,7 +13519,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f5",
       "card_datas_id": 10323014,
       "card_name": "オーロラスカイ",
       "style_level": 80,
@@ -13401,7 +13569,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f6",
       "card_datas_id": 10323024,
       "card_name": "華紺青",
       "style_level": 80,
@@ -13451,7 +13619,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f7",
       "card_datas_id": 10323034,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -13501,7 +13669,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f8",
       "card_datas_id": 10323044,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -13551,7 +13719,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f9",
       "card_datas_id": 10323054,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -13601,7 +13769,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fa",
       "card_datas_id": 10323064,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -13651,7 +13819,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fb",
       "card_datas_id": 10324014,
       "card_name": "AWOKE",
       "style_level": 100,
@@ -13707,7 +13875,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000f9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fc",
       "card_datas_id": 10324024,
       "card_name": "Sparkly Spot",
       "style_level": 100,
@@ -13763,7 +13931,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fa",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fd",
       "card_datas_id": 10324034,
       "card_name": "春色ニューデイズ",
       "style_level": 100,
@@ -13819,7 +13987,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fe",
       "card_datas_id": 10324044,
       "card_name": "チェリー♫ピクニック",
       "style_level": 100,
@@ -13875,7 +14043,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ff",
       "card_datas_id": 10324054,
       "card_name": "Tragic Drops",
       "style_level": 100,
@@ -13931,7 +14099,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fd",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000100",
       "card_datas_id": 10324064,
       "card_name": "アメアガリストリート",
       "style_level": 100,
@@ -13987,7 +14155,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000fe",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000101",
       "card_datas_id": 10324074,
       "card_name": "DEEPNESS",
       "style_level": 100,
@@ -14043,7 +14211,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000000ff",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000102",
       "card_datas_id": 10324084,
       "card_name": "ペンギンアイス",
       "style_level": 100,
@@ -14099,7 +14267,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000100",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000103",
       "card_datas_id": 10324094,
       "card_name": "金魚◎花火",
       "style_level": 100,
@@ -14155,7 +14323,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000101",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000104",
       "card_datas_id": 10324104,
       "card_name": "はじける☆ブルーソーダ",
       "style_level": 100,
@@ -14211,7 +14379,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000102",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000105",
       "card_datas_id": 10324114,
       "card_name": "夏めきペイン",
       "style_level": 100,
@@ -14267,7 +14435,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000103",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000106",
       "card_datas_id": 10324124,
       "card_name": "Take It Over",
       "style_level": 100,
@@ -14323,7 +14491,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000104",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000107",
       "card_datas_id": 10324134,
       "card_name": "Trick ＆ Cute",
       "style_level": 100,
@@ -14379,7 +14547,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000105",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000108",
       "card_datas_id": 10324144,
       "card_name": "ツバサ・ラ・リベルテ",
       "style_level": 100,
@@ -14435,7 +14603,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000106",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000109",
       "card_datas_id": 10324154,
       "card_name": "迎春 -舞-",
       "style_level": 100,
@@ -14491,7 +14659,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000107",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000010a",
       "card_datas_id": 10324164,
       "card_name": "Eisprinzessin",
       "style_level": 100,
@@ -14547,7 +14715,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000108",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000010b",
       "card_datas_id": 10324174,
       "card_name": "Pleasure Feather",
       "style_level": 100,
@@ -14603,7 +14771,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000109",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000010c",
       "card_datas_id": 10324184,
       "card_name": "桃節銘記",
       "style_level": 100,
@@ -14659,7 +14827,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000010a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000010d",
       "card_datas_id": 10324194,
       "card_name": "抱きしめる花びら",
       "style_level": 100,
@@ -14715,7 +14883,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000010b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000010e",
       "card_datas_id": 10324204,
       "card_name": "春風ブランコ",
       "style_level": 100,
@@ -14771,7 +14939,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000010c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000010f",
       "card_datas_id": 10324214,
       "card_name": "魔法少女リズミックハート",
       "style_level": 100,
@@ -14827,7 +14995,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000010d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000110",
       "card_datas_id": 10324224,
       "card_name": "COMPASS",
       "style_level": 100,
@@ -14883,7 +15051,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000010e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000111",
       "card_datas_id": 10324234,
       "card_name": "ブルウモーメント",
       "style_level": 100,
@@ -14939,7 +15107,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000010f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000112",
       "card_datas_id": 10324244,
       "card_name": "四蓮琴之虎",
       "style_level": 100,
@@ -14995,7 +15163,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000110",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000113",
       "card_datas_id": 10325014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -15051,7 +15219,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000111",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000114",
       "card_datas_id": 10325024,
       "card_name": "スケイプゴート",
       "style_level": 120,
@@ -15107,7 +15275,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000112",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000115",
       "card_datas_id": 10325034,
       "card_name": "薫風の調べ",
       "style_level": 120,
@@ -15163,7 +15331,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000113",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000116",
       "card_datas_id": 10325044,
       "card_name": "Rose Garden",
       "style_level": 120,
@@ -15219,7 +15387,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000114",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000117",
       "card_datas_id": 10325054,
       "card_name": "ツキマカセ",
       "style_level": 120,
@@ -15275,7 +15443,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000115",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000118",
       "card_datas_id": 10325064,
       "card_name": "雨と紫陽花に唄へば",
       "style_level": 120,
@@ -15331,7 +15499,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000116",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000119",
       "card_datas_id": 10325074,
       "card_name": "朝顔令嬢",
       "style_level": 120,
@@ -15387,7 +15555,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000117",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000011a",
       "card_datas_id": 10325084,
       "card_name": "Mirage Voyage",
       "style_level": 120,
@@ -15443,7 +15611,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000118",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000011b",
       "card_datas_id": 10325094,
       "card_name": "ドルフィン〰ビーチ",
       "style_level": 120,
@@ -15499,7 +15667,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000119",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000011c",
       "card_datas_id": 10325104,
       "card_name": "SPLASH!!!!",
       "style_level": 120,
@@ -15555,7 +15723,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000011a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000011d",
       "card_datas_id": 10325114,
       "card_name": "ゆのくにガールズ！",
       "style_level": 120,
@@ -15611,7 +15779,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000011b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000011e",
       "card_datas_id": 10325124,
       "card_name": "宇宙警察★うさぴょん",
       "style_level": 120,
@@ -15667,7 +15835,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000011c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000011f",
       "card_datas_id": 10325134,
       "card_name": "喫茶ハスノソラ",
       "style_level": 120,
@@ -15723,7 +15891,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000011d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000120",
       "card_datas_id": 10325144,
       "card_name": "Secret Christmas",
       "style_level": 120,
@@ -15779,7 +15947,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000011e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000121",
       "card_datas_id": 10325154,
       "card_name": "Link to the FUTURE",
       "style_level": 120,
@@ -15835,7 +16003,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000011f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000122",
       "card_datas_id": 10325164,
       "card_name": "青とシャボン",
       "style_level": 120,
@@ -15891,7 +16059,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000120",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000123",
       "card_datas_id": 10325174,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -15947,7 +16115,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000121",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000124",
       "card_datas_id": 10325184,
       "card_name": "真実の舞踏会",
       "style_level": 120,
@@ -16003,7 +16171,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000122",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000125",
       "card_datas_id": 10325194,
       "card_name": "レディバグ",
       "style_level": 120,
@@ -16059,7 +16227,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000123",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000126",
       "card_datas_id": 10325204,
       "card_name": "織姫草紙",
       "style_level": 120,
@@ -16115,7 +16283,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000124",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000127",
       "card_datas_id": 10325214,
       "card_name": "Proof",
       "style_level": 120,
@@ -16171,7 +16339,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000125",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000128",
       "card_datas_id": 10325224,
       "card_name": "紅葉乃舞姫",
       "style_level": 120,
@@ -16227,7 +16395,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000126",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000129",
       "card_datas_id": 10325234,
       "card_name": "バアドケージ",
       "style_level": 120,
@@ -16283,7 +16451,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000127",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000012a",
       "card_datas_id": 10325244,
       "card_name": "聖夜譚",
       "style_level": 120,
@@ -16339,7 +16507,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000128",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000012b",
       "card_datas_id": 10325254,
       "card_name": "AURORA FLOWER",
       "style_level": 120,
@@ -16395,7 +16563,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000129",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000012c",
       "card_datas_id": 10325264,
       "card_name": "Her-bath-rium",
       "style_level": 120,
@@ -16451,7 +16619,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000012a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000012d",
       "card_datas_id": 10325274,
       "card_name": "アンペア",
       "style_level": 120,
@@ -16507,7 +16675,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000012b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000012e",
       "card_datas_id": 10325284,
       "card_name": "アイドゥーミー！",
       "style_level": 120,
@@ -16563,7 +16731,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000012c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000012f",
       "card_datas_id": 10325294,
       "card_name": "太陽であれ！",
       "style_level": 120,
@@ -16619,7 +16787,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000012d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000130",
       "card_datas_id": 10325304,
       "card_name": "醒悟の地平から",
       "style_level": 120,
@@ -16675,7 +16843,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000012e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000131",
       "card_datas_id": 10325314,
       "card_name": "はじまりの羽音",
       "style_level": 120,
@@ -16731,7 +16899,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000012f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000132",
       "card_datas_id": 10325324,
       "card_name": "ガランドFlash",
       "style_level": 120,
@@ -16787,7 +16955,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000130",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000133",
       "card_datas_id": 10325334,
       "card_name": "雪舞う空と二秒の永遠",
       "style_level": 120,
@@ -16843,7 +17011,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000131",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000134",
       "card_datas_id": 10325344,
       "card_name": "リブウト",
       "style_level": 120,
@@ -16899,7 +17067,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000132",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000135",
       "card_datas_id": 10325354,
       "card_name": "拝啓、未来の君へ",
       "style_level": 120,
@@ -16955,7 +17123,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000133",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000136",
       "card_datas_id": 10325364,
       "card_name": "アイシイ",
       "style_level": 120,
@@ -17011,7 +17179,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000134",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000137",
       "card_datas_id": 10325374,
       "card_name": "今、過去、未来の三原色",
       "style_level": 120,
@@ -17067,7 +17235,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000135",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000138",
       "card_datas_id": 10328014,
       "card_name": "Prism Echo",
       "style_level": 140,
@@ -17123,7 +17291,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000136",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000139",
       "card_datas_id": 10328024,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -17179,7 +17347,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000137",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000013a",
       "card_datas_id": 10328034,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -17235,7 +17403,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000138",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000013b",
       "card_datas_id": 10329014,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -17291,7 +17459,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000139",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000013c",
       "card_datas_id": 10329024,
       "card_name": "18th Birthday",
       "style_level": 120,
@@ -17347,7 +17515,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000013a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000013d",
       "card_datas_id": 10333014,
       "card_name": "オーロラスカイ",
       "style_level": 80,
@@ -17397,7 +17565,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000013b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000013e",
       "card_datas_id": 10333024,
       "card_name": "華紺青",
       "style_level": 80,
@@ -17447,7 +17615,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000013c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000013f",
       "card_datas_id": 10333034,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -17497,7 +17665,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000013d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000140",
       "card_datas_id": 10333044,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -17547,7 +17715,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000013e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000141",
       "card_datas_id": 10333054,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -17597,7 +17765,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000013f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000142",
       "card_datas_id": 10333064,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -17647,7 +17815,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000140",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000143",
       "card_datas_id": 10334014,
       "card_name": "R's One Day",
       "style_level": 100,
@@ -17703,7 +17871,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000141",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000144",
       "card_datas_id": 10334024,
       "card_name": "@いっつぁどりーみんわーるど！",
       "style_level": 100,
@@ -17759,7 +17927,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000142",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000145",
       "card_datas_id": 10334034,
       "card_name": "にゅーかまー！",
       "style_level": 100,
@@ -17815,7 +17983,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000143",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000146",
       "card_datas_id": 10334044,
       "card_name": "世界中を夢中に",
       "style_level": 100,
@@ -17871,7 +18039,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000144",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000147",
       "card_datas_id": 10334054,
       "card_name": "ゆのくにガールズ！",
       "style_level": 100,
@@ -17927,7 +18095,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000145",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000148",
       "card_datas_id": 10334064,
       "card_name": "Au Bord du Lac",
       "style_level": 100,
@@ -17983,7 +18151,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000146",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000149",
       "card_datas_id": 10334074,
       "card_name": "喫茶ハスノソラ",
       "style_level": 100,
@@ -18039,7 +18207,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000147",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000014a",
       "card_datas_id": 10334084,
       "card_name": "ツバサ・ラ・リベルテ",
       "style_level": 100,
@@ -18095,7 +18263,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000148",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000014b",
       "card_datas_id": 10334094,
       "card_name": "冬のおくりもの",
       "style_level": 100,
@@ -18151,7 +18319,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000149",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000014c",
       "card_datas_id": 10334104,
       "card_name": "Secret Christmas",
       "style_level": 100,
@@ -18207,7 +18375,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000014a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000014d",
       "card_datas_id": 10334114,
       "card_name": "迎春 -楽-",
       "style_level": 100,
@@ -18263,7 +18431,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000014b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000014e",
       "card_datas_id": 10334124,
       "card_name": "抱きしめる花びら",
       "style_level": 100,
@@ -18319,7 +18487,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000014c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000014f",
       "card_datas_id": 10334134,
       "card_name": "春風ブランコ",
       "style_level": 100,
@@ -18375,7 +18543,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000014d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000150",
       "card_datas_id": 10334144,
       "card_name": "全方位キュン♡",
       "style_level": 100,
@@ -18431,7 +18599,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000014e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000151",
       "card_datas_id": 10334154,
       "card_name": "Her-bath-rium",
       "style_level": 100,
@@ -18487,7 +18655,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000014f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000152",
       "card_datas_id": 10334164,
       "card_name": "蒼のツバメ",
       "style_level": 100,
@@ -18543,7 +18711,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000150",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000153",
       "card_datas_id": 10334174,
       "card_name": "拝啓、未来の君へ",
       "style_level": 100,
@@ -18599,7 +18767,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000151",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000154",
       "card_datas_id": 10335014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -18655,7 +18823,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000152",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000155",
       "card_datas_id": 10335024,
       "card_name": "夏めきペイン",
       "style_level": 120,
@@ -18711,7 +18879,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000153",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000156",
       "card_datas_id": 10335034,
       "card_name": "yours ever",
       "style_level": 120,
@@ -18767,7 +18935,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000154",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000157",
       "card_datas_id": 10335044,
       "card_name": "アイデンティティ",
       "style_level": 120,
@@ -18823,7 +18991,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000155",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000158",
       "card_datas_id": 10335054,
       "card_name": "宇宙警察★うさぴょん",
       "style_level": 120,
@@ -18879,7 +19047,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000156",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000159",
       "card_datas_id": 10335064,
       "card_name": "Trick ＆ Cute",
       "style_level": 120,
@@ -18935,7 +19103,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000157",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000015a",
       "card_datas_id": 10335074,
       "card_name": "コットン=ユートピア",
       "style_level": 120,
@@ -18991,7 +19159,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000158",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000015b",
       "card_datas_id": 10335084,
       "card_name": "プチパティシエール",
       "style_level": 120,
@@ -19047,7 +19215,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000159",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000015c",
       "card_datas_id": 10335094,
       "card_name": "Link to the FUTURE",
       "style_level": 120,
@@ -19103,7 +19271,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000015a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000015d",
       "card_datas_id": 10335104,
       "card_name": "ハクチューアラモード",
       "style_level": 120,
@@ -19159,7 +19327,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000015b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000015e",
       "card_datas_id": 10335114,
       "card_name": "ミルク",
       "style_level": 120,
@@ -19215,7 +19383,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000015c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000015f",
       "card_datas_id": 10335124,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -19271,7 +19439,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000015d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000160",
       "card_datas_id": 10335134,
       "card_name": "Colorfulness",
       "style_level": 120,
@@ -19327,7 +19495,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000015e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000161",
       "card_datas_id": 10335144,
       "card_name": "悠久の舞踏会",
       "style_level": 120,
@@ -19383,7 +19551,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000015f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000162",
       "card_datas_id": 10335154,
       "card_name": "みらくりえーしょん",
       "style_level": 120,
@@ -19439,7 +19607,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000160",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000163",
       "card_datas_id": 10335164,
       "card_name": "織姫草紙",
       "style_level": 120,
@@ -19495,7 +19663,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000161",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000164",
       "card_datas_id": 10335174,
       "card_name": "DEEPNESS",
       "style_level": 120,
@@ -19551,7 +19719,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000162",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000165",
       "card_datas_id": 10335184,
       "card_name": "ファンファーレ！！！",
       "style_level": 120,
@@ -19607,7 +19775,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000163",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000166",
       "card_datas_id": 10335194,
       "card_name": "紅葉乃舞姫",
       "style_level": 120,
@@ -19663,7 +19831,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000164",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000167",
       "card_datas_id": 10335204,
       "card_name": "ジョーショーキリュー",
       "style_level": 120,
@@ -19719,7 +19887,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000165",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000168",
       "card_datas_id": 10335214,
       "card_name": "聖夜譚",
       "style_level": 120,
@@ -19775,7 +19943,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000166",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000169",
       "card_datas_id": 10335224,
       "card_name": "AURORA FLOWER",
       "style_level": 120,
@@ -19831,7 +19999,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000167",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000016a",
       "card_datas_id": 10335234,
       "card_name": "WAWO!",
       "style_level": 120,
@@ -19887,7 +20055,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000168",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000016b",
       "card_datas_id": 10335244,
       "card_name": "アイドゥーミー！",
       "style_level": 120,
@@ -19943,7 +20111,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000169",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000016c",
       "card_datas_id": 10335254,
       "card_name": "Very! Very! COCO夏っ",
       "style_level": 120,
@@ -19999,7 +20167,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000016a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000016d",
       "card_datas_id": 10335264,
       "card_name": "ニャオシグニャル",
       "style_level": 120,
@@ -20055,7 +20223,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000016b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000016e",
       "card_datas_id": 10335274,
       "card_name": "一生に夢が咲くように",
       "style_level": 120,
@@ -20111,7 +20279,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000016c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000016f",
       "card_datas_id": 10335284,
       "card_name": "眺望の地平から",
       "style_level": 120,
@@ -20167,7 +20335,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000016d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000170",
       "card_datas_id": 10335294,
       "card_name": "バイタルサイン",
       "style_level": 120,
@@ -20223,7 +20391,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000016e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000171",
       "card_datas_id": 10335304,
       "card_name": "Poupée en Lotus",
       "style_level": 120,
@@ -20279,7 +20447,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000016f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000172",
       "card_datas_id": 10335314,
       "card_name": "Hip, hip, hooray!",
       "style_level": 120,
@@ -20335,7 +20503,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000170",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000173",
       "card_datas_id": 10335324,
       "card_name": "雪舞う空と二秒の永遠",
       "style_level": 120,
@@ -20391,7 +20559,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000171",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000174",
       "card_datas_id": 10335334,
       "card_name": "Echoes Beyond",
       "style_level": 120,
@@ -20447,7 +20615,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000172",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000175",
       "card_datas_id": 10335344,
       "card_name": "平成ギャルズ!!!!",
       "style_level": 120,
@@ -20503,7 +20671,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000173",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000176",
       "card_datas_id": 10335354,
       "card_name": "トモダチになれる場所",
       "style_level": 120,
@@ -20559,7 +20727,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000174",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000177",
       "card_datas_id": 10335364,
       "card_name": "今、過去、未来の三原色",
       "style_level": 120,
@@ -20615,7 +20783,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000175",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000178",
       "card_datas_id": 10338014,
       "card_name": "Prism Echo",
       "style_level": 140,
@@ -20671,7 +20839,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000176",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000179",
       "card_datas_id": 10338024,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -20727,7 +20895,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000177",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000017a",
       "card_datas_id": 10338034,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -20783,7 +20951,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000178",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000017b",
       "card_datas_id": 10339014,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -20839,7 +21007,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000179",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000017c",
       "card_datas_id": 10339024,
       "card_name": "18th Birthday",
       "style_level": 120,
@@ -20895,7 +21063,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000017a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000017d",
       "card_datas_id": 10413014,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -20945,7 +21113,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000017b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000017e",
       "card_datas_id": 10413024,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -20995,7 +21163,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000017c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000017f",
       "card_datas_id": 10413034,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -21045,7 +21213,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000017d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000180",
       "card_datas_id": 10413044,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -21095,7 +21263,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000017e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000181",
       "card_datas_id": 10414014,
       "card_name": "アオクハルカ",
       "style_level": 100,
@@ -21151,7 +21319,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000017f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000182",
       "card_datas_id": 10414024,
       "card_name": "聖夜譚",
       "style_level": 100,
@@ -21207,7 +21375,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000180",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000183",
       "card_datas_id": 10414034,
       "card_name": "Her-bath-rium",
       "style_level": 100,
@@ -21263,7 +21431,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000181",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000184",
       "card_datas_id": 10414044,
       "card_name": "Poupée en Lotus",
       "style_level": 100,
@@ -21319,7 +21487,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000182",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000185",
       "card_datas_id": 10414054,
       "card_name": "My Lucky Clover",
       "style_level": 100,
@@ -21375,7 +21543,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000183",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000186",
       "card_datas_id": 10414064,
       "card_name": "拝啓、未来の君へ",
       "style_level": 100,
@@ -21431,7 +21599,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000184",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000187",
       "card_datas_id": 10415014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -21487,7 +21655,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000185",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000188",
       "card_datas_id": 10415024,
       "card_name": "Reflection in the mirror",
       "style_level": 120,
@@ -21543,7 +21711,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000186",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000189",
       "card_datas_id": 10415034,
       "card_name": "青嵐の鯉流し",
       "style_level": 120,
@@ -21599,7 +21767,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000187",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000018a",
       "card_datas_id": 10415044,
       "card_name": "Bloom the smile, Bloom the dream!",
       "style_level": 120,
@@ -21655,7 +21823,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000188",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000018b",
       "card_datas_id": 10415054,
       "card_name": "アオクハルカ/華",
       "style_level": 120,
@@ -21711,7 +21879,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000189",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000018c",
       "card_datas_id": 10415064,
       "card_name": "PASSION!!!!!!",
       "style_level": 120,
@@ -21767,7 +21935,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000018a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000018d",
       "card_datas_id": 10415074,
       "card_name": "月夜見海月",
       "style_level": 120,
@@ -21823,7 +21991,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000018b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000018e",
       "card_datas_id": 10415084,
       "card_name": "Link to the FUTURE",
       "style_level": 120,
@@ -21879,7 +22047,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000018c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000018f",
       "card_datas_id": 10415094,
       "card_name": "ハナムスビ",
       "style_level": 120,
@@ -21935,7 +22103,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000018d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000190",
       "card_datas_id": 10415104,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -21991,7 +22159,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000018e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000191",
       "card_datas_id": 10415114,
       "card_name": "AURORA FLOWER",
       "style_level": 120,
@@ -22047,7 +22215,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000018f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000192",
       "card_datas_id": 10415124,
       "card_name": "ユメワズライ",
       "style_level": 120,
@@ -22103,7 +22271,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000190",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000193",
       "card_datas_id": 10415134,
       "card_name": "輝跡の舞踏会",
       "style_level": 120,
@@ -22159,7 +22327,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000191",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000194",
       "card_datas_id": 10415144,
       "card_name": "Celebration!",
       "style_level": 120,
@@ -22215,7 +22383,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000192",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000195",
       "card_datas_id": 10415154,
       "card_name": "37.5℃のファンタジー",
       "style_level": 120,
@@ -22271,7 +22439,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000193",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000196",
       "card_datas_id": 10415164,
       "card_name": "フルーツパンチ",
       "style_level": 120,
@@ -22327,7 +22495,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000194",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000197",
       "card_datas_id": 10415174,
       "card_name": "可惜夜花火",
       "style_level": 120,
@@ -22383,7 +22551,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000195",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000198",
       "card_datas_id": 10415184,
       "card_name": "蒼のツバメ",
       "style_level": 120,
@@ -22439,7 +22607,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000196",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000199",
       "card_datas_id": 10415194,
       "card_name": "一生に夢が咲くように",
       "style_level": 120,
@@ -22495,7 +22663,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000197",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000019a",
       "card_datas_id": 10415204,
       "card_name": "乙女詞華集",
       "style_level": 120,
@@ -22551,7 +22719,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000198",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000019b",
       "card_datas_id": 10415214,
       "card_name": "もういちど ルミナス",
       "style_level": 120,
@@ -22607,7 +22775,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000199",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000019c",
       "card_datas_id": 10415224,
       "card_name": "Sayo-Shigure",
       "style_level": 120,
@@ -22663,7 +22831,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000019a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000019d",
       "card_datas_id": 10415234,
       "card_name": "不思議と君とライブラリー",
       "style_level": 120,
@@ -22719,7 +22887,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000019b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000019e",
       "card_datas_id": 10418014,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -22775,7 +22943,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000019c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000019f",
       "card_datas_id": 10418024,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -22831,7 +22999,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000019d",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a0",
       "card_datas_id": 10419014,
       "card_name": "16th Birthday",
       "style_level": 120,
@@ -22887,7 +23055,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000019e",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a1",
       "card_datas_id": 10419024,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -22943,7 +23111,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000019f",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a2",
       "card_datas_id": 10423014,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -22993,7 +23161,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a3",
       "card_datas_id": 10423024,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -23043,7 +23211,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a4",
       "card_datas_id": 10423034,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -23093,7 +23261,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a5",
       "card_datas_id": 10423044,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -23143,7 +23311,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a6",
       "card_datas_id": 10424014,
       "card_name": "青嵐の鯉流し",
       "style_level": 100,
@@ -23199,7 +23367,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a7",
       "card_datas_id": 10424024,
       "card_name": "PASSION!!!!!!",
       "style_level": 100,
@@ -23255,7 +23423,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a8",
       "card_datas_id": 10424034,
       "card_name": "魔法少女リズミックハート２",
       "style_level": 100,
@@ -23311,7 +23479,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a9",
       "card_datas_id": 10424044,
       "card_name": "ブルウモーメント",
       "style_level": 100,
@@ -23367,7 +23535,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001aa",
       "card_datas_id": 10424054,
       "card_name": "diamondz",
       "style_level": 100,
@@ -23423,7 +23591,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ab",
       "card_datas_id": 10424064,
       "card_name": "拝啓、未来の君へ",
       "style_level": 100,
@@ -23479,7 +23647,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001a9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ac",
       "card_datas_id": 10425014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -23535,7 +23703,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001aa",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ad",
       "card_datas_id": 10425024,
       "card_name": "Sparkly Spot",
       "style_level": 120,
@@ -23591,7 +23759,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ab",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ae",
       "card_datas_id": 10425034,
       "card_name": "レディバグ",
       "style_level": 120,
@@ -23647,7 +23815,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ac",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001af",
       "card_datas_id": 10425044,
       "card_name": "Bloom the smile, Bloom the dream!",
       "style_level": 120,
@@ -23703,7 +23871,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ad",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b0",
       "card_datas_id": 10425054,
       "card_name": "レディバグ/麗",
       "style_level": 120,
@@ -23759,7 +23927,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ae",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b1",
       "card_datas_id": 10425064,
       "card_name": "Proof",
       "style_level": 120,
@@ -23815,7 +23983,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001af",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b2",
       "card_datas_id": 10425074,
       "card_name": "Link to the FUTURE",
       "style_level": 120,
@@ -23871,7 +24039,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b3",
       "card_datas_id": 10425084,
       "card_name": "バアドケージ",
       "style_level": 120,
@@ -23927,7 +24095,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b4",
       "card_datas_id": 10425094,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -23983,7 +24151,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b5",
       "card_datas_id": 10425104,
       "card_name": "AURORA FLOWER",
       "style_level": 120,
@@ -24039,7 +24207,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b6",
       "card_datas_id": 10425114,
       "card_name": "COMPASS",
       "style_level": 120,
@@ -24095,7 +24263,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b7",
       "card_datas_id": 10425124,
       "card_name": "探求の舞踏会",
       "style_level": 120,
@@ -24151,7 +24319,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b8",
       "card_datas_id": 10425134,
       "card_name": "Her-bath-rium",
       "style_level": 120,
@@ -24207,7 +24375,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b9",
       "card_datas_id": 10425144,
       "card_name": "アンペア",
       "style_level": 120,
@@ -24263,7 +24431,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ba",
       "card_datas_id": 10425154,
       "card_name": "アイマイメーデー",
       "style_level": 120,
@@ -24319,7 +24487,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bb",
       "card_datas_id": 10425164,
       "card_name": "太陽であれ！",
       "style_level": 120,
@@ -24375,7 +24543,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001b9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bc",
       "card_datas_id": 10425174,
       "card_name": "一生に夢が咲くように",
       "style_level": 120,
@@ -24431,7 +24599,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ba",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bd",
       "card_datas_id": 10425184,
       "card_name": "はじまりの羽音",
       "style_level": 120,
@@ -24487,7 +24655,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001be",
       "card_datas_id": 10425194,
       "card_name": "ガランドFlash",
       "style_level": 120,
@@ -24543,7 +24711,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bf",
       "card_datas_id": 10425204,
       "card_name": "Poupée en Lotus",
       "style_level": 120,
@@ -24599,7 +24767,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bd",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c0",
       "card_datas_id": 10425214,
       "card_name": "壱雫空",
       "style_level": 120,
@@ -24655,7 +24823,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001be",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c1",
       "card_datas_id": 10425224,
       "card_name": "Jolie Mademoiselle",
       "style_level": 120,
@@ -24711,7 +24879,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001bf",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c2",
       "card_datas_id": 10425234,
       "card_name": "リブウト",
       "style_level": 120,
@@ -24767,7 +24935,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c3",
       "card_datas_id": 10425244,
       "card_name": "アイシイ",
       "style_level": 120,
@@ -24823,7 +24991,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c4",
       "card_datas_id": 10428014,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -24879,7 +25047,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c5",
       "card_datas_id": 10428024,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -24935,7 +25103,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c6",
       "card_datas_id": 10429014,
       "card_name": "16th Birthday",
       "style_level": 120,
@@ -24991,7 +25159,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c7",
       "card_datas_id": 10429024,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -25047,7 +25215,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c8",
       "card_datas_id": 10433014,
       "card_name": "レインボーシフォン",
       "style_level": 80,
@@ -25097,7 +25265,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c9",
       "card_datas_id": 10433024,
       "card_name": "室咲格子",
       "style_level": 80,
@@ -25147,7 +25315,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ca",
       "card_datas_id": 10433034,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -25197,7 +25365,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cb",
       "card_datas_id": 10433044,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -25247,7 +25415,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001c9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cc",
       "card_datas_id": 10434014,
       "card_name": "Bloom the smile, Bloom the dream!",
       "style_level": 100,
@@ -25303,7 +25471,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ca",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cd",
       "card_datas_id": 10434024,
       "card_name": "ジョーショーキリュー",
       "style_level": 100,
@@ -25359,7 +25527,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ce",
       "card_datas_id": 10434034,
       "card_name": "AURORA FLOWER",
       "style_level": 100,
@@ -25415,7 +25583,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cf",
       "card_datas_id": 10434044,
       "card_name": "蒼のツバメ",
       "style_level": 100,
@@ -25471,7 +25639,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cd",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d0",
       "card_datas_id": 10434054,
       "card_name": "Poupée en Lotus",
       "style_level": 100,
@@ -25527,7 +25695,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ce",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d1",
       "card_datas_id": 10434064,
       "card_name": "ハートにQ",
       "style_level": 100,
@@ -25583,7 +25751,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001cf",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d2",
       "card_datas_id": 10435014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -25639,7 +25807,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d3",
       "card_datas_id": 10435024,
       "card_name": "アイデンティティ",
       "style_level": 120,
@@ -25695,7 +25863,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d4",
       "card_datas_id": 10435034,
       "card_name": "青嵐の鯉流し",
       "style_level": 120,
@@ -25751,7 +25919,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d5",
       "card_datas_id": 10435044,
       "card_name": "みらくりえーしょん",
       "style_level": 120,
@@ -25807,7 +25975,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d6",
       "card_datas_id": 10435054,
       "card_name": "みらくりえーしょん/雅",
       "style_level": 120,
@@ -25863,7 +26031,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d7",
       "card_datas_id": 10435064,
       "card_name": "PASSION!!!!!!",
       "style_level": 120,
@@ -25919,7 +26087,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d8",
       "card_datas_id": 10435074,
       "card_name": "ファンファーレ！！！",
       "style_level": 120,
@@ -25975,7 +26143,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d9",
       "card_datas_id": 10435084,
       "card_name": "Link to the FUTURE",
       "style_level": 120,
@@ -26031,7 +26199,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001da",
       "card_datas_id": 10435094,
       "card_name": "104/⊿TRiEDGE",
       "style_level": 120,
@@ -26087,7 +26255,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001db",
       "card_datas_id": 10435104,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -26143,7 +26311,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001d9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001dc",
       "card_datas_id": 10435114,
       "card_name": "全方位キュン♡",
       "style_level": 120,
@@ -26199,7 +26367,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001da",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001dd",
       "card_datas_id": 10435124,
       "card_name": "邂逅の舞踏会",
       "style_level": 120,
@@ -26255,7 +26423,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001db",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001de",
       "card_datas_id": 10435134,
       "card_name": "Her-bath-rium",
       "style_level": 120,
@@ -26311,7 +26479,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001dc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001df",
       "card_datas_id": 10435144,
       "card_name": "WAWO!",
       "style_level": 120,
@@ -26367,7 +26535,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001dd",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e0",
       "card_datas_id": 10435154,
       "card_name": "BLAST!!",
       "style_level": 120,
@@ -26423,7 +26591,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001de",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e1",
       "card_datas_id": 10435164,
       "card_name": "Very! Very! COCO夏っ",
       "style_level": 120,
@@ -26479,7 +26647,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001df",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e2",
       "card_datas_id": 10435174,
       "card_name": "ニャオシグニャル",
       "style_level": 120,
@@ -26535,7 +26703,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e3",
       "card_datas_id": 10435184,
       "card_name": "バイタルサイン",
       "style_level": 120,
@@ -26591,7 +26759,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e4",
       "card_datas_id": 10435194,
       "card_name": "はじまりの羽音",
       "style_level": 120,
@@ -26647,7 +26815,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e5",
       "card_datas_id": 10435204,
       "card_name": "キミがいなくちゃっ！",
       "style_level": 120,
@@ -26703,7 +26871,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e6",
       "card_datas_id": 10435214,
       "card_name": "Hip, hip, hooray!",
       "style_level": 120,
@@ -26759,7 +26927,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e7",
       "card_datas_id": 10435224,
       "card_name": "Echoes Beyond",
       "style_level": 120,
@@ -26815,7 +26983,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e8",
       "card_datas_id": 10435234,
       "card_name": "IcHiGo milK love",
       "style_level": 120,
@@ -26871,7 +27039,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e9",
       "card_datas_id": 10435244,
       "card_name": "トモダチになれる場所",
       "style_level": 120,
@@ -26927,7 +27095,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ea",
       "card_datas_id": 10438014,
       "card_name": "Ether Aria",
       "style_level": 140,
@@ -26983,7 +27151,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001eb",
       "card_datas_id": 10438024,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -27039,7 +27207,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001e9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ec",
       "card_datas_id": 10439014,
       "card_name": "16th Birthday",
       "style_level": 120,
@@ -27095,7 +27263,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ea",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ed",
       "card_datas_id": 10439024,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -27151,7 +27319,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001eb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ee",
       "card_datas_id": 10444014,
       "card_name": "Edelied",
       "style_level": 100,
@@ -27197,7 +27365,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ec",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ef",
       "card_datas_id": 10513014,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -27247,7 +27415,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ed",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f0",
       "card_datas_id": 10513024,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -27297,7 +27465,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ee",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f1",
       "card_datas_id": 10514014,
       "card_name": "Her-bath-rium",
       "style_level": 100,
@@ -27353,7 +27521,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ef",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f2",
       "card_datas_id": 10514024,
       "card_name": "十六夜セレーネ",
       "style_level": 100,
@@ -27409,7 +27577,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f0",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f3",
       "card_datas_id": 10514034,
       "card_name": "四蓮琴之龍",
       "style_level": 100,
@@ -27465,7 +27633,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f1",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f4",
       "card_datas_id": 10514044,
       "card_name": "ドライブ・スペード・クレイジー",
       "style_level": 100,
@@ -27521,7 +27689,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f2",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f5",
       "card_datas_id": 10515014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -27577,7 +27745,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f3",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f6",
       "card_datas_id": 10515024,
       "card_name": "Retrofuture",
       "style_level": 120,
@@ -27633,7 +27801,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f4",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f7",
       "card_datas_id": 10515034,
       "card_name": "天地黎明",
       "style_level": 120,
@@ -27689,7 +27857,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f5",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f8",
       "card_datas_id": 10515044,
       "card_name": "蒼のツバメ",
       "style_level": 120,
@@ -27745,7 +27913,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f6",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f9",
       "card_datas_id": 10515054,
       "card_name": "フュージョンクラスト",
       "style_level": 120,
@@ -27801,7 +27969,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f7",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fa",
       "card_datas_id": 10515064,
       "card_name": "片翼のトリバガ",
       "style_level": 120,
@@ -27857,7 +28025,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f8",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fb",
       "card_datas_id": 10515074,
       "card_name": "シアター生き様",
       "style_level": 120,
@@ -27913,7 +28081,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001f9",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fc",
       "card_datas_id": 10515084,
       "card_name": "FIRE BIRD",
       "style_level": 120,
@@ -27969,7 +28137,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fa",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fd",
       "card_datas_id": 10515094,
       "card_name": "令嬢モブ！",
       "style_level": 120,
@@ -28025,7 +28193,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fb",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fe",
       "card_datas_id": 10515104,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -28081,7 +28249,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fc",
+      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ff",
       "card_datas_id": 10515114,
       "card_name": "廻天の車窓",
       "style_level": 120,
@@ -28137,7 +28305,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fd",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000200",
       "card_datas_id": 10515124,
       "card_name": "EdelinieN",
       "style_level": 120,
@@ -28193,7 +28361,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001fe",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000201",
       "card_datas_id": 10518014,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -28249,7 +28417,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-0000000001ff",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000202",
       "card_datas_id": 10519014,
       "card_name": "17th Birthday",
       "style_level": 120,
@@ -28305,7 +28473,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000200",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000203",
       "card_datas_id": 10523014,
       "card_name": "ノヴァホワイト",
       "style_level": 80,
@@ -28355,7 +28523,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000201",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000204",
       "card_datas_id": 10523024,
       "card_name": "翠鱗舞",
       "style_level": 80,
@@ -28405,7 +28573,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000202",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000205",
       "card_datas_id": 10524014,
       "card_name": "Her-bath-rium",
       "style_level": 100,
@@ -28461,7 +28629,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000203",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000206",
       "card_datas_id": 10524024,
       "card_name": "魔法少女リズミックハート３",
       "style_level": 100,
@@ -28517,7 +28685,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000204",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000207",
       "card_datas_id": 10524034,
       "card_name": "四蓮琴之雀",
       "style_level": 100,
@@ -28573,7 +28741,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000205",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000208",
       "card_datas_id": 10524044,
       "card_name": "いちご123",
       "style_level": 100,
@@ -28629,7 +28797,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000206",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000209",
       "card_datas_id": 10525014,
       "card_name": "Dream Believers",
       "style_level": 120,
@@ -28685,7 +28853,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000207",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000020a",
       "card_datas_id": 10525024,
       "card_name": "Retrofuture",
       "style_level": 120,
@@ -28741,7 +28909,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000208",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000020b",
       "card_datas_id": 10525034,
       "card_name": "十六夜セレーネ",
       "style_level": 120,
@@ -28797,7 +28965,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000209",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000020c",
       "card_datas_id": 10525044,
       "card_name": "天地黎明",
       "style_level": 120,
@@ -28853,7 +29021,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000020a",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000020d",
       "card_datas_id": 10525054,
       "card_name": "フュージョンクラスト",
       "style_level": 120,
@@ -28909,7 +29077,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000020b",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000020e",
       "card_datas_id": 10525064,
       "card_name": "片翼のトリバガ",
       "style_level": 120,
@@ -28965,7 +29133,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000020c",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000020f",
       "card_datas_id": 10525074,
       "card_name": "シアター生き様",
       "style_level": 120,
@@ -29021,7 +29189,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000020d",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000210",
       "card_datas_id": 10525084,
       "card_name": "105/刹那&セラニャン",
       "style_level": 120,
@@ -29077,7 +29245,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000020e",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000211",
       "card_datas_id": 10525094,
       "card_name": "令嬢モブ！",
       "style_level": 120,
@@ -29133,7 +29301,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000020f",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000212",
       "card_datas_id": 10525104,
       "card_name": "蓮ノ空歌留多",
       "style_level": 120,
@@ -29189,7 +29357,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000210",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000213",
       "card_datas_id": 10525114,
       "card_name": "再臨の車窓",
       "style_level": 120,
@@ -29245,7 +29413,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000211",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000214",
       "card_datas_id": 10525124,
       "card_name": "EdelinieN",
       "style_level": 120,
@@ -29301,7 +29469,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000212",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000215",
       "card_datas_id": 10528014,
       "card_name": "Oracle Étude",
       "style_level": 140,
@@ -29357,7 +29525,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000213",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000216",
       "card_datas_id": 10529014,
       "card_name": "16th Birthday",
       "style_level": 120,
@@ -29413,7 +29581,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000214",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000217",
       "card_datas_id": 19215014,
       "card_name": "今、過去、未来の三原色",
       "style_level": 120,
@@ -29469,7 +29637,63 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000215",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000218",
+      "card_datas_id": 19215024,
+      "card_name": "ハナ咲けばユメ駆ける",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 6325,
+        "pure": 5610,
+        "cool": 3905,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19215022,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29215020,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39215020,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1021,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000219",
       "card_datas_id": 19225014,
       "card_name": "今、過去、未来の三原色",
       "style_level": 120,
@@ -29525,7 +29749,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000216",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021a",
       "card_datas_id": 19234014,
       "card_name": "今、過去、未来の三原色",
       "style_level": 100,
@@ -29581,7 +29805,63 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000217",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021b",
+      "card_datas_id": 19235014,
+      "card_name": "ハナ咲けばユメ駆ける",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 6490,
+        "pure": 5500,
+        "cool": 3740,
+        "mental": 490,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19235012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29235010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39235010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1023,
+      "generations_id": 102,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021c",
       "card_datas_id": 19315014,
       "card_name": "ペレニアル",
       "style_level": 120,
@@ -29637,7 +29917,63 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000218",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021d",
+      "card_datas_id": 19315024,
+      "card_name": "光の中で花咲いて",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4950,
+        "pure": 6600,
+        "cool": 4180,
+        "mental": 490,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19315022,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29315020,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39315020,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1031,
+      "generations_id": 103,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021e",
       "card_datas_id": 19325014,
       "card_name": "ペレニアル",
       "style_level": 120,
@@ -29693,7 +30029,7 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-000000000219",
+      "d_card_datas_id": "00000000-0000-0000-0000-00000000021f",
       "card_datas_id": 19335014,
       "card_name": "ペレニアル",
       "style_level": 120,
@@ -29749,7 +30085,399 @@
       ]
     },
     {
-      "d_card_datas_id": "00000000-0000-0000-0000-00000000021a",
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000220",
+      "card_datas_id": 19415014,
+      "card_name": "今、過去、未来の三原色",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4730,
+        "pure": 7150,
+        "cool": 3960,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19415012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29415010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39415010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1041,
+      "generations_id": 104,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000221",
+      "card_datas_id": 19425014,
+      "card_name": "今、過去、未来の三原色",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4730,
+        "pure": 7095,
+        "cool": 4015,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19425012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29425010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39425010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1042,
+      "generations_id": 104,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000222",
+      "card_datas_id": 19425024,
+      "card_name": "ハナ咲けばユメ駆ける",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 6160,
+        "pure": 5720,
+        "cool": 3960,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19425022,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29425020,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39425020,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1042,
+      "generations_id": 104,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000223",
+      "card_datas_id": 19434014,
+      "card_name": "今、過去、未来の三原色",
+      "style_level": 100,
+      "max_style_level": 100,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 4675,
+        "pure": 5665,
+        "cool": 3520,
+        "mental": 420,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19434012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29434010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39434010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1043,
+      "generations_id": 104,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000224",
+      "card_datas_id": 19435014,
+      "card_name": "光の中で花咲いて",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 5225,
+        "pure": 6325,
+        "cool": 4180,
+        "mental": 490,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19435012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29435010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39435010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1043,
+      "generations_id": 104,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000225",
+      "card_datas_id": 19515014,
+      "card_name": "ハナ咲けばユメ駆ける",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 6050,
+        "pure": 5830,
+        "cool": 3960,
+        "mental": 480,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19515012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29515010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39515010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1051,
+      "generations_id": 105,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000226",
+      "card_datas_id": 19525014,
+      "card_name": "光の中で花咲いて",
+      "style_level": 120,
+      "max_style_level": 120,
+      "limit_break_times": 4,
+      "max_limit_break_times": 4,
+      "card_parameters": {
+        "smile": 5060,
+        "pure": 6380,
+        "cool": 4290,
+        "mental": 490,
+        "beat_point": 100
+      },
+      "skill_list": [
+        {
+          "skill_type": 1,
+          "card_skill_series_id": 19525012,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 2,
+          "card_skill_series_id": 29525010,
+          "skill_level": 14,
+          "max_skill_level": 14
+        },
+        {
+          "skill_type": 3,
+          "card_skill_series_id": 39525010,
+          "skill_level": 1,
+          "max_skill_level": 1
+        }
+      ],
+      "character_id": 1052,
+      "generations_id": 105,
+      "series_type": 0,
+      "card_sort_order": 0,
+      "character_bonus": {},
+      "is_evolve_possible": false,
+      "is_evolve_max": false,
+      "member_fan_level": 100,
+      "is_limit_break": true,
+      "is_style_level_up": true,
+      "rhythm_game_skill_list": [
+        {
+          "rhythm_game_skill_type": 1,
+          "skill_level": 14
+        },
+        {
+          "rhythm_game_skill_type": 2,
+          "skill_level": 14
+        }
+      ]
+    },
+    {
+      "d_card_datas_id": "00000000-0000-0000-0000-000000000227",
       "card_datas_id": 19534014,
       "card_name": "B.G.P. 撮影係",
       "style_level": 100,
