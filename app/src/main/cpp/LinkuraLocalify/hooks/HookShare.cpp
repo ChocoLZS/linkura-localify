@@ -908,6 +908,20 @@ namespace LinkuraLocal::HookShare {
         Configuration_set_UserAgent_Orig(self, value ,mtd);
     }
 
+    DEFINE_HOOK(void, Configuration_set_BasePath, (void* self, Il2cppUtils::Il2CppString* value, void* mtd)) {
+        if (!Config::apiServerUrl.empty() && value) {
+            auto orig = value->ToString();
+            if (orig.rfind("https://", 0) == 0) {
+                auto rewritten = replaceUriHost(orig, Config::apiServerUrl);
+                if (rewritten != orig) {
+                    Log::InfoFmt("[ApiOverride] Configuration.BasePath: %s -> %s", orig.c_str(), rewritten.c_str());
+                    value = Il2cppUtils::Il2CppString::New(rewritten);
+                }
+            }
+        }
+        Configuration_set_BasePath_Orig(self, value, mtd);
+    }
+
 //    DEFINE_HOOK(void, AssetManager_SynchronizeResourceVersion_MoveNext, (void* self, void* mtd)) {
 ////        Log::DebugFmt("AssetManager_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
 //        static auto AssetManager_klass = Il2cppUtils::GetClassIl2cpp("Core.dll", "Hailstorm", "AssetManager");
@@ -1097,6 +1111,7 @@ namespace LinkuraLocal::HookShare {
 #pragma region oldVersion
         ADD_HOOK(Configuration_AddDefaultHeader, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "AddDefaultHeader"));
         ADD_HOOK(Configuration_set_UserAgent, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_UserAgent"));
+        ADD_HOOK(Configuration_set_BasePath, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_BasePath"));
 //        ADD_HOOK(AssetManager_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetManager", "SynchronizeResourceVersion"));
         ADD_HOOK(Core_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "", "Core", "SynchronizeResourceVersion"));
         ADD_HOOK(Application_get_version, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Application::get_version"));

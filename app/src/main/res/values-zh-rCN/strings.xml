@@ -146,6 +146,8 @@
 
     <string name="config.assets.update_assets_url_prefix">游戏更新资源前缀 URL</string>
     <string name="config.assets.update_assets_url_prefix.placeholder">必须是https，留空代表不修改</string>
+    <string name="config.api.server_url">游戏API服务器前缀url</string>
+    <string name="config.api.server_url.placeholder">必须是https，留空代表不修改</string>
 
     <string name="config.story.settings_title">活动记录设置</string>
     <string name="config.story.hide_background">隐藏背景</string>
