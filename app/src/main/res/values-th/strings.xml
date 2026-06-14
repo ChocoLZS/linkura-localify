@@ -127,6 +127,8 @@
     <string name="overlay.color_picker.preset_colors">สีที่ตั้งไว้</string>
     <string name="config.assets.update_assets_url_prefix">URL คำนำหน้าทรัพยากรอัปเดตเกม</string>
     <string name="config.assets.update_assets_url_prefix.placeholder">ต้องเป็น https เว้นว่างไว้หากไม่ต้องการเปลี่ยน</string>
+    <string name="config.api.server_url">URL คำนำหน้าเซิร์ฟเวอร์ API ของเกม</string>
+    <string name="config.api.server_url.placeholder">ต้องเป็น https เว้นว่างไว้หากไม่ต้องการเปลี่ยน</string>
     <string name="config.story.settings_title">การตั้งค่าเนื้อเรื่อง</string>
     <string name="config.story.hide_background">ซ่อนพื้นหลัง</string>
     <string name="config.story.hide_transition">ซ่อนทรานซิชัน</string>

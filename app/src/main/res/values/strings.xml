@@ -146,6 +146,8 @@
 
     <string name="config.assets.update_assets_url_prefix">Game Update Resource Prefix URL</string>
     <string name="config.assets.update_assets_url_prefix.placeholder">Must be https, leave blank for no change</string>
+    <string name="config.api.server_url">Game API Server Prefix URL</string>
+    <string name="config.api.server_url.placeholder">Must be https, leave blank for no change</string>
 
     <string name="config.story.settings_title">Story Settings</string>
     <string name="config.story.hide_background">Hide Background</string>

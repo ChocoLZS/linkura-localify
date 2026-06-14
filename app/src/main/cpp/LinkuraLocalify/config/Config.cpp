@@ -63,6 +63,7 @@ namespace LinkuraLocal::Config {
     // Offline API mock defaults (disabled by default).
     bool enableOfflineApiMock = false;
     bool dumpHttpMockJson = false;
+    std::string apiServerUrl;
     
     // Archive configuration mapping: archives_id -> item data
     std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
@@ -135,6 +136,7 @@ namespace LinkuraLocal::Config {
             GetConfigItem(localeCode);
             GetConfigItem(enableOfflineApiMock);
             GetConfigItem(dumpHttpMockJson);
+            GetConfigItem(apiServerUrl);
             if (localeCode != "ja-JP") {
                 enableLocale = true;
             }

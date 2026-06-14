@@ -127,6 +127,8 @@
     <string name="overlay.color_picker.preset_colors">Colores predefinidos</string>
     <string name="config.assets.update_assets_url_prefix">URL prefijo de recursos de actualización del juego</string>
     <string name="config.assets.update_assets_url_prefix.placeholder">Debe ser https; déjalo vacío para no cambiar nada</string>
+    <string name="config.api.server_url">URL prefijo del servidor API del juego</string>
+    <string name="config.api.server_url.placeholder">Debe ser https; déjalo vacío para no cambiar nada</string>
     <string name="config.story.settings_title">Ajustes de historia</string>
     <string name="config.story.hide_background">Ocultar fondo</string>
     <string name="config.story.hide_transition">Ocultar transición</string>

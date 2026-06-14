@@ -127,6 +127,8 @@
     <string name="overlay.color_picker.preset_colors">프리셋 색상</string>
     <string name="config.assets.update_assets_url_prefix">게임 업데이트 리소스 접두 URL</string>
     <string name="config.assets.update_assets_url_prefix.placeholder">https여야 하며, 비워 두면 변경하지 않습니다</string>
+    <string name="config.api.server_url">게임 API 서버 접두 URL</string>
+    <string name="config.api.server_url.placeholder">https여야 하며, 비워 두면 변경하지 않습니다</string>
     <string name="config.story.settings_title">스토리 설정</string>
     <string name="config.story.hide_background">배경 숨기기</string>
     <string name="config.story.hide_transition">전환 효과 숨기기</string>

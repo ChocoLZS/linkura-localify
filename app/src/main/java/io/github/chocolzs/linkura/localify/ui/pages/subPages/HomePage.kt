@@ -243,6 +243,21 @@ fun HomePage(modifier: Modifier = Modifier,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
+                    Spacer(Modifier.height(4.dp))
+                    GakuTextInput(
+                        value = config.value.apiServerUrl,
+                        onValueChange = { value ->
+                            context?.onApiServerUrlChanged(value)
+                        },
+                        label = {
+                            Text(text = stringResource(R.string.config_api_server_url))
+                        }
+                    )
+                    Text(
+                        text = stringResource(R.string.config_api_server_url_placeholder),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
             }
             Spacer(Modifier.height(6.dp))

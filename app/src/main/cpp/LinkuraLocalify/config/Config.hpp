@@ -70,6 +70,11 @@ namespace LinkuraLocal::Config {
     extern bool enableOfflineApiMock;
     extern bool dumpHttpMockJson;
 
+    // API server redirect. When non-empty, all game API calls are forwarded to this base URL
+    // instead of the original server. Takes effect even when enableOfflineApiMock is false.
+    // Example: "https://api.myserver.example.com"
+    extern std::string apiServerUrl;
+
     extern std::unordered_map<std::string, nlohmann::json> archiveConfigMap;
     extern VersionCompatibility::Version currentClientVersion;
     extern std::string currentResVersion;
