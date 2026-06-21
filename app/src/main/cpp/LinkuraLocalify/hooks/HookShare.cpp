@@ -3,6 +3,8 @@
 #include "../Local.h"
 #include "http-mock/HttpMock.hpp"
 #include <re2/re2.h>
+#include <algorithm>
+#include <cctype>
 #include <mutex>
 #include <string_view>
 #include <unordered_set>
@@ -667,6 +669,50 @@ namespace LinkuraLocal::HookShare {
                                           headerParams, formParams, fileParams, pathParams,
                                           contentType, cancellationToken, method_info);
     }
+    // Lowercase response header names so the client's case-sensitive game-state header lookups
+    // (fan_level, user_stamina, x-res-version, ...) still match when an HTTP/1.1 proxy hop Title-Cases
+    // them. This getter is what the OpenAPI layer reads to build the ApiResponse.Headers dictionary.
+    DEFINE_HOOK(void*, RestResponseBase_get_Headers, (void* self, void* method_info)) {
+        using GetNameFn = Il2cppUtils::Il2CppString*(*)(void*, Il2cppUtils::MethodInfo*);
+        using SetNameFn = void(*)(void*, Il2cppUtils::Il2CppString*, Il2cppUtils::MethodInfo*);
+
+        auto* headers = RestResponseBase_get_Headers_Orig(self, method_info);
+
+        // Resolve RestSharp.Parameter's name accessors once.
+        static Il2cppUtils::MethodInfo* getNameMethod = nullptr;
+        static Il2cppUtils::MethodInfo* setNameMethod = nullptr;
+        static const bool resolved = [] {
+            auto* parameterClass = Il2cppUtils::GetClassIl2cpp("RestSharp.dll", "RestSharp", "Parameter");
+            if (!parameterClass) return false;
+            getNameMethod = Il2cppUtils::GetMethodIl2cpp(parameterClass, "get_Name", 0);
+            setNameMethod = Il2cppUtils::GetMethodIl2cpp(parameterClass, "set_Name", 1);
+            return getNameMethod && setNameMethod;
+        }();
+        if (!resolved || !headers) return headers;
+
+        auto* headerList = reinterpret_cast<UnityResolve::UnityType::List<void*>*>(headers);
+        auto* parameters = headerList->pList;
+        if (!parameters) return headers;
+        const int count = std::min(headerList->size, static_cast<int>(parameters->max_length));
+
+        for (int i = 0; i < count; i++) {
+            void* parameter = parameters->At(static_cast<unsigned>(i));
+            if (!parameter) continue;
+
+            auto* nameStr = reinterpret_cast<GetNameFn>(getNameMethod->methodPointer)(parameter, getNameMethod);
+            if (!nameStr) continue;
+
+            const std::string original = nameStr->ToString();
+            std::string lowercased = original;
+            std::transform(lowercased.begin(), lowercased.end(), lowercased.begin(),
+                           [](unsigned char ch) { return std::tolower(ch); });
+            if (lowercased != original) {
+                reinterpret_cast<SetNameFn>(setNameMethod->methodPointer)(
+                    parameter, Il2cppUtils::Il2CppString::New(lowercased), setNameMethod);
+            }
+        }
+        return headers;
+    }
     // http response modify
     DEFINE_HOOK(void* , ApiClient_Deserialize, (void* self, void* response, void* type, void* method_info)) {
         if (Config::dbgMode || Config::enableOfflineApiMock) {
@@ -979,6 +1025,7 @@ namespace LinkuraLocal::HookShare {
         // GetHttpAsyncAddr
         ADD_HOOK(ApiClient_CallApiAsync, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client","ApiClient", "CallApiAsync"));
         ADD_HOOK(ApiClient_Deserialize, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client","ApiClient", "Deserialize"));
+        ADD_HOOK(RestResponseBase_get_Headers, Il2cppUtils::GetMethodPointer("RestSharp.dll", "RestSharp", "RestResponseBase", "get_Headers"));
 #pragma region ArchiveApi
         auto ArchiveApi_klass = Il2cppUtils::GetClassIl2cpp("Assembly-CSharp.dll", "Org.OpenAPITools.Api", "ArchiveApi");
         auto method = (Il2cppUtils::MethodInfo*) nullptr;
