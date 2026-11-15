@@ -968,6 +968,19 @@ namespace LinkuraLocal::HookShare {
         Configuration_set_BasePath_Orig(self, value, mtd);
     }
 
+    struct UniTask {
+        void* source;
+        int16_t token;
+    };
+
+    DEFINE_HOOK(UniTask, PushTokenManager_CheckPushToken, (void* self, void* loginResponse, void* cancellationToken, void* mtd)) {
+        if (Config::enableOfflineApiMock || !Config::apiServerUrl.empty()) {
+            Log::InfoFmt("[ApiOverride] PushTokenManager.CheckPushToken skipped");
+            return {};
+        }
+        return PushTokenManager_CheckPushToken_Orig(self, loginResponse, cancellationToken, mtd);
+    }
+
 //    DEFINE_HOOK(void, AssetManager_SynchronizeResourceVersion_MoveNext, (void* self, void* mtd)) {
 ////        Log::DebugFmt("AssetManager_SynchronizeResourceVersion HOOKED, requestedVersion is %s", requestedVersion->ToString().c_str());
 //        static auto AssetManager_klass = Il2cppUtils::GetClassIl2cpp("Core.dll", "Hailstorm", "AssetManager");
@@ -1159,6 +1172,7 @@ namespace LinkuraLocal::HookShare {
         ADD_HOOK(Configuration_AddDefaultHeader, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "AddDefaultHeader"));
         ADD_HOOK(Configuration_set_UserAgent, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_UserAgent"));
         ADD_HOOK(Configuration_set_BasePath, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Org.OpenAPITools.Client", "Configuration", "set_BasePath"));
+        ADD_HOOK(PushTokenManager_CheckPushToken, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Tecotec", "PushTokenManager", "CheckPushToken"));
 //        ADD_HOOK(AssetManager_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetManager", "SynchronizeResourceVersion"));
         ADD_HOOK(Core_SynchronizeResourceVersion, Il2cppUtils::GetMethodPointer("Core.dll", "", "Core", "SynchronizeResourceVersion"));
         ADD_HOOK(Application_get_version, Il2cppUtils::il2cpp_resolve_icall("UnityEngine.Application::get_version"));
