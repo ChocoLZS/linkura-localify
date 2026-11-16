@@ -54,6 +54,19 @@ namespace LinkuraLocal::HookDebug {
         return base;
     }
 
+    struct UniTaskBytes {
+        void* source;
+        void* result;
+        int16_t token;
+    };
+
+    DEFINE_HOOK(UniTaskBytes, Hailstorm_AssetDownloaderAdapter_GetCatalog, (Il2cppUtils::Il2CppObject* self, Il2cppString* url, int64_t presumedDownloadBytes, void* method)) {
+        if (!Config::assetsUrlPrefix.empty() && url) {
+            url = Il2cppString::New(HookShare::replaceUriHost(url->ToString(), Config::assetsUrlPrefix));
+        }
+        return Hailstorm_AssetDownloaderAdapter_GetCatalog_Orig(self, url, presumedDownloadBytes, method);
+    }
+
     DEFINE_HOOK(void, FootShadowManipulator_OnInstantiate, (Il2cppUtils::Il2CppObject* self, void* method)) {
         Log::DebugFmt("FootShadowManipulator_OnInstantiate HOOKED");
         if (Config::hideCharacterShadow) return;
@@ -792,6 +805,7 @@ namespace LinkuraLocal::HookDebug {
         ADD_HOOK(MRS_AppsCoverScreen_SetActiveCoverImage, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.LiveMain", "AppsCoverScreen", "SetActiveCoverImage"));
         ADD_HOOK(CharacterVisibleReceiver_UpdateAvatarVisibility, Il2cppUtils::GetMethodPointer("Assembly-CSharp.dll", "Inspix.Character", "CharacterVisibleReceiver", "UpdateAvatarVisibility"));
         ADD_HOOK(Hailstorm_AssetDownloadJob_get_UrlBase, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloadJob", "get_UrlBase"));
+        ADD_HOOK(Hailstorm_AssetDownloaderAdapter_GetCatalog, Il2cppUtils::GetMethodPointer("Core.dll", "Hailstorm", "AssetDownloaderAdapter", "GetCatalog"));
 
         ADD_HOOK(FootShadowManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.FootShadow", "FootShadowManipulator", "OnInstantiate"));
         ADD_HOOK(ItemManipulator_OnInstantiate, Il2cppUtils::GetMethodPointer("Core.dll", "Inspix.Character.Item", "ItemManipulator", "OnInstantiate"));
